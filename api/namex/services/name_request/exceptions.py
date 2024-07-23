@@ -110,11 +110,6 @@ class SolrUpdateError(NameRequestException):
         super().__init__(wrapped_err, message)
 
 
-class NROUpdateError(NameRequestException):
-    def __init__(self, wrapped_err=None, message="Error updating NRO (Oracle). You must re-try."):
-        super().__init__(wrapped_err, message)
-
-
 class SaveNameRequestError(NameRequestException):
     def __init__(self, wrapped_err=None, message="Error saving request."):
         super().__init__(wrapped_err, message)

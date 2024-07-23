@@ -16,7 +16,7 @@ class BaseNameRequestResource(AbstractNameRequestResource):
     """
     Just a base class for NameRequest Resource so we have somewhere to put our common logic.
     Inherits from AbstractNROResource and AbstractSolrResource which extend this class with
-    functionality to communicate with NRO services and Solr.
+    functionality to communicate with Solr.
     """
     def initialize(self):
         self.validate_config(current_app)

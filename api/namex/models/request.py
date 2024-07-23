@@ -105,7 +105,7 @@ class Request(db.Model):
     _request_action_cd = db.Column('request_action_cd', db.String(10))
     _entity_type_cd = db.Column('entity_type_cd', db.String(10))
     consent_dt = db.Column('consent_dt', db.DateTime(timezone=True))
-    _source = db.Column('source', db.String(15), default=ValidSources.NRO.value)
+    _source = db.Column('source', db.String(15))
     tradeMark = db.Column('trade_mark', db.String(100))
 
     # Check-In / Check-Out (for INPROGRESS)

@@ -326,7 +326,6 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
         """
         At this point, the Name Request will still be using a TEMPORARY NR number.
         Confirming the payment on the frontend triggers this endpoint. Here, we:
-        - Save the request to NRO which gives us a real NR.
         - Create the payment via SBC Pay.
         - If payment creation is successful, create a corresponding payment record in our system.
         :param nr_id:
@@ -365,7 +364,6 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
 
             if valid_payment_action and valid_nr_state:
                 if payment_action in [NameRequestActions.CREATE.value, NameRequestActions.RESUBMIT.value]:
-                    # Save the record to NRO, which swaps the NR-L Number for a real NR
                     update_solr = True
                     nr_model = self.add_new_nr_number(nr_model, update_solr)
 

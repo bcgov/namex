@@ -348,7 +348,7 @@ class NameRequestFields(BaseNameRequestResource):
         # This handles updates if the NR state is 'patchable'
         nr_model = self.update_nr(nr_model, State.CANCELLED, self.handle_nr_patch)
 
-        # This handles the updates for NRO and Solr, if necessary
+        # This handles the updates for Solr, if necessary
         nr_model = self.update_solr(nr_model)
 
         # Record the event
@@ -392,7 +392,7 @@ class NameRequestFields(BaseNameRequestResource):
 
         publish_email_notification(nr_model.nrNum, 'refund', '{:.2f}'.format(refund_value))
 
-        # This handles the updates for NRO and Solr, if necessary
+        # This handles the updates for Solr, if necessary
         nr_model = self.update_solr(nr_model)
 
         # Record the event

@@ -27,7 +27,6 @@ from flask import Blueprint, current_app, request
 from gcp_queue import structured_log
 from gcp_queue.gcp_auth import ensure_authorized_queue_user
 from gcp_queue.logging import structured_log
-from namex import nro
 from namex.models import Event, Payment
 from namex.models import Request as RequestDAO  # noqa:I001; import orders
 from namex.models import State, User
@@ -249,29 +248,6 @@ def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-oute
         raise Exception(err)
 
 
-def update_nro(nr, payment):
-    change_flags = {
-    'is_changed__request': True,
-    'is_changed__previous_request': False,
-    'is_changed__applicant': False,
-    'is_changed__address': False,
-    'is_changed__name1': False,
-    'is_changed__name2': False,
-    'is_changed__name3': False,
-    'is_changed__nwpta_ab': False,
-    'is_changed__nwpta_sk': False,
-    'is_changed__request_state': False,
-    'is_changed_consent': False
-    }
-    warnings = nro.change_nr(nr, change_flags)
-    if warnings:
-        msg = f'Queue Error: Unable to update NRO :{warnings}'
-        structured_log(request, message=msg)
-        capture_message(
-            f'Queue Error: Unable to update NRO for {nr} {payment.payment_action} :{warnings}',
-            level='error'
-        )
-
 def process_payment(ce: SimpleCloudEvent):
     """Render the payment status."""
     structured_log(ce, 'DEBUG', 'entering process payment')
@@ -315,9 +291,6 @@ def process_payment(ce: SimpleCloudEvent):
                     nr,
                     nr.json()
                 )
-                if payment.payment_action in \
-                        [payment.PaymentActions.UPGRADE.value, payment.PaymentActions.REAPPLY.value]:
-                    update_nro(nr, payment)
 
             furnish_receipt_message(payment)
         else:

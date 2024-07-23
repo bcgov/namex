@@ -1,9 +1,0 @@
-Flask
-Flask-Migrate
-Flask-Script
-Flask-SQLAlchemy
-SQLAlchemy-Continuum
-gunicorn
-psycopg2-binary
-python-dotenv
-requests

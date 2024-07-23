@@ -2,6 +2,9 @@
 
 TODO: Fill in a larger description once the API is defined for V1
 """
+
+from datetime import datetime
+
 from flask import request, jsonify, g, current_app, make_response
 from flask_restx import Namespace, Resource, fields, cors
 from flask_jwt_oidc import AuthError
@@ -26,6 +29,7 @@ from namex.models import DecisionReason
 
 from namex.services.lookup import nr_filing_actions
 from namex.services import ServicesError, MessageServices, EventRecorder
+from namex.services.name_request import NameRequestService
 from namex.services.name_request.utils import check_ownership, get_or_create_user_by_jwt, valid_state_transition
 
 from namex.utils.common import (convert_to_ascii,
@@ -34,8 +38,6 @@ from namex.utils.common import (convert_to_ascii,
 from namex.utils.auth import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 from namex.utils import queue_util
-
-import datetime
 
 setup_logging()  # Important to do this first
 
@@ -630,6 +632,18 @@ class Request(Resource):
             # - None (null) is a valid value for Previous State
             if 'previousStateCd' in json_input.keys():
                 nrd.previousStateCd = json_input.get('previousStateCd', None)
+            
+            # calculate and update expiration date
+            if (
+                nrd.stateCd in (State.APPROVED, State.REJECTED, State.CONDITIONAL)
+                and nrd.furnished == 'N'
+                and nrd.expirationDate is None
+            ):
+                if (nrd.stateCd in (State.APPROVED, State.CONDITIONAL)):
+                    expiry_days = NameRequestService.get_expiry_days(nrd.request_action_cd, nrd.requestTypeCd)
+                    nrd.expirationDate = NameRequestService.create_expiry_date(datetime.utcnow(), expiry_days)
+
+                nrd.furnished = 'Y'
 
             # save record
             nrd.save_to_db()
@@ -702,12 +716,12 @@ class Request(Resource):
                 existing_nr.save_to_db()
 
             if json_input.get('consent_dt', None):
-                json_input['consent_dt'] = str(datetime.datetime.strptime(
+                json_input['consent_dt'] = str(datetime.strptime(
                     str(json_input['consent_dt'][5:]), '%d %b %Y %H:%M:%S %Z'))
 
             # convert Submitted Date to correct format
             if json_input.get('submittedDate', None):
-                json_input['submittedDate'] = str(datetime.datetime.strptime(
+                json_input['submittedDate'] = str(datetime.strptime(
                     str(json_input['submittedDate'][5:]), '%d %b %Y %H:%M:%S %Z'))
 
             # convert NWPTA dates to correct format
@@ -717,7 +731,7 @@ class Request(Resource):
                         if region['partnerNameDate'] == '':
                             region['partnerNameDate'] = None
                         if region['partnerNameDate']:
-                            region['partnerNameDate'] = str(datetime.datetime.strptime(
+                            region['partnerNameDate'] = str(datetime.strptime(
                                 str(region['partnerNameDate']), '%d-%m-%Y'))
                     except ValueError:
                         pass
@@ -725,7 +739,6 @@ class Request(Resource):
 
             # update request header
 
-            # if reset is set to true then this nr will be set to H + name_examination proc will be called in oracle
             reset = False
             if nrd.furnished == RequestDAO.REQUEST_FURNISHED and json_input.get('furnished', None) == 'N':
                 reset = True
@@ -1067,19 +1080,13 @@ class Request(Resource):
                 for we in warning_and_errors:
                     if we['type'] == MessageServices.ERROR:
                         return make_response(jsonify(errors=warning_and_errors), 400)
-
-            # update oracle if this nr was reset
-            # - first set status to H via name_examination proc, which handles clearing all necessary data and states
-            # - then set status to D so it's back in draft in NRO for customer to understand status
             if reset:
-
                 nrd.expirationDate = None
                 nrd.consentFlag = None
                 nrd.consent_dt = None
                 is_changed__request = True
                 is_changed_consent = True
 
-            # Update NR Details in NRO (not for reset)
             else:
                 change_flags = {
                     'is_changed__request': is_changed__request,
@@ -1097,7 +1104,6 @@ class Request(Resource):
 
                 # if any data has changed from an NR Details edit, update it in Oracle
                 if any(value is True for value in change_flags.values()):
-                    # Save the nr before trying to hit oracle (will format dates same as namerequest.)
                     nrd.save_to_db()
 
                     # Delete any names that were blanked out

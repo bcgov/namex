@@ -48,7 +48,6 @@ class ValidLocations(AbstractEnum):
 class ValidSources(AbstractEnum):
     NAMEX = 'NAMEX'
     NAMEREQUEST = 'NAMEREQUEST'
-    NRO = 'NRO'
     SO = 'SO'
 
 

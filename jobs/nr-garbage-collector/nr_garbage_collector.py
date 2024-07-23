@@ -1,6 +1,6 @@
 """Script used to regularly cancel test NRs."""
 from flask import Flask, current_app
-from namex import db, nro
+from namex import db
 from namex.models import Request, State
 from namex.resources.name_requests.abstract_solr_resource import AbstractSolrResource
 from namex.utils.logging import setup_logging
@@ -17,7 +17,6 @@ def create_app(environment='production'):
     app = Flask(__name__)
     app.config.from_object(get_named_config(environment))
     db.init_app(app)
-    nro.init_app(app)
     app.app_context().push()
     current_app.logger.debug('created the Flask App and pushed the App Context')
 
@@ -86,10 +85,6 @@ def run_nr_garbage_collection():
                 original_state = r.stateCd
                 r.stateCd = State.CANCELLED
                 current_app.logger.debug(' -- cancelled in postgres')
-                if 'NR L' not in r.nrNum:
-                    # Must be cancelled in oracle
-                    nro.cancel_nr(r, 'nr_garbage_collector')
-                    current_app.logger.debug(' -- cancelled in oracle')
 
                 # all cases are deleted from solr and cancelled in postgres
                 cancelled_nrs = delete_from_solr(r, original_state, cancelled_nrs)
