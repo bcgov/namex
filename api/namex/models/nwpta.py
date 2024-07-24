@@ -36,22 +36,6 @@ class PartnerNameSystem(db.Model):
     def delete_from_db(self):
         pass
 
-    # used by NRO extractor
-    def set_requested_flag(self):
-        try:
-            # NAS (Numbered Assumed) types have blank data but are not requested
-            if self.partnerNameTypeCd == 'NAS':
-                self.requested = False
-
-            # if all data is blank (except type and jurisdiction) then the customer has requested nwpta
-            elif self.partnerNameNumber in ['', None] and self.partnerName in ['', None] and self.partnerNameDate in ['', None]:
-                self.requested = True
-
-            else:
-                self.requested = False
-        except:
-            pass
-
 
 class PartnerNameSystemSchema(ma.SQLAlchemySchema):
     class Meta:

@@ -1,7 +1,0 @@
-psycopg2-binary
-python-dotenv
-
-Flask
-Flask-SQLAlchemy
-
-git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api

@@ -20,7 +20,6 @@ from .request import Request, RequestsSchema, RequestsHeaderSchema, RequestsSear
 from .user import User, UserSchema
 
 from .decision_reason import DecisionReason
-from .nro_sync_tables import NRONamesSyncJob, NRONamesSyncJobDetail, NRONamesSyncJobStatus
 from .admin_tables import DecisionReasonAudit, RestrictedConditionAudit
 from .word_classification import WordClassification, WordClassificationSchema
 from .virtual_word_condition import VirtualWordCondition

@@ -105,7 +105,7 @@ class Request(db.Model):
     _request_action_cd = db.Column('request_action_cd', db.String(10))
     _entity_type_cd = db.Column('entity_type_cd', db.String(10))
     consent_dt = db.Column('consent_dt', db.DateTime(timezone=True))
-    _source = db.Column('source', db.String(15), default=ValidSources.NRO.value)
+    _source = db.Column('source', db.String(15))
     tradeMark = db.Column('trade_mark', db.String(100))
 
     # Check-In / Check-Out (for INPROGRESS)
@@ -265,7 +265,7 @@ class Request(db.Model):
 
         if existing_nr:
             current_app.logger.info('Existing NR found, returning: {}'.format(existing_nr.nrNum))
-            return existing_nr, False
+            return existing_nr
 
         # this will error if there's nothing in the queue - likelihood ~ 0
         result = None
@@ -293,7 +293,7 @@ class Request(db.Model):
 
         db.session.add(result)
         db.session.commit()
-        return result, True
+        return result
 
     @classmethod
     def get_oldest_draft(cls):

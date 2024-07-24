@@ -1,4 +1,0 @@
-
-The scripts should be run in the following order:
-
-  1. As NAMEX@NAMES[D|T|P]: names/namex/create.sql

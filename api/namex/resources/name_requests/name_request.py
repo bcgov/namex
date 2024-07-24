@@ -3,7 +3,6 @@ from uuid import uuid4
 
 import requests
 from flask import current_app, jsonify, request, make_response
-from flask_restx import cors
 
 from namex import jwt
 from namex.constants import NameRequestPatchActions, NameRequestRollbackActions, PaymentState
@@ -11,7 +10,7 @@ from namex.models import Event, Payment, Request, State, User
 from namex.services import EventRecorder
 from namex.services.name_request.exceptions import InvalidInputError, NameRequestException, NameRequestIsInProgressError
 from namex.services.name_request.name_request_state import get_nr_state_actions
-from namex.services.name_request.utils import get_mapped_entity_and_action_code, is_temp_nr_num
+from namex.services.name_request.utils import get_mapped_entity_and_action_code
 from namex.services.name_request.name_request_state import is_request_editable, is_name_request_refundable
 from namex.services.payment.payments import get_payment, refund_payment
 from namex.services.statistics.wait_time_statistics import WaitTimeStatsService
@@ -24,7 +23,6 @@ from .api_models import nr_request
 from .api_namespace import api
 from .base_nr_resource import BaseNameRequestResource
 from .constants import contact_editable_states, request_editable_states
-
 
 setup_logging()  # Important to do this first
 
@@ -303,12 +301,6 @@ class NameRequestFields(BaseNameRequestResource):
         # This handles updates if the NR state is 'patchable'
         nr_model = self.update_nr(nr_model, State.INPROGRESS, self.handle_nr_patch)
 
-        # Lock nro Request row (set status=H)
-        nro_warnings = self.lock_request_in_nro(nr_model)
-        if nro_warnings:
-            on_success = False
-            return self.on_nro_update_complete(nr_model, on_success, nro_warnings)
-
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [checkout]', nr_model, {})
         return nr_model
 
@@ -318,11 +310,6 @@ class NameRequestFields(BaseNameRequestResource):
         # This handles updates if the NR state is 'patchable'
         nr_model = self.update_nr(nr_model, State.DRAFT, self.handle_nr_patch)
 
-        # Set status back to D after edit is complete
-        nro_warnings = self.unlock_request_in_nro(nr_model)
-        if nro_warnings:
-            on_success = False
-            return self.on_nro_update_complete(nr_model, on_success, nro_warnings)
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [checkin]', nr_model, {})
 
@@ -334,9 +321,6 @@ class NameRequestFields(BaseNameRequestResource):
         # This handles updates if the NR state is 'patchable'
         nr_model = self.update_nr(nr_model, nr_model.stateCd, self.handle_nr_patch)
 
-        # This handles the updates for NRO and Solr, if necessary
-        nr_model = self.update_records_in_network_services(nr_model, update_solr=False)
-
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [edit]', nr_model, nr_svc.request_data)
 
@@ -347,9 +331,6 @@ class NameRequestFields(BaseNameRequestResource):
 
         # This handles updates if the NR state is 'patchable'
         nr_model = self.update_nr(nr_model, nr_model.stateCd, self.handle_nr_patch)
-
-        # This handles the updates for NRO and Solr, if necessary
-        nr_model = self.update_records_in_network_services(nr_model, update_solr=False)
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [re-send]', nr_model, nr_svc.request_data)
@@ -367,8 +348,8 @@ class NameRequestFields(BaseNameRequestResource):
         # This handles updates if the NR state is 'patchable'
         nr_model = self.update_nr(nr_model, State.CANCELLED, self.handle_nr_patch)
 
-        # This handles the updates for NRO and Solr, if necessary
-        nr_model = self.update_records_in_network_services(nr_model, update_solr=True)
+        # This handles the updates for Solr, if necessary
+        nr_model = self.update_solr(nr_model)
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [cancel]', nr_model, nr_svc.request_data)
@@ -411,8 +392,8 @@ class NameRequestFields(BaseNameRequestResource):
 
         publish_email_notification(nr_model.nrNum, 'refund', '{:.2f}'.format(refund_value))
 
-        # This handles the updates for NRO and Solr, if necessary
-        nr_model = self.update_records_in_network_services(nr_model, update_solr=True)
+        # This handles the updates for Solr, if necessary
+        nr_model = self.update_solr(nr_model)
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [request-refund]', nr_model, nr_model.json())
@@ -493,11 +474,6 @@ class NameRequestRollback(BaseNameRequestResource):
 
         # This handles updates if the NR state is 'patchable'
         nr_model = self.update_nr(nr_model, State.CANCELLED, self.handle_nr_patch)
-        # Only update the record in NRO if it's a real NR, otherwise the record won't exist
-        if not is_temp_nr_num(nr_model.nrNum):
-            # This handles the updates for NRO and Solr, if necessary
-            # self.update_records_in_network_services(nr_model, update_solr=True)
-            nr_model = self.update_request_in_nro(nr_model, self.save_nr)
 
         # Delete in solr for temp or real NR because it is cancelled
         if nr_model.entity_type_cd in ['CR', 'UL', 'BC', 'CP', 'PA', 'XCR', 'XUL', 'XCP', 'CC', 'FI', 'XCR', 'XUL', 'XCP']:

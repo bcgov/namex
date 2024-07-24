@@ -1,8 +1,0 @@
-cx_Oracle
-psycopg2-binary
-python-dotenv
-
-Flask
-Flask-SQLAlchemy
-pytz
-

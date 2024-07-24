@@ -26,11 +26,8 @@ from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001
 
 from namex.services.cache import cache
 from namex.services.lookup import nr_filing_actions
-from namex.services.nro import NROServices
-
 from .services import queue
 
-nro = NROServices()
 from namex import models
 from namex.models import db, ma
 from namex.resources import api
@@ -65,7 +62,6 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     api.init_app(app)
     setup_jwt_manager(app, jwt)
 
-    nro.init_app(app)
     cache.init_app(app)
     nr_filing_actions.init_app(app)
 
