@@ -76,10 +76,11 @@ class ColinApi(Resource):
 
 def _init(colin_url):
     try:
-        SBC_SVC_AUTH_URL = current_app.config.get('SBC_SVC_AUTH_URL', '')
-        SBC_SVC_AUTH_CLIENT_ID = current_app.config.get('SBC_SVC_AUTH_CLIENT_ID', '')
-        SBC_SVC_CLIENT_SECRET = current_app.config.get('SBC_SVC_CLIENT_SECRET', '')
-        authenticated, token = get_client_credentials(SBC_SVC_AUTH_URL, SBC_SVC_AUTH_CLIENT_ID, SBC_SVC_CLIENT_SECRET)
+        authenticated, token = get_client_credentials(
+            current_app.config.get('COLIN_SVC_AUTH_URL'),
+            current_app.config.get('COLIN_SVC_AUTH_CLIENT_ID'),
+            current_app.config.get('COLIN_SVC_CLIENT_SECRET'),
+        )
         if not authenticated:
             raise ColinServiceException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
 
