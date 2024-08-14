@@ -94,6 +94,11 @@ def _init(colin_url):
             headers=headers
         )
 
+        current_app.logger.debug(
+            'Fetching data from URL: %s, Response: %d - %s',
+            colin_url, response.status_code, response.text
+        )
+
         if response.status_code != 200:
             raise ColinServiceException(message="Failed to fetch data", status_code=response.status_code)
         return response.json()
