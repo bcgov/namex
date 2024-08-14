@@ -58,10 +58,10 @@ entity_api = Namespace('entity', description='ENTITY API')
 class EntityApi(Resource):
     def get(self, corp_num):
         try:
-            SBC_SVC_AUTH_URL = current_app.config.get('SBC_SVC_AUTH_URL', '')
-            ENTITY_AUTH_CLIENT_ID = current_app.config.get('ENTITY_SERVICE_ACCOUNT_CLIENT_ID', '')
-            ENTITY_CLIENT_SECRET = current_app.config.get('ENTITY_SERVICE_ACCOUNT_CLIENT_SECRET', '')
-            authenticated, token = get_client_credentials(SBC_SVC_AUTH_URL, ENTITY_AUTH_CLIENT_ID, ENTITY_CLIENT_SECRET)
+            auth_url = current_app.config.get('ENTITY_SVC_AUTH_URL', '')
+            entity_auth_client_id = current_app.config.get('ENTITY_SERVICE_ACCOUNT_CLIENT_ID', '')
+            entity_client_secret = current_app.config.get('ENTITY_SERVICE_ACCOUNT_CLIENT_SECRET', '')
+            authenticated, token = get_client_credentials(auth_url, entity_auth_client_id, entity_client_secret)
             if not authenticated:
                 raise EntityServiceException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
 
