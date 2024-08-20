@@ -645,6 +645,31 @@ class Request(Resource):
 
                 nrd.furnished = 'Y'
 
+            def consumeName(nrd, json_input):
+                # Validate the required fields are present and not empty
+                name_to_consume = json_input.get('name')
+                if not name_to_consume \
+                    or not json_input.get('consumptionDate') \
+                        or not json_input.get('corpNum'):
+                    return False, '"name", "consumptionDate", and "corpNum" are required and cannot be empty.'
+
+                consumed = False
+                for nrd_name in nrd.names:
+                    if name_to_consume == nrd_name.name:
+                        nrd_name.consumptionDate = json_input.get('consumptionDate')
+                        nrd_name.corpNum = json_input.get('corpNum')
+                        consumed = True
+
+                if not consumed:
+                    return False, f"The given name '{name_to_consume}' cannot be found to be consumed."
+
+                return True, None  # Return success and no error message
+
+            if state == State.CONSUMED:
+                success, error_message = consumeName(nrd, json_input)
+                if not success:
+                    return make_response(jsonify(message=error_message), 406)
+
             # save record
             nrd.save_to_db()
             EventRecorder.record(user, Event.PATCH, nrd, json_input)
