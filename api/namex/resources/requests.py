@@ -579,7 +579,7 @@ class Request(Resource):
                     return make_response(jsonify({"message": "Request:{} not found".format(nr)}), 404)
 
                 if not valid_state_transition(user, nrd, state):
-                    return make_response(jsonify(message='you are not authorized to make these changes'), 401)
+                    return make_response(jsonify(message='You are not permitted or authorized to make these changes.'), 401)
 
                 # if the user has an existing (different) INPROGRESS NR, revert to previous state (default to HOLD)
                 existing_nr = RequestDAO.get_inprogress(user)
@@ -646,22 +646,18 @@ class Request(Resource):
                 nrd.furnished = 'Y'
 
             def consumeName(nrd, json_input):
-                # Validate the required fields are present and not empty
-                name_to_consume = json_input.get('name')
-                if not name_to_consume \
-                    or not json_input.get('consumptionDate') \
-                        or not json_input.get('corpNum'):
-                    return False, '"name", "consumptionDate", and "corpNum" are required and cannot be empty.'
-
+                if not json_input.get('corpNum'):
+                    return False, '"corpNum" is required and cannot be empty.'
+                    
                 consumed = False
                 for nrd_name in nrd.names:
-                    if name_to_consume == nrd_name.name:
-                        nrd_name.consumptionDate = json_input.get('consumptionDate')
+                    if nrd_name.state in (Name.APPROVED, Name.CONDITION):
+                        nrd_name.consumptionDate = datetime.utcnow()
                         nrd_name.corpNum = json_input.get('corpNum')
                         consumed = True
 
                 if not consumed:
-                    return False, f"The given name '{name_to_consume}' cannot be found to be consumed."
+                    return False, f"Cannot find an Approved or Condition name to be consumed."
 
                 return True, None  # Return success and no error message
 
