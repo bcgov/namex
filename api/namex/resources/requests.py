@@ -4,6 +4,7 @@ TODO: Fill in a larger description once the API is defined for V1
 """
 
 from datetime import datetime
+from pytz import timezone, UTC
 
 from flask import request, jsonify, g, current_app, make_response
 from flask_restx import Namespace, Resource, fields, cors
@@ -749,16 +750,25 @@ class Request(Resource):
                 json_input['submittedDate'] = str(datetime.strptime(
                     str(json_input['submittedDate'][5:]), '%d %b %Y %H:%M:%S %Z'))
 
-            # Convert Expiration Date to the correct format
+            # convert Expiration Date to correct format
             if json_input.get('expirationDate', None):
                 expiration_str = json_input['expirationDate']
+
+                # Convert the date (either UTC or ISO) into a UTC datetime object
                 if expiration_str.endswith('UTC'):
                     parsed_date = datetime.strptime(expiration_str[5:], '%d %b %Y %H:%M:%S %Z')
+                    parsed_date = parsed_date.replace(tzinfo=UTC) 
                 else:
-                    parsed_date = datetime.fromisoformat(expiration_str.rstrip('Z'))
+                    parsed_date = datetime.fromisoformat(expiration_str)
+                    if parsed_date.tzinfo is None:
+                        parsed_date = parsed_date.replace(tzinfo=UTC)  # If it's naive, assume UTC
+                    else:
+                        parsed_date = parsed_date.astimezone(UTC)  # Convert any timezone-aware datetime to UTC
 
-                end_of_day = parsed_date.replace(hour=23, minute=59, second=59)
-                json_input['expirationDate'] = end_of_day.strftime('%Y-%m-%d %H:%M:%S')
+                # Convert the UTC datetime object to the end of day in pacific time without milliseconds
+                pacific_time = parsed_date.astimezone(timezone('US/Pacific'))
+                end_of_day_pacific = pacific_time.replace(hour=23, minute=59, second=0, microsecond=0)
+                json_input['expirationDate'] = end_of_day_pacific.strftime('%Y-%m-%d %H:%M:%S%z')
 
             # convert NWPTA dates to correct format
             if json_input.get('nwpta', None):
