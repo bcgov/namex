@@ -579,7 +579,7 @@ class Request(Resource):
                     return make_response(jsonify({"message": "Request:{} not found".format(nr)}), 404)
 
                 if not valid_state_transition(user, nrd, state):
-                    return make_response(jsonify(message='You are not permitted or authorized to make these changes.'), 401)
+                    return make_response(jsonify(message='Name Request state transition validation failed.'), 401)
 
                 # if the user has an existing (different) INPROGRESS NR, revert to previous state (default to HOLD)
                 existing_nr = RequestDAO.get_inprogress(user)
@@ -648,7 +648,7 @@ class Request(Resource):
             def consumeName(nrd, json_input):
                 if not json_input.get('corpNum'):
                     return False, '"corpNum" is required and cannot be empty.'
-                    
+
                 consumed = False
                 for nrd_name in nrd.names:
                     if nrd_name.state in (Name.APPROVED, Name.CONDITION):
