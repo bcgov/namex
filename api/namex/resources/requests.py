@@ -749,6 +749,17 @@ class Request(Resource):
                 json_input['submittedDate'] = str(datetime.strptime(
                     str(json_input['submittedDate'][5:]), '%d %b %Y %H:%M:%S %Z'))
 
+            # Convert Expiration Date to the correct format
+            if json_input.get('expirationDate', None):
+                expiration_str = json_input['expirationDate']
+                if expiration_str.endswith('UTC'):
+                    parsed_date = datetime.strptime(expiration_str[5:], '%d %b %Y %H:%M:%S %Z')
+                else:
+                    parsed_date = datetime.fromisoformat(expiration_str.rstrip('Z'))
+
+                end_of_day = parsed_date.replace(hour=23, minute=59, second=59)
+                json_input['expirationDate'] = end_of_day.strftime('%Y-%m-%d %H:%M:%S')
+
             # convert NWPTA dates to correct format
             if json_input.get('nwpta', None):
                 for region in json_input['nwpta']:
