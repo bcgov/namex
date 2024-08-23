@@ -107,7 +107,12 @@ class Events(Resource):
                             if key == 'stateCd':
                                 continue
                             # otherwise update nr_event_info
-                            nr_event_info[key] = event_json_data[key]
+                            if key == 'corpNum' and nr_event_info['stateCd'] == 'CONSUMED':
+                                for name_info in nr_event_info['names']:
+                                    if name_info.get('state') in ('APPROVED', 'CONDITION'):
+                                        name_info['corpNum'] = event_json_data[key]
+                            else:
+                                nr_event_info[key] = event_json_data[key]
                     # entity_type_cd for namerequest is used to change requestTypeCd in namex (it is being mapped incorrectly)
                     if 'entity_type_cd' in event_json_data.keys() and 'requestTypeCd' not in event_json_data.keys():
                         nr_event_info['requestTypeCd'] = event_json_data['entity_type_cd']
