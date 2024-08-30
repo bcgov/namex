@@ -19,6 +19,7 @@ from .entities import entity_api
 from .statistics.wait_time_statistics import api as wait_time_stats_api
 
 from .user_settings import api as user_settings_api
+from .payment_societies import api as payment_societies_api
 
 
 # This will add the Authorize button to the swagger docs
@@ -54,3 +55,4 @@ api.add_namespace(colin_api, path='/colin')
 api.add_namespace(entity_api, path='/businesses')
 api.add_namespace(wait_time_stats_api, path='/statistics')
 api.add_namespace(user_settings_api, path='/usersettings')
+api.add_namespace(payment_societies_api, path='/payment-societies')

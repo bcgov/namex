@@ -28,3 +28,4 @@ from .nr_number_exclude import NRNumberExclude
 from .nr_number_lifespan import NRNumberLifespan
 from .payment import Payment
 from .hotjar_tracking import HotjarTracking
+from .payment_society import PaymentSociety
