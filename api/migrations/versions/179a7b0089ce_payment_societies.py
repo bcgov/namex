@@ -26,7 +26,6 @@ def upgrade():
     sa.Column('payment_status', sa.String(length=50), nullable=True),
     sa.Column('payment_date', sa.DateTime(), nullable=True),    
     sa.Column('payment_json', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
-    sa.ForeignKeyConstraint(['nr_id'], ['requests.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
