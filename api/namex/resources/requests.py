@@ -547,6 +547,10 @@ class Request(Resource):
 
         # do the cheap check first before the more expensive ones
         # check states
+        # some nr requested from Legancy application includes %20 after NR. e.g. 'NR%209288253', which should be 'NR 9288253'
+        nr = nr.replace("%20", " ")
+        current_app.logger.debug("NR: {0}".format(nr))
+        
         json_input = request.get_json()
         if not json_input:
             return make_response(jsonify({'message': 'No input data provided'}), 400)
