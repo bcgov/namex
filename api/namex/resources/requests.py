@@ -754,6 +754,7 @@ class Request(Resource):
 
             # convert Expiration Date to correct format
             if json_input.get('expirationDate', None):
+                current_app.logger.debug(f"Parsing expirationDate: {json_input['expirationDate']}")
                 try:
                     expirationDateStr = json_input['expirationDate']
                     expirationDate = DateUtils.parse_date(expirationDateStr)
@@ -761,7 +762,8 @@ class Request(Resource):
                     pacific_time = expirationDate.astimezone(timezone('US/Pacific'))
                     end_of_day_pacific = pacific_time.replace(hour=23, minute=59, second=0, microsecond=0)
                     json_input['expirationDate'] = end_of_day_pacific.strftime('%Y-%m-%d %H:%M:%S%z')
-                except Exception:
+                except Exception as e:
+                    current_app.logger.debug(f"Error parsing expirationDate: {str(e)}")
                     pass
 
             # convert NWPTA dates to correct format
