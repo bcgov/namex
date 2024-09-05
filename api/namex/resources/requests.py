@@ -754,21 +754,27 @@ class Request(Resource):
             if json_input.get('expirationDate', None):
                 expiration_str = json_input['expirationDate']
 
-                # Convert the date (either UTC or ISO) into a UTC datetime object
-                if expiration_str.endswith('UTC'):
-                    parsed_date = datetime.strptime(expiration_str[5:], '%d %b %Y %H:%M:%S %Z')
-                    parsed_date = parsed_date.replace(tzinfo=UTC) 
-                else:
-                    parsed_date = datetime.fromisoformat(expiration_str)
-                    if parsed_date.tzinfo is None:
-                        parsed_date = parsed_date.replace(tzinfo=UTC)  # If it's naive, assume UTC
+                try:
+                    # attempt to parse the format: '%Y-%m-%dT%H:%M:%S%z', which calls from LEAR
+                    if 'T' in expiration_str and ('+' in expiration_str or 'Z' in expiration_str):
+                        parsed_date = datetime.fromisoformat(expiration_str.rstrip('Z'))
+                    # Convert the date (either UTC or ISO) into a UTC datetime object
+                    elif expiration_str.endswith('UTC'):
+                        parsed_date = datetime.strptime(expiration_str[5:], '%d %b %Y %H:%M:%S %Z')
+                        parsed_date = parsed_date.replace(tzinfo=UTC) 
                     else:
-                        parsed_date = parsed_date.astimezone(UTC)  # Convert any timezone-aware datetime to UTC
+                        parsed_date = datetime.fromisoformat(expiration_str)
+                        if parsed_date.tzinfo is None:
+                            parsed_date = parsed_date.replace(tzinfo=UTC)  # If it's naive, assume UTC
+                        else:
+                            parsed_date = parsed_date.astimezone(UTC)  # Convert any timezone-aware datetime to UTC
 
-                # Convert the UTC datetime object to the end of day in pacific time without milliseconds
-                pacific_time = parsed_date.astimezone(timezone('US/Pacific'))
-                end_of_day_pacific = pacific_time.replace(hour=23, minute=59, second=0, microsecond=0)
-                json_input['expirationDate'] = end_of_day_pacific.strftime('%Y-%m-%d %H:%M:%S%z')
+                    # Convert the UTC datetime object to the end of day in pacific time without milliseconds
+                    pacific_time = parsed_date.astimezone(timezone('US/Pacific'))
+                    end_of_day_pacific = pacific_time.replace(hour=23, minute=59, second=0, microsecond=0)
+                    json_input['expirationDate'] = end_of_day_pacific.strftime('%Y-%m-%d %H:%M:%S%z')
+                except ValueError:
+                    MessageServices.add_message(MessageServices.ERROR, 'expirationDate_validation', errors)
 
             # convert NWPTA dates to correct format
             if json_input.get('nwpta', None):
