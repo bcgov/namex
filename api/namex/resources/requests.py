@@ -39,6 +39,8 @@ from namex.utils.common import (convert_to_ascii,
 from namex.utils.auth import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 from namex.utils import queue_util
+from .utils import DateUtils
+
 
 setup_logging()  # Important to do this first
 
@@ -742,39 +744,25 @@ class Request(Resource):
                 existing_nr.save_to_db()
 
             if json_input.get('consent_dt', None):
-                json_input['consent_dt'] = str(datetime.strptime(
-                    str(json_input['consent_dt'][5:]), '%d %b %Y %H:%M:%S %Z'))
+                consentDate = json_input['consent_dt']
+                json_input['consent_dt'] = DateUtils.parse_date_string(consentDate, '%d %b %Y %H:%M:%S %Z')
 
             # convert Submitted Date to correct format
             if json_input.get('submittedDate', None):
-                json_input['submittedDate'] = str(datetime.strptime(
-                    str(json_input['submittedDate'][5:]), '%d %b %Y %H:%M:%S %Z'))
+                submittedDateStr = json_input['submittedDate']
+                json_input['submittedDate'] = DateUtils.parse_date_string(submittedDateStr, '%d %b %Y %H:%M:%S %Z')
 
             # convert Expiration Date to correct format
             if json_input.get('expirationDate', None):
-                expiration_str = json_input['expirationDate']
-
                 try:
-                    # attempt to parse the format: '%Y-%m-%dT%H:%M:%S%z', which calls from LEAR
-                    if 'T' in expiration_str and ('+' in expiration_str or 'Z' in expiration_str):
-                        parsed_date = datetime.fromisoformat(expiration_str.rstrip('Z'))
-                    # Convert the date (either UTC or ISO) into a UTC datetime object
-                    elif expiration_str.endswith('UTC'):
-                        parsed_date = datetime.strptime(expiration_str[5:], '%d %b %Y %H:%M:%S %Z')
-                        parsed_date = parsed_date.replace(tzinfo=UTC) 
-                    else:
-                        parsed_date = datetime.fromisoformat(expiration_str)
-                        if parsed_date.tzinfo is None:
-                            parsed_date = parsed_date.replace(tzinfo=UTC)  # If it's naive, assume UTC
-                        else:
-                            parsed_date = parsed_date.astimezone(UTC)  # Convert any timezone-aware datetime to UTC
-
+                    expirationDateStr = json_input['expirationDate']
+                    expirationDate = DateUtils.parse_date(expirationDateStr)
                     # Convert the UTC datetime object to the end of day in pacific time without milliseconds
-                    pacific_time = parsed_date.astimezone(timezone('US/Pacific'))
+                    pacific_time = expirationDate.astimezone(timezone('US/Pacific'))
                     end_of_day_pacific = pacific_time.replace(hour=23, minute=59, second=0, microsecond=0)
                     json_input['expirationDate'] = end_of_day_pacific.strftime('%Y-%m-%d %H:%M:%S%z')
-                except ValueError:
-                    MessageServices.add_message(MessageServices.ERROR, 'expirationDate_validation', errors)
+                except Exception:
+                    pass
 
             # convert NWPTA dates to correct format
             if json_input.get('nwpta', None):
@@ -783,8 +771,8 @@ class Request(Resource):
                         if region['partnerNameDate'] == '':
                             region['partnerNameDate'] = None
                         if region['partnerNameDate']:
-                            region['partnerNameDate'] = str(datetime.strptime(
-                                str(region['partnerNameDate']), '%d-%m-%Y'))
+                            partnerNameDateStr = region['partnerNameDate']
+                            region['partnerNameDate'] = DateUtils.parse_date_string(partnerNameDateStr, '%d-%m-%Y')
                     except ValueError:
                         pass
                         # pass on this error and catch it when trying to add to record, to be returned
