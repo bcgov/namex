@@ -754,7 +754,6 @@ class Request(Resource):
 
             # convert Expiration Date to correct format
             if json_input.get('expirationDate', None):
-                current_app.logger.debug(f"Parsing expirationDate: {json_input['expirationDate']}")
                 try:
                     expirationDateStr = json_input['expirationDate']
                     expirationDate = DateUtils.parse_date(expirationDateStr)
