@@ -9,6 +9,7 @@ from pytz import timezone, UTC
 from flask import request, jsonify, g, current_app, make_response
 from flask_restx import Namespace, Resource, fields, cors
 from flask_jwt_oidc import AuthError
+from marshmallow import ValidationError
 
 from namex.constants import DATE_TIME_FORMAT_SQL
 from namex.models.request import RequestsAuthSearchSchema
@@ -39,6 +40,8 @@ from namex.utils.common import (convert_to_ascii,
 from namex.utils.auth import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 from namex.utils import queue_util
+from .utils import DateUtils
+
 
 setup_logging()  # Important to do this first
 
@@ -742,33 +745,26 @@ class Request(Resource):
                 existing_nr.save_to_db()
 
             if json_input.get('consent_dt', None):
-                json_input['consent_dt'] = str(datetime.strptime(
-                    str(json_input['consent_dt'][5:]), '%d %b %Y %H:%M:%S %Z'))
+                consentDateStr = json_input['consent_dt']
+                json_input['consent_dt'] = DateUtils.parse_date_string(consentDateStr, '%d %b %Y %H:%M:%S %Z')
 
             # convert Submitted Date to correct format
             if json_input.get('submittedDate', None):
-                json_input['submittedDate'] = str(datetime.strptime(
-                    str(json_input['submittedDate'][5:]), '%d %b %Y %H:%M:%S %Z'))
+                submittedDateStr = json_input['submittedDate']
+                json_input['submittedDate'] = DateUtils.parse_date_string(submittedDateStr, '%d %b %Y %H:%M:%S %Z')
 
             # convert Expiration Date to correct format
             if json_input.get('expirationDate', None):
-                expiration_str = json_input['expirationDate']
-
-                # Convert the date (either UTC or ISO) into a UTC datetime object
-                if expiration_str.endswith('UTC'):
-                    parsed_date = datetime.strptime(expiration_str[5:], '%d %b %Y %H:%M:%S %Z')
-                    parsed_date = parsed_date.replace(tzinfo=UTC) 
-                else:
-                    parsed_date = datetime.fromisoformat(expiration_str)
-                    if parsed_date.tzinfo is None:
-                        parsed_date = parsed_date.replace(tzinfo=UTC)  # If it's naive, assume UTC
-                    else:
-                        parsed_date = parsed_date.astimezone(UTC)  # Convert any timezone-aware datetime to UTC
-
-                # Convert the UTC datetime object to the end of day in pacific time without milliseconds
-                pacific_time = parsed_date.astimezone(timezone('US/Pacific'))
-                end_of_day_pacific = pacific_time.replace(hour=23, minute=59, second=0, microsecond=0)
-                json_input['expirationDate'] = end_of_day_pacific.strftime('%Y-%m-%d %H:%M:%S%z')
+                try:
+                    expirationDateStr = json_input['expirationDate']
+                    expirationDate = DateUtils.parse_date(expirationDateStr)
+                    # Convert the UTC datetime object to the end of day in pacific time without milliseconds
+                    pacific_time = expirationDate.astimezone(timezone('US/Pacific'))
+                    end_of_day_pacific = pacific_time.replace(hour=23, minute=59, second=0, microsecond=0)
+                    json_input['expirationDate'] = end_of_day_pacific.strftime('%Y-%m-%d %H:%M:%S%z')
+                except Exception as e:
+                    current_app.logger.debug(f"Error parsing expirationDate: {str(e)}")
+                    pass
 
             # convert NWPTA dates to correct format
             if json_input.get('nwpta', None):
@@ -777,8 +773,8 @@ class Request(Resource):
                         if region['partnerNameDate'] == '':
                             region['partnerNameDate'] = None
                         if region['partnerNameDate']:
-                            region['partnerNameDate'] = str(datetime.strptime(
-                                str(region['partnerNameDate']), '%d-%m-%Y'))
+                            partnerNameDateStr = region['partnerNameDate']
+                            region['partnerNameDate'] = DateUtils.parse_date_string(partnerNameDateStr, '%d-%m-%Y')
                     except ValueError:
                         pass
                         # pass on this error and catch it when trying to add to record, to be returned
@@ -821,7 +817,8 @@ class Request(Resource):
 
             try:
                 previousNr = json_input['previousNr']
-                nrd.previousRequestId = RequestDAO.find_by_nr(previousNr).requestId
+                if previousNr:
+                    nrd.previousRequestId = RequestDAO.find_by_nr(previousNr).requestId
             except AttributeError:
                 nrd.previousRequestId = None
             except KeyError:
@@ -1084,39 +1081,40 @@ class Request(Resource):
             is_changed__nwpta_ab = False
             is_changed__nwpta_sk = False
 
-            for nrd_nwpta in nrd.partnerNS.all():
+            if nrd.partnerNS.count() > 0:
+                for nrd_nwpta in nrd.partnerNS.all():
 
-                orig_nwpta = nrd_nwpta.as_dict()
+                    orig_nwpta = nrd_nwpta.as_dict()
 
-                for in_nwpta in json_input['nwpta']:
-                    if nrd_nwpta.partnerJurisdictionTypeCd == in_nwpta['partnerJurisdictionTypeCd']:
+                    for in_nwpta in json_input['nwpta']:
+                        if nrd_nwpta.partnerJurisdictionTypeCd == in_nwpta['partnerJurisdictionTypeCd']:
 
-                        errors = nwpta_schema.validate(in_nwpta, partial=False)
-                        if errors:
-                            MessageServices.add_message(MessageServices.ERROR, 'nwpta_validation', errors)
-                            # return make_response(jsonify(errors), 400
+                            errors = nwpta_schema.validate(in_nwpta, partial=False)
+                            if errors:
+                                MessageServices.add_message(MessageServices.ERROR, 'nwpta_validation', errors)
+                                # return make_response(jsonify(errors), 400
 
-                        nwpta_schema.load(in_nwpta, instance=nrd_nwpta, partial=False)
+                            nwpta_schema.load(in_nwpta, instance=nrd_nwpta, partial=False)
 
-                        # convert data to ascii, removing data that won't save to Oracle
-                        nrd_nwpta.partnerName = convert_to_ascii(in_nwpta.get('partnerName'))
-                        nrd_nwpta.partnerNameNumber = convert_to_ascii(in_nwpta.get('partnerNameNumber'))
+                            # convert data to ascii, removing data that won't save to Oracle
+                            nrd_nwpta.partnerName = convert_to_ascii(in_nwpta.get('partnerName'))
+                            nrd_nwpta.partnerNameNumber = convert_to_ascii(in_nwpta.get('partnerNameNumber'))
 
-                        # check if any of the Oracle db fields have changed, so we can send them back
-                        tmp_is_changed = False
-                        if nrd_nwpta.partnerNameTypeCd != orig_nwpta['partnerNameTypeCd']:
-                            tmp_is_changed = True
-                        if nrd_nwpta.partnerNameNumber != orig_nwpta['partnerNameNumber']:
-                            tmp_is_changed = True
-                        if nrd_nwpta.partnerNameDate != orig_nwpta['partnerNameDate']:
-                            tmp_is_changed = True
-                        if nrd_nwpta.partnerName != orig_nwpta['partnerName']:
-                            tmp_is_changed = True
-                        if tmp_is_changed:
-                            if nrd_nwpta.partnerJurisdictionTypeCd == 'AB':
-                                is_changed__nwpta_ab = True
-                            if nrd_nwpta.partnerJurisdictionTypeCd == 'SK':
-                                is_changed__nwpta_sk = True
+                            # check if any of the Oracle db fields have changed, so we can send them back
+                            tmp_is_changed = False
+                            if nrd_nwpta.partnerNameTypeCd != orig_nwpta['partnerNameTypeCd']:
+                                tmp_is_changed = True
+                            if nrd_nwpta.partnerNameNumber != orig_nwpta['partnerNameNumber']:
+                                tmp_is_changed = True
+                            if nrd_nwpta.partnerNameDate != orig_nwpta['partnerNameDate']:
+                                tmp_is_changed = True
+                            if nrd_nwpta.partnerName != orig_nwpta['partnerName']:
+                                tmp_is_changed = True
+                            if tmp_is_changed:
+                                if nrd_nwpta.partnerJurisdictionTypeCd == 'AB':
+                                    is_changed__nwpta_ab = True
+                                if nrd_nwpta.partnerJurisdictionTypeCd == 'SK':
+                                    is_changed__nwpta_sk = True
 
             ### END nwpta ###
 
@@ -1148,7 +1146,6 @@ class Request(Resource):
                     'is_changed_consent': is_changed_consent
                 }
 
-                # if any data has changed from an NR Details edit, update it in Oracle
                 if any(value is True for value in change_flags.values()):
                     nrd.save_to_db()
 
