@@ -38,6 +38,7 @@ class Event(db.Model):
     DELETE = 'DELETE'
     UPDATE_FROM_NRO = 'update_from_nro'
     NRO_UPDATE = 'nro_update'
+    NR_DAY_JOB = 'nr_day_job'
     MARKED_ON_HOLD = 'marked_on_hold'
     SET_TO_DRAFT = 'set_to_draft'
     NAMEX_PAY = 'namex_pay'
