@@ -1,9 +1,9 @@
 import copy, json
 from flask import jsonify, make_response
-from flask_restx import Resource, Namespace, cors
+from flask_restx import Resource, Namespace
 
 from namex import jwt
-from namex.models import Event as EventDAO, Request as RequestDAO, User, State, Payment, payment
+from namex.models import Event as EventDAO, Request as RequestDAO, User, State, Payment
 from namex.utils.auth import cors_preflight
 
 from namex.utils.logging import setup_logging
@@ -180,6 +180,8 @@ class Events(Resource):
                 user_action = "UI Error - NR Rolled Back"
             if '[cancel]' in e_dict['action']:
                 user_action = "Cancelled in Name Request"
+            if user_action == EventDAO.NR_DAY_JOB:
+                user_action = "NR Day Job"
 
             payment_action = ''
             payment_display = {

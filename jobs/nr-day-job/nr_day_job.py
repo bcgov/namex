@@ -17,8 +17,8 @@ import uuid
 from datetime import datetime, timezone
 
 from flask import Flask, current_app
-from namex.models import Request, State, db
-from namex.services import queue
+from namex.models import Request, State, db, Event
+from namex.services import queue, EventRecorder
 from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent
 from sqlalchemy import text
@@ -120,6 +120,8 @@ def notify_nr_expired():
         ).all()
         for request in requests:
             furnish_request_message(request, 'expired')
+            EventRecorder.record_as_system(Event.NR_DAY_JOB, request, request.json())
+
     except Exception as err:  # noqa B902; pylint: disable=W0703;
         current_app.logger.error(err)
 
