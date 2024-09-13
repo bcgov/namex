@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 import requests, xmltodict
-from flask import current_app, jsonify, make_response
+from flask import current_app, jsonify, make_response, current_app
 from flask_restx import Namespace, Resource, cors
 from lxml import etree  # Don't worry about this it exists... the module is dynamically loaded
 
@@ -56,15 +56,15 @@ class MrasProfile(Resource):
     def get(self, province, corp_num):
         try:
             # Get the jurisdiction
-            print('Calling MRAS Jurisdictions API using [corp_num: {corp_num}]'.format(corp_num=corp_num))
+            current_app.logger.debug('Calling MRAS Jurisdictions API using [corp_num: {corp_num}]'.format(corp_num=corp_num))
             mras_url = f'{current_app.config.get("MRAS_SVC_URL")}/api/v1/xpr/jurisdictions/{corp_num}'
             headers = {
                 'x-api-key': current_app.config.get('MRAS_SVC_API_KEY'),
                 'Accept': 'application/xml'
             }
 
-            print(mras_url)
-            print(repr(headers))
+            current_app.logger.debug(mras_url)
+            current_app.logger.debug(repr(headers))
             response = requests.get(
                 mras_url,
                 headers=headers
@@ -86,11 +86,11 @@ class MrasProfile(Resource):
             if province not in jurisdiction_ids:
                 return make_response(jsonify(message='Invalid request, province jurisdiction is incorrect'), HTTPStatus.BAD_REQUEST)
             else:
-                print('Valid jurisdiction IDs')
-                print(repr(jurisdiction_ids))
+                current_app.logger.debug('Valid jurisdiction IDs')
+                current_app.logger.debug(repr(jurisdiction_ids))
 
             # Get the profile
-            print('\nCalling MRAS Profile API using [corp_num: {corp_num}], [province: {province}]'.format(corp_num=corp_num, province=province))
+            current_app.logger.debug('\nCalling MRAS Profile API using [corp_num: {corp_num}], [province: {province}]'.format(corp_num=corp_num, province=province))
             mras_url =  f'{current_app.config.get("MRAS_SVC_URL")}/api/v1/xpr/GetProfile/{corp_num}/{province}'
 
             headers = {
@@ -98,31 +98,22 @@ class MrasProfile(Resource):
                 'Accept': 'application/xml'
             }
 
-            print(mras_url)
-            print(repr(headers))
+            current_app.logger.debug(mras_url)
+            current_app.logger.debug(repr(headers))
             response = requests.get(
                 mras_url,
                 headers=headers
             )
 
-
             # Return the auth response if an error occurs
             if not response.status_code == HTTPStatus.OK:
                 return make_response(jsonify({'error': 'No profile found for the jurisdiction, registration number pair.'}), HTTPStatus.NOT_FOUND)
-                # mras_errors = load_xml_response_content(response, './/mras_error')
-                # mras_error = {
-                #     'error_code': mras_errors[0].find('error_code').text,
-                #     'internal_error_code': mras_errors[0].find('internal_error_code').text,
-                #     'internal_error_message': mras_errors[0].find('internal_error_message').text
-                # }
-
-                # raise MrasServiceException(mras_error=mras_error)
 
             # Just return true or false, the profile either exists or it doesn't
             # Note: the response content is in xml format so we need to parse it to json format.
             dict_data = xmltodict.parse(response.content)
             jsonify_data = jsonify(dict_data)
-            return make_response(jsonify_data), HTTPStatus.OK
+            return make_response(jsonify_data, HTTPStatus.OK)
         except MrasServiceException as err:
             return handle_exception(err, err.message, err.error_code)
         except Exception as err:
