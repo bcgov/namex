@@ -453,7 +453,7 @@ class RequestSearch(Resource):
             have_more_data = results['response']['numFound'] > (start + rows)
             identifiers = [name['nr_num'] for name in results['names']]
             return RequestDAO.query.filter(
-                RequestDAO.nrNum.in_(identifiers),
+                RequestDAO.nrNum.in_(identifiers), RequestDAO.stateCd != State.CANCELLED,
                 or_(RequestDAO.stateCd != State.EXPIRED,
                     text(f"(requests.state_cd = '{State.EXPIRED}' AND CAST(requests.expiration_date AS DATE) + "
                          "interval '60 day' >= CAST(now() AS DATE))"))
