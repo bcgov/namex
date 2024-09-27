@@ -47,9 +47,6 @@ class Config(object):
 
     ENTITY_SVC_URL = f'{os.getenv("LEGAL_API_URL", None)}{os.getenv("LEGAL_API_VERSION", "/api/v1")}'
 
-    NRO_EXTRACTOR_URI = f'{os.getenv("NAMEX_API_URL", None)}{os.getenv("NAMEX_API_VERSION", None)}/nro-extract/nro-requests'
-
-
     NAME_REQUEST_URL = os.getenv('NAME_REQUEST_URL', '')
     NAMES_INFORMATION_URL = os.getenv('NAMES_INFORMATION_URL', 
                                       'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/\
@@ -72,13 +69,6 @@ permits-licences/businesses-incorporated-companies/approval-business-name')
     DB_PORT = os.getenv('NAMEX_DATABASE_PORT', '5432')
     SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
 
-    # ORACLE - LEGACY NRO NAMESDB
-    NRO_USER = os.getenv('NRO_USER', '')
-    NRO_PASSWORD = os.getenv('NRO_PASSWORD', '')
-    NRO_DB_NAME = os.getenv('NRO_DB_NAME', '')
-    NRO_HOST = os.getenv('ORACLE_HOST', '')
-    NRO_PORT = int(os.getenv('ORACLE_PORT', '1521'))
-
     # KEYCLOAK & JWT_OIDC Settings
     JWT_OIDC_WELL_KNOWN_CONFIG = os.getenv('JWT_OIDC_WELL_KNOWN_CONFIG')
     JWT_OIDC_ALGORITHMS = os.getenv('JWT_OIDC_ALGORITHMS')
@@ -89,10 +79,11 @@ permits-licences/businesses-incorporated-companies/approval-business-name')
 
     JWT_OIDC_AUDIENCE = os.getenv('JWT_OIDC_AUDIENCE')
 
-    SBC_SVC_AUTH_URL = os.getenv('KEYCLOAK_AUTH_TOKEN_URL', '')
-    SBC_SVC_AUTH_CLIENT_ID = os.getenv('NAMEX_SBC_SERVICE_ACCOUNT_CLIENT_ID', '')
-    SBC_SVC_CLIENT_SECRET = os.getenv('NAMEX_SBC_SERVICE_ACCOUNT_CLIENT_SECRET', '')
+    COLIN_SVC_AUTH_URL = os.getenv('KEYCLOAK_AUTH_TOKEN_URL', '')
+    COLIN_SVC_AUTH_CLIENT_ID = os.getenv('NAME_REQUEST_SERVICE_ACCOUNT_CLIENT_ID', '')
+    COLIN_SVC_CLIENT_SECRET = os.getenv('NAME_REQUEST_SERVICE_ACCOUNT_CLIENT_SECRET', '')
 
+    ENTITY_SVC_AUTH_URL = os.getenv('KEYCLOAK_AUTH_TOKEN_URL', '')
     ENTITY_SERVICE_ACCOUNT_CLIENT_ID = os.getenv('ENTITY_SERVICE_ACCOUNT_CLIENT_ID', '')
     ENTITY_SERVICE_ACCOUNT_CLIENT_SECRET = os.getenv('ENTITY_SERVICE_ACCOUNT_CLIENT_SECRET', '')
 
@@ -100,10 +91,7 @@ permits-licences/businesses-incorporated-companies/approval-business-name')
     PAYMENT_SVC_AUTH_CLIENT_ID = os.getenv('NAME_REQUEST_SERVICE_ACCOUNT_CLIENT_ID', '')
     PAYMENT_SVC_CLIENT_SECRET = os.getenv('NAME_REQUEST_SERVICE_ACCOUNT_CLIENT_SECRET', '')
 
-    # You can disable NRO updates for Name Requests by setting the variable in your .env / OpenShift configuration
-    DISABLE_NAMEREQUEST_NRO_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NRO_UPDATES', 0))
     DISABLE_NAMEREQUEST_SOLR_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0))
-
 
     GCP_AUTH_KEY = os.getenv('BUSINESS_GCP_AUTH_KEY', None)
     NAMEX_NR_STATE_TOPIC = os.getenv('NAMEX_NR_STATE_TOPIC', '')
@@ -129,8 +117,6 @@ class DevConfig(Config):
     TESTING = False,
     DEBUG = True
 
-    # We can't run NRO locally unless you're provisioned, you can disable NRO updates for Name Requests by setting the variable in your .env
-    DISABLE_NAMEREQUEST_NRO_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NRO_UPDATES', 0))
     DISABLE_NAMEREQUEST_SOLR_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0))
 
 
@@ -145,7 +131,7 @@ class TestConfig(Config):
     DB_NAME = os.getenv('DATABASE_TEST_NAME', '')
     DB_HOST = os.getenv('DATABASE_TEST_HOST', '')
     DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
-    # Allows for NRO add / update bypass if necessary (for local development)
+
     LOCAL_DEV_MODE = os.getenv('LOCAL_DEV_MODE', False)
     # Set this in your .env to debug SQL Alchemy queries (for local development)
     SQLALCHEMY_ECHO = 'debug' if os.getenv('DEBUG_SQL_QUERIES', False) else False
@@ -158,8 +144,6 @@ class TestConfig(Config):
     )
     EMAILER_TOPIC = os.getenv('NAMEX_MAILER_TOPIC', '')
 
-    # We can't run NRO locally for running our tests
-    DISABLE_NAMEREQUEST_NRO_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NRO_UPDATES', 1))
     DISABLE_NAMEREQUEST_SOLR_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0))
 
     # JWT OIDC settings

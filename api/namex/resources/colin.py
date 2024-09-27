@@ -4,7 +4,6 @@ import requests
 from flask import current_app, jsonify, make_response
 from flask_restx import Namespace, Resource, cors
 
-from namex.services.colin.oracle_services import ColinServices
 from namex.utils.api_resource import handle_exception
 from namex.utils.auth import MSG_CLIENT_CREDENTIALS_REQ_FAILED, cors_preflight, get_client_credentials
 from namex.utils.logging import setup_logging
@@ -17,7 +16,6 @@ MSG_SERVER_ERROR = 'Server Error!'
 MSG_NOT_FOUND = 'Resource not found'
 MSG_COULD_NOT_FIND_CORP = 'Error: Could not find corporation details'
 
-oracle_services = ColinServices()
 
 class ColinServiceException(Exception):
     def __init__(self, wrapped_err=None, message="COLIN API exception.", status_code=500):
@@ -51,44 +49,38 @@ class ColinServiceException(Exception):
 colin_api = Namespace('colin', description='COLIN API')
 
 
-@cors_preflight('POST, GET')
-@colin_api.route('/<string:corp_num>', strict_slashes=False, methods=['POST', 'OPTIONS'])
+@cors_preflight('GET')
 @colin_api.route('/<string:corp_num>', strict_slashes=False, methods=['GET', 'OPTIONS'])
 @colin_api.doc(params={
     'corp_num': 'Incorporation Number - This field is required'
 })
 class ColinApi(Resource):
-    def post(self, corp_num):
-        colin_url = f'{current_app.config.get("COLIN_SVC_URL")}/corporations/{corp_num}'
-        response, status_code = _init(colin_url)
-        return response, status_code
-
     def get(self, corp_num):
-        try:
-            business_info_dict = oracle_services.get_business_info_by_corp_num(corp_num=corp_num)
-            if not business_info_dict:
-                return make_response(jsonify({'message': MSG_COULD_NOT_FIND_CORP}), 404)
+        colin_url = f'{current_app.config.get("COLIN_SVC_URL")}/businesses/{corp_num}/public'
+        response = _init(colin_url)
 
-        except ColinServiceException as err:
-            return handle_exception(err, err.message, err.status_code)
-        except Exception as err:
-            return handle_exception(err, 'Internal Server Error', 500)
+        business_info = response.get('business', {})
 
-        response_dict = {'identifier': corp_num,
-                         'legalName': business_info_dict['corp_nme'],
-                         'legalType': business_info_dict['corp_typ_cd'],
-                         'state': business_info_dict['op_state_typ_cd'],
-                         'jurisdiction': business_info_dict['jurisdiction'],
-                         'homeIdentifier': business_info_dict['home_juris_num']}
+        response_dict = {
+            'identifier': business_info.get('identifier', corp_num),
+            'legalName': business_info.get('legalName'),
+            'legalType': business_info.get('legalType'),
+            'corpState': business_info.get('corpStateClass'),
+            'status': business_info.get('status'),
+            'jurisdiction': business_info.get('jurisdiction'),
+            'homeIdentifier': business_info.get('homeJurisdictionNumber')
+        }
 
         return make_response(jsonify(response_dict), 200)
 
+
 def _init(colin_url):
     try:
-        SBC_SVC_AUTH_URL = current_app.config.get('SBC_SVC_AUTH_URL', '')
-        SBC_SVC_AUTH_CLIENT_ID = current_app.config.get('SBC_SVC_AUTH_CLIENT_ID', '')
-        SBC_SVC_CLIENT_SECRET = current_app.config.get('SBC_SVC_CLIENT_SECRET', '')
-        authenticated, token = get_client_credentials(SBC_SVC_AUTH_URL, SBC_SVC_AUTH_CLIENT_ID, SBC_SVC_CLIENT_SECRET)
+        authenticated, token = get_client_credentials(
+            current_app.config.get('COLIN_SVC_AUTH_URL'),
+            current_app.config.get('COLIN_SVC_AUTH_CLIENT_ID'),
+            current_app.config.get('COLIN_SVC_CLIENT_SECRET'),
+        )
         if not authenticated:
             raise ColinServiceException(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
 
@@ -102,10 +94,13 @@ def _init(colin_url):
             headers=headers
         )
 
-        content = json.loads(response.text)
         if response.status_code != 200:
-            return make_response(jsonify(content), response.status_code)
-        return make_response(jsonify(content), response.status_code)
+            current_app.logger.debug(
+                'Error fetching data from URL: %s, Response: %d - %s',
+                colin_url, response.status_code, response.text
+            )
+            raise ColinServiceException(message="Failed to fetch data", status_code=response.status_code)
+        return response.json()
     except ColinServiceException as err:
         return handle_exception(err, err.message, err.status_code)
     except Exception as err:

@@ -2,10 +2,14 @@
 
 TODO: Fill in a larger description once the API is defined for V1
 """
-from http import HTTPStatus
+
+from datetime import datetime
+from pytz import timezone, UTC
+
 from flask import request, jsonify, g, current_app, make_response
 from flask_restx import Namespace, Resource, fields, cors
 from flask_jwt_oidc import AuthError
+from marshmallow import ValidationError
 
 from namex.constants import DATE_TIME_FORMAT_SQL
 from namex.models.request import RequestsAuthSearchSchema
@@ -13,12 +17,12 @@ from namex.utils.logging import setup_logging
 
 from sqlalchemy.orm import load_only, lazyload, eagerload
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import and_, func, or_, text, Date
+from sqlalchemy import func, or_, text
 from sqlalchemy.inspection import inspect
 
-from namex import jwt, nro, services
+from namex import jwt
 from namex.exceptions import BusinessException
-from namex.models import db, ValidationError
+from namex.models import db
 from namex.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema, RequestsSearchSchema
 from namex.models import Applicant, Name, NameSchema, PartnerNameSystemSchema
 from namex.models import User, State, Comment, NameCommentSchema, Event
@@ -27,6 +31,7 @@ from namex.models import DecisionReason
 
 from namex.services.lookup import nr_filing_actions
 from namex.services import ServicesError, MessageServices, EventRecorder
+from namex.services.name_request import NameRequestService
 from namex.services.name_request.utils import check_ownership, get_or_create_user_by_jwt, valid_state_transition
 
 from namex.utils.common import (convert_to_ascii,
@@ -34,10 +39,9 @@ from namex.utils.common import (convert_to_ascii,
                                 convert_to_utc_max_date_time)
 from namex.utils.auth import cors_preflight
 from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
-from namex.services.nro import NROServicesError
 from namex.utils import queue_util
+from .utils import DateUtils
 
-import datetime
 
 setup_logging()  # Important to do this first
 
@@ -104,6 +108,7 @@ class RequestsQueue(Resource):
         try:
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
         except ServicesError as se:
+            current_app.logger.error(se.with_traceback(None))
             return make_response(jsonify(message='unable to get ot create user, aborting operation'), 500)
         except Exception as unmanaged_error:
             current_app.logger.error(unmanaged_error.with_traceback(None))
@@ -112,29 +117,18 @@ class RequestsQueue(Resource):
         # get the next NR assigned to the User
         try:
             priority_queue = request.args.get('priorityQueue')
-            nr, new_assignment = RequestDAO.get_queued_oldest(user, priority_queue == 'true')
+            nr = RequestDAO.get_queued_oldest(user, priority_queue == 'true')
         except BusinessException as be:
+            current_app.logger.error(be.with_traceback(None))
             return make_response(jsonify(message='There are no more requests in the {} Queue'.format(State.DRAFT)), 404)
         except Exception as unmanaged_error:
             current_app.logger.error(unmanaged_error.with_traceback(None))
             return make_response(jsonify(message='internal server error'), 500)
-        current_app.logger.debug('got the nr:{} and its a new assignment?{}'.format(nr.nrNum, new_assignment))
+        current_app.logger.debug('got the nr:{}'.format(nr.nrNum))
 
         # if no NR returned
         if 'nr' not in locals() or not nr:
             return make_response(jsonify(message='No more NRs in Queue to process'), 200)
-
-        # if it's an NR already INPROGRESS and assigned to the user
-        if nr and not new_assignment:
-            return make_response(jsonify(nameRequest='{}'.format(nr.nrNum)), 200)
-
-        # if it's a new assignment, then LOGICALLY lock the record in NRO
-        # if we fail to do that, send back the NR and the errors for user-intervention
-        if new_assignment:
-            warnings = nro.move_control_of_request_from_nro(nr, user)
-
-        if 'warnings' in locals() and warnings:
-            return make_response(jsonify(nameRequest='{}'.format(nr.nrNum), warnings=warnings), 206)
 
         EventRecorder.record(user, Event.GET, nr, {})
 
@@ -459,7 +453,7 @@ class RequestSearch(Resource):
             have_more_data = results['response']['numFound'] > (start + rows)
             identifiers = [name['nr_num'] for name in results['names']]
             return RequestDAO.query.filter(
-                RequestDAO.nrNum.in_(identifiers),
+                RequestDAO.nrNum.in_(identifiers), RequestDAO.stateCd != State.CANCELLED,
                 or_(RequestDAO.stateCd != State.EXPIRED,
                     text(f"(requests.state_cd = '{State.EXPIRED}' AND CAST(requests.expiration_date AS DATE) + "
                          "interval '60 day' >= CAST(now() AS DATE))"))
@@ -556,6 +550,10 @@ class Request(Resource):
 
         # do the cheap check first before the more expensive ones
         # check states
+        # some nr requested from Legancy application includes %20 after NR. e.g. 'NR%209288253', which should be 'NR 9288253'
+        nr = nr.replace("%20", " ")
+        current_app.logger.debug("NR: {0}".format(nr))
+        
         json_input = request.get_json()
         if not json_input:
             return make_response(jsonify({'message': 'No input data provided'}), 400)
@@ -589,7 +587,7 @@ class Request(Resource):
                     return make_response(jsonify({"message": "Request:{} not found".format(nr)}), 404)
 
                 if not valid_state_transition(user, nrd, state):
-                    return make_response(jsonify(message='you are not authorized to make these changes'), 401)
+                    return make_response(jsonify(message='Name Request state transition validation failed.'), 401)
 
                 # if the user has an existing (different) INPROGRESS NR, revert to previous state (default to HOLD)
                 existing_nr = RequestDAO.get_inprogress(user)
@@ -601,38 +599,8 @@ class Request(Resource):
                         existing_nr.stateCd = State.HOLD
                     existing_nr.save_to_db()
 
-                # if the NR is in DRAFT then LOGICALLY lock the record in NRO
-                # if we fail to do that, send back the NR and the errors for user-intervention
-                # if state is already approved do not update from nro
-                if nrd.stateCd == State.DRAFT and state != State.APPROVED:
-                    warnings = nro.move_control_of_request_from_nro(nrd, user)
-
-                # if we're changing to DRAFT, update NRO status to "D" in NRO
-                if state == State.DRAFT:
-                    change_flags = {
-                        'is_changed__request': False,
-                        'is_changed__previous_request': False,
-                        'is_changed__applicant': False,
-                        'is_changed__address': False,
-                        'is_changed__name1': False,
-                        'is_changed__name2': False,
-                        'is_changed__name3': False,
-                        'is_changed__nwpta_ab': False,
-                        'is_changed__nwpta_sk': False,
-                        'is_changed__request_state': True,
-                        'is_changed_consent': False
-                    }
-
-                    warnings = nro.change_nr(nrd, change_flags)
-                    if warnings:
-                        MessageServices.add_message(MessageServices.ERROR,
-                                                    'change_request_in_NRO', warnings)
-
                 nrd.stateCd = state
                 nrd.userId = user.id
-
-                if state == State.CANCELLED:
-                    nro.cancel_nr(nrd, user.username)
 
                 # if our state wasn't INPROGRESS and it is now, ensure the furnished flag is N
                 if (start_state in locals()
@@ -667,14 +635,44 @@ class Request(Resource):
                             new_comment.nrId = nrd.id
 
                 ### END comments ###
-            elif consume := json_input.get('consume', None):
-                corp_num = consume.get('corpNum', None)
-                nro.consume_nr(nrd, user, corp_num)
 
             ### PREVIOUS STATE ###
             # - None (null) is a valid value for Previous State
             if 'previousStateCd' in json_input.keys():
                 nrd.previousStateCd = json_input.get('previousStateCd', None)
+            
+            # calculate and update expiration date
+            if (
+                nrd.stateCd in (State.APPROVED, State.REJECTED, State.CONDITIONAL)
+                and nrd.furnished == 'N'
+                and nrd.expirationDate is None
+            ):
+                if (nrd.stateCd in (State.APPROVED, State.CONDITIONAL)):
+                    expiry_days = NameRequestService.get_expiry_days(nrd.request_action_cd, nrd.requestTypeCd)
+                    nrd.expirationDate = NameRequestService.create_expiry_date(datetime.utcnow(), expiry_days)
+
+                nrd.furnished = 'Y'
+
+            def consumeName(nrd, json_input):
+                if not json_input.get('corpNum'):
+                    return False, '"corpNum" is required and cannot be empty.'
+
+                consumed = False
+                for nrd_name in nrd.names:
+                    if nrd_name.state in (Name.APPROVED, Name.CONDITION):
+                        nrd_name.consumptionDate = datetime.utcnow()
+                        nrd_name.corpNum = json_input.get('corpNum')
+                        consumed = True
+
+                if not consumed:
+                    return False, f"Cannot find an Approved or Condition name to be consumed."
+
+                return True, None  # Return success and no error message
+
+            if state == State.CONSUMED:
+                success, error_message = consumeName(nrd, json_input)
+                if not success:
+                    return make_response(jsonify(message=error_message), 406)
 
             # save record
             nrd.save_to_db()
@@ -697,7 +695,7 @@ class Request(Resource):
     @cors.crossdomain(origin='*')
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR])
     def put(nr, *args, **kwargs):
-
+        
         # do the cheap check first before the more expensive ones
         json_input = request.get_json()
         if not json_input:
@@ -747,13 +745,26 @@ class Request(Resource):
                 existing_nr.save_to_db()
 
             if json_input.get('consent_dt', None):
-                json_input['consent_dt'] = str(datetime.datetime.strptime(
-                    str(json_input['consent_dt'][5:]), '%d %b %Y %H:%M:%S %Z'))
+                consentDateStr = json_input['consent_dt']
+                json_input['consent_dt'] = DateUtils.parse_date_string(consentDateStr, '%d %b %Y %H:%M:%S %Z')
 
             # convert Submitted Date to correct format
             if json_input.get('submittedDate', None):
-                json_input['submittedDate'] = str(datetime.datetime.strptime(
-                    str(json_input['submittedDate'][5:]), '%d %b %Y %H:%M:%S %Z'))
+                submittedDateStr = json_input['submittedDate']
+                json_input['submittedDate'] = DateUtils.parse_date_string(submittedDateStr, '%d %b %Y %H:%M:%S %Z')
+
+            # convert Expiration Date to correct format
+            if json_input.get('expirationDate', None):
+                try:
+                    expirationDateStr = json_input['expirationDate']
+                    expirationDate = DateUtils.parse_date(expirationDateStr)
+                    # Convert the UTC datetime object to the end of day in pacific time without milliseconds
+                    pacific_time = expirationDate.astimezone(timezone('US/Pacific'))
+                    end_of_day_pacific = pacific_time.replace(hour=23, minute=59, second=0, microsecond=0)
+                    json_input['expirationDate'] = end_of_day_pacific.strftime('%Y-%m-%d %H:%M:%S%z')
+                except Exception as e:
+                    current_app.logger.debug(f"Error parsing expirationDate: {str(e)}")
+                    pass
 
             # convert NWPTA dates to correct format
             if json_input.get('nwpta', None):
@@ -762,25 +773,14 @@ class Request(Resource):
                         if region['partnerNameDate'] == '':
                             region['partnerNameDate'] = None
                         if region['partnerNameDate']:
-                            region['partnerNameDate'] = str(datetime.datetime.strptime(
-                                str(region['partnerNameDate']), '%d-%m-%Y'))
+                            partnerNameDateStr = region['partnerNameDate']
+                            region['partnerNameDate'] = DateUtils.parse_date_string(partnerNameDateStr, '%d-%m-%Y')
                     except ValueError:
                         pass
                         # pass on this error and catch it when trying to add to record, to be returned
 
-            # ## If the current state is DRAFT, the transfer control from NRO to NAMEX
-            # if the NR is in DRAFT then LOGICALLY lock the record in NRO
-            # if we fail to do that, send back the NR and the errors for user-intervention
-            if nrd.stateCd == State.DRAFT:
-                warnings = nro.move_control_of_request_from_nro(nrd, user)
-                if warnings:
-                    MessageServices.add_message(MessageServices.WARN, 'nro_lock', warnings)
-
-            ### REQUEST HEADER ###
-
             # update request header
 
-            # if reset is set to true then this nr will be set to H + name_examination proc will be called in oracle
             reset = False
             if nrd.furnished == RequestDAO.REQUEST_FURNISHED and json_input.get('furnished', None) == 'N':
                 reset = True
@@ -817,7 +817,8 @@ class Request(Resource):
 
             try:
                 previousNr = json_input['previousNr']
-                nrd.previousRequestId = RequestDAO.find_by_nr(previousNr).requestId
+                if previousNr:
+                    nrd.previousRequestId = RequestDAO.find_by_nr(previousNr).requestId
             except AttributeError:
                 nrd.previousRequestId = None
             except KeyError:
@@ -1080,39 +1081,40 @@ class Request(Resource):
             is_changed__nwpta_ab = False
             is_changed__nwpta_sk = False
 
-            for nrd_nwpta in nrd.partnerNS.all():
+            if nrd.partnerNS.count() > 0:
+                for nrd_nwpta in nrd.partnerNS.all():
 
-                orig_nwpta = nrd_nwpta.as_dict()
+                    orig_nwpta = nrd_nwpta.as_dict()
 
-                for in_nwpta in json_input['nwpta']:
-                    if nrd_nwpta.partnerJurisdictionTypeCd == in_nwpta['partnerJurisdictionTypeCd']:
+                    for in_nwpta in json_input['nwpta']:
+                        if nrd_nwpta.partnerJurisdictionTypeCd == in_nwpta['partnerJurisdictionTypeCd']:
 
-                        errors = nwpta_schema.validate(in_nwpta, partial=False)
-                        if errors:
-                            MessageServices.add_message(MessageServices.ERROR, 'nwpta_validation', errors)
-                            # return make_response(jsonify(errors), 400
+                            errors = nwpta_schema.validate(in_nwpta, partial=False)
+                            if errors:
+                                MessageServices.add_message(MessageServices.ERROR, 'nwpta_validation', errors)
+                                # return make_response(jsonify(errors), 400
 
-                        nwpta_schema.load(in_nwpta, instance=nrd_nwpta, partial=False)
+                            nwpta_schema.load(in_nwpta, instance=nrd_nwpta, partial=False)
 
-                        # convert data to ascii, removing data that won't save to Oracle
-                        nrd_nwpta.partnerName = convert_to_ascii(in_nwpta.get('partnerName'))
-                        nrd_nwpta.partnerNameNumber = convert_to_ascii(in_nwpta.get('partnerNameNumber'))
+                            # convert data to ascii, removing data that won't save to Oracle
+                            nrd_nwpta.partnerName = convert_to_ascii(in_nwpta.get('partnerName'))
+                            nrd_nwpta.partnerNameNumber = convert_to_ascii(in_nwpta.get('partnerNameNumber'))
 
-                        # check if any of the Oracle db fields have changed, so we can send them back
-                        tmp_is_changed = False
-                        if nrd_nwpta.partnerNameTypeCd != orig_nwpta['partnerNameTypeCd']:
-                            tmp_is_changed = True
-                        if nrd_nwpta.partnerNameNumber != orig_nwpta['partnerNameNumber']:
-                            tmp_is_changed = True
-                        if nrd_nwpta.partnerNameDate != orig_nwpta['partnerNameDate']:
-                            tmp_is_changed = True
-                        if nrd_nwpta.partnerName != orig_nwpta['partnerName']:
-                            tmp_is_changed = True
-                        if tmp_is_changed:
-                            if nrd_nwpta.partnerJurisdictionTypeCd == 'AB':
-                                is_changed__nwpta_ab = True
-                            if nrd_nwpta.partnerJurisdictionTypeCd == 'SK':
-                                is_changed__nwpta_sk = True
+                            # check if any of the Oracle db fields have changed, so we can send them back
+                            tmp_is_changed = False
+                            if nrd_nwpta.partnerNameTypeCd != orig_nwpta['partnerNameTypeCd']:
+                                tmp_is_changed = True
+                            if nrd_nwpta.partnerNameNumber != orig_nwpta['partnerNameNumber']:
+                                tmp_is_changed = True
+                            if nrd_nwpta.partnerNameDate != orig_nwpta['partnerNameDate']:
+                                tmp_is_changed = True
+                            if nrd_nwpta.partnerName != orig_nwpta['partnerName']:
+                                tmp_is_changed = True
+                            if tmp_is_changed:
+                                if nrd_nwpta.partnerJurisdictionTypeCd == 'AB':
+                                    is_changed__nwpta_ab = True
+                                if nrd_nwpta.partnerJurisdictionTypeCd == 'SK':
+                                    is_changed__nwpta_sk = True
 
             ### END nwpta ###
 
@@ -1122,73 +1124,35 @@ class Request(Resource):
                 for we in warning_and_errors:
                     if we['type'] == MessageServices.ERROR:
                         return make_response(jsonify(errors=warning_and_errors), 400)
-
-            # update oracle if this nr was reset
-            # - first set status to H via name_examination proc, which handles clearing all necessary data and states
-            # - then set status to D so it's back in draft in NRO for customer to understand status
             if reset:
-                current_app.logger.debug('set state to h for RESET')
-                try:
-                    nro.set_request_status_to_h(nr, user.username)
-                except (NROServicesError, Exception) as err:
-                    MessageServices.add_message('error', 'reset_request_in_NRO', err)
-
                 nrd.expirationDate = None
                 nrd.consentFlag = None
                 nrd.consent_dt = None
                 is_changed__request = True
                 is_changed_consent = True
 
+            else:
                 change_flags = {
                     'is_changed__request': is_changed__request,
-                    'is_changed__previous_request': False,
-                    'is_changed__applicant': False,
-                    'is_changed__address': False,
-                    'is_changed__name1': False,
-                    'is_changed__name2': False,
-                    'is_changed__name3': False,
-                    'is_changed__nwpta_ab': False,
-                    'is_changed__nwpta_sk': False,
+                    'is_changed__previous_request': is_changed__previous_request,
+                    'is_changed__applicant': is_changed__applicant,
+                    'is_changed__address': is_changed__address,
+                    'is_changed__name1': is_changed__name1,
+                    'is_changed__name2': is_changed__name2,
+                    'is_changed__name3': is_changed__name3,
+                    'is_changed__nwpta_ab': is_changed__nwpta_ab,
+                    'is_changed__nwpta_sk': is_changed__nwpta_sk,
                     'is_changed__request_state': is_changed__request_state,
                     'is_changed_consent': is_changed_consent
                 }
-                warnings = nro.change_nr(nrd, change_flags)
-                if warnings:
-                    MessageServices.add_message(MessageServices.ERROR, 'change_request_in_NRO', warnings)
 
-            # Update NR Details in NRO (not for reset)
-            else:
-                try:
-                    change_flags = {
-                        'is_changed__request': is_changed__request,
-                        'is_changed__previous_request': is_changed__previous_request,
-                        'is_changed__applicant': is_changed__applicant,
-                        'is_changed__address': is_changed__address,
-                        'is_changed__name1': is_changed__name1,
-                        'is_changed__name2': is_changed__name2,
-                        'is_changed__name3': is_changed__name3,
-                        'is_changed__nwpta_ab': is_changed__nwpta_ab,
-                        'is_changed__nwpta_sk': is_changed__nwpta_sk,
-                        'is_changed__request_state': is_changed__request_state,
-                        'is_changed_consent': is_changed_consent
-                    }
+                if any(value is True for value in change_flags.values()):
+                    nrd.save_to_db()
 
-                    # if any data has changed from an NR Details edit, update it in Oracle
-                    if any(value is True for value in change_flags.values()):
-                        # Save the nr before trying to hit oracle (will format dates same as namerequest.)
-                        nrd.save_to_db()
-
-                        # Delete any names that were blanked out
-                        for nrd_name in nrd.names:
-                            if deleted_names[nrd_name.choice - 1]:
-                                nrd_name.delete_from_db()
-
-                        warnings = nro.change_nr(nrd, change_flags)
-                        if warnings:
-                            MessageServices.add_message(MessageServices.ERROR, 'change_request_in_NRO', warnings)
-
-                except (NROServicesError, Exception) as err:
-                    MessageServices.add_message('error', 'change_request_in_NRO', err)
+                    # Delete any names that were blanked out
+                    for nrd_name in nrd.names:
+                        if deleted_names[nrd_name.choice - 1]:
+                            nrd_name.delete_from_db()
 
             # if there were errors, return the set of errors
             warning_and_errors = MessageServices.get_all_messages()
@@ -1502,13 +1466,6 @@ class SyncNR(Resource):
 
         if not nrd:
             return make_response(jsonify({"message": "Request:{} not found".format(nr)}), 404)
-
-        warnings = nro.move_control_of_request_from_nro(nrd, user, True)
-
-        if warnings:
-            resp = RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404().json()
-            resp['warnings'] = warnings
-            return make_response(jsonify(resp), 206)
 
         return jsonify(RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404().json())
 

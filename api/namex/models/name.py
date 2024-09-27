@@ -34,7 +34,6 @@ class Name(db.Model):
     commentId = db.Column('comment_id', db.Integer, db.ForeignKey('comments.id'))
     # nameRequest = db.relationship('Request')
 
-    # if a comment is added during decision, link it to the name record to be sent back to NRO
     comment = db.relationship("Comment", backref=backref("related_name", uselist=False), foreign_keys=[commentId])
 
     # Required for name request name analysis
@@ -130,34 +129,6 @@ def update_nr_name_search(mapper, connection, target):
             """,
             ('(' + name_search + ')', nr.id)
         )
-
-        # set nr state to consumed
-        name_consume_history = get_history(name, 'consumptionDate')
-        current_app.logger\
-            .debug('name_consume_history check - nrNum: {}, consumptionDate: {}, corpNum: {}, state: {}'
-            .format(nr.nrNum, name.consumptionDate, name.corpNum, name.state))
-        # Note: we cannot just check for a corpNum addition due to some Society change of name NRs coming over from
-        #  NRO extractor providing a value for the corpNum field.
-        if len(name_consume_history.added) \
-                and name.consumptionDate \
-                and name.corpNum \
-                and name.state in ['APPROVED', 'CONDITION']:
-            # Adding an after_flush_postexec to avoid connection and transaction closed issue's
-            # Creating one time execution event when ever corpNum is added to a name
-            # corpNum sets from nro-extractor job
-            @event.listens_for(db.session, 'after_flush_postexec', once=True)
-            def receive_after_flush_postexec(session, flush_context):
-                nr = Request.find_by_id(name.nrId)
-                nr.stateCd = State.CONSUMED
-                nr.add_to_db()
-                current_app.logger.debug('moved to CONSUMED state {}'.format(name.corpNum))
-                EventRecorder.record_as_system(Event.UPDATE_FROM_NRO, nr, {
-                    'id': nr.id,
-                    'nrNum': nr.nrNum,
-                    'stateCd': nr.stateCd
-                }, True)
-                current_app.logger.debug('moved to CONSUMED state event logged {}'.format(nr.nrNum))
-
 
 class NameSchema(ma.SQLAlchemySchema):
     class Meta:

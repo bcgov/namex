@@ -1,1 +1,0 @@
-@ ../../../../object/registry/namex/package/solr_pkb.sql

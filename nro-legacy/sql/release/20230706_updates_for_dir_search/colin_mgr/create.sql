@@ -1,1 +1,0 @@
-@ ../../../../object/registry/colin_mgr/trigger/namex_corp_party_qmsg.sql

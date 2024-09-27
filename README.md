@@ -30,11 +30,6 @@ api        - the core API service
 solr       - solr is used as a search service providing advanced semantic support
 solr-feeder
 solr-synonyms-api
-
-nro-update    - updates the legacy database, used as an integration point for downstream systems
-nro-extractor - pulling incoming requests from the legacy systems
-
-nro-legacy    - scripts to manage integration objects with the legacy Oracle DB      
 ```
 
 ## Deployment (Local Development)

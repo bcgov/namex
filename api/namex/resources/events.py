@@ -1,9 +1,9 @@
 import copy, json
 from flask import jsonify, make_response
-from flask_restx import Resource, Namespace, cors
+from flask_restx import Resource, Namespace
 
 from namex import jwt
-from namex.models import Event as EventDAO, Request as RequestDAO, User, State, Payment, payment
+from namex.models import Event as EventDAO, Request as RequestDAO, User, State, Payment
 from namex.utils.auth import cors_preflight
 
 from namex.utils.logging import setup_logging
@@ -99,6 +99,10 @@ class Events(Resource):
                     else:
                         nr_event_info['names'].append(event_json_data)
 
+                elif 'state' in event_json_data and event_json_data['state'] == 'CONSUMED':
+                    for name_info in nr_event_info['names']:
+                        if name_info.get('state') in ('APPROVED', 'CONDITION'):
+                            name_info['corpNum'] = event_json_data['corpNum']
                 # else update nr_event_info with any changed event data (should be formatted same as an NR json)
                 else:
                     for key in nr_event_info.keys():
@@ -176,6 +180,8 @@ class Events(Resource):
                 user_action = "UI Error - NR Rolled Back"
             if '[cancel]' in e_dict['action']:
                 user_action = "Cancelled in Name Request"
+            if user_action == EventDAO.NR_DAY_JOB:
+                user_action = "NR Day Job"
 
             payment_action = ''
             payment_display = {
