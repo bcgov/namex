@@ -156,6 +156,7 @@ def update_payment_record(payment: Payment) -> Optional[Payment]:
             capture_message(msg)
             raise Exception(f'Unknown action:{payment_action} for payment.id={payment.id}')
 
+    return payment
 
 def reapply_payment(nr, payment):
     if nr.stateCd != State.APPROVED \
