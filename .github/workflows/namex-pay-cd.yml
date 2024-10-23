@@ -3,7 +3,7 @@ name: Namex Pay CD
 on:
   push:
     branches:
-      - main
+      - gcp-build
     paths:
       - "services/namex-pay/**"
   workflow_dispatch:
