@@ -9,14 +9,14 @@ on:
 defaults:
   run:
     shell: bash
-    working-directory: "services/namex-pay/**"
+    working-directory: "services/namex-pay"
 
 jobs:
   namex-pay-ci:
     uses: bcgov/bcregistry-sre/.github/workflows/backend-ci.yaml@main
     with:
       app_name: "namex-pay"
-      working_directory: "services/namex-pay/**"
+      working_directory: "services/namex-pay"
       codecov_flag: "namexpay"
       skip_isort: "true"
       skip_black: "true"
