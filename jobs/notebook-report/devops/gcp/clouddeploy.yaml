@@ -28,8 +28,8 @@ serialPipeline:
    - values:
       deploy-env: "development"
       deploy-project-id: "a083gt-dev"
-      service-name: "notebook-report-dev"
-      container-name: "notebook-report-dev"
+      service-name: "namex-notebook-report-dev"
+      container-name: "namex-notebook-report-dev"
       service-account: "sa-api@a083gt-dev.iam.gserviceaccount.com"
       cloudsql-instances: ""
  - targetId: a083gt-test
@@ -41,8 +41,8 @@ serialPipeline:
    - values:
       deploy-env: "test"
       deploy-project-id: "a083gt-test"
-      service-name: "notebook-report-test"
-      container-name: "notebook-report-test"
+      service-name: "namex-notebook-report-test"
+      container-name: "namex-notebook-report-test"
       service-account: "sa-api@a083gt-test.iam.gserviceaccount.com"
       cloudsql-instances: ""
  - targetId: a083gt-sandbox
@@ -54,8 +54,8 @@ serialPipeline:
    - values:
       deploy-env: "sandbox"
       deploy-project-id: "a083gt-integration"
-      service-name: "notebook-report-sandbox"
-      container-name: "notebook-report-sandbox"
+      service-name: "namex-notebook-report-sandbox"
+      container-name: "namex-notebook-report-sandbox"
       service-account: "sa-api@a083gt-integration.iam.gserviceaccount.com"
       cloudsql-instances: ""
  - targetId: a083gt-prod
@@ -67,8 +67,8 @@ serialPipeline:
    - values:
       deploy-env: "production"
       deploy-project-id: "a083gt-prod"
-      service-name: "notebook-report-prod"
-      container-name: "notebook-report-prod"
+      service-name: "namex-notebook-report-prod"
+      container-name: "namex-notebook-report-prod"
       service-account: "sa-api@a083gt-prod.iam.gserviceaccount.com"
       max-scale: "10"
       container-concurrency: "20"
