@@ -103,6 +103,12 @@ class EntityTypes(AbstractEnum):
     XPRO_SOCIETY = 'XSO'
     # Used for mapping back to legacy oracle codes
     FIRM = 'FIRM'
+    # Continued In Types
+    CONTINUE_IN = 'C'             # Continued In BC Ltd.
+    CONTINUE_IN_CCC = 'CCC'       # Continued In Community Contrbution Company
+    CONTINUE_IN_CUL = 'CUL'       # Continued In Unlimited Liability Company
+    CONTINUE_IN_CBEN = 'CBEN'     # Continued In Benefit Company 
+
 
 
 EntityTypeDescriptions = {
@@ -271,6 +277,7 @@ request_type_mapping = [
     ('CCR', EntityTypes.CORPORATION.value, RequestAction.RESUBMIT.value),
     ('CT', EntityTypes.CORPORATION.value, RequestAction.MVE.value, True),
     ('CT', EntityTypes.CORPORATION.value, RequestAction.RESUBMIT.value),
+    ('CT', EntityTypes.CONTINUE_IN.value, RequestAction.CHG.value),
     ('RCR', EntityTypes.CORPORATION.value, RequestAction.REST.value, True),
     ('RCR', EntityTypes.CORPORATION.value, RequestAction.REH.value),
     ('RCR', EntityTypes.CORPORATION.value, RequestAction.REN.value),
@@ -380,6 +387,7 @@ request_type_mapping = [
     ('CCC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.RESUBMIT.value),
     ('CCCT', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.MVE.value, True),
     ('CCCT', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.RESUBMIT.value),
+    ('CCCT', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.CHG.value),
     ('RCC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.REST.value, True),
     ('RCC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.REH.value),
     ('RCC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.REN.value),
@@ -392,6 +400,7 @@ request_type_mapping = [
     ('CUL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.CHG.value, True),
     ('ULCT', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.MVE.value, True),
     ('ULCT', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.RESUBMIT.value),
+    ('ULCT', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.CHG.value),
     ('RUL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.REST.value, True),
     ('RUL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.REH.value),
     ('RUL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.REN.value),
@@ -428,6 +437,7 @@ request_type_mapping = [
     ('BEC', EntityTypes.BENEFIT_COMPANY.value, RequestAction.RESUBMIT.value),
     ('BECT', EntityTypes.BENEFIT_COMPANY.value, RequestAction.MVE.value, True),
     ('BECT', EntityTypes.BENEFIT_COMPANY.value, RequestAction.RESUBMIT.value),
+    ('BECT', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.CHG.value),
     ('BERE', EntityTypes.BENEFIT_COMPANY.value, RequestAction.REST.value, True),
     ('BERE', EntityTypes.BENEFIT_COMPANY.value, RequestAction.REH.value),
     ('BERE', EntityTypes.BENEFIT_COMPANY.value, RequestAction.REN.value),
