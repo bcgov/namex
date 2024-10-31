@@ -106,7 +106,7 @@ class EntityTypes(AbstractEnum):
     # Continued In Types
     CONTINUE_IN = 'C'             # Continued In BC Ltd.
     CONTINUE_IN_CBEN = 'CBEN'     # Continued In Benefit Company 
-    CONTINUE_IN_CCC = 'CCC'       # Continued In Community Contrbution Company
+    CONTINUE_IN_CCC = 'CCC'       # Continued In Community Contribution Company
     CONTINUE_IN_CUL = 'CUL'       # Continued In Unlimited Liability Company
 
 
