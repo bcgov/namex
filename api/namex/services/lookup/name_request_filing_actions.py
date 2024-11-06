@@ -117,6 +117,10 @@ class NameRequestFilingActions:
         ('RCC', 'CCC', 'Continued In CCC', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
         ('RUL', 'CUL', 'Continued In ULC', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
         ('BERE', 'CBEN', 'Continued in Benefit Company', 'Restoration', 'lear', None, None, None),
+        ('CCR', 'C', 'Continued In BC Limited Company', 'Change of Name', 'lear', None, None, None),
+        ('CCC', 'CCC', 'Continued In CCC', 'Change of Name', 'lear', None, None, None),
+        ('CUL', 'CUL', 'Continued In ULC', 'Change of Name', 'lear', None, None, None),
+        ('BEC', 'CBEN', 'Continued In Benefit Company', 'Change of Name', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
     ]
 
     @cached_property
