@@ -43,17 +43,17 @@ git add --chmod=+x path/to/file
 2. switch to tools namespace
 
    ```sh
-   oc project cc892f-tools
+   oc project f2b77c-tools
    ```
 
 3. Create build image with a tag 'latest'.
 
    ```sh   
    oc process -f openshift/templates/bc.yaml \
-   -p GIT_REPO_URL=https://github.com/bcgov/lear.git \
+   -p GIT_REPO_URL=https://github.com/bcgov/namex.git \
    -p GIT_REF=main \
    -o yaml \
-   | oc apply -f - -n cc892f-tools  
+   | oc apply -f - -n f2b77c-tools  
    ```
 4. Checking log for building process at Console => Administrator => Builds => Builds => click image 'sftp-nuans-report' => logs
 
@@ -71,7 +71,7 @@ git add --chmod=+x path/to/file
 2. switch to dev namespace
 
    ```sh
-   oc project cc892f-dev
+   oc project f2b77c-dev
    ```
 
 3. Create cron - to run at 0:55 * * TUE-SAT at pacific time so it will be 7:55 at UTC
@@ -81,7 +81,7 @@ git add --chmod=+x path/to/file
   -p TAG=dev \
   -p SCHEDULE="55 7 * * TUE-SAT" \
   -o yaml \
-  | oc apply -f - -n cc892f-dev
+  | oc apply -f - -n f2b77c-dev
   ```
 
-4. Create a job to run and test it: 'oc create job sftp-nuans-report-dev-1 --from=cronjob/sftp-nuans-report-dev -n cc892f-dev'
+4. Create a job to run and test it: 'oc create job sftp-nuans-report-dev-1 --from=cronjob/sftp-nuans-report-dev -n f2b77c-dev'
