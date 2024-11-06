@@ -462,7 +462,27 @@ request_type_mapping = [
     ('BECR', EntityTypes.CORPORATION.value, RequestAction.CNV.value, True),
     ('BECR', EntityTypes.CORPORATION.value, RequestAction.RESUBMIT.value),
     ('ULCB', EntityTypes.CORPORATION.value, RequestAction.CNV.value, True),
-    ('ULCB', EntityTypes.CORPORATION.value, RequestAction.RESUBMIT.value)
+    ('ULCB', EntityTypes.CORPORATION.value, RequestAction.RESUBMIT.value),
+
+    ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.REST.value, True),
+    ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.REH.value),
+    ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.REN.value),
+    ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.RESUBMIT.value),
+
+    ('RCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.REST.value, True),
+    ('RCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.REH.value),
+    ('RCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.REN.value),
+    ('RCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.RESUBMIT.value),
+
+    ('RUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.REST.value, True),
+    ('RUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.REH.value),
+    ('RUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.REN.value),
+    ('RUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.RESUBMIT.value),
+
+    ('BERE', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.REST.value, True),
+    ('BERE', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.REH.value),
+    ('BERE', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.REN.value),
+    ('BERE', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.RESUBMIT.value),
 ]
 
 reverse_request_type_mapping = [m for m in request_type_mapping if len(m) == 4 and m[3] is True]
