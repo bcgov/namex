@@ -401,6 +401,7 @@ request_type_mapping = [
     ('UC', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.CNV.value, True),
     ('UC', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.RESUBMIT.value),
     ('CUL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.CHG.value, True),
+    ('CUL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.RESUBMIT.value, True),
     ('ULCT', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.MVE.value, True),
     ('ULCT', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.RESUBMIT.value),
     ('RUL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.REST.value, True),
@@ -451,6 +452,18 @@ request_type_mapping = [
     ('BECR', EntityTypes.CORPORATION.value, RequestAction.RESUBMIT.value),
     ('ULCB', EntityTypes.CORPORATION.value, RequestAction.CNV.value, True),
     ('ULCB', EntityTypes.CORPORATION.value, RequestAction.RESUBMIT.value),
+    
+    ('CCR', EntityTypes.CONTINUE_IN.value, RequestAction.CHG.value, True),
+    ('CCR', EntityTypes.CONTINUE_IN.value, RequestAction.RESUBMIT.value),
+
+    ('CCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.CHG.value, True),
+    ('CCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.RESUBMIT.value),
+
+    ('CUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.CHG.value, True),
+    ('CUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.RESUBMIT.value, True),
+
+    ('BEC', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.CHG.value, True),
+    ('BEC', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.RESUBMIT.value),
 
     ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.REST.value, True),
     ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.REH.value),
