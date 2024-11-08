@@ -103,6 +103,12 @@ class EntityTypes(AbstractEnum):
     XPRO_SOCIETY = 'XSO'
     # Used for mapping back to legacy oracle codes
     FIRM = 'FIRM'
+    # Continued In Types
+    CONTINUE_IN = 'C'             # Continued In BC Ltd.
+    CONTINUE_IN_CBEN = 'CBEN'     # Continued In Benefit Company 
+    CONTINUE_IN_CCC = 'CCC'       # Continued In Community Contribution Company
+    CONTINUE_IN_CUL = 'CUL'       # Continued In Unlimited Liability Company
+
 
 
 EntityTypeDescriptions = {
@@ -130,7 +136,12 @@ EntityTypeDescriptions = {
     EntityTypes.XPRO_COOPERATIVE: 'Extraprovincial Cooperative',
     EntityTypes.XPRO_SOCIETY: 'Extraprovincial Society',
     # Used for mapping back to legacy oracle codes, description not required
-    EntityTypes.FIRM: 'FIRM (Legacy Oracle)'
+    EntityTypes.FIRM: 'FIRM (Legacy Oracle)',
+    #continue-in
+    EntityTypes.CONTINUE_IN: 'Corporation',
+    EntityTypes.CONTINUE_IN_CBEN: 'Benefit Company',
+    EntityTypes.CONTINUE_IN_CCC: 'Community Contribution Company',
+    EntityTypes.CONTINUE_IN_CUL: 'Unlimited Liability Company',
 }
 
 '''
@@ -390,6 +401,7 @@ request_type_mapping = [
     ('UC', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.CNV.value, True),
     ('UC', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.RESUBMIT.value),
     ('CUL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.CHG.value, True),
+    ('CUL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.RESUBMIT.value, True),
     ('ULCT', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.MVE.value, True),
     ('ULCT', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.RESUBMIT.value),
     ('RUL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.REST.value, True),
@@ -439,7 +451,39 @@ request_type_mapping = [
     ('BECR', EntityTypes.CORPORATION.value, RequestAction.CNV.value, True),
     ('BECR', EntityTypes.CORPORATION.value, RequestAction.RESUBMIT.value),
     ('ULCB', EntityTypes.CORPORATION.value, RequestAction.CNV.value, True),
-    ('ULCB', EntityTypes.CORPORATION.value, RequestAction.RESUBMIT.value)
+    ('ULCB', EntityTypes.CORPORATION.value, RequestAction.RESUBMIT.value),
+    
+    ('CCR', EntityTypes.CONTINUE_IN.value, RequestAction.CHG.value, True),
+    ('CCR', EntityTypes.CONTINUE_IN.value, RequestAction.RESUBMIT.value),
+
+    ('CCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.CHG.value, True),
+    ('CCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.RESUBMIT.value),
+
+    ('CUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.CHG.value, True),
+    ('CUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.RESUBMIT.value, True),
+
+    ('BEC', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.CHG.value, True),
+    ('BEC', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.RESUBMIT.value),
+
+    ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.REST.value, True),
+    ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.REH.value),
+    ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.REN.value),
+    ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.RESUBMIT.value),
+
+    ('RCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.REST.value, True),
+    ('RCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.REH.value),
+    ('RCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.REN.value),
+    ('RCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.RESUBMIT.value),
+
+    ('RUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.REST.value, True),
+    ('RUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.REH.value),
+    ('RUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.REN.value),
+    ('RUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.RESUBMIT.value),
+
+    ('BERE', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.REST.value, True),
+    ('BERE', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.REH.value),
+    ('BERE', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.REN.value),
+    ('BERE', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.RESUBMIT.value),
 ]
 
 reverse_request_type_mapping = [m for m in request_type_mapping if len(m) == 4 and m[3] is True]
