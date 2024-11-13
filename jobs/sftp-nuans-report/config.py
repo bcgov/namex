@@ -19,6 +19,7 @@ class Config(object):
     EMAIL_SMTP = os.getenv('EMAIL_SMTP', '')
     ENVIRONMENT = os.getenv('ENVIRONMENT', '')
     MONTH_REPORT_DATES = os.getenv('MONTH_REPORT_DATES', '')
+    SFTP_HOST_KEY = os.getenv('SFTP_HOST_KEY', '')
 
     # POSTGRESQL
     PG_USER = os.getenv('PG_USER', '')

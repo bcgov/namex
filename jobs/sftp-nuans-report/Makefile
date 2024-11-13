@@ -45,19 +45,19 @@ clean-test: ## clean test files
 build-req: clean ## Upgrade requirements
 	test -f venv/bin/activate || python3.8 -m venv  $(CURRENT_ABS_DIR)/venv ;\
 	. venv/bin/activate ;\
-	pip install pip==21.1.2 ;\
-	pip install -Ur requirements/prod.txt ;\
+	pip install pip==24.3.1 ;\
+	pip install -r requirements/prod.txt ;\
 	pip freeze | sort > requirements.txt ;\
 
 install: clean ## Install python virtual environment
 	test -f venv/bin/activate || python3.8 -m venv  $(CURRENT_ABS_DIR)/venv ;\
 	. venv/bin/activate ;\
-	pip install pip==21.1.2 ;\
-	pip install -Ur requirements.txt
+	pip install pip==24.3.1 ;\
+	pip install -r requirements.txt
 
 install-dev: ## Install local application
 	. venv/bin/activate ; \
-	pip install -Ur requirements/dev.txt; \
+	pip install -r requirements/dev.txt; \
 	pip install -e .
 
 #################################################################################
