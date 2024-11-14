@@ -100,6 +100,8 @@ def email_report(email_info: SimpleCloudEvent):
             if instruction_group:
                 file_name += '-'
                 file_name += instruction_group
+                if nr_model['entity_type_cd'] == "CT":
+                    file_name_suffix += "-cont-in"
 
             email_template = Path(f'{template_path}/{file_name}.md').read_text()
 
