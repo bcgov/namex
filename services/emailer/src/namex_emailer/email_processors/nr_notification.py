@@ -44,7 +44,7 @@ class Option(Enum):
 
 
 def __is_modernized(legal_type):
-    modernized_list = ["GP", "DBA", "FR", "CP", "BC", "CT"]
+    modernized_list = ['GP', 'DBA', 'FR', 'CP', 'BC', 'C', 'CBEN', 'CCC', 'CUL']
     return legal_type in modernized_list
 
 
