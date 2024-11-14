@@ -258,7 +258,7 @@ class ReportResource(Resource):
 
     @staticmethod
     def _is_modernized(legal_type):
-        modernized_list = ['GP', 'DBA', 'FR', 'CP', 'BC']
+        modernized_list = ['GP', 'DBA', 'FR', 'CP', 'BC', 'CT']
         return legal_type in modernized_list
 
 
