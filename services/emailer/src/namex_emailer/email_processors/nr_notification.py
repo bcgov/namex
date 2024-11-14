@@ -44,7 +44,7 @@ class Option(Enum):
 
 
 def __is_modernized(legal_type):
-    modernized_list = ["GP", "DBA", "FR", "CP", "BC"]
+    modernized_list = ["GP", "DBA", "FR", "CP", "BC", "CT"]
     return legal_type in modernized_list
 
 
@@ -114,6 +114,14 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
             if group:
                 instruction_group = "-" + group
                 file_name_suffix += instruction_group.upper()
+                if legal_type == "CT":
+                    file_name_suffix += "-CONT-IN"
+
+    elif option == Option.EXPIRED.value:
+        if "entity_type_cd" in nr_data:
+            legal_type = nr_data["entity_type_cd"]
+            if legal_type == "CT":
+                file_name_suffix += "-CONT-IN"
 
     template = Path(f'{current_app.config.get("TEMPLATE_PATH")}/NR-{file_name_suffix}.html').read_text()
     filled_template = substitute_template_parts(template)
