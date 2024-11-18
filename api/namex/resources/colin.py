@@ -75,7 +75,8 @@ class ColinApi(Resource):
                 'homeIdentifier': business_info.get('homeJurisdictionNumber'),
                 'registeredOfficeDeliveryAddress': office_info.get('registered', []),
                 'recordsOfficeDeliveryAddress': office_info.get('records', []),
-                'directors': parties_info
+                'directors': parties_info.get('directorNames'),
+                'attorney names': parties_info.get('attorneyNames'),
             }
 
             # Return the response as JSON
@@ -129,7 +130,8 @@ class ColinApi(Resource):
             # Return formatted addresses
             return {
                 'registered': extract_address("registeredOffice"),
-                'records': extract_address("recordsOffice")
+                'records': extract_address("recordsOffice"),
+                # 'head': extract_address('headOffice') -- extract head office for expro companies
             }
 
         except Exception as e:
@@ -150,7 +152,7 @@ class ColinApi(Resource):
         try:
             # Build the Colin service endpoint
             colin_service_url = f'{current_app.config.get("COLIN_SVC_URL")}'
-            parties_endpoint = f"{colin_service_url}/businesses/{legal_type}/{corp_num}/parties"
+            parties_endpoint = f"{colin_service_url}/businesses/{legal_type}/{corp_num}/parties/all"
 
             # Make the authenticated request
             response = EntityUtils.make_authenticated_request(parties_endpoint)
@@ -161,19 +163,34 @@ class ColinApi(Resource):
             # Log the received data for debugging
             current_app.logger.debug(f"Processing parties data for corporation number {corp_num}: {parties_data}")
 
-            # Extract director names
-            def extract_director_name(director):
-                officer = director.get("officer", {})
-                first_name = officer.get("firstName", "").strip()
-                middle_initial = officer.get("middleInitial", "").strip()
-                last_name = officer.get("lastName", "").strip()
-                return f"{first_name} {middle_initial} {last_name}".strip()
+            # Helper function to extract names for a specific role
+            def extract_names(party_list, role_type):
+                # Return an empty list immediately if the party_list is empty
+                if not party_list:
+                    return []
 
-            directors = []
-            for director in parties_data.get("directors", []):
-                directors.append(extract_director_name(director))
-            return directors
+                names = []
+                for party in party_list:
+                    roles = party.get("roles", [])
+                    if any(role.get("roleType") == role_type for role in roles):
+                        officer = party.get("officer", {})
+                        first_name = officer.get("firstName", "").strip()
+                        middle_initial = officer.get("middleInitial", "").strip()
+                        last_name = officer.get("lastName", "").strip()
+                        full_name = f"{first_name} {middle_initial} {last_name}".strip()
+                        names.append(full_name)
+                return names
+        
+            # Extract names for the directoires, if it is a BC company
+            role = 'Director'
+            party_list = parties_data.get('parties', [])
+            director_names = extract_names(party_list, role)
 
+            # extract names for Attorneys, if it is a xpro corp
+            role = 'Attorney'
+            attorney_names = extract_names(party_list, role)
+
+            return {'directorNames': director_names, 'attorneyNames': attorney_names}
         except Exception as e:
             current_app.logger.error(f"Error while processing parties data for {corp_num}: {e}")
             raise ValueError(f"Failed to retrieve or process parties data for {corp_num}: {e}")
