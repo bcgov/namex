@@ -5,6 +5,7 @@ import requests
 from flask import current_app, jsonify, make_response
 from flask_restx import Namespace, Resource, cors
 from namex.exceptions import EntityServiceException
+from namex.models.request import Request
 
 from namex.utils.api_resource import handle_exception
 from namex.utils.auth import MSG_CLIENT_CREDENTIALS_REQ_FAILED, cors_preflight
@@ -64,6 +65,9 @@ class ColinApi(Resource):
             office_info = self._get_office_data(corp_num, legal_type)
             parties_info = self._get_parties_data(corp_num, legal_type)
 
+            # Fetch nature business info
+            nature_business_info = self._get_nature_of_business(corp_num)
+
             # Construct the response dictionary
             response_dict = {
                 'identifier': business_info.get('identifier', corp_num),
@@ -77,6 +81,7 @@ class ColinApi(Resource):
                 'recordsOfficeDeliveryAddress': office_info.get('records', []),
                 'directors': parties_info.get('directorNames'),
                 'attorney names': parties_info.get('attorneyNames'),
+                'nature of business': nature_business_info,
             }
 
             # Return the response as JSON
@@ -194,4 +199,7 @@ class ColinApi(Resource):
         except Exception as e:
             current_app.logger.error(f"Error while processing parties data for {corp_num}: {e}")
             raise ValueError(f"Failed to retrieve or process parties data for {corp_num}: {e}")
+
+    def _get_nature_of_business(self, corp_num):
+        return Request.get_nature_business_info(corp_num)
 
