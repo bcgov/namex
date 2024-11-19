@@ -71,14 +71,15 @@ class ColinApi(Resource):
             # Construct the response dictionary
             response_dict = {
                 'identifier': business_info.get('identifier', corp_num),
+                'incorporated': business_info.get('foundingDate'),
                 'legalName': business_info.get('legalName'),
                 'legalType': legal_type,
                 'corpState': business_info.get('corpStateClass'),
                 'status': business_info.get('status'),
                 'jurisdiction': business_info.get('jurisdiction'),
                 'homeIdentifier': business_info.get('homeJurisdictionNumber'),
-                'registeredOfficeDeliveryAddress': office_info.get('registered', []),
-                'recordsOfficeDeliveryAddress': office_info.get('records', []),
+                'registered office delivery address': office_info.get('registered', []),
+                'records office delivery address': office_info.get('records', []),
                 'directors': parties_info.get('directorNames'),
                 'attorney names': parties_info.get('attorneyNames'),
                 'nature of business': nature_business_info,
