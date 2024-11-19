@@ -644,6 +644,15 @@ class Request(db.Model):
                     r'\W*({0})?\W*({1})?$'.format(any_designation_alternators, end_designation_alternators)
         return full_name
 
+    @classmethod
+    def get_nature_business_info(cls, corp_num):
+        """
+        Retrieve the nature_business_info for the given corp_num.
+        """
+        subquery = db.session.query(Name.nrId).filter(Name.corpNum == corp_num).subquery()
+        result = db.session.query(Request.natureBusinessInfo).filter(Request.id == subquery).first()
+        return result[0] if result else None
+
 
 @event.listens_for(Request, 'after_insert')
 @event.listens_for(Request, 'after_update')
