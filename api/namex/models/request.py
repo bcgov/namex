@@ -645,7 +645,7 @@ class Request(db.Model):
         return full_name
 
     @classmethod
-    def get_nature_business_info(corp_num):
+    def get_nature_business_info(cls, corp_num):
         """
         Retrieve the nature_business_info for the given corp_num.
         """
