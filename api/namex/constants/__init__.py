@@ -104,10 +104,10 @@ class EntityTypes(AbstractEnum):
     # Used for mapping back to legacy oracle codes
     FIRM = 'FIRM'
     # Continued In Types
-    CONTINUE_IN = 'C'             # Continued In BC Ltd.
-    CONTINUE_IN_CBEN = 'CBEN'     # Continued In Benefit Company 
-    CONTINUE_IN_CCC = 'CCC'       # Continued In Community Contribution Company
-    CONTINUE_IN_CUL = 'CUL'       # Continued In Unlimited Liability Company
+    CONTINUE_IN = 'C'             # Continued In BC Limited Company
+    BEN_CONTINUE_IN = 'CBEN'      # Continued In BC Benefit Company 
+    CCC_CONTINUE_IN = 'CCC'       # Continued In BC Community Contribution Company
+    ULC_CONTINUE_IN = 'CUL'       # Continued In BC Unlimited Liability Company
 
 
 
@@ -139,9 +139,9 @@ EntityTypeDescriptions = {
     EntityTypes.FIRM: 'FIRM (Legacy Oracle)',
     #continue-in
     EntityTypes.CONTINUE_IN: 'Corporation',
-    EntityTypes.CONTINUE_IN_CBEN: 'Benefit Company',
-    EntityTypes.CONTINUE_IN_CCC: 'Community Contribution Company',
-    EntityTypes.CONTINUE_IN_CUL: 'Unlimited Liability Company',
+    EntityTypes.BEN_CONTINUE_IN: 'Benefit Company',
+    EntityTypes.CCC_CONTINUE_IN: 'Community Contribution Company',
+    EntityTypes.ULC_CONTINUE_IN: 'Unlimited Liability Company',
 }
 
 '''
@@ -455,35 +455,31 @@ request_type_mapping = [
     
     ('CCR', EntityTypes.CONTINUE_IN.value, RequestAction.CHG.value, True),
     ('CCR', EntityTypes.CONTINUE_IN.value, RequestAction.RESUBMIT.value),
-
-    ('CCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.CHG.value, True),
-    ('CCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.RESUBMIT.value),
-
-    ('CUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.CHG.value, True),
-    ('CUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.RESUBMIT.value, True),
-
-    ('BEC', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.CHG.value, True),
-    ('BEC', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.RESUBMIT.value),
-
     ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.REST.value, True),
     ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.REH.value),
     ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.REN.value),
     ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.RESUBMIT.value),
 
-    ('RCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.REST.value, True),
-    ('RCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.REH.value),
-    ('RCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.REN.value),
-    ('RCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.RESUBMIT.value),
+    ('CCC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.CHG.value, True),
+    ('CCC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
+    ('RCC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.REST.value, True),
+    ('RCC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.REH.value),
+    ('RCC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.REN.value),
+    ('RCC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
 
-    ('RUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.REST.value, True),
-    ('RUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.REH.value),
-    ('RUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.REN.value),
-    ('RUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.RESUBMIT.value),
+    ('CUL', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.CHG.value, True),
+    ('CUL', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.RESUBMIT.value, True),
+    ('RUL', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.REST.value, True),
+    ('RUL', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.REH.value),
+    ('RUL', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.REN.value),
+    ('RUL', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
 
-    ('BERE', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.REST.value, True),
-    ('BERE', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.REH.value),
-    ('BERE', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.REN.value),
-    ('BERE', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.RESUBMIT.value),
+    ('BEC', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.CHG.value, True),
+    ('BEC', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
+    ('BERE', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.REST.value, True),
+    ('BERE', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.REH.value),
+    ('BERE', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.REN.value),
+    ('BERE', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
 ]
 
 reverse_request_type_mapping = [m for m in request_type_mapping if len(m) == 4 and m[3] is True]
