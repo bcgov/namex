@@ -46,81 +46,114 @@ class NameRequestFilingActions:
     # multiple filing actions per nr_type is supported
     # NR Type', 'LegalTypeCd', 'LegalTypeName', 'Filing Name', 'Target', 'entitiesFilingName', 'URL', 'learTemplate
     raw_nr_to_action_mapping = [
-        ('CR', 'BC', 'B.C. Company', 'Incorporation', 'lear', None, None, None),
-        ('CR', 'BC', 'B.C. Company', 'Amalgamation', 'colin', None, None, None),
-        ('CCR', 'BC', 'B.C. Company', 'Change of Name', 'lear', None, None, None),
-        ('CT', 'C', 'B.C. Company', 'Continuation In', 'lear', None, None, None),
-        ('RCR', 'BC', 'B.C. Company', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
+        ('CR', 'BC', 'BC Limited Company', 'Incorporation', 'lear', None, None, None),
+        ('CR', 'BC', 'BC Limited Company', 'Amalgamation', 'colin', None, None, None),
+        ('CCR', 'BC', 'BC Limited Company', 'Change of Name', 'lear', None, None, None),
+        ('RCR', 'BC', 'BC Limited Company', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
+        ('BECR', 'BC', 'BC Limited Company', 'Conversion from Benefit Company ', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+        ('ULCB', 'BC', 'BC Limited Company', 'Conversion from ULC', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+
         ('XCR', 'XCR', 'Corporation (Foreign)', 'Extraprovincial Registration', 'colin', None, None, None),
         ('XCR', 'XCR', 'Corporation (Foreign)', 'Extraprovincial Amalgamation', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#forms', None),
         ('XCCR', 'XCR', 'Corporation (Foreign)', 'Extraprovincial Change of Name', 'colin', None, None, None),
         ('XRCR', 'XCR', 'Corporation (Foreign)', 'Extraprovincial Reinstatement', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
         ('AS', 'XCR', 'Corporation (Foreign)', 'Extraprovincial Assumed Name', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#forms', None),
+
         ('LC', 'LLC', 'Extraprovincial Limited Liability Company', 'Extraprovincial Registration', 'static', None, 'https://www2.gov.bc.ca/assets/gov/employment-business-and-economic-development/business-management/permits-licences-and-registration/registries-packages/pack_33_xco_-_registration_statement_and_business_number_request.pdf', None),
         ('CLC', 'LLC', 'Extraprovincial Limited Liability Company', 'Extraprovincial Change of Name', 'static', None, 'https://www2.gov.bc.ca/assets/gov/employment-business-and-economic-development/business-management/permits-licences-and-registration/registries-forms/form_37_xco_-_name_change.pdf', None),
         ('RLC', 'LLC', 'Extraprovincial Limited Liability Company', 'Extraprovincial Reinstatement', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
         ('AL', 'LLC', 'Extraprovincial Limited Liability Company', 'Extraprovincial Assumed Name', 'static', None, 'https://www2.gov.bc.ca/assets/gov/employment-business-and-economic-development/business-management/permits-licences-and-registration/registries-forms/form_37_xco_-_name_change.pdf', None),
+
         ('FR_FR', 'SP', 'Sole Proprietorship', 'Registration', 'lear', None, None, None),
-        ('FR_DBA', 'SP', 'Sole Proprietorship (DBA)', 'Registration', 'lear', None, None, None),
-        ('FR_GP', 'GP', 'General Partnership', 'Registration', 'lear', None, None, None),
         ('CFR_FR', 'SP', 'Sole Proprietorship', 'Change of Name', 'lear', None, None, None),
+        ('FR_DBA', 'SP', 'Sole Proprietorship (DBA)', 'Registration', 'lear', None, None, None),
         ('CFR_DBA', 'SP', 'Sole Proprietorship (DBA)', 'Change of Name', 'lear', None, None, None),
+
+        ('FR_GP', 'GP', 'General Partnership', 'Registration', 'lear', None, None, None),
         ('CFR_GP', 'GP', 'General Partnership', 'Change of Name', 'lear', None, None, None),
+
         ('LL', 'LL', 'Limited Liability Partnership', 'Registration', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
         ('CLL', 'LL', 'Limited Liability Partnership', 'Change of Name', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
+
         ('XLL', 'XP', 'Extraprovincial Limited Liability Partnership', 'Registration', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
         ('XCLL', 'XP', 'Extraprovincial Limited Liability Partnership', 'Change of Name', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
+
         ('LP', 'LP', 'Limited Partnership', 'Registration', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
         ('CLP', 'LP', 'Limited Partnership', 'Change of Name', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
+
         ('XLP', 'XL', 'Extraprovincial Limited Partnership', 'Registration', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
         ('XCLP', 'XL', 'Extraprovincial Limited Partnership', 'Change of Name', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
+
         ('CP', 'CP', 'Cooperative', 'Incorporation', 'lear', 'incorporationApplication', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
         ('CP', 'CP', 'Cooperative', 'Amalgamation', 'lear', 'manual', None, None),
         ('CCP', 'CP', 'Cooperative', 'Change of Name', 'lear', 'changeOfName', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
         ('CTC', 'CP', 'Cooperative', 'Continuation In', 'lear', 'manual', None, None),
         ('RCP', 'CP', 'Cooperative', 'Restoration', 'lear', 'manual', None, None),
+
         ('XCP', 'XCP', 'Extraprovincial Cooperative', 'Incorporation', 'lear', 'manual', None, None),
         ('XCP', 'XCP', 'Extraprovincial Cooperative', 'Amalgamation', 'lear', 'manual', None, None),
         ('XCCP', 'XCP', 'Extraprovincial Cooperative', 'Change of Name', 'lear', 'manual', None, None),
         ('XRCP', 'XCP', 'Extraprovincial Cooperative', 'Restoration', 'lear', 'manual', None, None),
-        ('CC', 'CC', 'Community Contribution Co.', 'Incorporation', 'lear', None, None, None),
-        ('CC', 'CC', 'Community Contribution Co.', 'Amalgamation', 'colin', None, None, None),
-        ('CCV', 'CC', 'Community Contribution Co.', 'BC to CCC Conversion', 'colin', None, None, None),
-        ('CCC', 'CC', 'Community Contribution Co.', 'Change of Name', 'lear', None, None, None),
-        ('CCCT', 'CCC', 'Community Contribution Co.', 'Continuation In', 'lear', None, None, None),
-        ('RCC', 'CC', 'Community Contribution Co.', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
-        ('UL', 'ULC', 'Unlimited Liability Co.', 'Incorporation', 'lear', None, None, None),
-        ('UL', 'ULC', 'Unlimited Liability Co.', 'Amalgamation', 'colin', None, None, None),
-        ('UC', 'ULC', 'Unlimited Liability Co.', 'BC to ULC Conversion', 'colin', None, None, None),
-        ('CUL', 'ULC', 'Unlimited Liability Co.', 'Change of Name', 'lear', None, None, None),
-        ('ULCT', 'CUL', 'Unlimited Liability Co.', 'Continuation In', 'lear', None, None, None),
-        ('RUL', 'ULC', 'Unlimited Liability Co.', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
+
+        ('CC', 'CC', 'Community Contribution Company', 'Incorporation', 'lear', None, None, None),
+        ('CC', 'CC', 'Community Contribution Company', 'Amalgamation', 'colin', None, None, None),
+        ('CCC', 'CC', 'Community Contribution Company', 'Change of Name', 'lear', None, None, None),
+        ('RCC', 'CC', 'Community Contribution Company', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
+        ('CCV', 'CC', 'Community Contribution Company', 'Conversion from BC Limited Company', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+        ('BECC', 'CC', 'Community Contribution Company', 'Conversion from Benefit Company', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+
+        ('UL', 'ULC', 'Unlimited Liability Company', 'Incorporation', 'lear', None, None, None),
+        ('UL', 'ULC', 'Unlimited Liability Company', 'Amalgamation', 'colin', None, None, None),
+        ('CUL', 'ULC', 'Unlimited Liability Company', 'Change of Name', 'lear', None, None, None),
+        ('RUL', 'ULC', 'Unlimited Liability Company', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
+        ('UC', 'ULC', 'Unlimited Liability Company', 'Conversion from BC Limited Company', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+
         ('UA', 'A', 'Extraprovincial Unlimited Liability Company', 'Assumed', 'colin', None, None, None),
         ('XUL', 'A', 'Extraprovincial Unlimited Liability Company', 'Incorporation', 'colin', None, None, None),
         ('XCUL', 'A', 'Extraprovincial Unlimited Liability Company', 'Amalgamation', 'colin', None, None, None),
         ('XRUL', 'A', 'Extraprovincial Unlimited Liability Company', 'Restoration', 'colin', None, None, None),
+
         ('FI', 'FI', 'Financial Institution (BC)', 'Incorporation', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
         ('CFI', 'FI', 'Financial Institution (BC)', 'Change of Name', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
         ('RFI', 'FI', 'Financial Institution (BC)', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
+
         ('PA', 'PA', 'Private Act', 'Incorporation', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
         ('PAR', 'PAR', 'Parish', 'Incorporation', 'static', None, 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services', None),
-        ('BC', 'BEN', 'BC Benefit Company Incorporation', 'Incorporation', 'lear', 'incorporationApplication', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
-        ('BEAM', 'BEN', 'BC Benefit Company Incorporation', 'Amalgamation', 'lear', None, None, None),
-        ('BEC', 'BEN', 'BC Benefit Company Incorporation', 'Change of Name', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
-        ('BECT', 'CBEN', 'BC Benefit Company Incorporation', 'Continuation In', 'lear', None, None, None),
-        ('BERE', 'BEN', 'BC Benefit Company Incorporation', 'Restoration', 'lear', None, None, None),
-        ('BECV', 'BEN', 'BC Benefit Company Incorporation', 'Alteration', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
-        ('BECR', 'BC', 'B.C. limited Company', 'Convert to BC', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
-        ('ULBE', 'BEN', 'BC Benefit Company', 'Alteration', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
-        ('ULCB', 'BC', 'B.C. limited Company', 'Alteration', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
-        ('RCR', 'C', 'Continued In BC Company', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
-        ('RCC', 'CCC', 'Continued In CCC', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
-        ('RUL', 'CUL', 'Continued In ULC', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
-        ('BERE', 'CBEN', 'Continued in Benefit Company', 'Restoration', 'lear', None, None, None),
+
+        # Benefit Company
+        ('BC', 'BEN', 'Benefit Company', 'Incorporation', 'lear', 'incorporationApplication', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+        ('BEAM', 'BEN', 'Benefit Company', 'Amalgamation', 'lear', None, None, None),
+        ('BEC', 'BEN', 'Benefit Company', 'Change of Name', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+        ('BERE', 'BEN', 'Benefit Company', 'Restoration', 'lear', None, None, None),
+        ('BECV', 'BEN', 'Benefit Company', 'Conversion from BC Limited Company', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+        ('ULBE', 'BEN', 'Benefit Company', 'Conversion from ULC', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+
+        # continued in BC Limited Company
+        ('CT', 'C', 'Continued In BC Limited Company', 'Continuation In', 'lear', None, None, None),
         ('CCR', 'C', 'Continued In BC Limited Company', 'Change of Name', 'lear', None, None, None),
-        ('CCC', 'CCC', 'Continued In CCC', 'Change of Name', 'lear', None, None, None),
-        ('CUL', 'CUL', 'Continued In ULC', 'Change of Name', 'lear', None, None, None),
+        ('RCR', 'C', 'Continued In BC Limited Company', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
+        ('BECR', 'C', 'Continued In BC Limited Company', 'Conversion from Continued In Benefit Company ', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+        ('ULCB', 'C', 'Continued In BC Limited Company', 'Conversion from Continued In ULC', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+
+        # continued in Benefit Company
+        ('BECT', 'CBEN', 'Continued In Benefit Company', 'Continuation In', 'lear', None, None, None),
         ('BEC', 'CBEN', 'Continued In Benefit Company', 'Change of Name', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+        ('BERE', 'CBEN', 'Continued in Benefit Company', 'Restoration', 'lear', None, None, None),
+        ('BECV', 'CBEN', 'Continued In Benefit Company', 'Conversion from Continued In BC Limited Company', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+        ('ULBE', 'CBEN', 'Continued In Benefit Company', 'Conversion from Continued In ULC', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+
+        # continued in Community Contribution Company
+        ('CCCT', 'CCC', 'Continued In CCC', 'Continuation In', 'lear', None, None, None),
+        ('CCC', 'CCC', 'Continued In CCC', 'Change of Name', 'lear', None, None, None),
+        ('RCC', 'CCC', 'Continued In CCC', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
+        ('CCV', 'CCC', 'Continued In CCC', 'Conversion from Continued In BC Limited Company', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+        ('BECC', 'CCC', 'Continued In CCC', 'Conversion from Continued In Benefit Company', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+        
+        # continued in Unlimited Liability Company
+        ('ULCT', 'CUL', 'Continued In ULC', 'Continuation In', 'lear', None, None, None),
+        ('CUL', 'CUL', 'Continued In ULC', 'Change of Name', 'lear', None, None, None),
+        ('RUL', 'CUL', 'Continued In ULC', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
+        ('UC', 'CUL', 'Continued In ULC', 'Conversion from Continued In BC Limited Company', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
     ]
 
     @cached_property

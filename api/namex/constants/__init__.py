@@ -104,10 +104,10 @@ class EntityTypes(AbstractEnum):
     # Used for mapping back to legacy oracle codes
     FIRM = 'FIRM'
     # Continued In Types
-    CONTINUE_IN = 'C'             # Continued In BC Ltd.
-    CONTINUE_IN_CBEN = 'CBEN'     # Continued In Benefit Company 
-    CONTINUE_IN_CCC = 'CCC'       # Continued In Community Contribution Company
-    CONTINUE_IN_CUL = 'CUL'       # Continued In Unlimited Liability Company
+    CONTINUE_IN = 'C'             # Continued In BC Limited Company
+    BEN_CONTINUE_IN = 'CBEN'      # Continued In BC Benefit Company 
+    CCC_CONTINUE_IN = 'CCC'       # Continued In BC Community Contribution Company
+    ULC_CONTINUE_IN = 'CUL'       # Continued In BC Unlimited Liability Company
 
 
 
@@ -139,9 +139,9 @@ EntityTypeDescriptions = {
     EntityTypes.FIRM: 'FIRM (Legacy Oracle)',
     #continue-in
     EntityTypes.CONTINUE_IN: 'Corporation',
-    EntityTypes.CONTINUE_IN_CBEN: 'Benefit Company',
-    EntityTypes.CONTINUE_IN_CCC: 'Community Contribution Company',
-    EntityTypes.CONTINUE_IN_CUL: 'Unlimited Liability Company',
+    EntityTypes.BEN_CONTINUE_IN: 'Benefit Company',
+    EntityTypes.CCC_CONTINUE_IN: 'Community Contribution Company',
+    EntityTypes.ULC_CONTINUE_IN: 'Unlimited Liability Company',
 }
 
 '''
@@ -286,6 +286,11 @@ request_type_mapping = [
     ('RCR', EntityTypes.CORPORATION.value, RequestAction.REH.value),
     ('RCR', EntityTypes.CORPORATION.value, RequestAction.REN.value),
     ('RCR', EntityTypes.CORPORATION.value, RequestAction.RESUBMIT.value),
+    ('BECR', EntityTypes.CORPORATION.value, RequestAction.CNV.value, True), # Benefit Company -> BC Limited Company
+    ('BECR', EntityTypes.CORPORATION.value, RequestAction.RESUBMIT.value),
+    ('ULCB', EntityTypes.CORPORATION.value, RequestAction.CNV.value, True), # Unlimited Liability Company -> BC Limited Company
+    ('ULCB', EntityTypes.CORPORATION.value, RequestAction.RESUBMIT.value),
+
     ('XCR', EntityTypes.XPRO_CORPORATION.value, RequestAction.NEW_AML.value, True),
     ('XCR', EntityTypes.XPRO_CORPORATION.value, RequestAction.NEW.value),
     ('XCR', EntityTypes.XPRO_CORPORATION.value, RequestAction.AML.value),
@@ -385,8 +390,10 @@ request_type_mapping = [
     ('CC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.NEW.value),
     ('CC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.AML.value),
     ('CC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.RESUBMIT.value),
-    ('CCV', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.CNV.value, True),
+    ('CCV', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.CNV.value, True), # BC Limited Company -> Community Contribution Company
     ('CCV', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.RESUBMIT.value),
+    ('BECC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.CNV.value, True), # Benefit Company -> Community Contribution Company
+    ('BECC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.RESUBMIT.value),
     ('CCC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.CHG.value, True),
     ('CCC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.RESUBMIT.value),
     ('CCCT', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.MVE.value, True),
@@ -398,7 +405,7 @@ request_type_mapping = [
     ('UL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.NEW.value, True),
     ('UL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.AML.value),
     ('UL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.RESUBMIT.value),
-    ('UC', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.CNV.value, True),
+    ('UC', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.CNV.value, True), # BC Limited Company -> Unlimited Liability Company
     ('UC', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.RESUBMIT.value),
     ('CUL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.CHG.value, True),
     ('CUL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.RESUBMIT.value, True),
@@ -444,46 +451,52 @@ request_type_mapping = [
     ('BERE', EntityTypes.BENEFIT_COMPANY.value, RequestAction.REH.value),
     ('BERE', EntityTypes.BENEFIT_COMPANY.value, RequestAction.REN.value),
     ('BERE', EntityTypes.BENEFIT_COMPANY.value, RequestAction.RESUBMIT.value),
-    ('BECV', EntityTypes.BENEFIT_COMPANY.value, RequestAction.CNV.value, True),
+    ('BECV', EntityTypes.BENEFIT_COMPANY.value, RequestAction.CNV.value, True), # BC Limited Company -> Benefit Company
     ('BECV', EntityTypes.BENEFIT_COMPANY.value, RequestAction.RESUBMIT.value),
-    ('ULBE', EntityTypes.BENEFIT_COMPANY.value, RequestAction.CNV.value, True),
+    ('ULBE', EntityTypes.BENEFIT_COMPANY.value, RequestAction.CNV.value, True), # Unlimited Liability Company -> Benefit Company
     ('ULBE', EntityTypes.BENEFIT_COMPANY.value, RequestAction.RESUBMIT.value),
-    ('BECR', EntityTypes.CORPORATION.value, RequestAction.CNV.value, True),
-    ('BECR', EntityTypes.CORPORATION.value, RequestAction.RESUBMIT.value),
-    ('ULCB', EntityTypes.CORPORATION.value, RequestAction.CNV.value, True),
-    ('ULCB', EntityTypes.CORPORATION.value, RequestAction.RESUBMIT.value),
     
     ('CCR', EntityTypes.CONTINUE_IN.value, RequestAction.CHG.value, True),
     ('CCR', EntityTypes.CONTINUE_IN.value, RequestAction.RESUBMIT.value),
-
-    ('CCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.CHG.value, True),
-    ('CCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.RESUBMIT.value),
-
-    ('CUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.CHG.value, True),
-    ('CUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.RESUBMIT.value, True),
-
-    ('BEC', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.CHG.value, True),
-    ('BEC', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.RESUBMIT.value),
-
     ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.REST.value, True),
     ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.REH.value),
     ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.REN.value),
     ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.RESUBMIT.value),
+    ('BECR', EntityTypes.CONTINUE_IN.value, RequestAction.CNV.value, True), # continued in Benefit Company -> continued in BC Limited Company
+    ('BECR', EntityTypes.CONTINUE_IN.value, RequestAction.RESUBMIT.value),
+    ('ULCB', EntityTypes.CONTINUE_IN.value, RequestAction.CNV.value, True), # continued in Unlimited Liability Company -> continued in BC Limited Company
+    ('ULCB', EntityTypes.CONTINUE_IN.value, RequestAction.RESUBMIT.value),
 
-    ('RCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.REST.value, True),
-    ('RCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.REH.value),
-    ('RCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.REN.value),
-    ('RCC', EntityTypes.CONTINUE_IN_CCC.value, RequestAction.RESUBMIT.value),
+    ('CCC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.CHG.value, True),
+    ('CCC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
+    ('RCC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.REST.value, True),
+    ('RCC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.REH.value),
+    ('RCC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.REN.value),
+    ('RCC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
+    ('CCV', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.CNV.value, True), # continued in BC Limited Company -> continued in Community Contribution Company
+    ('CCV', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
+    ('BECC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.CNV.value, True), # continued in Benefit Company -> continued in Community Contribution Company
+    ('BECC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
 
-    ('RUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.REST.value, True),
-    ('RUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.REH.value),
-    ('RUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.REN.value),
-    ('RUL', EntityTypes.CONTINUE_IN_CUL.value, RequestAction.RESUBMIT.value),
+    ('CUL', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.CHG.value, True),
+    ('CUL', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.RESUBMIT.value, True),
+    ('RUL', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.REST.value, True),
+    ('RUL', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.REH.value),
+    ('RUL', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.REN.value),
+    ('RUL', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
+    ('UC', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.CNV.value, True), # continued in BC Limited Company -> continued in Unlimited Liability Company
+    ('UC', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
 
-    ('BERE', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.REST.value, True),
-    ('BERE', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.REH.value),
-    ('BERE', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.REN.value),
-    ('BERE', EntityTypes.CONTINUE_IN_CBEN.value, RequestAction.RESUBMIT.value),
+    ('BEC', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.CHG.value, True),
+    ('BEC', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
+    ('BERE', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.REST.value, True),
+    ('BERE', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.REH.value),
+    ('BERE', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.REN.value),
+    ('BERE', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
+    ('BECV', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.CNV.value, True), # continued in BC Limited Company -> continued in Benefit Company
+    ('BECV', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
+    ('ULBE', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.CNV.value, True), # continued in Unlimited Liability Company -> continued in Benefit Company
+    ('ULBE', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
 ]
 
 reverse_request_type_mapping = [m for m in request_type_mapping if len(m) == 4 and m[3] is True]
