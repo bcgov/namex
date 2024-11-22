@@ -22,10 +22,13 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('nr_num', sa.String(length=10), nullable=True),
     sa.Column('corp_num', sa.String(20), nullable=True),
-    sa.Column('request_state', sa.String(length=40), nullable=True),
-    sa.Column('payment_status', sa.String(length=50), nullable=True),
-    sa.Column('payment_date', sa.DateTime(), nullable=True),    
+    sa.Column('payment_completion_date', sa.DateTime(), nullable=True),
+    sa.Column('payment_status_code', sa.String(length=30), nullable=True),
+    sa.Column('payment_fee_code', sa.String(length=30), nullable=True),
+    sa.Column('payment_type', sa.String(length=30), nullable=True),
+    sa.Column('payment_amount', sa.Numeric(), nullable=True),
     sa.Column('payment_json', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+    sa.Column('payment_action', sa.String(length=30), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
