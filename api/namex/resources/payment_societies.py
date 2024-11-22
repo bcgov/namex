@@ -1,7 +1,7 @@
-import copy, json
-import json
-from flask import request, jsonify, g, current_app, make_response
-from flask_restx import Resource, Namespace, cors
+import copy
+from flask import request, jsonify, current_app, make_response
+from flask_restx import Namespace, cors
+from namex.resources.name_requests.abstract_nr_resource import AbstractNameRequestResource
 from sqlalchemy.orm.exc import NoResultFound
 
 from namex import jwt
@@ -17,7 +17,7 @@ api = Namespace('payment_society', description='Store data for society from home
 
 @cors_preflight('GET')
 @api.route('/<string:nr>', methods=['GET', 'OPTIONS'])
-class PaymentSocietiesSearch(Resource):
+class PaymentSocietiesSearch(AbstractNameRequestResource):
     
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -56,13 +56,15 @@ class PaymentSocietiesSearch(Resource):
             nr_payment_society_info['id'] = ps.id
             nr_payment_society_info['nr_num'] = ps.nrNum
             nr_payment_society_info['corp_num'] = ps.corpNum
-            nr_payment_society_info['request_state'] = ps.requestState
-            nr_payment_society_info['payment_state'] = ps.paymentState
-            nr_payment_society_info['paymentDate'] = ps.paymentDate
+            nr_payment_society_info['payment_completion_date'] = ps.paymentCompletionDate
+            nr_payment_society_info['payment_status_code'] = ps.paymentStatusCode
+            nr_payment_society_info['payment_fee_code'] = ps.paymentFeeCode
+            nr_payment_society_info['payment_type'] = ps.paymentType
+            nr_payment_society_info['payment_amount'] = ps.paymentAmount
             nr_payment_society_info['payment_json'] = ps.paymentJson
+            nr_payment_society_info['payment_action'] = ps.paymentAction
             
             payment_society_txn_history.insert(0, copy.deepcopy(nr_payment_society_info))
-            
         if len(payment_society_txn_history) == 0:
             return make_response(jsonify({ 'message': f'No valid payment societies for {nr} found'}), 404)
 
@@ -76,39 +78,28 @@ class PaymentSocietiesSearch(Resource):
  
 @cors_preflight('POST')
 @api.route('', methods=['POST', 'OPTIONS'])
-class PaymentSocieties(Resource): 
-    
-    @staticmethod
+class PaymentSocieties(AbstractNameRequestResource):
     @cors.crossdomain(origin='*')
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.SYSTEM])
-    def post(*args, **kwargs):
+    def post(self):
         # do the cheap check first before the more expensive ones
-        
         try:
             json_input = request.get_json()
             if not json_input:
                 return make_response(jsonify({'message': 'No input data provided'}), 400)
-            current_app.logger.debug(json_input)
+            current_app.logger.debug(f'Request Json: {json_input}')
             
             nr_num = json_input.get('nrNum', None)
             if not nr_num:
                 return make_response(jsonify({"message": "nr_num not set in json input"}), 406)
-                        
-            paymentStateType = json_input.get('paymentStateType', None)
-            if not paymentStateType:
-                return make_response(jsonify({"message": "paymentStateType not set in json input"}), 406)
-            
-            payment_json = json_input.get('payment', None)
-            if not payment_json:
-                return make_response(jsonify({"message": "payment not set in json input"}), 406)
-            
-            paymentDate = payment_json.get('paymentDate', None)
-            if not paymentDate:
-                return make_response(jsonify({"message": "paymentDate not set in json input"}), 406)
 
             nrd = RequestDAO.find_by_nr(nr_num)
             if not nrd:
                 return make_response(jsonify({"message": "Request: {} not found in requests table".format(nr_num)}), 404)
+
+            # replacing temp NR number to a formal NR number if needed.
+            nrd = self.add_new_nr_number(nrd, False)
+            current_app.logger.debug(f'Formal NR nubmer is: {nrd.nrNum}')
         except NoResultFound as nrf:
             # not an error we need to track in the log
             return make_response(jsonify({"message": "Request: {} not found".format(nr_num)}), 404)
@@ -116,19 +107,23 @@ class PaymentSocieties(Resource):
             current_app.logger.error("Error when posting NR: {0} Err:{1} Please double check the json input file format".format(nr_num, err))
             return make_response(jsonify({"message": "NR had an internal error. Please double check the json input file format"}), 404)
 
-        user = User.find_by_jwtToken(g.jwt_oidc_token_info)
-        if user is None:
-            return make_response(jsonify({'message': 'No User'}), 404)                 
-         
         ps_instance = PaymentSocietyDAO()        
-        ps_instance.nrNum = nr_num
-        ps_instance.corpNum = nrd.corpNum
-        ps_instance.requestState = nrd.stateCd
-        ps_instance.paymentState = paymentStateType
-        ps_instance.paymentDate = paymentDate
-        ps_instance.paymentJson = json.dumps(json_input) 
+        ps_instance.nrNum = nrd.nrNum
+        ps_instance.corpNum = json_input.get('corpNum', None)
+        ps_instance.paymentCompletionDate = json_input.get('paymentCompletionDate', None)
+        ps_instance.paymentStatusCode = json_input.get('paymentStatusCode', None)
+        ps_instance.paymentFeeCode = json_input.get('paymentFeeCode', None)
+        ps_instance.paymentType = json_input.get('paymentType', None)
+        ps_instance.paymentAmount = json_input.get('paymentAmount', None)
+        ps_instance.paymentJson = json_input.get('paymentJson', None)
+        ps_instance.paymentAction = json_input.get('paymentAction', None)
 
         ps_instance.save_to_db()
+        current_app.logger.debug(f'ps_instance saved...')
+
+        if nrd.nrNum !=nr_num:
+            nrd.save_to_db()
+            current_app.logger.debug(f'nrd saved...')
         
         return make_response(jsonify(ps_instance.json()), 200)     
     
