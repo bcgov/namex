@@ -122,6 +122,7 @@ class PaymentSocieties(AbstractNameRequestResource):
         current_app.logger.debug(f'ps_instance saved...')
 
         if nrd.nrNum !=nr_num:
+            nrd.stateCd = 'DRAFT'
             nrd.save_to_db()
             current_app.logger.debug(f'nrd saved...')
         
