@@ -650,6 +650,7 @@ class Request(Resource):
                 if (nrd.stateCd in (State.APPROVED, State.CONDITIONAL)):
                     expiry_days = NameRequestService.get_expiry_days(nrd.request_action_cd, nrd.requestTypeCd)
                     nrd.expirationDate = NameRequestService.create_expiry_date(datetime.utcnow(), expiry_days)
+                    json_input["expirationDate"] = nrd.expirationDate.isoformat()
 
                 nrd.furnished = 'Y'
 
