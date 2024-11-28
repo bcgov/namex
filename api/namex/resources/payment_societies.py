@@ -121,9 +121,9 @@ class PaymentSocieties(AbstractNameRequestResource):
         ps_instance.save_to_db()
         current_app.logger.debug(f'ps_instance saved...')
 
-        if nrd.nrNum !=nr_num:
-            nrd.save_to_db()
-            current_app.logger.debug(f'nrd saved...')
+        nrd.stateCd = 'DRAFT'
+        nrd.save_to_db()
+        current_app.logger.debug(f'nrd saved...')
         
         return make_response(jsonify(ps_instance.json()), 200)     
     
