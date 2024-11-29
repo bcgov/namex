@@ -78,8 +78,9 @@ class ColinApi(Resource):
                 'status': business_info.get('status'),
                 'jurisdiction': business_info.get('jurisdiction'),
                 'homeIdentifier': business_info.get('homeJurisdictionNumber'),
-                'registered office delivery address': office_info.get('registered', []),
-                'records office delivery address': office_info.get('records', []),
+                'registered office delivery address': office_info.get('registeredOffice', []),
+                'records office delivery address': office_info.get('recordsOffice', []),
+                'head office': office_info.get('headOffice', []),
                 'directors': parties_info.get('directorNames'),
                 'attorney names': parties_info.get('attorneyNames'),
                 'nature of business': nature_business_info,
@@ -135,9 +136,9 @@ class ColinApi(Resource):
 
             # Return formatted addresses
             return {
-                'registered': extract_address("registeredOffice"),
-                'records': extract_address("recordsOffice"),
-                # 'head': extract_address('headOffice') -- extract head office for expro companies
+                'registeredOffice': extract_address("registeredOffice"),
+                'recordsOffice': extract_address("recordsOffice"),
+                'headOffice': extract_address('headOffice') # head office for xpro companies
             }
 
         except Exception as e:
