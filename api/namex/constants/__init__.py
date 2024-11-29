@@ -127,6 +127,7 @@ EntityTypeDescriptions = {
     EntityTypes.PRIVATE_ACT: 'Private Act',
     EntityTypes.FINANCIAL_INSTITUTION: 'Financial Institution',
     EntityTypes.PARISH: 'Parish',
+
     # XPRO and Foreign Types
     EntityTypes.XPRO_CORPORATION: 'Extraprovincial Corporation',
     EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY: 'Extraprovincial Unlimited Liability Company',
@@ -135,9 +136,11 @@ EntityTypeDescriptions = {
     EntityTypes.XPRO_LIMITED_LIABILITY_PARTNERSHIP: 'Extraprovincial Limited Liability Partnership',
     EntityTypes.XPRO_COOPERATIVE: 'Extraprovincial Cooperative',
     EntityTypes.XPRO_SOCIETY: 'Extraprovincial Society',
+
     # Used for mapping back to legacy oracle codes, description not required
     EntityTypes.FIRM: 'FIRM (Legacy Oracle)',
-    #continue-in
+
+    # Continued in Companies
     EntityTypes.CONTINUE_IN: 'Corporation',
     EntityTypes.BEN_CONTINUE_IN: 'Benefit Company',
     EntityTypes.CCC_CONTINUE_IN: 'Community Contribution Company',
@@ -173,6 +176,10 @@ class BCProtectedNameEntityTypes(AbstractEnum):
     PRIVATE_ACT = EntityTypes.PRIVATE_ACT.value
     PARISH = EntityTypes.PARISH.value
     SOCIETY = EntityTypes.SOCIETY.value
+    CONTINUE_IN = EntityTypes.CONTINUE_IN
+    BEN_CONTINUE_IN = EntityTypes.BEN_CONTINUE_IN
+    CCC_CONTINUE_IN = EntityTypes.CCC_CONTINUE_IN
+    ULC_CONTINUE_IN = EntityTypes.ULC_CONTINUE_IN
 
 
 # TODO: Are these still valid for unprotected?
