@@ -15,7 +15,7 @@
 apiVersion: deploy.cloud.google.com/v1
 kind: DeliveryPipeline
 metadata:
- name: nr-day-job-pipeline
+ name: namex-nr-day-job-pipeline
 description: Deployment pipeline
 serialPipeline:
  stages:
@@ -28,8 +28,7 @@ serialPipeline:
    - values:
       deploy-env: "development"
       deploy-project-id: "a083gt-dev"
-      service-name: "namex-nr-day-job-dev"
-      container-name: "namex-nr-day-job-dev"
+      job-name: "namex-nr-day-job-dev"
       service-account: "sa-api@a083gt-dev.iam.gserviceaccount.com"
       cloudsql-instances: ""
  - targetId: a083gt-test
@@ -41,8 +40,7 @@ serialPipeline:
    - values:
       deploy-env: "test"
       deploy-project-id: "a083gt-test"
-      service-name: "namex-nr-day-job-test"
-      container-name: "namex-nr-day-job-test"
+      job-name: "namex-nr-day-job-test"
       service-account: "sa-api@a083gt-test.iam.gserviceaccount.com"
       cloudsql-instances: ""
  - targetId: a083gt-sandbox
@@ -54,8 +52,7 @@ serialPipeline:
    - values:
       deploy-env: "sandbox"
       deploy-project-id: "a083gt-integration"
-      service-name: "namex-nr-day-job-sandbox"
-      container-name: "namex-nr-day-job-sandbox"
+      job-name: "namex-nr-day-job-sandbox"
       service-account: "sa-api@a083gt-integration.iam.gserviceaccount.com"
       cloudsql-instances: ""
  - targetId: a083gt-prod
@@ -67,8 +64,7 @@ serialPipeline:
    - values:
       deploy-env: "production"
       deploy-project-id: "a083gt-prod"
-      service-name: "namex-nr-day-job-prod"
-      container-name: "namex-nr-day-job-prod"
+      job-name: "namex-nr-day-job-prod"
       service-account: "sa-api@a083gt-prod.iam.gserviceaccount.com"
       max-scale: "10"
       container-concurrency: "20"
