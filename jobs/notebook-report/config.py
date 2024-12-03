@@ -13,8 +13,6 @@ class Config(object):
     REPORT_RECIPIENTS = os.getenv('REPORT_RECIPIENTS', '')
     EMAIL_SMTP = os.getenv('EMAIL_SMTP', '')
     ENVIRONMENT = os.getenv('ENVIRONMENT', '')
-    SIX_MONTH_REPORT_DATES = os.getenv('SIX_MONTH_REPORT_DATES', '')
-    SIX_MONTH_REPORT_MONTHS = os.getenv('SIX_MONTH_REPORT_MONTHS', '')
 
     # POSTGRESQL
     PG_USER = os.getenv('PG_USER', '')
