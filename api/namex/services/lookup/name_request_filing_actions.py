@@ -129,31 +129,31 @@ class NameRequestFilingActions:
         ('ULBE', 'BEN', 'Benefit Company', 'Conversion from ULC', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
 
         # continued in BC Limited Company
-        ('CT', 'C', 'Continued In BC Limited Company', 'Continuation In', 'lear', None, None, None),
-        ('CCR', 'C', 'Continued In BC Limited Company', 'Change of Name', 'lear', None, None, None),
-        ('RCR', 'C', 'Continued In BC Limited Company', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
-        ('BECR', 'C', 'Continued In BC Limited Company', 'Conversion from Continued In Benefit Company ', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
-        ('ULCB', 'C', 'Continued In BC Limited Company', 'Conversion from Continued In ULC', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+        ('CT_C', 'C', 'Continued In BC Limited Company', 'Continuation In', 'lear', None, None, None),
+        ('CCR_C', 'C', 'Continued In BC Limited Company', 'Change of Name', 'lear', None, None, None),
+        ('RCR_C', 'C', 'Continued In BC Limited Company', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
+        ('BECR_C', 'C', 'Continued In BC Limited Company', 'Conversion from Continued In Benefit Company ', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+        ('ULCB_C', 'C', 'Continued In BC Limited Company', 'Conversion from Continued In ULC', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
 
         # continued in Benefit Company
-        ('BECT', 'CBEN', 'Continued In Benefit Company', 'Continuation In', 'lear', None, None, None),
-        ('BEC', 'CBEN', 'Continued In Benefit Company', 'Change of Name', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
-        ('BERE', 'CBEN', 'Continued in Benefit Company', 'Restoration', 'lear', None, None, None),
-        ('BECV', 'CBEN', 'Continued In Benefit Company', 'Conversion from Continued In BC Limited Company', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
-        ('ULBE', 'CBEN', 'Continued In Benefit Company', 'Conversion from Continued In ULC', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+        ('BECT_CBEN', 'CBEN', 'Continued In Benefit Company', 'Continuation In', 'lear', None, None, None),
+        ('BEC_CBEN', 'CBEN', 'Continued In Benefit Company', 'Change of Name', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+        ('BERE_CBEN', 'CBEN', 'Continued in Benefit Company', 'Restoration', 'lear', None, None, None),
+        ('BECV_CBEN', 'CBEN', 'Continued In Benefit Company', 'Conversion from Continued In BC Limited Company', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+        ('ULBE_CBEN', 'CBEN', 'Continued In Benefit Company', 'Conversion from Continued In ULC', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
 
         # continued in Community Contribution Company
-        ('CCCT', 'CCC', 'Continued In CCC', 'Continuation In', 'lear', None, None, None),
-        ('CCC', 'CCC', 'Continued In CCC', 'Change of Name', 'lear', None, None, None),
-        ('RCC', 'CCC', 'Continued In CCC', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
-        ('CCV', 'CCC', 'Continued In CCC', 'Conversion from Continued In BC Limited Company', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
-        ('BECC', 'CCC', 'Continued In CCC', 'Conversion from Continued In Benefit Company', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+        ('CCCT_CCC', 'CCC', 'Continued In CCC', 'Continuation In', 'lear', None, None, None),
+        ('CCC_CCC', 'CCC', 'Continued In CCC', 'Change of Name', 'lear', None, None, None),
+        ('RCC_CCC', 'CCC', 'Continued In CCC', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
+        ('CCV_CCC', 'CCC', 'Continued In CCC', 'Conversion from Continued In BC Limited Company', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+        ('BECC_CCC', 'CCC', 'Continued In CCC', 'Conversion from Continued In Benefit Company', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
         
         # continued in Unlimited Liability Company
-        ('ULCT', 'CUL', 'Continued In ULC', 'Continuation In', 'lear', None, None, None),
-        ('CUL', 'CUL', 'Continued In ULC', 'Change of Name', 'lear', None, None, None),
-        ('RUL', 'CUL', 'Continued In ULC', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
-        ('UC', 'CUL', 'Continued In ULC', 'Conversion from Continued In BC Limited Company', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
+        ('ULCT_CUL', 'CUL', 'Continued In ULC', 'Continuation In', 'lear', None, None, None),
+        ('CUL_CUL', 'CUL', 'Continued In ULC', 'Change of Name', 'lear', None, None, None),
+        ('RUL_CUL', 'CUL', 'Continued In ULC', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
+        ('UC_CUL', 'CUL', 'Continued In ULC', 'Conversion from Continued In BC Limited Company', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
     ]
 
     @cached_property
@@ -188,6 +188,10 @@ class NameRequestFilingActions:
             learTemplate: the templat that can be used to create a draft filing.
         """
         if nr_type in ['FR', 'CFR'] and entity_type_cd in ['FR', 'DBA', 'GP']:
+            nr_type = nr_type + '_' + entity_type_cd
+
+        # special case for continued in types that otherwise have the same NR type as regular companies
+        if entity_type_cd in ['C', 'CBEN', 'CCC', 'CUL']:
             nr_type = nr_type + '_' + entity_type_cd
 
         return self.get_dict.get(nr_type)
