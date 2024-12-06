@@ -63,7 +63,7 @@ class Config:  # pylint: disable=too-few-public-methods
         name=DB_NAME
     )
 
-    SOLR_SYNONYMS_API_URL = os.getenv('SOLR_SYNONYMS_API_URL', None)
+    SOLR_SYNONYMS_API_URL = f'{os.getenv('SOLR_SYNONYMS_API_URL', None)}{os.getenv('SOLR_SYNONYMS_API_VERSION', None)}'
 
     # JWT_OIDC Settings
     JWT_OIDC_WELL_KNOWN_CONFIG = os.getenv('JWT_OIDC_WELL_KNOWN_CONFIG')
@@ -108,7 +108,7 @@ class TestConfig(Config):  # pylint: disable=too-few-public-methods
         name=DB_NAME
     )
 
-    SOLR_SYNONYMS_API_URL = os.getenv('SOLR_SYNONYMS_API_URL', None)
+    SOLR_SYNONYMS_API_URL = f'{os.getenv('SOLR_SYNONYMS_API_URL', None)}{os.getenv('SOLR_SYNONYMS_API_VERSION', None)}'
 
     # JWT OIDC settings
     # JWT_OIDC_TEST_MODE will set jwt_manager to use
