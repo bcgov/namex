@@ -74,13 +74,6 @@ class Config():  # pylint: disable=too-few-public-methods
     DB_PORT = os.getenv('NAMEX_DATABASE_PORT', '5432')
     SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
 
-    # ORACLE - LEGACY NRO NAMESDB
-    NRO_USER = os.getenv('NRO_USER', '')
-    NRO_PASSWORD = os.getenv('NRO_PASSWORD', '')
-    NRO_DB_NAME = os.getenv('NRO_DB_NAME', '')
-    NRO_HOST = os.getenv('ORACLE_HOST', '')
-    NRO_PORT = int(os.getenv('ORACLE_PORT', '1521'))
-
     GCP_AUTH_KEY = os.getenv('BUSINESS_GCP_AUTH_KEY', None)
     EMAILER_TOPIC = os.getenv('NAMEX_MAILER_TOPIC', '')
     NAMEX_NR_STATE_TOPIC = os.getenv('NAMEX_NR_STATE_TOPIC', '')
