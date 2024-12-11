@@ -388,57 +388,28 @@ class RequestSearch(Resource):
         example: query=NR3742302 or query=abcd
         """
         data = []
-        start = request.args.get('start', 0, type=int)
-        rows = request.args.get('rows', 10, type=int)
-        query = request.args.get('query', '')
-        if not query:
-            return make_response(jsonify(data), 200)
+        nr_num = request.args.get('query', '').strip().upper()
 
         try:
-            solr_query, nr_number, nr_name = SolrQueries.get_parsed_query_name_nr_search(query)
-            condition = ''
-            if nr_number:
-                condition = f"requests.nr_num ILIKE '%{nr_number}%'"
-            if nr_name:
-                nr_name = nr_name.replace("'", "''")
-                if condition:
-                    condition += ' OR '
-                name_condition = "requests.name_search ILIKE '%"
-                name_condition += "%' AND requests.name_search ILIKE '%".join(nr_name.split())
-                name_condition += "%'"
-
-                condition += f'({name_condition})'
-
-            results = RequestDAO.query.filter(
-                RequestDAO.stateCd.in_([State.DRAFT, State.INPROGRESS, State.REFUND_REQUESTED]),
-                text(f'({condition})')
+            # Find the NR only if it is not cancelled & not expired or if it has expired within a 60 day grace period. 
+            query = RequestDAO.query.filter(
+                RequestDAO.nrNum == nr_num,
+                RequestDAO.stateCd != State.CANCELLED,
+                or_(
+                    RequestDAO.stateCd != State.EXPIRED,
+                    text(f"(requests.state_cd = '{State.EXPIRED}' AND CAST(requests.expiration_date AS DATE) + "
+                            "interval '60 day' >= CAST(now() AS DATE))")
+                )
             ).options(
                 lazyload('*'),
                 eagerload(RequestDAO.names).load_only(Name.name),
-                load_only(
-                    RequestDAO.id,
-                    RequestDAO.nrNum
-                )
-            ).order_by(RequestDAO.submittedDate.desc()).limit(rows).all()
-
-            data.extend([{
-                # 'id': nr.id,
+                load_only(RequestDAO.id, RequestDAO.nrNum)
+            )
+            result = query.all()
+            data = [{
                 'nrNum': nr.nrNum,
                 'names': [n.name for n in nr.names]
-            } for nr in results])
-
-            while len(data) < rows:
-                nr_data, have_more_data = RequestSearch._get_next_set_from_solr(solr_query, start, rows)
-                nr_data = nr_data[:(rows - len(data))]
-                data.extend([{
-                    # 'id': nr.id,
-                    'nrNum': nr.nrNum,
-                    'names': [n.name for n in nr.names]
-                } for nr in nr_data])
-
-                if not have_more_data:
-                    break  # no more data in solr
-                start += rows
+            } for nr in result]
 
             return make_response(jsonify(data), 200)
         except Exception:
