@@ -388,12 +388,13 @@ class RequestSearch(Resource):
         example: query=NR3742302 or query=abcd
         """
         data = []
-        nr_num = request.args.get('query', '').strip().upper()
+        nr_num = '%' + request.args.get('query', '').strip().upper() + '%'
+        rows = request.args.get('rows', 10, type=int)
 
         try:
             # Find the NR only if it is not cancelled & not expired or if it has expired within a 60 day grace period. 
             query = RequestDAO.query.filter(
-                RequestDAO.nrNum == nr_num,
+                RequestDAO.nrNum.like(nr_num),
                 RequestDAO.stateCd != State.CANCELLED,
                 or_(
                     RequestDAO.stateCd != State.EXPIRED,
@@ -404,7 +405,7 @@ class RequestSearch(Resource):
                 lazyload('*'),
                 eagerload(RequestDAO.names).load_only(Name.name),
                 load_only(RequestDAO.id, RequestDAO.nrNum)
-            )
+            ).limit(rows)
             result = query.all()
             data = [{
                 'nrNum': nr.nrNum,
