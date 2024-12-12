@@ -377,35 +377,40 @@ class Requests(Resource):
 @cors_preflight("GET, POST")
 @api.route('/search', methods=['GET', 'POST', 'OPTIONS'])
 class RequestSearch(Resource):
-    """Search for NR's."""
+    """Search for NR's by NR number or associated name."""
 
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
     def get():
-        """Query for name requests.
+        """Query for name requests with partial matching for both NR number and name.
 
         example: query=NR3742302 or query=abcd
         """
         data = []
-        nr_num = '%' + request.args.get('query', '').strip().upper() + '%'
+        search_query = '%' + request.args.get('query', '').strip().upper() + '%'
         rows = request.args.get('rows', 10, type=int)
+        if not search_query:
+            return make_response(jsonify(data), 200)
 
         try:
-            # Find the NR only if it is not cancelled & not expired or if it has expired within a 60 day grace period. 
+            # Find the NR only if it is not cancelled & not expired or if it has expired within a 60 day grace period
             query = RequestDAO.query.filter(
-                RequestDAO.nrNum.like(nr_num),
+                or_(
+                    RequestDAO.nrNum.like(search_query),
+                    RequestDAO.nameSearch.like(search_query)
+                ),
                 RequestDAO.stateCd != State.CANCELLED,
                 or_(
                     RequestDAO.stateCd != State.EXPIRED,
                     text(f"(requests.state_cd = '{State.EXPIRED}' AND CAST(requests.expiration_date AS DATE) + "
-                            "interval '60 day' >= CAST(now() AS DATE))")
+                         "interval '60 day' >= CAST(now() AS DATE))")
                 )
             ).options(
                 lazyload('*'),
                 eagerload(RequestDAO.names).load_only(Name.name),
                 load_only(RequestDAO.id, RequestDAO.nrNum)
-            ).limit(rows)
+            ).order_by(RequestDAO.submittedDate.desc()).limit(rows)
             result = query.all()
             data = [{
                 'nrNum': nr.nrNum,
@@ -413,7 +418,8 @@ class RequestSearch(Resource):
             } for nr in result]
 
             return make_response(jsonify(data), 200)
-        except Exception:
+        except Exception as e:
+            current_app.logger.error(f"Error in /search, {e}")
             return make_response(jsonify({'message': 'Internal server error'}), 500)
 
     @staticmethod
