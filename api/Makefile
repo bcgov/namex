@@ -51,7 +51,7 @@ update: ## Upgrade lock
 install: clean ## Install python virtrual environment
 	test -f .venv/bin/activate || python3.12 -m venv  $(CURRENT_ABS_DIR)/.venv ;\
 	. .venv/bin/activate ;\
-	pip install poetry
+	pipx install poetry
 	poetry install
 
 
