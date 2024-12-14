@@ -2,29 +2,37 @@
 FROM python:3.12-slim
 
 # Set environment variables for Python optimization
-ENV PYTHONDONTWRITEBYTECODE 1  # Prevents creation of .pyc files
-ENV PYTHONUNBUFFERED 1        # Ensures output is not buffered
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Set working directory inside the container
-WORKDIR /app
-
-# Install system dependencies
+# Install system dependencies with no recommended packages
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
     --no-install-recommends && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-COPY requirements.txt /app/
+# Create a non-root user and set permissions
+RUN useradd --create-home appuser
+WORKDIR /home/appuser
+
+# Copy only required files for dependencies
+COPY pyproject.toml poetry.lock /home/appuser/
+
+# Install dependencies using Poetry
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir poetry && \
+    poetry install --no-root --no-dev
 
-# Copy the application code into the container
-COPY . /app/
+# Copy application source code selectively
+COPY src /home/appuser/src
+COPY app.py /home/appuser/
 
-# Expose the port (if applicable)
-# EXPOSE 5000  # Uncomment if this is a web app
+# Set appropriate permissions
+RUN chown -R appuser:appuser /home/appuser
+
+# Switch to the non-root user
+USER appuser
 
 # Define the default command to run the application
-CMD ["python", "app.py"]
+CMD ["poetry", "run", "python", "app.py"]
