@@ -6,10 +6,10 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 # Install system dependencies with no recommended packages
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpq-dev \
-    --no-install-recommends && \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential=12.9 \
+        libpq-dev=13.4-1 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user and set permissions

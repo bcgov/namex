@@ -5,7 +5,13 @@ from services.email_service import send_email_notification
 
 def create_app(config_name="default"):
     """Creates and configures the Flask app."""
+
+    """Note: CSRF protection is disabled because this is not a web application.
+    The app does not handle user-submitted data, forms, or sessions, and is
+    used as a background service or job.
+    """
     app = Flask(__name__)
+    app.config['WTF_CSRF_ENABLED'] = False  # Explicitly disable CSRF
     app.config.from_object(APP_CONFIG[config_name])
     print(app.config)
     return app
