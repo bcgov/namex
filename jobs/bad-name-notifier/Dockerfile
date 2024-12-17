@@ -6,10 +6,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    POETRY_HOME="/usr/local"
-
-# Add Poetry to PATH
-ENV PATH="$POETRY_HOME/bin:$PATH"
+    POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_CREATE=false \
+    PATH="/root/.local/bin:$PATH" \
+    PYTHONPATH="/app"
 
 # Install system dependencies
 RUN apt-get update && apt-get install --no-install-recommends -y \
@@ -24,16 +24,20 @@ RUN python3 -m ensurepip --upgrade && \
     curl -sSL https://install.python-poetry.org | python3 - && \
     poetry --version
 
+# Set working directory
 WORKDIR /app
 
 # Copy dependency files and install dependencies
-COPY --chown=appuser:appuser pyproject.toml poetry.lock /app/
+COPY pyproject.toml poetry.lock /app/
 RUN poetry install --no-dev --no-interaction --no-ansi
 
 # Copy the application source code
-COPY --chown=appuser:appuser src /app/src
+COPY src /app/src
 
-# OpenShift will assign a random UID
+# Ensure all files are group-writable for OpenShift compatibility
+RUN chmod -R g=u /app
+
+# OpenShift will assign a random UID at runtime
 USER 1001
 
 # Default command
