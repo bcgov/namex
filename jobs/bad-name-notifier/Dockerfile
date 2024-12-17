@@ -9,7 +9,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_CREATE=false \
     PATH="/root/.local/bin:$PATH" \
-    PYTHONPATH="/app"
+    PYTHONPATH="/app/src"
 
 # Install system dependencies
 RUN apt-get update && apt-get install --no-install-recommends -y \
