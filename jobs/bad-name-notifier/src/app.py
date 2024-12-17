@@ -1,4 +1,4 @@
-from config import APP_CONFIG
+from src.config import APP_CONFIG
 from flask import Flask, current_app
 from services.database_service import get_bad_names
 from services.email_service import send_email_notification

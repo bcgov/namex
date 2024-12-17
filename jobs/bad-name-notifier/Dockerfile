@@ -1,38 +1,40 @@
-# Use Python 3.12.3 slim image as the base
+# Use Python 3.12 slim image
 FROM python:3.12-slim
 
-# Set environment variables for Python optimization
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    POETRY_HOME="/usr/local"
 
-# Install system dependencies with no recommended packages
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        build-essential=12.9 \
-        libpq-dev=13.4-1 && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+# Add Poetry to PATH
+ENV PATH="$POETRY_HOME/bin:$PATH"
 
-# Create a non-root user and set permissions
-RUN useradd --create-home appuser
-WORKDIR /home/appuser
+# Install system dependencies
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    build-essential \
+    libpq-dev \
+    curl \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copy only required files for dependencies
-COPY pyproject.toml poetry.lock /home/appuser/
+# Upgrade pip and install Poetry
+RUN python3 -m ensurepip --upgrade && \
+    python3 -m pip install --upgrade pip setuptools wheel && \
+    curl -sSL https://install.python-poetry.org | python3 - && \
+    poetry --version
 
-# Install dependencies using Poetry
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir poetry && \
-    poetry install --no-root --no-dev
+WORKDIR /app
 
-# Copy application source code selectively
-COPY src /home/appuser/src
-COPY app.py /home/appuser/
+# Copy dependency files and install dependencies
+COPY --chown=appuser:appuser pyproject.toml poetry.lock /app/
+RUN poetry install --no-dev --no-interaction --no-ansi
 
-# Set appropriate permissions
-RUN chown -R appuser:appuser /home/appuser
+# Copy the application source code
+COPY --chown=appuser:appuser src /app/src
 
-# Switch to the non-root user
-USER appuser
+# OpenShift will assign a random UID
+USER 1001
 
-# Define the default command to run the application
-CMD ["poetry", "run", "python", "app.py"]
+# Default command
+CMD ["python", "src/app.py"]

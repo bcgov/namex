@@ -1,9 +1,11 @@
 import os
 from dotenv import find_dotenv, load_dotenv
 
-# Load environment variables from .env file for local development
-if os.getenv("FLASK_ENV") == "development":
-    load_dotenv(find_dotenv())
+# Get the project root directory
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Load the .env file from the project root
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 
 class Config:

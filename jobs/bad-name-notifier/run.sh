@@ -8,4 +8,4 @@ export FLASK_APP=app.py
 export FLASK_ENV=development
 
 # Run the Flask app
-python app.py
+python src/app.py
