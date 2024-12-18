@@ -264,13 +264,18 @@ class ReportResource(Resource):
 
     @staticmethod
     def _is_colin(legal_type):
-        colin_list = ['CR', 'UL', 'CC', 'XCR', 'XUL', 'RLC']
+        colin_list = ['XCR', 'XUL', 'RLC']
         return legal_type in colin_list
     
     @staticmethod
     def _is_society(legal_type):
         society_list = ['SO', 'XSO']
         return legal_type in society_list
+
+    @staticmethod
+    def _is_ia(legal_type):
+        ia_list = ['CR', 'UL', 'CC']
+        return legal_type in ia_list
 
 
     @staticmethod
@@ -281,6 +286,8 @@ class ReportResource(Resource):
             return 'colin'
         if ReportResource._is_society(legal_type):
             return 'so'
+        if ReportResource._is_ia(legal_type):
+            return 'ia'
         return ''
 
     @staticmethod

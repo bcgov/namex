@@ -49,13 +49,17 @@ def __is_modernized(legal_type):
 
 
 def __is_colin(legal_type):
-    colin_list = ["CR", "UL", "CC", "XCR", "XUL", "RLC"]
+    colin_list = ["XCR", "XUL", "RLC"]
     return legal_type in colin_list
 
 
 def _is_society(legal_type):
     society_list = ["SO", "XSO"]
     return legal_type in society_list
+
+def _is_ia(legal_type):
+    ia_list = ["CR", "UL", "CC"]
+    return legal_type in ia_list
 
 
 def __get_instruction_group(legal_type):
@@ -65,6 +69,8 @@ def __get_instruction_group(legal_type):
         return "colin"
     if _is_society(legal_type):
         return "so"
+    if _is_ia(legal_type):
+        return "ia"
     return ""
 
 
@@ -105,6 +111,7 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
     corp_online_url = current_app.config.get("COLIN_URL")
     form_page_url = current_app.config.get("CORP_FORMS_URL")
     societies_url = current_app.config.get("SOCIETIES_URL")
+    magic_link = f'{current_app.config.get("AUTH_WEB_URL")}magicLink/?nrId={nr_number}&email={nr_data["applicants"]["emailAddress"]}&phone={nr_data["applicants"]["phoneNumber"]}'
 
     file_name_suffix = option.upper()
     if option == Option.BEFORE_EXPIRY.value:
@@ -130,6 +137,7 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
         corp_online_url=corp_online_url,
         form_page_url=form_page_url,
         societies_url=societies_url,
+        magic_link=magic_link
     )
 
     # get recipients
