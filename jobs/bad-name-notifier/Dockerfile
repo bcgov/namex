@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 # Upgrade pip and install Poetry
 RUN python3 -m ensurepip --upgrade && \
     python3 -m pip install --upgrade pip setuptools wheel && \
-    curl -sSL https://install.python-poetry.org | python3 - && \
+    curl --proto "=https" --tlsv1.2 -sSf -L https://install.python-poetry.org | python3 - && \
     poetry --version
 
 # Set working directory
