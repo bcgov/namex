@@ -62,6 +62,10 @@ def worker():
                 structured_log(request, message=f'Begin process_nr_state_change for nr_event_msg: {ce}')
                 process_names_event_message(ce, current_app)
                 structured_log(request, message=f'Completed process_nr_state_change for nr_event_msg: {ce}')
+            elif is_processable_firm(ce):
+                structured_log(request, message=f'Begin process_nr_state_change for firm, nr_event_msg: {ce}')
+                process_names_event_message_firm(ce, current_app)
+                structured_log(request, message=f'Completed process_nr_state_change for firm, nr_event_msg: {ce}')
             else:
                 # Skip processing of message as it isn't a message type this queue listener processes
                 structured_log(request, message=f'Skipping processing of nr event message as message type is not supported: {ce}')
@@ -103,6 +107,18 @@ def is_processable(msg: dict):
 
     return False
 
+def is_processable_firm(msg: dict):
+    """Determine if message is processible and a firm."""
+    if msg and is_names_event_msg_type(msg) \
+        and (nr_num := msg.data
+                            .get('request', {})
+                            .get('nrNum', None)) \
+        and (nr := RequestDAO.find_by_nr(nr_num)) \
+        and nr.entity_type_cd in ('FR', 'GP'):
+        return True
+
+    return False
+
 
 def process_names_event_message(msg: dict, flask_app: Flask):
     """Update solr accordingly based on incoming nr state changes."""
@@ -121,6 +137,28 @@ def process_names_event_message(msg: dict, flask_app: Flask):
         elif new_state in ('CANCELLED', 'RESET', 'CONSUMED', 'EXPIRED'):
             process_names_delete(request_state_change)
             process_possible_conflicts_delete(request_state_change)
+        else:
+            structured_log(f'no names processing required for request state change message: {msg}')
+
+    else:
+        structured_log(f'skipping - no matching state change message: {msg}')
+
+
+def process_names_event_message_firm(msg: dict, flask_app: Flask):
+    """Update solr for the firm accordingly based on incoming nr state changes."""
+    if not flask_app or not msg:
+        raise Exception('Flask App or msg not available.')
+
+    structured_log( f'entering processing of nr event msg for firm: {msg}')
+
+    request_state_change = msg.data.get('request', None)
+
+    if request_state_change:
+        new_state = request_state_change.get('newState')
+        if new_state in ('APPROVED', 'CONDITIONAL'):
+            process_names_add(request_state_change)
+        elif new_state in ('CANCELLED', 'RESET'):
+            process_names_delete(request_state_change)
         else:
             structured_log(f'no names processing required for request state change message: {msg}')
 
