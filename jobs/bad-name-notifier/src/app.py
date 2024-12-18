@@ -11,6 +11,7 @@ def create_app(config_name="default"):
     used as a background service or job.
     """
     app = Flask(__name__)
+    # NOSONAR
     app.config['WTF_CSRF_ENABLED'] = False  # Explicitly disable CSRF
     app.config.from_object(APP_CONFIG[config_name])
     print(app.config)
