@@ -4,7 +4,7 @@
 source venv/bin/activate
 
 # Export environment variables
-export FLASK_APP=app.py
+export FLASK_APP=src/app.py
 export FLASK_ENV=development
 
 # Run the Flask app

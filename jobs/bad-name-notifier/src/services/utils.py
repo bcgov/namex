@@ -6,7 +6,7 @@ def get_yesterday_str():
     yesterday = datetime.now() - timedelta(days=1)
     
     # Format the date as yyyy-mm-dd
-    formatted_date = yesterday.strftime('%Y-%m-%d')
+    return yesterday.strftime('%Y-%m-%d')
 
 def get_yesterday_utc_range():
     pacific = pytz.timezone('America/Los_Angeles')
