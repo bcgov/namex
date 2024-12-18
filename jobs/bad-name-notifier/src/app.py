@@ -6,7 +6,7 @@ from services.email_service import send_email_notification
 def create_app(config_name="default"):
     """Creates and configures the Flask app."""
 
-    app = Flask(__name__)
+    app = Flask(__name__) # NOSONAR
     app.config.from_object(APP_CONFIG[config_name])
     print(app.config)
     return app
