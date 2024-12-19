@@ -10,6 +10,7 @@ import requests
 from flask import current_app, jsonify, request, make_response
 from flask_restx import Resource
 
+from namex.constants import RequestAction
 from namex.models import Request, State
 from namex.utils.api_resource import handle_exception
 from namex.utils.auth import cors_preflight, full_access_to_name_request
@@ -279,7 +280,7 @@ class ReportResource(Resource):
 
 
     @staticmethod
-    def _get_instruction_group(legal_type):
+    def _get_instruction_group(legal_type, request_action):
         if ReportResource._is_modernized(legal_type):
             return 'modernized'
         if ReportResource._is_colin(legal_type):
@@ -287,6 +288,8 @@ class ReportResource(Resource):
         if ReportResource._is_society(legal_type):
             return 'so'
         if ReportResource._is_ia(legal_type):
+            if request_action == RequestAction.NEW.value:
+                return 'colin'
             return 'ia'
         return ''
 

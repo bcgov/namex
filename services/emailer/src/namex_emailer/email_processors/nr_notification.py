@@ -24,6 +24,7 @@ from gcp_queue.logging import structured_log
 from jinja2 import Template
 from simple_cloudevent import SimpleCloudEvent
 
+from namex.constants import RequestAction
 from namex_emailer.email_processors import substitute_template_parts
 from namex_emailer.services.helpers import as_legislation_timezone, format_as_report_string, query_nr_number
 
@@ -62,7 +63,7 @@ def _is_ia(legal_type):
     return legal_type in ia_list
 
 
-def __get_instruction_group(legal_type):
+def __get_instruction_group(legal_type, request_action):
     if __is_modernized(legal_type):
         return "modernized"
     if __is_colin(legal_type):
@@ -70,6 +71,8 @@ def __get_instruction_group(legal_type):
     if _is_society(legal_type):
         return "so"
     if _is_ia(legal_type):
+        if request_action == RequestAction.NEW.value:
+            return 'colin'
         return "ia"
     return ""
 
@@ -117,7 +120,8 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
     if option == Option.BEFORE_EXPIRY.value:
         if "entity_type_cd" in nr_data:
             legal_type = nr_data["entity_type_cd"]
-            group = __get_instruction_group(legal_type)
+            request_action = nr_data["request_action_cd"]
+            group = __get_instruction_group(legal_type, request_action)
             if group:
                 instruction_group = "-" + group
                 file_name_suffix += instruction_group.upper()
