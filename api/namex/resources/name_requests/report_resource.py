@@ -289,8 +289,8 @@ class ReportResource(Resource):
             return 'so'
         if ReportResource._is_ia(legal_type):
             if request_action == RequestAction.NEW.value:
-                return 'colin'
-            return 'ia'
+                return 'ia'
+            return 'colin'
         return ''
 
     @staticmethod

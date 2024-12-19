@@ -72,8 +72,8 @@ def __get_instruction_group(legal_type, request_action):
         return "so"
     if _is_ia(legal_type):
         if request_action == RequestAction.NEW.value:
-            return 'colin'
-        return "ia"
+            return 'ia'
+        return "colin"
     return ""
 
 
