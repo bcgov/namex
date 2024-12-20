@@ -16,8 +16,8 @@ def get_bad_names():
     start_of_yesterday_utc, start_of_today_utc = get_yesterday_utc_range()
 
     # Print the timestamps
-    current_app.logger.info("Start of yesterday (UTC):", start_of_yesterday_utc)
-    current_app.logger.info("Start of today (UTC):", start_of_today_utc)
+    current_app.logger.info(f"Start of yesterday (UTC): {start_of_yesterday_utc}")
+    current_app.logger.info(f"Start of today (UTC): {start_of_today_utc}")
 
     try:
         # Wrap the query in text()
