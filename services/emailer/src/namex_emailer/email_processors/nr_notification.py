@@ -24,6 +24,7 @@ from gcp_queue.logging import structured_log
 from jinja2 import Template
 from simple_cloudevent import SimpleCloudEvent
 
+from namex.constants import RequestAction
 from namex_emailer.email_processors import substitute_template_parts
 from namex_emailer.services.helpers import as_legislation_timezone, format_as_report_string, query_nr_number
 
@@ -49,7 +50,7 @@ def __is_modernized(legal_type):
 
 
 def __is_colin(legal_type):
-    colin_list = ["CR", "UL", "CC", "XCR", "XUL", "RLC"]
+    colin_list = ["XCR", "XUL", "RLC"]
     return legal_type in colin_list
 
 
@@ -57,14 +58,22 @@ def _is_society(legal_type):
     society_list = ["SO", "XSO"]
     return legal_type in society_list
 
+def _is_ia(legal_type):
+    ia_list = ["CR", "UL", "CC"]
+    return legal_type in ia_list
 
-def __get_instruction_group(legal_type):
+
+def __get_instruction_group(legal_type, request_action):
     if __is_modernized(legal_type):
         return "modernized"
     if __is_colin(legal_type):
         return "colin"
     if _is_society(legal_type):
         return "so"
+    if _is_ia(legal_type):
+        if request_action == RequestAction.NEW.value:
+            return 'ia'
+        return "colin"
     return ""
 
 
@@ -105,12 +114,14 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
     corp_online_url = current_app.config.get("COLIN_URL")
     form_page_url = current_app.config.get("CORP_FORMS_URL")
     societies_url = current_app.config.get("SOCIETIES_URL")
+    magic_link = f'{current_app.config.get("AUTH_WEB_URL")}magicLink/?nrId={nr_number}&email={nr_data["applicants"]["emailAddress"]}&phone={nr_data["applicants"]["phoneNumber"]}'
 
     file_name_suffix = option.upper()
     if option == Option.BEFORE_EXPIRY.value:
         if "entity_type_cd" in nr_data:
             legal_type = nr_data["entity_type_cd"]
-            group = __get_instruction_group(legal_type)
+            request_action = nr_data["request_action_cd"]
+            group = __get_instruction_group(legal_type, request_action)
             if group:
                 instruction_group = "-" + group
                 file_name_suffix += instruction_group.upper()
@@ -130,6 +141,7 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
         corp_online_url=corp_online_url,
         form_page_url=form_page_url,
         societies_url=societies_url,
+        magic_link=magic_link
     )
 
     # get recipients
