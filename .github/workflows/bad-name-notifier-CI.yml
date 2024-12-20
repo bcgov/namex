@@ -1,0 +1,72 @@
+name: Bad Name Notifier CI
+
+on:
+  pull_request:
+    types: [assigned, synchronize]
+    paths:
+      - "jobs/bad-name-notifier/**"
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./jobs/bad-name-notifier
+
+jobs:
+  setup-job:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v4
+      - run: "true"
+
+  linting:
+    needs: setup-job
+    runs-on: ubuntu-20.04
+
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          make setup
+      - name: Lint with flake8
+        id: flake8
+        run: |
+          poetry run flake8 src/app.py
+
+  # Uncomment and customize this block if testing is required
+  # testing:
+  #   needs: setup-job
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Set up Python ${{ matrix.python-version }}
+  #       uses: actions/setup-python@v1
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
+  #     - name: Install dependencies
+  #       run: |
+  #         make setup
+  #     - name: Test with pytest
+  #       id: test
+  #       run: |
+  #         make test
+
+  build-check:
+    needs: setup-job
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build to check strictness
+        id: build
+        run: |
+          make build-nc
