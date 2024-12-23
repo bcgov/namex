@@ -59,6 +59,6 @@ def query_nr_number(identifier: str):
 
 @staticmethod
 def get_magic_link(nr_number, email, phone):
-    """Return a JSON object with name request information."""
+    """Return a magic link."""
     auth_web_url = current_app.config.get("AUTH_WEB_URL")
     return f'{auth_web_url}incorporateNow/?nr={nr_number}&email={email}&phone={phone}'
