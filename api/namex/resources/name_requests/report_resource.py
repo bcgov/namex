@@ -145,10 +145,12 @@ class ReportResource(Resource):
         nr_report_json['legalAct'] = ReportResource._get_legal_act(nr_model['entity_type_cd'])
         isXPRO = nr_model['entity_type_cd'] in ['XCR', 'XUL', 'RLC', 'XLP', 'XLL', 'XCP', 'XSO']
         nr_report_json['isXPRO'] = isXPRO
-        nr_report_json['isModernized'] = ReportResource._is_modernized(nr_model['entity_type_cd'])
-        nr_report_json['isColin'] = ReportResource._is_colin(nr_model['entity_type_cd'])
-        nr_report_json['isSociety'] = ReportResource._is_society(nr_model['entity_type_cd'])
-        nr_report_json['isPaper'] = not (ReportResource._is_colin(nr_model['entity_type_cd']) or ReportResource._is_modernized(nr_model['entity_type_cd']) or ReportResource._is_society(nr_model['entity_type_cd']))
+        instruction_group = ReportResource._get_instruction_group(nr_model['entity_type_cd'], nr_model['request_action_cd'])
+        nr_report_json['isModernized'] = True if instruction_group == 'modernized' else False
+        nr_report_json['isColin'] = True if instruction_group == 'colin' else False
+        nr_report_json['isSociety'] = True if instruction_group == 'so' else False
+        nr_report_json['isNew'] = True if instruction_group == 'new' else False
+        nr_report_json['isPaper'] = not (ReportResource._is_colin(nr_model['entity_type_cd']) or ReportResource._is_modernized(nr_model['entity_type_cd']) or ReportResource._is_society(nr_model['entity_type_cd']) or ReportResource._is_potential_colin(nr_model['entity_type_cd']))
         nr_report_json['requestCodeDescription'] = \
             ReportResource._get_request_action_cd_description(nr_report_json['request_action_cd'])
         nr_report_json['nrStateDescription'] = \
@@ -274,9 +276,9 @@ class ReportResource(Resource):
         return legal_type in society_list
 
     @staticmethod
-    def _is_ia(legal_type):
-        ia_list = ['CR', 'UL', 'CC']
-        return legal_type in ia_list
+    def _is_potential_colin(legal_type):
+        potential_colin_list = ['CR', 'UL', 'CC']
+        return legal_type in potential_colin_list
 
 
     @staticmethod
@@ -287,9 +289,10 @@ class ReportResource(Resource):
             return 'colin'
         if ReportResource._is_society(legal_type):
             return 'so'
-        if ReportResource._is_ia(legal_type):
+        # return "new" for BC/CC/ULC IAs, "colin" for for BC/CC/ULC others
+        if ReportResource._is_potential_colin(legal_type):
             if request_action == RequestAction.NEW.value:
-                return 'ia'
+                return 'new'
             return 'colin'
         return ''
 
@@ -369,10 +372,12 @@ class ReportResource(Resource):
         next_action_text = {
             # BC Types
             'CR':  {
+               'NEW': 'Check your email for instructions on how to complete your application using this name request.',
                'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
                           f'{url}</a>'
             },
             'UL': {
+               'NEW': 'Check your email for instructions on how to complete your application using this name request.',
                'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
                           f'{url}</a>'
             },
@@ -415,6 +420,7 @@ class ReportResource(Resource):
                'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">{url}</a>'
             },
             'CC': {
+               'NEW': 'Check your email for instructions on how to complete your application using this name request.',
                'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
                           f'{url}</a>'
             },

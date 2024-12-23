@@ -26,7 +26,7 @@ from simple_cloudevent import SimpleCloudEvent
 
 from namex.constants import RequestAction
 from namex_emailer.email_processors import substitute_template_parts
-from namex_emailer.services.helpers import as_legislation_timezone, format_as_report_string, query_nr_number
+from namex_emailer.services.helpers import as_legislation_timezone, format_as_report_string, get_magic_link, query_nr_number
 
 
 class Option(Enum):
@@ -58,9 +58,9 @@ def _is_society(legal_type):
     society_list = ["SO", "XSO"]
     return legal_type in society_list
 
-def _is_ia(legal_type):
-    ia_list = ["CR", "UL", "CC"]
-    return legal_type in ia_list
+def _is_potential_colin(legal_type):
+    potential_colin_list = ["CR", "UL", "CC"]
+    return legal_type in potential_colin_list
 
 
 def __get_instruction_group(legal_type, request_action):
@@ -70,9 +70,10 @@ def __get_instruction_group(legal_type, request_action):
         return "colin"
     if _is_society(legal_type):
         return "so"
-    if _is_ia(legal_type):
+    # return "new" for BC/CC/ULC IAs, "colin" for for BC/CC/ULC others
+    if _is_potential_colin(legal_type):
         if request_action == RequestAction.NEW.value:
-            return 'ia'
+            return 'new'
         return "colin"
     return ""
 
@@ -114,7 +115,7 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
     corp_online_url = current_app.config.get("COLIN_URL")
     form_page_url = current_app.config.get("CORP_FORMS_URL")
     societies_url = current_app.config.get("SOCIETIES_URL")
-    magic_link = f'{current_app.config.get("AUTH_WEB_URL")}magicLink/?nrId={nr_number}&email={nr_data["applicants"]["emailAddress"]}&phone={nr_data["applicants"]["phoneNumber"]}'
+    magic_link = get_magic_link(nr_number, nr_data["applicants"]["emailAddress"], nr_data["applicants"]["phoneNumber"])
 
     file_name_suffix = option.upper()
     if option == Option.BEFORE_EXPIRY.value:

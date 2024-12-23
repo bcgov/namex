@@ -10,7 +10,7 @@ from namex.utils.api_resource import handle_exception
 from simple_cloudevent import SimpleCloudEvent
 from datetime import datetime
 
-from namex_emailer.services.helpers import query_nr_number
+from namex_emailer.services.helpers import get_magic_link, query_nr_number
 
 RESULT_EMAIL_SUBJECT = 'Name Request Results from Corporate Registry'
 CONSENT_EMAIL_SUBJECT = 'Consent Received by Corporate Registry'
@@ -145,7 +145,7 @@ def _build_email_body(template: str, nr_model, email, phone):
         '{{CORP_FORMS_URL}}': current_app.config.get('CORP_FORMS_URL'),
         '{{SOCIETIES_URL}}': current_app.config.get('SOCIETIES_URL'),
         '{{EXPIRATION_DATE}}': nr_model['expirationDate'],
-        '{{MAGIC_LINK}}': f'{current_app.config.get("AUTH_WEB_URL")}magicLink/?nrId={nr_model["nrNum"]}&email={email}&phone={phone}'
+        '{{MAGIC_LINK}}': get_magic_link(nr_model['nrNum'], email, phone)
     }
     for template_string, val in var_map.items():
         if isinstance(val, datetime):
