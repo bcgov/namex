@@ -13,92 +13,65 @@
 # limitations under the License.
 
 apiVersion: deploy.cloud.google.com/v1
-kind: Target
+kind: DeliveryPipeline
 metadata:
- name: dev
-description: Dev Environment
-deployParameters:
-  deploy-env: "development"
-  deploy-project-id: "a083gt-dev"
-  service-name: "namex-emailer-dev"
-  container-name: "namex-emailer-dev"
-  cloudsql-instances: ""
-  app-env: "dev"
-  service-account: "sa-api@a083gt-dev.iam.gserviceaccount.com"
-run:
- location: projects/a083gt-dev/locations/northamerica-northeast1
-executionConfigs:
-- usages: [DEPLOY, RENDER]
-  artifactStorage: 'gs://c4hnrd-tools_clouddeploy/history'
----
-
-apiVersion: deploy.cloud.google.com/v1
-kind: Target
-metadata:
- name: test
-description: Test Environment
-deployParameters:
-  deploy-env: "development"
-  deploy-project-id: "a083gt-test"
-  service-name: "namex-emailer-test"
-  container-name: "namex-emailer-test"
-  cloudsql-instances: ""
-  app-env: "test"
-  service-account: "sa-api@a083gt-test.iam.gserviceaccount.com"
-run:
- location: projects/a083gt-test/locations/northamerica-northeast1
-executionConfigs:
-- usages: [DEPLOY, RENDER]
-  artifactStorage: 'gs://c4hnrd-tools_clouddeploy/history'
----
-
-apiVersion: deploy.cloud.google.com/v1
-kind: Target
-metadata:
- name: sandbox
-description: Sandbox Environment
-requireApproval: true
-deployParameters:
-  deploy-env: "production"
-  deploy-project-id: "a083gt-tools"
-  service-name: "namex-emailer-sandbox"
-  container-name: "namex-emailer-sandbox"
-  cloudsql-instances: ""
-  app-env: "sandbox"
-  service-account: "sa-api@a083gt-tools.iam.gserviceaccount.com"
-  max-scale: "50"
-  container-concurrency: "20"
-  container-port: "8080"
-  resources-cpu: 4000m
-  resources-memory: 8Gi
-run:
- location: projects/a083gt-tools/locations/northamerica-northeast1
-executionConfigs:
-- usages: [DEPLOY, RENDER]
-  artifactStorage: 'gs://c4hnrd-tools_clouddeploy/history'
----
-
-apiVersion: deploy.cloud.google.com/v1
-kind: Target
-metadata:
- name: prod
-description: Production Environment
-requireApproval: true
-deployParameters:
-  deploy-env: "production"
-  deploy-project-id: "a083gt-prod"
-  service-name: "namex-emailer-prod"
-  container-name: "namex-emailer-prod"
-  cloudsql-instances: ""
-  app-env: "production"
-  service-account: "sa-api@a083gt-prod.iam.gserviceaccount.com"
-  max-scale: "50"
-  container-concurrency: "20"
-  container-port: "8080"
-  resources-cpu: 4000m
-  resources-memory: 8Gi
-run:
- location: projects/a083gt-prod/locations/northamerica-northeast1
-executionConfigs:
-- usages: [DEPLOY, RENDER]
-  artifactStorage: 'gs://c4hnrd-tools_clouddeploy/history'
+ name: namex-emailer-pipeline
+description: Deployment pipeline
+serialPipeline:
+ stages:
+ - targetId: a083gt-dev
+   profiles: [dev]
+   strategy:
+    standard:
+      verify: false
+   deployParameters:
+   - values:
+      deploy-env: "development"
+      deploy-project-id: "a083gt-dev"
+      service-name: "namex-emailer-dev"
+      container-name: "namex-emailer-dev"
+      cloudsql-instances: ""
+      service-account: "sa-api@gtksf3-dev.iam.gserviceaccount.com"
+ - targetId: a083gt-test
+   profiles: [test]
+   strategy:
+    standard:
+      verify: false
+   deployParameters:
+   - values:
+      deploy-env: "development"
+      deploy-project-id: "a083gt-test"
+      service-name: "namex-emailer-test"
+      container-name: "namex-emailer-test"
+      cloudsql-instances: ""
+      service-account: "sa-api@gtksf3-test.iam.gserviceaccount.com"
+ - targetId: a083gt-sandbox
+   profiles: [sandbox]
+   strategy:
+    standard:
+      verify: false
+   deployParameters:
+   - values:
+      deploy-env: "production"
+      deploy-project-id: "a083gt-tools"
+      service-name: "namex-emailer-sandbox"
+      container-name: "namex-emailer-sandbox"
+      cloudsql-instances: ""
+      service-account: "sa-api@gtksf3-tools.iam.gserviceaccount.com"
+ - targetId: a083gt-prod
+   profiles: [prod]
+   strategy:
+    standard:
+      verify: false
+   deployParameters:
+   - values:
+      deploy-env: "production"
+      deploy-project-id: "a083gt-prod"
+      service-name: "namex-emailer-prod"
+      container-name: "namex-emailer-prod"
+      container-concurrency: "60"
+      resources-cpu: "8000m"
+      resources-memory: "4Gi"
+      cloudsql-instances: ""
+      service-account: "sa-api@gtksf3-prod.iam.gserviceaccount.com"
+      max-scale: "10"
