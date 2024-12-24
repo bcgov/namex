@@ -49,7 +49,10 @@ def email_consent_letter(email_info: SimpleCloudEvent):
         recipients = ','.join(recipient_emails)
         template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
         file_name = 'consent'
-        instruction_group = ReportResource._get_instruction_group(nr_model['entity_type_cd'], nr_model["request_action_cd"])
+        legal_type = nr_model['entity_type_cd']
+        request_action = nr_model["request_action_cd"]
+        corpNum = nr_model["corpNum"]
+        instruction_group = ReportResource._get_instruction_group(legal_type, request_action, corpNum)
         if instruction_group:
             file_name = f"{file_name}-{instruction_group}"
         email_template = Path(f'{template_path}/{file_name}.md').read_text()

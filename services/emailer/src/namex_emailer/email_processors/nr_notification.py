@@ -25,6 +25,7 @@ from jinja2 import Template
 from simple_cloudevent import SimpleCloudEvent
 
 from namex.constants import RequestAction
+from namex.resources.name_requests import ReportResource
 from namex_emailer.email_processors import substitute_template_parts
 from namex_emailer.services.helpers import as_legislation_timezone, format_as_report_string, get_magic_link, query_nr_number
 
@@ -42,40 +43,6 @@ class Option(Enum):
     REJECTED = "REJECTED"
     CONSENT_RECEIVED = "CONSENT_RECEIVED"
 
-
-
-def __is_modernized(legal_type):
-    modernized_list = ["GP", "DBA", "FR", "CP", "BC"]
-    return legal_type in modernized_list
-
-
-def __is_colin(legal_type):
-    colin_list = ["XCR", "XUL", "RLC"]
-    return legal_type in colin_list
-
-
-def _is_society(legal_type):
-    society_list = ["SO", "XSO"]
-    return legal_type in society_list
-
-def _is_potential_colin(legal_type):
-    potential_colin_list = ["CR", "UL", "CC"]
-    return legal_type in potential_colin_list
-
-
-def __get_instruction_group(legal_type, request_action):
-    if __is_modernized(legal_type):
-        return "modernized"
-    if __is_colin(legal_type):
-        return "colin"
-    if _is_society(legal_type):
-        return "so"
-    # return "new" for BC/CC/ULC IAs, "colin" for for BC/CC/ULC others
-    if _is_potential_colin(legal_type):
-        if request_action == RequestAction.NEW.value:
-            return 'new'
-        return "colin"
-    return ""
 
 
 def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-msg=too-many-locals
@@ -122,7 +89,8 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
         if "entity_type_cd" in nr_data:
             legal_type = nr_data["entity_type_cd"]
             request_action = nr_data["request_action_cd"]
-            group = __get_instruction_group(legal_type, request_action)
+            corpNum = nr_data["corpNum"]
+            group = ReportResource._get_instruction_group(legal_type, request_action, corpNum)
             if group:
                 instruction_group = "-" + group
                 file_name_suffix += instruction_group.upper()

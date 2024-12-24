@@ -19,6 +19,7 @@ from namex.services.name_request import NameRequestService
 from namex.services.name_request.utils import get_mapped_entity_and_action_code
 from namex.utils.auth import get_client_credentials
 from .api_namespace import api
+from ..utils import EntityUtils
 
 setup_logging()  # Important to do this first
 
@@ -145,7 +146,7 @@ class ReportResource(Resource):
         nr_report_json['legalAct'] = ReportResource._get_legal_act(nr_model['entity_type_cd'])
         isXPRO = nr_model['entity_type_cd'] in ['XCR', 'XUL', 'RLC', 'XLP', 'XLL', 'XCP', 'XSO']
         nr_report_json['isXPRO'] = isXPRO
-        instruction_group = ReportResource._get_instruction_group(nr_model['entity_type_cd'], nr_model['request_action_cd'])
+        instruction_group = ReportResource._get_instruction_group(nr_model['entity_type_cd'], nr_model['request_action_cd'], nr_model['corpNum'])
         nr_report_json['isModernized'] = True if instruction_group == 'modernized' else False
         nr_report_json['isColin'] = True if instruction_group == 'colin' else False
         nr_report_json['isSociety'] = True if instruction_group == 'so' else False
@@ -258,12 +259,20 @@ class ReportResource(Resource):
         }
         return entity_type_descriptions.get(entity_type_cd, None)
 
-
+    @staticmethod
+    def _is_lear_entity(corpNum):
+        if not corpNum:
+            return False
+        entity_url = f'{current_app.config.get("ENTITY_SVC_URL")}/businesses/{corpNum}'
+        response = EntityUtils.make_authenticated_request(entity_url)
+        if response.status_code == HTTPStatus.OK and response.json():
+            return True
+        return False
+    
     @staticmethod
     def _is_modernized(legal_type):
         modernized_list = ['GP', 'DBA', 'FR', 'CP', 'BC']
         return legal_type in modernized_list
-
 
     @staticmethod
     def _is_colin(legal_type):
@@ -280,9 +289,11 @@ class ReportResource(Resource):
         potential_colin_list = ['CR', 'UL', 'CC']
         return legal_type in potential_colin_list
 
-
     @staticmethod
-    def _get_instruction_group(legal_type, request_action):
+    def _get_instruction_group(legal_type, request_action, corpNum):
+        if request_action == RequestAction.CHG.value or RequestAction.CNV.value:
+            # For the 'Name Change' or 'Alteration', return 'modernized' if the company is in LEAR, and 'colin' if not
+            return 'modernized' if ReportResource._is_lear_entity(request_action, corpNum) else 'colin'
         if ReportResource._is_modernized(legal_type):
             return 'modernized'
         if ReportResource._is_colin(legal_type):
