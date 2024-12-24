@@ -24,8 +24,10 @@ from gcp_queue.logging import structured_log
 from jinja2 import Template
 from simple_cloudevent import SimpleCloudEvent
 
+from namex.constants import RequestAction
+from namex.resources.name_requests import ReportResource
 from namex_emailer.email_processors import substitute_template_parts
-from namex_emailer.services.helpers import as_legislation_timezone, format_as_report_string, query_nr_number
+from namex_emailer.services.helpers import as_legislation_timezone, format_as_report_string, get_magic_link, query_nr_number
 
 
 class Option(Enum):
@@ -41,31 +43,6 @@ class Option(Enum):
     REJECTED = "REJECTED"
     CONSENT_RECEIVED = "CONSENT_RECEIVED"
 
-
-
-def __is_modernized(legal_type):
-    modernized_list = ["GP", "DBA", "FR", "CP", "BC"]
-    return legal_type in modernized_list
-
-
-def __is_colin(legal_type):
-    colin_list = ["CR", "UL", "CC", "XCR", "XUL", "RLC"]
-    return legal_type in colin_list
-
-
-def _is_society(legal_type):
-    society_list = ["SO", "XSO"]
-    return legal_type in society_list
-
-
-def __get_instruction_group(legal_type):
-    if __is_modernized(legal_type):
-        return "modernized"
-    if __is_colin(legal_type):
-        return "colin"
-    if _is_society(legal_type):
-        return "so"
-    return ""
 
 
 def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-msg=too-many-locals
@@ -105,12 +82,15 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
     corp_online_url = current_app.config.get("COLIN_URL")
     form_page_url = current_app.config.get("CORP_FORMS_URL")
     societies_url = current_app.config.get("SOCIETIES_URL")
+    magic_link = get_magic_link(nr_number, nr_data["applicants"]["emailAddress"], nr_data["applicants"]["phoneNumber"])
 
     file_name_suffix = option.upper()
     if option == Option.BEFORE_EXPIRY.value:
         if "entity_type_cd" in nr_data:
             legal_type = nr_data["entity_type_cd"]
-            group = __get_instruction_group(legal_type)
+            request_action = nr_data["request_action_cd"]
+            corpNum = nr_data["corpNum"]
+            group = ReportResource._get_instruction_group(legal_type, request_action, corpNum)
             if group:
                 instruction_group = "-" + group
                 file_name_suffix += instruction_group.upper()
@@ -130,6 +110,7 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
         corp_online_url=corp_online_url,
         form_page_url=form_page_url,
         societies_url=societies_url,
+        magic_link=magic_link
     )
 
     # get recipients
