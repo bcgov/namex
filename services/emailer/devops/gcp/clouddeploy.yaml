@@ -31,7 +31,7 @@ serialPipeline:
       service-name: "namex-emailer-dev"
       container-name: "namex-emailer-dev"
       cloudsql-instances: ""
-      service-account: "sa-api@gtksf3-dev.iam.gserviceaccount.com"
+      service-account: "sa-api@a083gt-dev.iam.gserviceaccount.com"
  - targetId: a083gt-test
    profiles: [test]
    strategy:
@@ -44,7 +44,7 @@ serialPipeline:
       service-name: "namex-emailer-test"
       container-name: "namex-emailer-test"
       cloudsql-instances: ""
-      service-account: "sa-api@gtksf3-test.iam.gserviceaccount.com"
+      service-account: "sa-api@a083gt-test.iam.gserviceaccount.com"
  - targetId: a083gt-sandbox
    profiles: [sandbox]
    strategy:
@@ -57,7 +57,7 @@ serialPipeline:
       service-name: "namex-emailer-sandbox"
       container-name: "namex-emailer-sandbox"
       cloudsql-instances: ""
-      service-account: "sa-api@gtksf3-tools.iam.gserviceaccount.com"
+      service-account: "sa-api@a083gt-integration.iam.gserviceaccount.com"
  - targetId: a083gt-prod
    profiles: [prod]
    strategy:
@@ -73,5 +73,5 @@ serialPipeline:
       resources-cpu: "8000m"
       resources-memory: "4Gi"
       cloudsql-instances: ""
-      service-account: "sa-api@gtksf3-prod.iam.gserviceaccount.com"
+      service-account: "sa-api@a083gt-prod.iam.gserviceaccount.com"
       max-scale: "10"
