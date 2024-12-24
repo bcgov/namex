@@ -24,7 +24,7 @@ jobs:
       id-token: write
       contents: write
 
-    uses: bcgov/bcregistry-sre/.github/workflows/cloud-run-service-cd.yaml@main
+    uses: bcgov/bcregistry-sre/.github/workflows/backend-cd.yaml@main
     with:
       target: ${{ github.event.inputs.target }}  # Corrected the input reference
       app_name: "namex-emailer"
