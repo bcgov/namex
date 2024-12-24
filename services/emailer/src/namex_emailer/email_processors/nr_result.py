@@ -10,7 +10,7 @@ from namex.utils.api_resource import handle_exception
 from simple_cloudevent import SimpleCloudEvent
 from datetime import datetime
 
-from namex_emailer.services.helpers import query_nr_number
+from namex_emailer.services.helpers import get_magic_link, query_nr_number
 
 RESULT_EMAIL_SUBJECT = 'Name Request Results from Corporate Registry'
 CONSENT_EMAIL_SUBJECT = 'Consent Received by Corporate Registry'
@@ -35,22 +35,28 @@ def email_consent_letter(email_info: SimpleCloudEvent):
         ReportResource._update_entity_and_action_code(nr_model)
         report_name = nr_number + ' - ' + CONSENT_EMAIL_SUBJECT
         recipient_emails = []
+        recipient_phones = []
         applicants = nr_model['applicants']
         if isinstance(applicants, dict):
             recipient_emails.append(applicants['emailAddress'])
+            recipient_phones.append(applicants['phoneNumber'])
         else:
             for applicant in applicants:
                 recipient_emails.append(applicant['emailAddress'])
+                recipient_phones.append(applicant['phoneNumber'])
         if not nr_model['expirationDate']:
             ReportResource._add_expiry_date(nr_model)
         recipients = ','.join(recipient_emails)
         template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
         file_name = 'consent'
-        instruction_group = ReportResource._get_instruction_group(nr_model['entity_type_cd'])
+        legal_type = nr_model['entity_type_cd']
+        request_action = nr_model["request_action_cd"]
+        corpNum = nr_model["corpNum"]
+        instruction_group = ReportResource._get_instruction_group(legal_type, request_action, corpNum)
         if instruction_group:
             file_name = f"{file_name}-{instruction_group}"
         email_template = Path(f'{template_path}/{file_name}.md').read_text()
-        email_body = _build_email_body(email_template, nr_model)
+        email_body = _build_email_body(email_template, nr_model, recipient_emails[0], recipient_phones[0])
         email = {
             'recipients': recipients,
             'content': {
@@ -80,17 +86,20 @@ def email_report(email_info: SimpleCloudEvent):
             return make_response(jsonify(message=str(report)), status_code)
         report_name = nr_number + ' - ' + RESULT_EMAIL_SUBJECT
         recipient_emails = []
+        recipient_phones = []
         applicants = nr_model['applicants']
         if isinstance(applicants, dict):
             recipient_emails.append(applicants['emailAddress'])
+            recipient_phones.append(applicants['phoneNumber'])
         else:
             for applicant in applicants:
                 recipient_emails.append(applicant['emailAddress'])
+                recipient_phones.append(applicant['phoneNumber'])
         recipients = ','.join(recipient_emails)
         template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
         email_template = Path(f'{template_path}/rejected.md').read_text()
         if nr_model['stateCd'] in [State.APPROVED, State.CONDITIONAL]:
-            instruction_group = ReportResource._get_instruction_group(nr_model['entity_type_cd'])
+            instruction_group = ReportResource._get_instruction_group(nr_model['entity_type_cd'], nr_model["request_action_cd"])
             file_name=''
             if nr_model['consentFlag'] in ['Y', 'R']:
                 file_name = 'conditional'
@@ -103,7 +112,7 @@ def email_report(email_info: SimpleCloudEvent):
 
             email_template = Path(f'{template_path}/{file_name}.md').read_text()
 
-        email_body = _build_email_body(email_template, nr_model)
+        email_body = _build_email_body(email_template, nr_model, recipient_emails[0], recipient_phones[0])
 
         email = {
             'recipients': recipients,
@@ -128,7 +137,7 @@ def email_report(email_info: SimpleCloudEvent):
         return handle_exception(err, 'Error retrieving the report.', 500)
 
 
-def _build_email_body(template: str, nr_model):
+def _build_email_body(template: str, nr_model, email, phone):
     var_map = {
         '{{NAMES_INFORMATION_URL}}': current_app.config.get('NAMES_INFORMATION_URL'),
         '{{NAME_REQUEST_URL}}': current_app.config.get('NAME_REQUEST_URL'),
@@ -138,7 +147,8 @@ def _build_email_body(template: str, nr_model):
         '{{CORP_ONLINE_URL}}': current_app.config.get('COLIN_URL'),
         '{{CORP_FORMS_URL}}': current_app.config.get('CORP_FORMS_URL'),
         '{{SOCIETIES_URL}}': current_app.config.get('SOCIETIES_URL'),
-        '{{EXPIRATION_DATE}}': nr_model['expirationDate']
+        '{{EXPIRATION_DATE}}': nr_model['expirationDate'],
+        '{{MAGIC_LINK}}': get_magic_link(nr_model['nrNum'], email, phone)
     }
     for template_string, val in var_map.items():
         if isinstance(val, datetime):

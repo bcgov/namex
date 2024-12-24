@@ -26,14 +26,16 @@
         "vault": "web-url",
         "application": [
             "name-request",
-            "bcregistry"
+            "bcregistry",
+            "auth-web"
         ]
     },
     {
         "vault": "web-url",
         "application": [
             "name-request",
-            "bcregistry"
+            "bcregistry",
+            "auth-web"
         ]
     }
 ]
