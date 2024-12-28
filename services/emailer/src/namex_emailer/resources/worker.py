@@ -133,6 +133,7 @@ def process_email(email_msg: SimpleCloudEvent):  # pylint: disable=too-many-bran
 
 def send_email(email: dict, token: str):
     """Send the email"""
+    structured_log(request, "INFO", f"Send Email: {email}")
     return requests.post(
         f'{current_app.config.get("NOTIFY_API_URL", "")}',
         json=email,

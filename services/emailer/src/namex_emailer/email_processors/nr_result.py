@@ -98,8 +98,12 @@ def email_report(email_info: SimpleCloudEvent):
         recipients = ','.join(recipient_emails)
         template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
         email_template = Path(f'{template_path}/rejected.md').read_text()
+        structured_log(request, "DEBUG", f"NR_notification: {nr_model}")
         if nr_model['stateCd'] in [State.APPROVED, State.CONDITIONAL]:
-            instruction_group = ReportResource._get_instruction_group(nr_model['entity_type_cd'], nr_model["request_action_cd"])
+            legal_type = nr_model['entity_type_cd']
+            request_action = nr_model["request_action_cd"]
+            corpNum = nr_model["corpNum"]
+            instruction_group = ReportResource._get_instruction_group(legal_type, request_action, corpNum)
             file_name=''
             if nr_model['consentFlag'] in ['Y', 'R']:
                 file_name = 'conditional'
@@ -112,6 +116,7 @@ def email_report(email_info: SimpleCloudEvent):
 
             email_template = Path(f'{template_path}/{file_name}.md').read_text()
 
+        structured_log(request, "DEBUG", f"NR_notification: {file_name}")
         email_body = _build_email_body(email_template, nr_model, recipient_emails[0], recipient_phones[0])
 
         email = {
