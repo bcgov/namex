@@ -27,7 +27,8 @@
         "application": [
             "name-request",
             "bcregistry",
-            "auth-web"
+            "auth-web",
+            "business-registry-ui"
         ]
     },
     {
@@ -35,7 +36,8 @@
         "application": [
             "name-request",
             "bcregistry",
-            "auth-web"
+            "auth-web",
+            "business-registry-ui"
         ]
     }
 ]
