@@ -120,7 +120,7 @@ def email_report(email_info: SimpleCloudEvent):
 
             email_template = Path(f'{template_path}/{file_name}.md').read_text()
 
-        structured_log(request, "DEBUG", f"NR_notification: {file_name}")
+        structured_log(request, "DEBUG", f"NR_notification: {nr_model}")
         email_body = _build_email_body(email_template, nr_model, recipient_emails[0], recipient_phones[0])
 
         email = {
