@@ -91,7 +91,7 @@ class Config:  # pylint: disable=too-few-public-methods
     NAMEX_API_URL = os.getenv("NAMEX_API_URL", "")
     NAMEX_API_VERSION = os.getenv("NAMEX_API_VERSION", "")
     LEGAL_API_URL = os.getenv("NOTIFY_API_URL", "https://legal-api-dev.apps.silver.devops.gov.bc.ca")
-    LEGAL_API_VERSION = os.getenv("NOTIFY_API_VERSION", "/api/v1")
+    LEGAL_API_VERSION = os.getenv("NOTIFY_API_VERSION", "/api/v2")
 
     NOTIFY_API_URL = f"{NOTIFY_API_URL + NOTIFY_API_VERSION}/notify"
     NAMEX_SVC_URL = f"{NAMEX_API_URL + NAMEX_API_VERSION}"
