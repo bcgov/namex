@@ -293,7 +293,7 @@ class ReportResource(Resource):
     def _get_instruction_group(legal_type, request_action, corpNum):
         if request_action == RequestAction.CHG.value or RequestAction.CNV.value:
             # For the 'Name Change' or 'Alteration', return 'modernized' if the company is in LEAR, and 'colin' if not
-            return 'modernized' if ReportResource._is_lear_entity(request_action, corpNum) else 'colin'
+            return 'modernized' if ReportResource._is_lear_entity(corpNum) else 'colin'
         if ReportResource._is_modernized(legal_type):
             return 'modernized'
         if ReportResource._is_colin(legal_type):
@@ -302,9 +302,7 @@ class ReportResource(Resource):
             return 'so'
         # return "new" for BC/CC/ULC IAs, "colin" for for BC/CC/ULC others
         if ReportResource._is_potential_colin(legal_type):
-            if request_action == RequestAction.NEW.value:
-                return 'new'
-            return 'colin'
+            return 'new' if request_action == RequestAction.NEW.value else 'colin'
         return ''
 
     @staticmethod

@@ -98,12 +98,12 @@ def email_report(email_info: SimpleCloudEvent):
         recipients = ','.join(recipient_emails)
         template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
         email_template = Path(f'{template_path}/rejected.md').read_text()
-        structured_log(request, "DEBUG", f"NR_notification: {nr_model}")
         if nr_model['stateCd'] in [State.APPROVED, State.CONDITIONAL]:
             legal_type = nr_model['entity_type_cd']
             request_action = nr_model["request_action_cd"]
             corpNum = nr_model["corpNum"]
             instruction_group = ReportResource._get_instruction_group(legal_type, request_action, corpNum)
+            structured_log(request, "DEBUG", f"NR_notification - instruction_group: {instruction_group}")
             file_name=''
             if nr_model['consentFlag'] in ['Y', 'R']:
                 file_name = 'conditional'
@@ -155,6 +155,7 @@ def _build_email_body(template: str, nr_model, email, phone):
         '{{EXPIRATION_DATE}}': nr_model['expirationDate'],
         '{{MAGIC_LINK}}': get_magic_link(nr_model['nrNum'], email, phone)
     }
+    structured_log(request, "DEBUG", f"NR_notification - get_magic_link: {get_magic_link(nr_model['nrNum'], email, phone)}")
     for template_string, val in var_map.items():
         if isinstance(val, datetime):
             val = val.strftime(DATE_FORMAT)
