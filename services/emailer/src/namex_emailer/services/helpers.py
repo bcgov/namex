@@ -5,6 +5,7 @@ import requests
 from flask import current_app
 from cachetools import cached, TTLCache
 from urllib.parse import urlencode
+from namex.constants import RequestAction
 
 @staticmethod
 @cached(cache=TTLCache(maxsize=1, ttl=180)) 
@@ -69,3 +70,41 @@ def get_magic_link(nr_number, email, phone):
     }
     encoded_params = urlencode(params)
     return f'{BUSINESS_REGISTRY_URL}incorporateNow/?{encoded_params}'
+
+
+@staticmethod
+def _is_lear_entity(corpNum):
+    if not corpNum:
+        return False
+    entity_url = f'{current_app.config.get("ENTITY_SVC_URL")}/businesses/{corpNum}'
+    token = get_bearer_token()
+    response = requests.get(entity_url, headers={
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+    })
+
+    return response
+
+
+# This function will be removed if the emailer service and NameX API are in sync well 
+@staticmethod
+def get_instruction_group(legal_type, request_action, corpNum):
+    legal_type_groups = {
+        'modernized': ['GP', 'DBA', 'FR', 'CP', 'BC'],
+        'colin': ['XCR', 'XUL', 'RLC'],
+        'society': ['SO', 'XSO'],
+        'potential_colin': ['CR', 'UL', 'CC']
+    }
+
+    if request_action in {RequestAction.CHG.value, RequestAction.CNV.value}:
+        return 'modernized' if _is_lear_entity(corpNum) else 'colin'
+    if legal_type in legal_type_groups['modernized']:
+        return 'modernized'
+    if legal_type in legal_type_groups['colin']:
+        return 'colin'
+    if legal_type in legal_type_groups['society']:
+        return 'so'
+    if legal_type in legal_type_groups['potential_colin']:
+        return 'new' if request_action == RequestAction.NEW.value else 'colin'
+
+    return ''

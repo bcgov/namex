@@ -12,7 +12,8 @@
         "application": [
             "notify-api",
             "namex-api",
-            "report-api"
+            "report-api",
+            "legal-api"
         ]
     },
     {
