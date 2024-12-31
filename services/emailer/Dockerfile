@@ -64,9 +64,6 @@ RUN groupadd -g "${GID}" -r web \
 # Copy only requirements, to cache them in docker layer
 COPY --chown=web:web ./poetry.lock ./pyproject.toml /code/
 
-COPY --chown=web:web ./src /code/src
-COPY --chown=web:web ./README.md /code
-
 # Project initialization:
 RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
   echo "$APP_ENV" \
@@ -80,10 +77,7 @@ RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
 # Running as non-root user:
 USER web
 
-# The following stage is only for production:
-# FROM development_build AS production_build
-COPY --chown=web:web . /code
-
-# ENV PYTHONPATH=/opt/app-root/src
+COPY --chown=web:web ./src /code/src
+COPY --chown=web:web ./README.md /code
 
 CMD gunicorn --preload --bind 0.0.0.0:${PORT} --config /code/gunicorn_config.py wsgi:app
