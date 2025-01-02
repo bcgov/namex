@@ -9,8 +9,6 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 
 class Config:
-    """Base configuration class."""
-
     # Database Configuration
     DB_USER = os.getenv("NAMEX_DATABASE_USERNAME", "")
     DB_PASSWORD = os.getenv("NAMEX_DATABASE_PASSWORD", "")
@@ -30,18 +28,15 @@ class Config:
 
 
 class DevConfig(Config):
-    """Development-specific configuration."""
     DEBUG = True
 
 
 class TestConfig(Config):
-    """Testing-specific configuration."""
     DEBUG = True
     TESTING = True
 
 
 class ProdConfig(Config):
-    """Production-specific configuration."""
     pass
 
 
