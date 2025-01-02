@@ -57,10 +57,8 @@ APP_CONFIG = {
 
 
 def get_named_config(config_name: str = "default"):
-    """Return the configuration object based on the name.
-
-    :raise: KeyError: if an unknown configuration is requested
-    """
-    if config_name not in APP_CONFIG:
+    """Return the configuration object based on the name."""
+    try:
+        return APP_CONFIG[config_name]
+    except KeyError:
         raise KeyError(f"Unknown configuration: {config_name}")
-    return APP_CONFIG[config_name]
