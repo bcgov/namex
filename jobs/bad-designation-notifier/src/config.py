@@ -48,7 +48,7 @@ class ProdConfig(Config):
 
 
 # Environment-specific configuration mapping
-APP_CONFIG = {
+_APP_CONFIG = {
     "development": DevConfig,
     "testing": TestConfig,
     "production": ProdConfig,
@@ -59,6 +59,6 @@ APP_CONFIG = {
 def get_named_config(config_name: str = "default"):
     """Return the configuration object based on the name."""
     try:
-        return APP_CONFIG[config_name]
+        return _APP_CONFIG[config_name]
     except KeyError:
         raise KeyError(f"Unknown configuration: {config_name}")

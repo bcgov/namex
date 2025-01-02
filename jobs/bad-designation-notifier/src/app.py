@@ -1,4 +1,4 @@
-from src.config import APP_CONFIG
+from config import get_named_config
 from flask import Flask, current_app
 from services.database_service import get_bad_designations
 from services.email_service import send_email_notification
@@ -11,7 +11,7 @@ def create_app(config_name="default"):
     """Creates and configures the Flask app."""
 
     app = Flask(__name__) # NOSONAR
-    app.config.from_object(APP_CONFIG[config_name])
+    app.config.from_object(get_named_config(config_name))
     print(app.config)
     return app
 
