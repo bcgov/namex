@@ -9,6 +9,7 @@ from pytz import timezone
 import requests
 from flask import current_app, jsonify, request, make_response
 from flask_restx import Resource
+from gcp_queue.logging import structured_log
 
 from namex.constants import RequestAction
 from namex.models import Request, State
@@ -173,6 +174,7 @@ class ReportResource(Resource):
             nr_report_json['applicants']['countryName'] = \
                 pycountry.countries.search_fuzzy(nr_report_json['applicants']['countryTypeCd'])[0].name
         actions_obj = ReportResource._get_next_action_text(nr_model['entity_type_cd'])
+        structured_log(request, "DEBUG", f"NR_notification: {nr_model['entity_type_cd'], nr_report_json['request_action_cd'], nr_model}")
         if actions_obj:
             action_text = actions_obj.get(nr_report_json['request_action_cd'])
             if not action_text:
