@@ -32,7 +32,6 @@ class Config:
 class DevConfig(Config):
     """Development-specific configuration."""
     DEBUG = True
-    TESTING = False
 
 
 class TestConfig(Config):
@@ -43,8 +42,7 @@ class TestConfig(Config):
 
 class ProdConfig(Config):
     """Production-specific configuration."""
-    DEBUG = False
-    TESTING = False
+    pass
 
 
 # Environment-specific configuration mapping
