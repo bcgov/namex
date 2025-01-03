@@ -10,8 +10,7 @@ def get_bad_designations():
     """Fetches bad names from the database."""
     # Create the database engine and session
     engine = create_engine(current_app.config["NAMEX_DATABASE_URI"])
-    Session = sessionmaker(bind=engine)
-    session = Session()
+    session = sessionmaker(bind=engine)()
 
     yesterday_pacific = get_yesterday_str()
 
@@ -63,7 +62,6 @@ def get_bad_designations():
         result = session.execute(query).fetchall()
 
         # Convert result rows to a list of dictionaries
-        keys = ["nr_num","name", "last_update", "request_type_cd", "entity_type_cd", "state_cd", "expiration_date", "consumed_corp_num", "consumed_date"]
         formatted_result = [
             [(value if value is not None else 'n/a') for value in row]
             for row in result

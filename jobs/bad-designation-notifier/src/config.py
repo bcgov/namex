@@ -10,12 +10,12 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 class Config:
     # Database Configuration
-    DB_USER = os.getenv("NAMEX_DATABASE_USERNAME", "")
-    DB_PASSWORD = os.getenv("NAMEX_DATABASE_PASSWORD", "")
-    DB_NAME = os.getenv("NAMEX_DATABASE_NAME", "")
-    DB_HOST = os.getenv("NAMEX_DATABASE_HOST", "")
-    DB_PORT = os.getenv("NAMEX_DATABASE_PORT", "5432")
-    NAMEX_DATABASE_URI = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    _DB_USER = os.getenv("NAMEX_DATABASE_USERNAME", "")
+    _DB_PASSWORD = os.getenv("NAMEX_DATABASE_PASSWORD", "")
+    _DB_NAME = os.getenv("NAMEX_DATABASE_NAME", "")
+    _DB_HOST = os.getenv("NAMEX_DATABASE_HOST", "")
+    _DB_PORT = os.getenv("NAMEX_DATABASE_PORT", "5432")
+    NAMEX_DATABASE_URI = f"postgresql://{_DB_USER}:{_DB_PASSWORD}@{_DB_HOST}:{_DB_PORT}/{_DB_NAME}"
 
     # Email Configuration
     EMAIL_RECIPIENTS = os.getenv("EMAIL_RECIPIENTS", "").split(",")
