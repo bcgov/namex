@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "bad-designation-notifier"
+version = "0.1.0"
+description = "An app to detect and notify about bad designations."
+authors = ["Your Name <your.email@example.com>"]
+license = "Apache-2.0"
+readme = "README.md"
+packages = [
+    { include = "services", from = "src" },  # Updated to specify the `src` path
+    { include = "src" }                      # Ensure `src` folder is packaged
+]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+flask = "^3.0.2"
+sqlalchemy = "^1.4.18"
+psycopg2-binary = "^2.9.7"
+secure-smtplib = "^0.1.1"
+pytz = "^2022.4"
+python-dotenv = "^1.0.1"
