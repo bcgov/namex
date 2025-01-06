@@ -174,7 +174,12 @@ class ReportResource(Resource):
             nr_report_json['applicants']['countryName'] = \
                 pycountry.countries.search_fuzzy(nr_report_json['applicants']['countryTypeCd'])[0].name
         actions_obj = ReportResource._get_next_action_text(nr_model['entity_type_cd'])
-        structured_log(request, "DEBUG", f"NR_notification: {nr_model['entity_type_cd'], nr_report_json['request_action_cd'], nr_model}")
+        structured_log(request, "DEBUG", f"NR_notification - NameX API: {actions_obj}")
+        current_app.logger.debug(f"NR_notification - NameX API: {actions_obj}")
+        structured_log(request, "DEBUG", f"NR_notification - NameX API: {nr_report_json['request_action_cd']}")
+        current_app.logger.debug(f"NR_notification - NameX API: {nr_report_json['request_action_cd']}")
+        structured_log(request, "DEBUG", f"NR_notification - NameX API: {nr_model['entity_type_cd']}")
+        current_app.logger.debug(f"NR_notification - NameX API: {nr_model['entity_type_cd']}")
         if actions_obj:
             action_text = actions_obj.get(nr_report_json['request_action_cd'])
             if not action_text:
@@ -485,4 +490,6 @@ class ReportResource(Resource):
                 'DEFAULT': 'FIRM (Legacy Oracle)'
             }
         }
+        structured_log(request, "DEBUG", f"NR_notification - NameX API: {next_action_text}")
+        current_app.logger.debug(f"NR_notification - NameX API: {next_action_text}")
         return next_action_text.get(entity_type_cd, None)
