@@ -13,7 +13,7 @@ gcp_queue = { git = "https://github.com/bcgov/namex.git", subdirectory = "servic
 swagger_client = { git = "https://github.com/bcgov/namex-synonyms-api-py-client.git" }
 simple_cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py" }
 # flask-jwt-oidc = { git = "https://github.com/thorwolpert/flask-jwt-oidc.git" }
-flask-jwt-oidc = { git = "https://github.com/bolyachevets/flask-jwt-oidc.git", branch = "bump-flask-version" }
+flask-jwt-oidc = { git = "https://github.com/seeker25/flask-jwt-oidc.git" }
 sbc-common-components = { git = "https://github.com/bcgov/sbc-common-components.git", subdirectory = "python" }
 
 gunicorn = "^20.1.0"
