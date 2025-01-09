@@ -174,12 +174,6 @@ class ReportResource(Resource):
             nr_report_json['applicants']['countryName'] = \
                 pycountry.countries.search_fuzzy(nr_report_json['applicants']['countryTypeCd'])[0].name
         actions_obj = ReportResource._get_next_action_text(nr_model['entity_type_cd'])
-        structured_log(request, "DEBUG", f"NR_notification - NameX API: {actions_obj}")
-        current_app.logger.debug(f"NR_notification - NameX API: {actions_obj}")
-        structured_log(request, "DEBUG", f"NR_notification - NameX API: {nr_report_json['request_action_cd']}")
-        current_app.logger.debug(f"NR_notification - NameX API: {nr_report_json['request_action_cd']}")
-        structured_log(request, "DEBUG", f"NR_notification - NameX API: {nr_model['entity_type_cd']}")
-        current_app.logger.debug(f"NR_notification - NameX API: {nr_model['entity_type_cd']}")
         if actions_obj:
             action_text = actions_obj.get(nr_report_json['request_action_cd'])
             if not action_text:
@@ -298,7 +292,7 @@ class ReportResource(Resource):
 
     @staticmethod
     def _get_instruction_group(legal_type, request_action, corpNum):
-        if request_action == RequestAction.CHG.value or RequestAction.CNV.value:
+        if request_action in {RequestAction.CHG.value, RequestAction.CNV.value}:
             # For the 'Name Change' or 'Alteration', return 'modernized' if the company is in LEAR, and 'colin' if not
             return 'modernized' if ReportResource._is_lear_entity(corpNum) else 'colin'
         if ReportResource._is_modernized(legal_type):

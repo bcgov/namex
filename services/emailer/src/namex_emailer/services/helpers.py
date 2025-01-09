@@ -2,10 +2,12 @@ from datetime import datetime
 
 import pytz
 import requests
-from flask import current_app
+from http import HTTPStatus
+from flask import current_app, request
+from gcp_queue.logging import structured_log
 from cachetools import cached, TTLCache
 from urllib.parse import urlencode
-from namex.constants import RequestAction
+from namex.resources.name_requests import ReportResource
 
 @staticmethod
 @cached(cache=TTLCache(maxsize=1, ttl=180)) 
@@ -73,38 +75,24 @@ def get_magic_link(nr_number, email, phone):
 
 
 @staticmethod
-def _is_lear_entity(corpNum):
-    if not corpNum:
-        return False
-    entity_url = f'{current_app.config.get("ENTITY_SVC_URL")}/businesses/{corpNum}'
-    token = get_bearer_token()
-    response = requests.get(entity_url, headers={
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token
-    })
-
-    return response
-
-
-# This function will be removed if the emailer service and NameX API are in sync well 
-@staticmethod
 def get_instruction_group(legal_type, request_action, corpNum):
+    from namex.services import flags  # pylint: disable=import-outside-toplevel
+    enable_won_emails = flags.value('enable-won-emails')
+    structured_log(request, "DEBUG", f"enable way of navigation emails feature flags value: {enable_won_emails}")
+    if enable_won_emails:
+       structured_log(request, "DEBUG", f"enable way of navigation emails")
+       return ReportResource._get_instruction_group(legal_type, request_action, corpNum)
+
     legal_type_groups = {
         'modernized': ['GP', 'DBA', 'FR', 'CP', 'BC'],
-        'colin': ['XCR', 'XUL', 'RLC'],
-        'society': ['SO', 'XSO'],
-        'potential_colin': ['CR', 'UL', 'CC']
+        'colin': ['CR', 'UL', 'CC', 'XCR', 'XUL', 'RLC'],
+        'society': ['SO', 'XSO']
     }
 
-    if request_action in {RequestAction.CHG.value, RequestAction.CNV.value}:
-        return 'modernized' if _is_lear_entity(corpNum) else 'colin'
     if legal_type in legal_type_groups['modernized']:
         return 'modernized'
     if legal_type in legal_type_groups['colin']:
         return 'colin'
     if legal_type in legal_type_groups['society']:
         return 'so'
-    if legal_type in legal_type_groups['potential_colin']:
-        return 'new' if request_action == RequestAction.NEW.value else 'colin'
-
     return ''

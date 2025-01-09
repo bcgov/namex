@@ -40,5 +40,11 @@
             "auth-web",
             "business-registry-ui"
         ]
+    },
+    {
+        "vault": "launchdarkly",
+        "application": [
+            "namex"
+        ]
     }
 ]

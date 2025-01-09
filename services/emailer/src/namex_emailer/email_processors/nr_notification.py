@@ -89,8 +89,6 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
             legal_type = nr_data["entity_type_cd"]
             request_action = nr_data["request_action_cd"]
             corpNum = nr_data["corpNum"]
-            # This function will be restred after the emailer service and NameX API are sync well.
-            # group = ReportResource._get_instruction_group(legal_type, request_action, corpNum)
             group = get_instruction_group(legal_type, request_action, corpNum)
             if group:
                 instruction_group = "-" + group
