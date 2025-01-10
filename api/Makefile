@@ -97,7 +97,7 @@ cd:
 else
 TAG_NAME=dev
 ## cd: build update-env tag
-cd:
+cd: build tag
 endif
 
 build: ## Build the docker container
@@ -115,8 +115,8 @@ push: #build ## Push the docker container to the registry & tag latest
     docker tag $(DOCKER_NAME) $(REGISTRY_IMAGE):latest ;\
     docker push $(REGISTRY_IMAGE):latest
 
-VAULTS=`cat devops/vaults.json`
-## update-env: ## Update env from 1pass
+# VAULTS=`cat devops/vaults.json`
+# update-env: ## Update env from 1pass
 #	oc -n "$(OPS_REPOSITORY)-$(TAG_NAME)" exec "dc/vault-service-$(TAG_NAME)" -- ./scripts/1pass.sh \
 #		-m "secret" \
 #		-e "$(TAG_NAME)" \
