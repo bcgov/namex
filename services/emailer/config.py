@@ -73,7 +73,7 @@ class Config:  # pylint: disable=too-few-public-methods
 
     ENVIRONMENT = os.getenv("APP_ENV", "prod")
 
-    LD_SDK_KEY = os.getenv("LD_SDK_KEY", None)
+    NAMEX_LD_SDK_ID = os.getenv("NAMEX_LD_SDK_ID", None)
 
     SENTRY_DSN = os.getenv("SENTRY_DSN", None)
 
@@ -90,8 +90,8 @@ class Config:  # pylint: disable=too-few-public-methods
     NOTIFY_API_VERSION = os.getenv("NOTIFY_API_VERSION", "")
     NAMEX_API_URL = os.getenv("NAMEX_API_URL", "")
     NAMEX_API_VERSION = os.getenv("NAMEX_API_VERSION", "")
-    LEGAL_API_URL = os.getenv("NOTIFY_API_URL", "https://legal-api-dev.apps.silver.devops.gov.bc.ca")
-    LEGAL_API_VERSION = os.getenv("NOTIFY_API_VERSION", "/api/v2")
+    LEGAL_API_URL = os.getenv("LEGAL_API_URL", "https://legal-api-dev.apps.silver.devops.gov.bc.ca")
+    LEGAL_API_VERSION = os.getenv("LEGAL_API_VERSION", "/api/v1")
 
     NOTIFY_API_URL = f"{NOTIFY_API_URL + NOTIFY_API_VERSION}/notify"
     NAMEX_SVC_URL = f"{NAMEX_API_URL + NAMEX_API_VERSION}"
