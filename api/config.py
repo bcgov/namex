@@ -60,7 +60,6 @@ permits-licences/businesses-incorporated-companies/approval-business-name')
     SOCIETIES_URL = os.getenv('SOCIETIES_URL', '')
 
     NAMEX_LD_SDK_ID = os.getenv('NAMEX_LD_SDK_ID', '')
-    LD_SDK_KEY = os.getenv('LD_SDK_KEY', '')
 
     # POSTGRESQL
     DB_USER = os.getenv('NAMEX_DATABASE_USERNAME', '')

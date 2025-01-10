@@ -64,7 +64,7 @@ class Flags():
     def init_app(self, app):
         """Initialize the Feature Flag environment."""
         self.app = app
-        self.sdk_key = app.config.get('LD_SDK_KEY')
+        self.sdk_key = app.config.get('NAMEX_LD_SDK_ID')
 
         if self.sdk_key or app.env != 'production':
 

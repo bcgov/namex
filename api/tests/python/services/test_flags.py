@@ -38,7 +38,7 @@ def test_flags_init_app():
     """Ensure that extension can be initialized."""
     app = Flask(__name__)
     app.env = 'development'
-    app.config['LD_SDK_KEY'] = 'https://no.flag/avail'
+    app.config['NAMEX_LD_SDK_ID'] = 'https://no.flag/avail'
 
     with app.app_context():
         flags = Flags()
@@ -50,7 +50,7 @@ def test_flags_init_app_production():
     """Ensure that extension can be initialized."""
     app = Flask(__name__)
     app.env = 'production'
-    app.config['LD_SDK_KEY'] = 'https://no.flag/avail'
+    app.config['NAMEX_LD_SDK_ID'] = 'https://no.flag/avail'
 
     with app.app_context():
         flags = Flags()
@@ -61,7 +61,7 @@ def test_flags_init_app_production():
 def test_flags_init_app_no_key_dev():
     """Assert that the extension is setup with a KEY, but in non-production mode."""
     app = Flask(__name__)
-    app.config['LD_SDK_KEY'] = None
+    app.config['NAMEX_LD_SDK_ID'] = None
     app.env = 'development'
 
     with app.app_context():
@@ -73,7 +73,7 @@ def test_flags_init_app_no_key_dev():
 def test_flags_init_app_no_key_prod():
     """Assert that prod with no key initializes, but does not setup the extension."""
     app = Flask(__name__)
-    app.config['LD_SDK_KEY'] = None
+    app.config['NAMEX_LD_SDK_ID'] = None
     app.env = 'production'
 
     with app.app_context():
@@ -87,7 +87,7 @@ def test_flags_init_app_no_key_prod():
 def test_flags_bool_no_key_prod():
     """Assert that prod with no key initializes, but does not setup the extension."""
     app = Flask(__name__)
-    app.config['LD_SDK_KEY'] = None
+    app.config['NAMEX_LD_SDK_ID'] = None
     app.env = 'production'
 
     with app.app_context():
@@ -102,7 +102,7 @@ def test_flags_bool():
     """Assert that a boolean (True) is returned, when using the local Flag.json file."""
     app = Flask(__name__)
     app.env = 'development'
-    app.config['LD_SDK_KEY'] = 'https://no.flag/avail'
+    app.config['NAMEX_LD_SDK_ID'] = 'https://no.flag/avail'
 
     with app.app_context():
         flags = Flags()
@@ -161,7 +161,7 @@ def test_flag_bool_unique_user():
     """Assert that a unique user can retrieve a flag, when using the local Flag.json file."""
     app = Flask(__name__)
     app.env = 'development'
-    app.config['LD_SDK_KEY'] = 'https://no.flag/avail'
+    app.config['NAMEX_LD_SDK_ID'] = 'https://no.flag/avail'
 
     user = User(username='username', firstname='firstname', lastname='lastname', sub='sub', iss='iss', idp_userid='123', login_source='IDIR')
 
