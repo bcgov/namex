@@ -27,7 +27,7 @@ from simple_cloudevent import SimpleCloudEvent
 from namex.constants import RequestAction
 from namex.resources.name_requests import ReportResource
 from namex_emailer.email_processors import substitute_template_parts
-from namex_emailer.services.helpers import as_legislation_timezone, format_as_report_string, get_magic_link, query_nr_number, get_instruction_group
+from namex_emailer.services.helpers import as_legislation_timezone, format_as_report_string, get_magic_link, query_nr_number
 
 class Option(Enum):
     """NR notification option."""
@@ -87,11 +87,7 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
     if option == Option.BEFORE_EXPIRY.value:
         if "entity_type_cd" in nr_data:
             legal_type = nr_data["entity_type_cd"]
-            request_action = nr_data["request_action_cd"]
-            corpNum = nr_data["corpNum"]
-            # This function will be restred after the emailer service and NameX API are sync well.
-            # group = ReportResource._get_instruction_group(legal_type, request_action, corpNum)
-            group = get_instruction_group(legal_type, request_action, corpNum)
+            group = ReportResource._get_instruction_group(legal_type)
             if group:
                 instruction_group = "-" + group
                 file_name_suffix += instruction_group.upper()
