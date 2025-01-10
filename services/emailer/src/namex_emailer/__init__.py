@@ -47,8 +47,6 @@ from namex_emailer.utils import get_run_version
 from .resources import register_endpoints
 from .services import queue
 
-from namex.services import flags
-
 
 def create_app(environment: Config = Production, **kwargs) -> Flask:
     """Return a configured Flask App using the Factory method."""
@@ -64,7 +62,6 @@ def create_app(environment: Config = Production, **kwargs) -> Flask:
             send_default_pii=False,
         )
 
-    flags.init_app(app)
     queue.init_app(app)
     register_endpoints(app)
 

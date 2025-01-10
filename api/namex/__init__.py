@@ -32,7 +32,6 @@ from namex import models
 from namex.models import db, ma
 from namex.resources import api
 from namex.utils.run_version import get_run_version
-from namex.services import flags
 
 # noqa: I003; dont know what flake8 wants here
 
@@ -53,7 +52,6 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
                integrations=[FlaskIntegration()]
             )
 
-    flags.init_app(app)
     queue.init_app(app)
 
     db.init_app(app)

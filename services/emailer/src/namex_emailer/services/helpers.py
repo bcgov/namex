@@ -72,27 +72,3 @@ def get_magic_link(nr_number, email, phone):
     }
     encoded_params = urlencode(params)
     return f'{BUSINESS_REGISTRY_URL}incorporateNow/?{encoded_params}'
-
-
-@staticmethod
-def get_instruction_group(legal_type, request_action, corpNum):
-    from namex.services import flags  # pylint: disable=import-outside-toplevel
-    enable_won_emails = flags.value('enable-won-emails')
-    structured_log(request, "DEBUG", f"enable way of navigation emails feature flags value: {enable_won_emails}")
-    if enable_won_emails:
-       structured_log(request, "DEBUG", f"enable way of navigation emails")
-       return ReportResource._get_instruction_group(legal_type, request_action, corpNum)
-
-    legal_type_groups = {
-        'modernized': ['GP', 'DBA', 'FR', 'CP', 'BC'],
-        'colin': ['CR', 'UL', 'CC', 'XCR', 'XUL', 'RLC'],
-        'society': ['SO', 'XSO']
-    }
-
-    if legal_type in legal_type_groups['modernized']:
-        return 'modernized'
-    if legal_type in legal_type_groups['colin']:
-        return 'colin'
-    if legal_type in legal_type_groups['society']:
-        return 'so'
-    return ''

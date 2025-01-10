@@ -10,7 +10,7 @@ from namex.utils.api_resource import handle_exception
 from simple_cloudevent import SimpleCloudEvent
 from datetime import datetime
 
-from namex_emailer.services.helpers import get_magic_link, query_nr_number, get_instruction_group
+from namex_emailer.services.helpers import get_magic_link, query_nr_number
 
 RESULT_EMAIL_SUBJECT = 'Name Request Results from Corporate Registry'
 CONSENT_EMAIL_SUBJECT = 'Consent Received by Corporate Registry'
@@ -50,9 +50,7 @@ def email_consent_letter(email_info: SimpleCloudEvent):
         template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
         file_name = 'consent'
         legal_type = nr_model['entity_type_cd']
-        request_action = nr_model["request_action_cd"]
-        corpNum = nr_model["corpNum"]
-        instruction_group = get_instruction_group(legal_type, request_action, corpNum)
+        instruction_group = ReportResource._get_instruction_group(legal_type)
         if instruction_group:
             file_name = f"{file_name}-{instruction_group}"
         email_template = Path(f'{template_path}/{file_name}.md').read_text()
@@ -100,9 +98,7 @@ def email_report(email_info: SimpleCloudEvent):
         email_template = Path(f'{template_path}/rejected.md').read_text()
         if nr_model['stateCd'] in [State.APPROVED, State.CONDITIONAL]:
             legal_type = nr_model['entity_type_cd']
-            request_action = nr_model["request_action_cd"]
-            corpNum = nr_model["corpNum"]
-            instruction_group = get_instruction_group(legal_type, request_action, corpNum)
+            instruction_group = ReportResource._get_instruction_group(legal_type)
             file_name=''
             if nr_model['consentFlag'] in ['Y', 'R']:
                 file_name = 'conditional'
