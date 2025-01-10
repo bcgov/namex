@@ -174,12 +174,6 @@ class ReportResource(Resource):
             nr_report_json['applicants']['countryName'] = \
                 pycountry.countries.search_fuzzy(nr_report_json['applicants']['countryTypeCd'])[0].name
         actions_obj = ReportResource._get_next_action_text(nr_model['entity_type_cd'])
-        structured_log(request, "DEBUG", f"NR_notification - NameX API: {actions_obj}")
-        current_app.logger.debug(f"NR_notification - NameX API: {actions_obj}")
-        structured_log(request, "DEBUG", f"NR_notification - NameX API: {nr_report_json['request_action_cd']}")
-        current_app.logger.debug(f"NR_notification - NameX API: {nr_report_json['request_action_cd']}")
-        structured_log(request, "DEBUG", f"NR_notification - NameX API: {nr_model['entity_type_cd']}")
-        current_app.logger.debug(f"NR_notification - NameX API: {nr_model['entity_type_cd']}")
         if actions_obj:
             action_text = actions_obj.get(nr_report_json['request_action_cd'])
             if not action_text:
@@ -283,7 +277,7 @@ class ReportResource(Resource):
 
     @staticmethod
     def _is_colin(legal_type):
-        colin_list = ['XCR', 'XUL', 'RLC']
+        colin_list = ['CR', 'UL', 'CC', 'XCR', 'XUL', 'RLC']
         return legal_type in colin_list
     
     @staticmethod
@@ -292,24 +286,13 @@ class ReportResource(Resource):
         return legal_type in society_list
 
     @staticmethod
-    def _is_potential_colin(legal_type):
-        potential_colin_list = ['CR', 'UL', 'CC']
-        return legal_type in potential_colin_list
-
-    @staticmethod
-    def _get_instruction_group(legal_type, request_action, corpNum):
-        if request_action == RequestAction.CHG.value or RequestAction.CNV.value:
-            # For the 'Name Change' or 'Alteration', return 'modernized' if the company is in LEAR, and 'colin' if not
-            return 'modernized' if ReportResource._is_lear_entity(corpNum) else 'colin'
+    def _get_instruction_group(legal_type):
         if ReportResource._is_modernized(legal_type):
             return 'modernized'
         if ReportResource._is_colin(legal_type):
             return 'colin'
         if ReportResource._is_society(legal_type):
             return 'so'
-        # return "new" for BC/CC/ULC IAs, "colin" for for BC/CC/ULC others
-        if ReportResource._is_potential_colin(legal_type):
-            return 'new' if request_action == RequestAction.NEW.value else 'colin'
         return ''
 
     @staticmethod
@@ -388,12 +371,10 @@ class ReportResource(Resource):
         next_action_text = {
             # BC Types
             'CR':  {
-               'NEW': 'Check your email for instructions on how to complete your application using this name request.',
                'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
                           f'{url}</a>'
             },
             'UL': {
-               'NEW': 'Check your email for instructions on how to complete your application using this name request.',
                'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
                           f'{url}</a>'
             },
@@ -436,7 +417,6 @@ class ReportResource(Resource):
                'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">{url}</a>'
             },
             'CC': {
-               'NEW': 'Check your email for instructions on how to complete your application using this name request.',
                'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
                           f'{url}</a>'
             },
