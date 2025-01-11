@@ -149,10 +149,13 @@ def valid_state_transition(user, nr, new_state):
     """
     # when the legacy user just created a new NR from legacy side, the user should be allowed to
     # modify and cancel it from the legacy side (while the NR still in DRAFT state).
+    current_app.logger.debug('stateCd: {}'.format(nr.stateCd))
+    current_app.logger.debug('new_state: {}'.format(new_state))
     current_app.logger.debug(f"inside valid_state_transition")
-    if nr.stateCd == State.DRAFT and (new_state == State.DRAFT or new_state == State.CANCELLED):
+    if (nr.stateCd == State.DRAFT or nr.stateCd == State.APPROVED  or nr.stateCd == State.CANCELLED)   \
+        and (new_state == State.DRAFT or new_state == State.CANCELLED):
+        current_app.logger.debug(f"inside valid_state_transition true")
         return True
-
     current_app.logger.debug(f"inside valid_state_transition continue")
     if (new_state in (State.APPROVED,
                       State.REJECTED,
