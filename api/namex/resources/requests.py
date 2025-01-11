@@ -717,7 +717,10 @@ class Request(Resource):
 
         try:
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
+            
+            current_app.logger.debug(f"User found!")
             nrd = RequestDAO.find_by_nr(nr)
+            current_app.logger.debug(f"nrd found!")
             if not nrd:
                 return make_response(jsonify({"message": "Request:{} not found".format(nr)}), 404)
             orig_nrd = nrd.json()
@@ -728,6 +731,7 @@ class Request(Resource):
             current_app.logger.error("Error when patching NR:{0} Err:{1}".format(nr, err))
             return make_response(jsonify({"message": "NR had an internal error"}), 404)
 
+        current_app.logger.debug(f"Before valid_state_transition")
         if not valid_state_transition(user, nrd, state):
             return make_response(jsonify(message='you are not authorized to make these changes'), 401)
 
