@@ -121,11 +121,9 @@ class PaymentSocieties(AbstractNameRequestResource):
         ps_instance.save_to_db()
         current_app.logger.debug(f'ps_instance saved...')
 
-        current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
         if nrd.stateCd == State.PENDING_PAYMENT:
             nrd.stateCd = 'DRAFT'
-            
-        current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
+
         nrd.save_to_db()
         current_app.logger.debug(f'nrd saved...')
         
