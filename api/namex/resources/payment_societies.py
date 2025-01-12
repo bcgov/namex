@@ -5,7 +5,7 @@ from namex.resources.name_requests.abstract_nr_resource import AbstractNameReque
 from sqlalchemy.orm.exc import NoResultFound
 
 from namex import jwt
-from namex.models import PaymentSociety as PaymentSocietyDAO, Request as RequestDAO, User
+from namex.models import State, PaymentSociety as PaymentSocietyDAO, Request as RequestDAO, User
 from namex.utils.auth import cors_preflight
 
 from namex.utils.logging import setup_logging
@@ -121,7 +121,11 @@ class PaymentSocieties(AbstractNameRequestResource):
         ps_instance.save_to_db()
         current_app.logger.debug(f'ps_instance saved...')
 
-        nrd.stateCd = 'DRAFT'
+        current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
+        if nrd.stateCd == State.PENDING_PAYMENT:
+            nrd.stateCd = 'DRAFT'
+            
+        current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
         nrd.save_to_db()
         current_app.logger.debug(f'nrd saved...')
         
