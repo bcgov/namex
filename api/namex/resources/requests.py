@@ -714,13 +714,11 @@ class Request(Resource):
 
         if state not in State.VALID_STATES:
             return make_response(jsonify({"message": "not a valid state"}), 406)
-        myStr = 'continue...stateCd: {}'
+
         try:
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
             nrd = RequestDAO.find_by_nr(nr)
-            
-            current_app.logger.debug(myStr.format(nrd.stateCd))
-            # current_app.logger.error("Error when replacing NR:{0} Err:{1}".format(nr, err))
+
             if not nrd:
                 return make_response(jsonify({"message": "Request:{} not found".format(nr)}), 404)
             orig_nrd = nrd.json()
@@ -733,8 +731,7 @@ class Request(Resource):
 
         if not valid_state_transition(user, nrd, state):
             return make_response(jsonify(message='you are not authorized to make these changes'), 401)
-        
-        current_app.logger.debug(myStr.format(nrd.stateCd))
+        current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
         name_choice_exists = {1: False, 2: False, 3: False}
         for name in json_input.get('names', None):
             if name['name'] and name['name'] != '':
@@ -743,8 +740,7 @@ class Request(Resource):
             return make_response(jsonify(message='Data does not include a name choice 1'), 400)
         if not name_choice_exists[2] and name_choice_exists[3]:
             return make_response(jsonify(message='Data contains a name choice 3 without a name choice 2'), 400)
-        
-        current_app.logger.debug(myStr.format(nrd.stateCd))
+        current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
         try:
             existing_nr = RequestDAO.get_inprogress(user)
             if existing_nr:
@@ -772,7 +768,7 @@ class Request(Resource):
                 except Exception as e:
                     current_app.logger.debug(f"Error parsing expirationDate: {str(e)}")
                     pass
-            current_app.logger.debug(myStr.format(nrd.stateCd))
+            current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
             # convert NWPTA dates to correct format
             if json_input.get('nwpta', None):
                 for region in json_input['nwpta']:
@@ -791,7 +787,7 @@ class Request(Resource):
             reset = False
             if nrd.furnished == RequestDAO.REQUEST_FURNISHED and json_input.get('furnished', None) == 'N':
                 reset = True
-            current_app.logger.debug(myStr.format(nrd.stateCd))
+            current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
             nrd.additionalInfo = convert_to_ascii(json_input.get('additionalInfo', None))
             nrd.consentFlag = json_input.get('consentFlag', None)
             nrd.consent_dt = json_input.get('consent_dt', None)
@@ -830,11 +826,11 @@ class Request(Resource):
                 nrd.previousRequestId = None
             except KeyError:
                 nrd.previousRequestId = None
-            current_app.logger.debug(myStr.format(nrd.stateCd))
+            current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
             # if we're changing to a completed or cancelled state, clear reset flag on NR record
             if state in State.COMPLETED_STATE + [State.CANCELLED]:
                 nrd.hasBeenReset = False
-            current_app.logger.debug(myStr.format(nrd.stateCd))
+            current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
             # check if any of the Oracle db fields have changed, so we can send them back
             is_changed__request = False
             is_changed__previous_request = False
@@ -858,7 +854,7 @@ class Request(Resource):
                 is_changed_consent = True
                 if nrd.consentFlag == 'R':
                     queue_util.publish_email_notification(nrd.nrNum, 'CONSENT_RECEIVED')
-            current_app.logger.debug(myStr.format(nrd.stateCd))
+            current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
             # Need this for a re-open
             if nrd.stateCd != State.CONDITIONAL and is_changed__request_state:
                 nrd.consentFlag = None
@@ -869,7 +865,7 @@ class Request(Resource):
             ### APPLICANTS ###
             is_changed__applicant = False
             is_changed__address = False
-            current_app.logger.debug(myStr.format(nrd.stateCd))
+            current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
             if nrd.applicants:
                 applicants_d = nrd.applicants[0]
                 orig_applicant = applicants_d.as_dict()
@@ -897,7 +893,7 @@ class Request(Resource):
                     applicants_d.postalCd = convert_to_ascii(appl.get('postalCd', None))
                     applicants_d.stateProvinceCd = convert_to_ascii(appl.get('stateProvinceCd', None))
                     applicants_d.countryTypeCd = convert_to_ascii(appl.get('countryTypeCd', None))
-                    current_app.logger.debug(myStr.format(nrd.stateCd))
+                    current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                     # check if any of the Oracle db fields have changed, so we can send them back
                     if applicants_d.lastName != orig_applicant['lastName']:
                         is_changed__applicant = True
@@ -933,12 +929,12 @@ class Request(Resource):
                         is_changed__address = True
                     if applicants_d.countryTypeCd != orig_applicant['countryTypeCd']:
                         is_changed__address = True
-                    current_app.logger.debug(myStr.format(nrd.stateCd))
+                    current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                 else:
                     applicants_d.delete_from_db()
                     is_changed__applicant = True
                     is_changed__address = True
-                    current_app.logger.debug(myStr.format(nrd.stateCd))
+                    current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
 
             ### END applicants ###
 
@@ -949,7 +945,7 @@ class Request(Resource):
             is_changed__name2 = False
             is_changed__name3 = False
             deleted_names = [False] * 3
-            current_app.logger.debug(myStr.format(nrd.stateCd))
+            current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
             if len(nrd.names) == 0:
                 new_name_choice = Name()
                 new_name_choice.nrId = nrd.id
@@ -958,23 +954,23 @@ class Request(Resource):
                 new_name_choice.name = convert_to_ascii(new_name_choice.name)
 
                 nrd.names.append(new_name_choice)
-            current_app.logger.debug(myStr.format(nrd.stateCd))
+            current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
             for nrd_name in nrd.names:
 
                 orig_name = nrd_name.as_dict()
 
                 for in_name in json_input.get('names', []):
-                    current_app.logger.debug(myStr.format(nrd.stateCd))
+                    current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                     if len(nrd.names) < in_name['choice']:
 
                         errors = names_schema.validate(in_name, partial=False)
                         if errors:
                             MessageServices.add_message(MessageServices.ERROR, 'names_validation', errors)
                             # return make_response(jsonify(errors), 400
-                        current_app.logger.debug(myStr.format(nrd.stateCd))
+                        current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                         # don't save if the name is blank
                         if in_name.get('name') and in_name.get('name') != '':
-                            current_app.logger.debug(myStr.format(nrd.stateCd))
+                            current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                             new_name_choice = Name()
                             new_name_choice.nrId = nrd.id
                             new_name_choice.choice = in_name.get('choice')
@@ -1001,7 +997,7 @@ class Request(Resource):
                                 is_changed__name3 = True
 
                     elif nrd_name.choice == in_name['choice']:
-                        current_app.logger.debug(myStr.format(nrd.stateCd))
+                        current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                         errors = names_schema.validate(in_name, partial=False)
                         if errors:
                             MessageServices.add_message(MessageServices.ERROR, 'names_validation', errors)
@@ -1022,48 +1018,48 @@ class Request(Resource):
                         nrd_name.name = in_name.get('name')
                         nrd_name.state = in_name.get('state')
                         nrd_name.name = convert_to_ascii(nrd_name.name.upper())
-                        current_app.logger.debug(myStr.format(nrd.stateCd))
+                        current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                         # set comments (existing or cleared)
                         if in_name.get('comment', None) is not None:
 
                             # if there is a comment ID in data, just set it
                             if in_name['comment'].get('id', None) is not None:
                                 nrd_name.commentId = in_name['comment'].get('id')
-                                current_app.logger.debug(myStr.format(nrd.stateCd))
+                                current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
 
                             # if no comment id, it's a new comment, so add it
                             else:
-                                current_app.logger.debug(myStr.format(nrd.stateCd))
+                                current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                                 # no business case for this at this point - this code will never run
                                 pass
 
                         else:
                             nrd_name.comment = None
-                        current_app.logger.debug(myStr.format(nrd.stateCd))
+                        current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                         # convert data to ascii, removing data that won't save to Oracle
                         # - also force uppercase
                         nrd_name.name = convert_to_ascii(nrd_name.name)
                         if (nrd_name.name is not None):
                             nrd_name.name = nrd_name.name.upper()
-                        current_app.logger.debug(myStr.format(nrd.stateCd))
+                        current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                         # check if any of the Oracle db fields have changed, so we can send them back
                         # - this is only for editing a name from the Edit NR section, NOT making a decision
                         if nrd_name.name != orig_name['name']:
-                            current_app.logger.debug(myStr.format(nrd.stateCd))
+                            current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                             if nrd_name.choice == 1:
-                                current_app.logger.debug(myStr.format(nrd.stateCd))
+                                current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                                 is_changed__name1 = True
                                 json_input['comments'].append({'comment': 'Name choice 1 changed from {0} to {1}'
                                                                .format(orig_name['name'], nrd_name.name)})
                             if nrd_name.choice == 2:
-                                current_app.logger.debug(myStr.format(nrd.stateCd))
+                                current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                                 is_changed__name2 = True
                                 if not nrd_name.name:
                                     deleted_names[nrd_name.choice - 1] = True
                                 json_input['comments'].append({'comment': 'Name choice 2 changed from {0} to {1}'
                                                                .format(orig_name['name'], nrd_name.name)})
                             if nrd_name.choice == 3:
-                                current_app.logger.debug(myStr.format(nrd.stateCd))
+                                current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                                 is_changed__name3 = True
                                 if not nrd_name.name:
                                     deleted_names[nrd_name.choice - 1] = True
@@ -1076,17 +1072,17 @@ class Request(Resource):
             # we only add new comments, we do not change existing comments
             # - we can find new comments in json as those with no ID
             # - This must come after names section above, to handle comments re. changed names.
-            current_app.logger.debug(myStr.format(nrd.stateCd))
+            current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
             for in_comment in json_input['comments']:
                 is_new_comment = False
                 try:
-                    current_app.logger.debug(myStr.format(nrd.stateCd))
+                    current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                     if in_comment['id'] is None or in_comment['id'] == 0:
                         is_new_comment = True
                 except KeyError:
                     is_new_comment = True
                 if is_new_comment and in_comment['comment'] is not None:
-                    current_app.logger.debug(myStr.format(nrd.stateCd))
+                    current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                     new_comment = Comment()
                     new_comment.comment = convert_to_ascii(in_comment['comment'])
                     new_comment.examiner = user
@@ -1098,17 +1094,17 @@ class Request(Resource):
 
             is_changed__nwpta_ab = False
             is_changed__nwpta_sk = False
-            current_app.logger.debug(myStr.format(nrd.stateCd))
+            current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
             if nrd.partnerNS.count() > 0:
                 for nrd_nwpta in nrd.partnerNS.all():
-                    current_app.logger.debug(myStr.format(nrd.stateCd))
+                    current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
 
                     orig_nwpta = nrd_nwpta.as_dict()
 
                     for in_nwpta in json_input['nwpta']:
-                        current_app.logger.debug(myStr.format(nrd.stateCd))
+                        current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                         if nrd_nwpta.partnerJurisdictionTypeCd == in_nwpta['partnerJurisdictionTypeCd']:
-                            current_app.logger.debug(myStr.format(nrd.stateCd))
+                            current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                             errors = nwpta_schema.validate(in_nwpta, partial=False)
                             if errors:
                                 MessageServices.add_message(MessageServices.ERROR, 'nwpta_validation', errors)
@@ -1140,21 +1136,21 @@ class Request(Resource):
 
             # if there were errors, abandon changes and return the set of errors
             warning_and_errors = MessageServices.get_all_messages()
-            current_app.logger.debug(myStr.format(nrd.stateCd))
+            current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
             if warning_and_errors:
                 for we in warning_and_errors:
                     if we['type'] == MessageServices.ERROR:
                         return make_response(jsonify(errors=warning_and_errors), 400)
-            current_app.logger.debug(myStr.format(nrd.stateCd))
+            current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
             if reset:
                 nrd.expirationDate = None
                 nrd.consentFlag = None
                 nrd.consent_dt = None
                 is_changed__request = True
                 is_changed_consent = True
-                current_app.logger.debug(myStr.format(nrd.stateCd))
+                current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
             else:
-                current_app.logger.debug(myStr.format(nrd.stateCd))
+                current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                 change_flags = {
                     'is_changed__request': is_changed__request,
                     'is_changed__previous_request': is_changed__previous_request,
@@ -1170,33 +1166,33 @@ class Request(Resource):
                 }
 
                 if any(value is True for value in change_flags.values()):
-                    current_app.logger.debug(myStr.format(nrd.stateCd))
+                    current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                     nrd.save_to_db()
-                    current_app.logger.debug(myStr.format(nrd.stateCd))
+                    current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
 
                     # Delete any names that were blanked out
-                    current_app.logger.debug(myStr.format(nrd.stateCd))
+                    current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                     for nrd_name in nrd.names:
-                        current_app.logger.debug(myStr.format(nrd.stateCd))
+                        current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
                         if deleted_names[nrd_name.choice - 1]:
                             nrd_name.delete_from_db()
-                            current_app.logger.debug(myStr.format(nrd.stateCd))
+                            current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
 
             # if there were errors, return the set of errors
             warning_and_errors = MessageServices.get_all_messages()
-            current_app.logger.debug(myStr.format(nrd.stateCd))
+            current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
             if warning_and_errors:
                 for we in warning_and_errors:
                     if we['type'] == MessageServices.ERROR:
                         return make_response(jsonify(errors=warning_and_errors), 400)
 
             # Finally save the entire graph
-            current_app.logger.debug(myStr.format(nrd.stateCd))
+            current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
             nrd.save_to_db()
-            current_app.logger.debug(myStr.format(nrd.stateCd))
+            current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
 
             EventRecorder.record(user, Event.PUT, nrd, json_input)
-            current_app.logger.debug(myStr.format(nrd.stateCd))
+            current_app.logger.debug(f"continue...stateCd is: {nrd.stateCd}")
 
         except ValidationError as ve:
             return make_response(jsonify(ve.messages), 400)
