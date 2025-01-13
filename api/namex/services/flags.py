@@ -65,10 +65,11 @@ class Flags():
         """Initialize the Feature Flag environment."""
         self.app = app
         self.sdk_key = app.config.get('NAMEX_LD_SDK_ID')
+        env = app.config.get('ENVIRONMENT')
 
-        if self.sdk_key or app.env != 'production':
+        if self.sdk_key or env != 'production':
 
-            if app.env == 'production':
+            if env == 'production':
                 config = Config(sdk_key=self.sdk_key)
             else:
                 factory = FileDataSource.factory(paths=['flags.json'],
