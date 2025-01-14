@@ -292,6 +292,8 @@ class ReportResource(Resource):
 
     @staticmethod
     def _get_instruction_group(legal_type, request_action, corpNum):
+        if not ReportResource._get_enable_won_emails_ff():
+            return ReportResource._old_get_instruction_group(legal_type)
         if request_action in {RequestAction.CHG.value, RequestAction.CNV.value}:
             # For the 'Name Change' or 'Alteration', return 'modernized' if the company is in LEAR, and 'colin' if not
             return 'modernized' if ReportResource._is_lear_entity(corpNum) else 'colin'
@@ -304,6 +306,16 @@ class ReportResource(Resource):
         # return "new" for BC/CC/ULC IAs, "colin" for for BC/CC/ULC others
         if ReportResource._is_potential_colin(legal_type):
             return 'new' if request_action == RequestAction.NEW.value else 'colin'
+        return ''
+    
+    @staticmethod
+    def _old_get_instruction_group(legal_type):
+        if ReportResource._is_modernized(legal_type):
+            return 'modernized'
+        if ReportResource._is_colin(legal_type) or ReportResource._is_potential_colin(legal_type):
+            return 'colin'
+        if ReportResource._is_society(legal_type):
+            return 'so'
         return ''
 
     @staticmethod
@@ -484,6 +496,115 @@ class ReportResource(Resource):
                 'DEFAULT': 'FIRM (Legacy Oracle)'
             }
         }
-        structured_log(request, "DEBUG", f"NR_notification - NameX API: {next_action_text}")
-        current_app.logger.debug(f"NR_notification - NameX API: {next_action_text}")
-        return next_action_text.get(entity_type_cd, None)
+        old_next_action_text = {
+            # BC Types
+            'CR':  {
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
+                          f'{url}</a>'
+            },
+            'UL': {
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
+                          f'{url}</a>'
+            },
+            'FR': {
+               'NEW': f'Use this name request to complete your application by visiting <a href="{url}">'
+                        'Registering Proprietorships and Partnerships</a>',
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
+                          'Registering Proprietorships and Partnerships</a> for more information. To learn more, visit '
+                          f'<a href="{BUSINESS_CHANGES_URL}">Making Changes to your Proprietorship or'
+                          ' Partnership</a>'
+            },
+            'GP': {
+               'NEW': f'Use this name request to complete your application by visiting <a href="{url}">'
+                        'BC Registries and Online Services</a>',
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
+                          'BC Registries and Online Services</a> for more information. To learn more, visit '
+                          f'<a href="{BUSINESS_CHANGES_URL}">Making Changes to your Proprietorship or'
+                          ' Partnership</a>'
+            },
+            'DBA': {
+               'NEW': f'Use this name request to complete your application by visiting <a href="{url}">'
+                        'Registering Proprietorships and Partnerships</a>',
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
+                          'Registering Proprietorships and Partnerships</a> for more information. To learn more, visit '
+                          f'<a href="{BUSINESS_CHANGES_URL}">Making Changes to your Proprietorship or'
+                          ' Partnership</a>'
+            },
+            'LP': {
+               'DEFAULT': f'Visit <a href= "{url}">Forms, fees and information packages page</a> and'
+                          ' download the appropriate form'
+            },
+            'LL': {
+               'DEFAULT': f'Visit <a href= "{url}">Forms, fees and information packages page</a> and'
+                          ' download the appropriate form'
+            },
+            'CP': {
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">{url}</a>'
+            },
+            'BC': {
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">{url}</a>'
+            },
+            'CC': {
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
+                          f'{url}</a>'
+            },
+            'SO': {
+               'DEFAULT': f'To complete your filing, visit <a href="{url}">'
+                          f'{url}</a> and login with your BCeID.'
+            },
+            'PA': {
+               'DEFAULT': ReportResource.GENERIC_STEPS
+            },
+            'FI': {
+               'DEFAULT': ReportResource.GENERIC_STEPS
+            },
+            'PAR': {
+               'DEFAULT': ReportResource.GENERIC_STEPS
+            },
+            # XPRO and Foreign Types
+            'XCR': {
+               'NEW': f'Use this name request to complete your application by visiting <a href="{url}">'
+                      f'{url}</a>',
+               'CHG': f'Use this name request to complete your application by visiting <a href="{url}">'
+                      f'{url}</a>',
+               'DEFAULT': f'To complete your filing, <a href= "{url}">visit our Forms page</a> to'
+                          ' download and submit a form'
+            },
+            'XUL': {
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
+                          f'{url}</a>'
+            },
+            'RLC': {
+                'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
+                          f'{url}</a>'
+            },
+            'XLP': {
+               'DEFAULT': f'Visit <a href= "{url}">Forms, fees and information packages page</a> and'
+                          ' download the appropriate form'
+            },
+            'XLL': {
+               'DEFAULT': f'Visit <a href= "{url}">Forms, fees and information packages page</a> and'
+                          ' download the appropriate form'
+            },
+            'XCP': {
+                'DEFAULT': 'Extraprovincial Cooperative Association'
+            },
+            'XSO': {
+                'DEFAULT': f'To complete your filing, visit <a href="{url}">'
+                           f'{url}</a> and login with your BCeID.'
+            },
+            # Used for mapping back to legacy oracle codes, description not required
+            'FIRM': {
+                'DEFAULT': 'FIRM (Legacy Oracle)'
+            }
+        }
+        if ReportResource._get_enable_won_emails_ff():
+            return next_action_text.get(entity_type_cd, None)
+        return old_next_action_text.get(entity_type_cd, None)
+
+    @staticmethod
+    def _get_enable_won_emails_ff():
+        from namex.services import flags  # pylint: disable=import-outside-toplevel
+        enable_won_emails = flags.value('enable-won-emails')
+        structured_log(request, "DEBUG", f"NR-Email: NameX API: enable_way_of_navigation_emails feature_flag: {enable_won_emails}")
+        return enable_won_emails

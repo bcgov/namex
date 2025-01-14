@@ -12,33 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Manage the Feature Flags initialization, setup and service."""
+import logging
 from flask import current_app
 from ldclient import get as ldclient_get, set_config as ldclient_set_config  # noqa: I001
 from ldclient.config import Config  # noqa: I005
-from ldclient.impl.integrations.files.file_data_source import _FileDataSource
-from ldclient.interfaces import UpdateProcessor
+from ldclient import Context
+from ldclient.integrations import Files
 
 from namex.models import User
-
-
-class FileDataSource(UpdateProcessor):
-    """FileDataStore has been removed, so this provides similar functionality."""
-
-    @classmethod
-    def factory(cls, **kwargs):
-        """Provide a way to use local files as a source of feature flag state.
-
-        .. deprecated:: 6.8.0
-          This module and this implementation class are deprecated and may be changed or removed in the future.
-          Please use :func:`ldclient.integrations.Files.new_data_source()`.
-
-        The keyword arguments are the same as the arguments to :func:`ldclient.integrations.Files.new_data_source()`.
-        """
-        return lambda config, store, ready: _FileDataSource(store, ready,
-                                                            paths=kwargs.get('paths'),
-                                                            auto_update=kwargs.get('auto_update', False),
-                                                            poll_interval=kwargs.get('poll_interval', 1),
-                                                            force_polling=kwargs.get('force_polling', False))
 
 
 class Flags():
@@ -67,26 +48,20 @@ class Flags():
         self.sdk_key = app.config.get('NAMEX_LD_SDK_ID')
         env = app.config.get('ENVIRONMENT')
 
-        if self.sdk_key or env != 'production':
+        if self.sdk_key or env == 'local':
 
-            if env == 'production':
-                config = Config(sdk_key=self.sdk_key)
-            else:
-                factory = FileDataSource.factory(paths=['flags.json'],
-                                                 auto_update=True)
+            if env == 'local':
+                factory = Files.new_data_source(paths=['flags.json'], auto_update=True)
                 config = Config(sdk_key=self.sdk_key,
                                 update_processor_class=factory,
                                 send_events=False)
+            else:
+                config = Config(sdk_key=self.sdk_key)
 
             ldclient_set_config(config)
             client = ldclient_get()
 
             app.extensions['featureflags'] = client
-
-    def teardown(self, exception):  # pylint: disable=unused-argument; flask method signature
-        """Destroy all objects created by this extension."""
-        client = current_app.extensions['featureflags']
-        client.close()
 
     def _get_client(self):
         try:
@@ -96,51 +71,48 @@ class Flags():
                 self.init_app(current_app)
                 client = current_app.extensions['featureflags']
             except KeyError:
+                logging.warning("Couldn\'t retrieve launch darkly client from extensions.")
                 client = None
 
         return client
 
     @staticmethod
     def _get_anonymous_user():
-        return {
-            'key': 'anonymous'
-        }
+        return Context.create('anonymous')
 
     @staticmethod
     def _user_as_key(user: User):
-        user_json = {
-            'key': user.sub,
-            'firstName': user.firstname,
-            'lastName': user.lastname
-        }
-        return user_json
+        return Context.builder(user.idp_userid)\
+            .set('firstName', user.firstname)\
+            .set('lastName', user.lastname).build()
 
-    def is_on(self, flag: str, user: User = None) -> bool:
+    def is_on(self, flag: str, default: bool = False, user: User = None) -> bool:
         """Assert that the flag is set for this user."""
         client = self._get_client()
 
+        if not client:
+            return default
+
         if user:
             flag_user = self._user_as_key(user)
         else:
             flag_user = self._get_anonymous_user()
 
-        try:
-            return bool(client.variation(flag, flag_user, None))
-        except Exception as err:
-            current_app.logger.error('Unable to read flags: %s' % repr(err), exc_info=True)
-            return False
+        return bool(client.variation(flag, flag_user, default))
 
-    def value(self, flag: str, user: User = None) -> bool:
+    def value(self, flag: str, default=None, user: User = None):
         """Retrieve the value  of the (flag, user) tuple."""
         client = self._get_client()
 
+        if not client:
+            return default
+
         if user:
             flag_user = self._user_as_key(user)
         else:
             flag_user = self._get_anonymous_user()
 
-        try:
-            return client.variation(flag, flag_user, None)
-        except Exception as err:
-            current_app.logger.error('Unable to read flags: %s' % repr(err), exc_info=True)
-            return False
+        return client.variation(flag, flag_user, default)
+
+
+flags = Flags()
