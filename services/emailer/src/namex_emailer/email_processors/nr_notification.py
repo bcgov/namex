@@ -24,10 +24,9 @@ from gcp_queue.logging import structured_log
 from jinja2 import Template
 from simple_cloudevent import SimpleCloudEvent
 
-from namex.constants import RequestAction
 from namex.resources.name_requests import ReportResource
 from namex_emailer.email_processors import substitute_template_parts
-from namex_emailer.services.helpers import as_legislation_timezone, format_as_report_string, get_magic_link, query_nr_number, get_instruction_group
+from namex_emailer.services.helpers import as_legislation_timezone, format_as_report_string, get_magic_link, query_nr_number
 
 class Option(Enum):
     """NR notification option."""
@@ -89,7 +88,7 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
             legal_type = nr_data["entity_type_cd"]
             request_action = nr_data["request_action_cd"]
             corpNum = nr_data["corpNum"]
-            group = get_instruction_group(legal_type, request_action, corpNum)
+            group = ReportResource._get_instruction_group(legal_type, request_action, corpNum)
             if group:
                 instruction_group = "-" + group
                 file_name_suffix += instruction_group.upper()

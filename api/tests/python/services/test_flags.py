@@ -1,4 +1,4 @@
-# Copyright © 2024 Province of British Columbia
+# Copyright © 2025 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ from namex.services.flags import Flags
 def test_flags_init():
     """Ensure that extension can be initialized."""
     app = Flask(__name__)
-    app.env = 'development'
+    app.config['ENVIRONMENT'] = 'local'
 
     with app.app_context():
         flags = Flags(app)
@@ -37,7 +37,7 @@ def test_flags_init():
 def test_flags_init_app():
     """Ensure that extension can be initialized."""
     app = Flask(__name__)
-    app.env = 'development'
+    app.config['ENVIRONMENT'] = 'local'
     app.config['NAMEX_LD_SDK_ID'] = 'https://no.flag/avail'
 
     with app.app_context():
@@ -49,7 +49,7 @@ def test_flags_init_app():
 def test_flags_init_app_production():
     """Ensure that extension can be initialized."""
     app = Flask(__name__)
-    app.env = 'production'
+    app.config['ENVIRONMENT'] = 'production'
     app.config['NAMEX_LD_SDK_ID'] = 'https://no.flag/avail'
 
     with app.app_context():
@@ -62,7 +62,7 @@ def test_flags_init_app_no_key_dev():
     """Assert that the extension is setup with a KEY, but in non-production mode."""
     app = Flask(__name__)
     app.config['NAMEX_LD_SDK_ID'] = None
-    app.env = 'development'
+    app.config['ENVIRONMENT'] = 'local'
 
     with app.app_context():
         flags = Flags()
@@ -74,7 +74,7 @@ def test_flags_init_app_no_key_prod():
     """Assert that prod with no key initializes, but does not setup the extension."""
     app = Flask(__name__)
     app.config['NAMEX_LD_SDK_ID'] = None
-    app.env = 'production'
+    app.config['ENVIRONMENT'] = 'production'
 
     with app.app_context():
         flags = Flags()
@@ -88,7 +88,7 @@ def test_flags_bool_no_key_prod():
     """Assert that prod with no key initializes, but does not setup the extension."""
     app = Flask(__name__)
     app.config['NAMEX_LD_SDK_ID'] = None
-    app.env = 'production'
+    app.config['ENVIRONMENT'] = 'production'
 
     with app.app_context():
         flags = Flags()
@@ -101,7 +101,7 @@ def test_flags_bool_no_key_prod():
 def test_flags_bool():
     """Assert that a boolean (True) is returned, when using the local Flag.json file."""
     app = Flask(__name__)
-    app.env = 'development'
+    app.config['ENVIRONMENT'] = 'local'
     app.config['NAMEX_LD_SDK_ID'] = 'https://no.flag/avail'
 
     with app.app_context():
@@ -115,7 +115,7 @@ def test_flags_bool():
 def test_flags_bool_missing_flag(app):
     """Assert that a boolean (False) is returned when flag doesn't exist, when using the local Flag.json file."""
     from namex import flags
-    app_env = app.env
+    app_env = app.config.get('ENVIRONMENT')
     try:
         with app.app_context():
             flag_on = flags.is_on('no flag here')
@@ -125,14 +125,14 @@ def test_flags_bool_missing_flag(app):
         # for tests we don't care
         assert False
     finally:
-        app.env = app_env
+        app.config['ENVIRONMENT'] = app_env
 
 
 def test_flags_bool_using_current_app():
     """Assert that a boolean (True) is returned, when using the local Flag.json file."""
     from namex import flags
     app = Flask(__name__)
-    app.env = 'development'
+    app.config['ENVIRONMENT'] = 'local'
 
     with app.app_context():
         flag_on = flags.is_on('bool-flag')
@@ -144,12 +144,13 @@ def test_flags_bool_using_current_app():
     ('boolean flag', 'bool-flag', True),
     ('string flag', 'string-flag', 'a string value'),
     ('integer flag', 'integer-flag', 10),
+    ('boolean flag', 'enable-won-emails', False),
 ])
 def test_flags_bool_value(test_name, flag_name, expected):
     """Assert that a boolean (True) is returned, when using the local Flag.json file."""
     from namex import flags
     app = Flask(__name__)
-    app.env = 'development'
+    app.config['ENVIRONMENT'] = 'local'
 
     with app.app_context():
         val = flags.value(flag_name)
@@ -160,17 +161,17 @@ def test_flags_bool_value(test_name, flag_name, expected):
 def test_flag_bool_unique_user():
     """Assert that a unique user can retrieve a flag, when using the local Flag.json file."""
     app = Flask(__name__)
-    app.env = 'development'
+    app.config['ENVIRONMENT'] = 'local'
     app.config['NAMEX_LD_SDK_ID'] = 'https://no.flag/avail'
 
     user = User(username='username', firstname='firstname', lastname='lastname', sub='sub', iss='iss', idp_userid='123', login_source='IDIR')
 
-    app_env = app.env
+    app_env = app.config['ENVIRONMENT']
     try:
         with app.app_context():
             flags = Flags()
             flags.init_app(app)
-            app.env = 'development'
+            app.config['ENVIRONMENT'] = 'local'
             val = flags.value('bool-flag', user)
             flag_on = flags.is_on('bool-flag', user)
 
@@ -180,4 +181,4 @@ def test_flag_bool_unique_user():
         # for tests we don't care
         assert False
     finally:
-        app.env = app_env
+        app.config['ENVIRONMENT'] = app_env
