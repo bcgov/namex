@@ -47,8 +47,10 @@ If you don’t have a BC Registries account:
 
 Use [BC Corporate Online]({{CORP_ONLINE_URL}}) to complete your application if you are an existing user or if you are a new user with more complex filings needs.
 
-1. Go to [BC Corporate Online]({{CORP_ONLINE_URL}})
-2. Complete and submit the form along with any required documentation and payment
+1. Send in your consent letter to [BCRegistries@gov.bc.ca](BCRegistries@gov.bc.ca)
+2. Receive confirmation that the consent letter has been accepted
+3. Go to [BC Corporate Online]({{CORP_ONLINE_URL}})
+4. Complete and submit the form along with any required documentation and payment
 
 ---
 
