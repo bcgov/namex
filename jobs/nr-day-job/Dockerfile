@@ -79,7 +79,7 @@ USER web
 # The following stage is only for production:
 # FROM development_build AS production_build
 COPY --chown=web:web . /code
-RUN chmod -R 755 /code
+RUN chmod -R 755 /code/run.sh
 
 EXPOSE 8080
 
