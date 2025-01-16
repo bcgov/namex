@@ -602,7 +602,7 @@ Flask = ">=0.9"
 
 [[package]]
 name = "flask-jwt-oidc"
-version = "0.6.0"
+version = "0.7.0"
 description = "Opinionated flask oidc client"
 optional = false
 python-versions = "^3.9"
@@ -610,16 +610,16 @@ files = []
 develop = false
 
 [package.dependencies]
-cachelib = "^0.13.0"
-Flask = "^3"
+cachelib = "0.*"
+Flask = ">=2"
 python-jose = "^3.3.0"
 six = "^1.16.0"
 
 [package.source]
 type = "git"
-url = "https://github.com/bolyachevets/flask-jwt-oidc.git"
-reference = "bump-flask-version"
-resolved_reference = "f023e01b537e454dfa569bc45575f1f0680daf49"
+url = "https://github.com/seeker25/flask-jwt-oidc.git"
+reference = "HEAD"
+resolved_reference = "563f01ef6453eb0ea1cc0a2d71c6665350c853ff"
 
 [[package]]
 name = "flask-marshmallow"
@@ -1782,7 +1782,7 @@ ecdsa = "^0.18.0"
 flask = "^3.0.2"
 flask-caching = "^1.10.1"
 flask-cors = "^4.0.0"
-flask-jwt-oidc = {git = "https://github.com/bolyachevets/flask-jwt-oidc.git", branch = "bump-flask-version"}
+flask-jwt-oidc = {git = "https://github.com/seeker25/flask-jwt-oidc.git"}
 flask-marshmallow = "^0.14.0"
 flask-migrate = "^2.7.0"
 flask-moment = "^0.11.0"
@@ -1845,7 +1845,7 @@ zipp = "^3.8.1"
 type = "git"
 url = "https://github.com/bcgov/namex.git"
 reference = "HEAD"
-resolved_reference = "79316e352cd643f71f43e0be3c6e553a7531273e"
+resolved_reference = "5e3d013d788ec027147fac6ee3be8df10cacc37d"
 subdirectory = "api"
 
 [[package]]
