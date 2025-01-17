@@ -1,4 +1,5 @@
 import json
+import requests
 from datetime import datetime, timedelta
 
 from dateutil import parser as dateutil_parser
@@ -315,6 +316,50 @@ class FindNameRequestPayments(PaymentNameRequestResource):
 })
 
 class CreateNameRequestPayment(AbstractNameRequestResource):
+
+    @staticmethod
+    def _is_staff(auth_header):
+        """Determine if the user is a staff member."""
+        return auth_header and validate_roles(jwt, auth_header, [User.STAFF])
+
+    @staticmethod
+    def _affiliate_business_account(auth_header, business_account_id, nr_model):
+        """Affiliate the new NR to the business account."""
+        auth_svc_url = current_app.config.get('AUTH_SVC_URL')
+        if not auth_svc_url:
+            raise ValueError("AUTH_SVC_URL is not configured in the application.")
+
+        nr_num = nr_model.nrNum
+        phone_num = nr_model.applicants[0].phoneNumber
+        auth_url = f'{auth_svc_url}/orgs/{business_account_id}/affiliations?newBusiness=true'
+        headers = {
+            'Authorization': auth_header,
+            'Content-Type': 'application/json'
+        }
+        payload = {
+            'businessIdentifier': nr_num,
+            'phone': phone_num
+        }
+
+        try:
+            response = requests.post(url=auth_url, json=payload, headers=headers)
+
+            # Check the response status
+            if not response.ok:
+                current_app.logger.error(
+                    f"Failed to affiliate business account {business_account_id} with {nr_num}. "
+                    f"Status Code: {response.status_code}, Response: {response.text}"
+                )
+            else:
+                current_app.logger.debug(
+                    f"Successfully affiliated business account {business_account_id} with {nr_num}."
+                )
+        except requests.exceptions.RequestException as e:
+            current_app.logger.error(
+                f"Error affiliating business account {business_account_id} with {nr_num}: {e}"
+            )
+
+
     """Create name request payment endpoints."""
     @payment_api.expect(payment_request_schema)
     @payment_api.response(200, 'Success', '')
@@ -337,7 +382,6 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             nr_model = RequestDAO.query.get(nr_id)
             # only used for adding namerequest service user to event recording
             nr_svc = self.nr_service
-
             if not nr_model:
                 # Should this be a 400 or 404... hmmm
                 return make_response(jsonify(message=f'Name Request {nr_id} not found'), 400)
@@ -362,10 +406,17 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             if not valid_nr_state:
                 return make_response(jsonify(message=f'Invalid NR state [{payment_action}]'), 400)
 
+            json_input = request.get_json()
+            headers = json_input.get('headers')
+            auth_header = headers.get('Authorization')
+            is_new_nr = False
+            is_staff = self._is_staff(auth_header)
+
             if valid_payment_action and valid_nr_state:
                 if payment_action in [NameRequestActions.CREATE.value, NameRequestActions.RESUBMIT.value]:
                     update_solr = True
                     nr_model = self.add_new_nr_number(nr_model, update_solr)
+                    is_new_nr = True
 
             existing_payment = PaymentDAO.find_by_existing_nr_id(nr_id, payment_action)
             if existing_payment:
@@ -383,7 +434,6 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                                                 nr_model,
                                                 nr_svc)
 
-            json_input = request.get_json()
             payment_request = {}
             if not json_input:
                 # return make_response(jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400
@@ -400,14 +450,11 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             business_info = payment_request.get('businessInfo')
             details = payment_request.get('details')
 
-            headers = json_input.get('headers')
-            auth = headers.get('Authorization')
             account_info = {}
-
             if folio_number := headers.pop('folioNumber', None):
                 filing_info['folioNumber'] = folio_number
 
-            if auth and validate_roles(jwt, auth, [User.STAFF]):
+            if is_staff:
                 if routing_slip_number := headers.get('routingSlipNumber'):
                     account_info['routingSlip'] = routing_slip_number
                     del headers['routingSlipNumber']
@@ -445,12 +492,23 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             # payment will be saved in handle_payment_response with a payment_token
 
             payment_response = create_payment(req.as_dict(), headers)
-            return handle_payment_response(payment_action,
+            payment_response_result = handle_payment_response(payment_action,
                                            payment_response,
                                            payment,
                                            nr_id,
                                            nr_model,
                                            nr_svc)
+            # after a new NR saved
+            # if logged in user is a staff, affiliate the new NR with the business_account_id
+            if is_new_nr and is_staff:
+                business_account_id = json_input.get("businessAccountId")
+                if business_account_id:
+                    current_app.logger.debug(f"Affiliating to business account ID: {business_account_id} with {nr_model.nrNum}")
+                    # affiliate the new NR to the account_info
+                    #affiliate_business_account(business_account_id, nr_model.nrNum)
+                    self._affiliate_business_account(auth_header, business_account_id, nr_model)
+
+            return payment_response_result
 
         except PaymentServiceError as err:
             return handle_exception(err, err.message, 500)
