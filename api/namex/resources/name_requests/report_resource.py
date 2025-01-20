@@ -173,7 +173,8 @@ class ReportResource(Resource):
         if nr_report_json['applicants']['countryTypeCd']:
             nr_report_json['applicants']['countryName'] = \
                 pycountry.countries.search_fuzzy(nr_report_json['applicants']['countryTypeCd'])[0].name
-        actions_obj = ReportResource._get_next_action_text(nr_model['entity_type_cd'])
+        action_url = ReportResource._get_action_url(nr_model['entity_type_cd'], instruction_group)
+        actions_obj = ReportResource._get_next_action_text(nr_model['entity_type_cd'], action_url)
         if actions_obj:
             action_text = actions_obj.get(nr_report_json['request_action_cd'])
             if not action_text:
@@ -292,11 +293,11 @@ class ReportResource(Resource):
 
     @staticmethod
     def _get_instruction_group(legal_type, request_action, corpNum):
-        if not ReportResource._get_enable_won_emails_ff():
-            return ReportResource._old_get_instruction_group(legal_type)
         if request_action in {RequestAction.CHG.value, RequestAction.CNV.value}:
             # For the 'Name Change' or 'Alteration', return 'modernized' if the company is in LEAR, and 'colin' if not
             return 'modernized' if ReportResource._is_lear_entity(corpNum) else 'colin'
+        if not ReportResource._get_enable_won_emails_ff():
+            return ReportResource._old_get_instruction_group(legal_type)
         if ReportResource._is_modernized(legal_type):
             return 'modernized'
         if ReportResource._is_colin(legal_type):
@@ -319,7 +320,7 @@ class ReportResource(Resource):
         return ''
 
     @staticmethod
-    def _get_action_url(entity_type_cd: str):
+    def _get_action_url(entity_type_cd: str, instruction_group: str):
 
         DECIDE_BUSINESS_URL =  current_app.config.get('DECIDE_BUSINESS_URL')
         CORP_FORMS_URL =  current_app.config.get('CORP_FORMS_URL')
@@ -329,8 +330,8 @@ class ReportResource(Resource):
 
         url = {
             # BC Types
-            'CR':  CORP_ONLINE_URL,
-            'UL':  CORP_ONLINE_URL,
+            'CR':  BUSINESS_URL if instruction_group == 'modernized' else CORP_ONLINE_URL,
+            'UL':  BUSINESS_URL if instruction_group == 'modernized' else CORP_ONLINE_URL,
             'FR':  DECIDE_BUSINESS_URL,
             'GP':  DECIDE_BUSINESS_URL,
             'DBA': DECIDE_BUSINESS_URL,
@@ -338,7 +339,7 @@ class ReportResource(Resource):
             'LL':  CORP_FORMS_URL,
             'CP':  BUSINESS_URL,
             'BC':  BUSINESS_URL,
-            'CC':  CORP_ONLINE_URL,
+            'CC':  BUSINESS_URL if instruction_group == 'modernized' else CORP_ONLINE_URL,
             'SO':  SOCIETIES_URL,
             'PA': ReportResource.GENERIC_STEPS,
             'FI': ReportResource.GENERIC_STEPS,
@@ -385,11 +386,9 @@ class ReportResource(Resource):
         return next_action_text.get(entity_type_cd, None)
 
     @staticmethod
-    def _get_next_action_text(entity_type_cd: str):
+    def _get_next_action_text(entity_type_cd: str, url: str):
 
         BUSINESS_CHANGES_URL =  current_app.config.get('BUSINESS_CHANGES_URL')
-
-        url = ReportResource._get_action_url(entity_type_cd)
 
         next_action_text = {
             # BC Types
