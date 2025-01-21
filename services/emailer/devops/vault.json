@@ -12,7 +12,8 @@
         "application": [
             "notify-api",
             "namex-api",
-            "report-api"
+            "report-api",
+            "legal-api"
         ]
     },
     {
@@ -26,14 +27,24 @@
         "vault": "web-url",
         "application": [
             "name-request",
-            "bcregistry"
+            "bcregistry",
+            "auth-web",
+            "business-registry-ui"
         ]
     },
     {
         "vault": "web-url",
         "application": [
             "name-request",
-            "bcregistry"
+            "bcregistry",
+            "auth-web",
+            "business-registry-ui"
+        ]
+    },
+    {
+        "vault": "launchdarkly",
+        "application": [
+            "namex"
         ]
     }
 ]

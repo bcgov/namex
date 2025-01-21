@@ -9,7 +9,9 @@ from pytz import timezone
 import requests
 from flask import current_app, jsonify, request, make_response
 from flask_restx import Resource
+from gcp_queue.logging import structured_log
 
+from namex.constants import RequestAction
 from namex.models import Request, State
 from namex.utils.api_resource import handle_exception
 from namex.utils.auth import cors_preflight, full_access_to_name_request
@@ -18,6 +20,7 @@ from namex.services.name_request import NameRequestService
 from namex.services.name_request.utils import get_mapped_entity_and_action_code
 from namex.utils.auth import get_client_credentials
 from .api_namespace import api
+from ..utils import EntityUtils
 
 setup_logging()  # Important to do this first
 
@@ -144,10 +147,12 @@ class ReportResource(Resource):
         nr_report_json['legalAct'] = ReportResource._get_legal_act(nr_model['entity_type_cd'])
         isXPRO = nr_model['entity_type_cd'] in ['XCR', 'XUL', 'RLC', 'XLP', 'XLL', 'XCP', 'XSO']
         nr_report_json['isXPRO'] = isXPRO
-        nr_report_json['isModernized'] = ReportResource._is_modernized(nr_model['entity_type_cd'])
-        nr_report_json['isColin'] = ReportResource._is_colin(nr_model['entity_type_cd'])
-        nr_report_json['isSociety'] = ReportResource._is_society(nr_model['entity_type_cd'])
-        nr_report_json['isPaper'] = not (ReportResource._is_colin(nr_model['entity_type_cd']) or ReportResource._is_modernized(nr_model['entity_type_cd']) or ReportResource._is_society(nr_model['entity_type_cd']))
+        instruction_group = ReportResource._get_instruction_group(nr_model['entity_type_cd'], nr_model['request_action_cd'], nr_model['corpNum'])
+        nr_report_json['isModernized'] = True if instruction_group == 'modernized' else False
+        nr_report_json['isColin'] = True if instruction_group == 'colin' else False
+        nr_report_json['isSociety'] = True if instruction_group == 'so' else False
+        nr_report_json['isNew'] = True if instruction_group == 'new' else False
+        nr_report_json['isPaper'] = not (ReportResource._is_colin(nr_model['entity_type_cd']) or ReportResource._is_modernized(nr_model['entity_type_cd']) or ReportResource._is_society(nr_model['entity_type_cd']) or ReportResource._is_potential_colin(nr_model['entity_type_cd']))
         nr_report_json['requestCodeDescription'] = \
             ReportResource._get_request_action_cd_description(nr_report_json['request_action_cd'])
         nr_report_json['nrStateDescription'] = \
@@ -168,7 +173,8 @@ class ReportResource(Resource):
         if nr_report_json['applicants']['countryTypeCd']:
             nr_report_json['applicants']['countryName'] = \
                 pycountry.countries.search_fuzzy(nr_report_json['applicants']['countryTypeCd'])[0].name
-        actions_obj = ReportResource._get_next_action_text(nr_model['entity_type_cd'])
+        action_url = ReportResource._get_action_url(nr_model['entity_type_cd'], instruction_group)
+        actions_obj = ReportResource._get_next_action_text(nr_model['entity_type_cd'], action_url)
         if actions_obj:
             action_text = actions_obj.get(nr_report_json['request_action_cd'])
             if not action_text:
@@ -255,16 +261,24 @@ class ReportResource(Resource):
         }
         return entity_type_descriptions.get(entity_type_cd, None)
 
-
+    @staticmethod
+    def _is_lear_entity(corpNum):
+        if not corpNum:
+            return False
+        entity_url = f'{current_app.config.get("ENTITY_SVC_URL")}/businesses/{corpNum}'
+        response = EntityUtils.make_authenticated_request(entity_url)
+        if response.status_code == HTTPStatus.OK and response.json():
+            return True
+        return False
+    
     @staticmethod
     def _is_modernized(legal_type):
         modernized_list = ['GP', 'DBA', 'FR', 'CP', 'BC']
         return legal_type in modernized_list
 
-
     @staticmethod
     def _is_colin(legal_type):
-        colin_list = ['CR', 'UL', 'CC', 'XCR', 'XUL', 'RLC']
+        colin_list = ['XCR', 'XUL', 'RLC']
         return legal_type in colin_list
     
     @staticmethod
@@ -272,19 +286,41 @@ class ReportResource(Resource):
         society_list = ['SO', 'XSO']
         return legal_type in society_list
 
+    @staticmethod
+    def _is_potential_colin(legal_type):
+        potential_colin_list = ['CR', 'UL', 'CC']
+        return legal_type in potential_colin_list
 
     @staticmethod
-    def _get_instruction_group(legal_type):
+    def _get_instruction_group(legal_type, request_action, corpNum):
+        if request_action in {RequestAction.CHG.value, RequestAction.CNV.value}:
+            # For the 'Name Change' or 'Alteration', return 'modernized' if the company is in LEAR, and 'colin' if not
+            return 'modernized' if ReportResource._is_lear_entity(corpNum) else 'colin'
+        if not ReportResource._get_enable_won_emails_ff():
+            return ReportResource._old_get_instruction_group(legal_type)
         if ReportResource._is_modernized(legal_type):
             return 'modernized'
         if ReportResource._is_colin(legal_type):
             return 'colin'
         if ReportResource._is_society(legal_type):
             return 'so'
+        # return "new" for BC/CC/ULC IAs, "colin" for for BC/CC/ULC others
+        if ReportResource._is_potential_colin(legal_type):
+            return 'new' if request_action == RequestAction.NEW.value else 'colin'
+        return ''
+    
+    @staticmethod
+    def _old_get_instruction_group(legal_type):
+        if ReportResource._is_modernized(legal_type):
+            return 'modernized'
+        if ReportResource._is_colin(legal_type) or ReportResource._is_potential_colin(legal_type):
+            return 'colin'
+        if ReportResource._is_society(legal_type):
+            return 'so'
         return ''
 
     @staticmethod
-    def _get_action_url(entity_type_cd: str):
+    def _get_action_url(entity_type_cd: str, instruction_group: str):
 
         DECIDE_BUSINESS_URL =  current_app.config.get('DECIDE_BUSINESS_URL')
         CORP_FORMS_URL =  current_app.config.get('CORP_FORMS_URL')
@@ -294,8 +330,8 @@ class ReportResource(Resource):
 
         url = {
             # BC Types
-            'CR':  CORP_ONLINE_URL,
-            'UL':  CORP_ONLINE_URL,
+            'CR':  BUSINESS_URL if instruction_group == 'modernized' else CORP_ONLINE_URL,
+            'UL':  BUSINESS_URL if instruction_group == 'modernized' else CORP_ONLINE_URL,
             'FR':  DECIDE_BUSINESS_URL,
             'GP':  DECIDE_BUSINESS_URL,
             'DBA': DECIDE_BUSINESS_URL,
@@ -303,7 +339,7 @@ class ReportResource(Resource):
             'LL':  CORP_FORMS_URL,
             'CP':  BUSINESS_URL,
             'BC':  BUSINESS_URL,
-            'CC':  CORP_ONLINE_URL,
+            'CC':  BUSINESS_URL if instruction_group == 'modernized' else CORP_ONLINE_URL,
             'SO':  SOCIETIES_URL,
             'PA': ReportResource.GENERIC_STEPS,
             'FI': ReportResource.GENERIC_STEPS,
@@ -350,13 +386,116 @@ class ReportResource(Resource):
         return next_action_text.get(entity_type_cd, None)
 
     @staticmethod
-    def _get_next_action_text(entity_type_cd: str):
+    def _get_next_action_text(entity_type_cd: str, url: str):
 
         BUSINESS_CHANGES_URL =  current_app.config.get('BUSINESS_CHANGES_URL')
 
-        url = ReportResource._get_action_url(entity_type_cd)
-
         next_action_text = {
+            # BC Types
+            'CR':  {
+               'NEW': 'Check your email for instructions on how to complete your application using this name request.',
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
+                          f'{url}</a>'
+            },
+            'UL': {
+               'NEW': 'Check your email for instructions on how to complete your application using this name request.',
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
+                          f'{url}</a>'
+            },
+            'FR': {
+               'NEW': f'Use this name request to complete your application by visiting <a href="{url}">'
+                        'Registering Proprietorships and Partnerships</a>',
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
+                          'Registering Proprietorships and Partnerships</a> for more information. To learn more, visit '
+                          f'<a href="{BUSINESS_CHANGES_URL}">Making Changes to your Proprietorship or'
+                          ' Partnership</a>'
+            },
+            'GP': {
+               'NEW': f'Use this name request to complete your application by visiting <a href="{url}">'
+                        'BC Registries and Online Services</a>',
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
+                          'BC Registries and Online Services</a> for more information. To learn more, visit '
+                          f'<a href="{BUSINESS_CHANGES_URL}">Making Changes to your Proprietorship or'
+                          ' Partnership</a>'
+            },
+            'DBA': {
+               'NEW': f'Use this name request to complete your application by visiting <a href="{url}">'
+                        'Registering Proprietorships and Partnerships</a>',
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
+                          'Registering Proprietorships and Partnerships</a> for more information. To learn more, visit '
+                          f'<a href="{BUSINESS_CHANGES_URL}">Making Changes to your Proprietorship or'
+                          ' Partnership</a>'
+            },
+            'LP': {
+               'DEFAULT': f'Visit <a href= "{url}">Forms, fees and information packages page</a> and'
+                          ' download the appropriate form'
+            },
+            'LL': {
+               'DEFAULT': f'Visit <a href= "{url}">Forms, fees and information packages page</a> and'
+                          ' download the appropriate form'
+            },
+            'CP': {
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">{url}</a>'
+            },
+            'BC': {
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">{url}</a>'
+            },
+            'CC': {
+               'NEW': 'Check your email for instructions on how to complete your application using this name request.',
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
+                          f'{url}</a>'
+            },
+            'SO': {
+               'DEFAULT': f'To complete your filing, visit <a href="{url}">'
+                          f'{url}</a> and login with your BCeID.'
+            },
+            'PA': {
+               'DEFAULT': ReportResource.GENERIC_STEPS
+            },
+            'FI': {
+               'DEFAULT': ReportResource.GENERIC_STEPS
+            },
+            'PAR': {
+               'DEFAULT': ReportResource.GENERIC_STEPS
+            },
+            # XPRO and Foreign Types
+            'XCR': {
+               'NEW': f'Use this name request to complete your application by visiting <a href="{url}">'
+                      f'{url}</a>',
+               'CHG': f'Use this name request to complete your application by visiting <a href="{url}">'
+                      f'{url}</a>',
+               'DEFAULT': f'To complete your filing, <a href= "{url}">visit our Forms page</a> to'
+                          ' download and submit a form'
+            },
+            'XUL': {
+               'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
+                          f'{url}</a>'
+            },
+            'RLC': {
+                'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
+                          f'{url}</a>'
+            },
+            'XLP': {
+               'DEFAULT': f'Visit <a href= "{url}">Forms, fees and information packages page</a> and'
+                          ' download the appropriate form'
+            },
+            'XLL': {
+               'DEFAULT': f'Visit <a href= "{url}">Forms, fees and information packages page</a> and'
+                          ' download the appropriate form'
+            },
+            'XCP': {
+                'DEFAULT': 'Extraprovincial Cooperative Association'
+            },
+            'XSO': {
+                'DEFAULT': f'To complete your filing, visit <a href="{url}">'
+                           f'{url}</a> and login with your BCeID.'
+            },
+            # Used for mapping back to legacy oracle codes, description not required
+            'FIRM': {
+                'DEFAULT': 'FIRM (Legacy Oracle)'
+            }
+        }
+        old_next_action_text = {
             # BC Types
             'CR':  {
                'DEFAULT': f'Use this name request to complete your application by visiting <a href="{url}">'
@@ -458,4 +597,13 @@ class ReportResource(Resource):
                 'DEFAULT': 'FIRM (Legacy Oracle)'
             }
         }
-        return next_action_text.get(entity_type_cd, None)
+        if ReportResource._get_enable_won_emails_ff():
+            return next_action_text.get(entity_type_cd, None)
+        return old_next_action_text.get(entity_type_cd, None)
+
+    @staticmethod
+    def _get_enable_won_emails_ff():
+        from namex.services import flags  # pylint: disable=import-outside-toplevel
+        enable_won_emails = flags.value('enable-won-emails')
+        structured_log(request, "DEBUG", f"NR-Email: NameX API: enable_way_of_navigation_emails feature_flag: {enable_won_emails}")
+        return enable_won_emails

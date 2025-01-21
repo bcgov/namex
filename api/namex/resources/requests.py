@@ -377,13 +377,13 @@ class Requests(Resource):
 @cors_preflight("GET, POST")
 @api.route('/search', methods=['GET', 'POST', 'OPTIONS'])
 class RequestSearch(Resource):
-    """Search for NR's."""
+    """Search for NR's by NR number or associated name."""
 
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
     def get():
-        """Query for name requests.
+        """Query for name requests with partial matching for both NR number and name.
 
         example: query=NR3742302 or query=abcd
         """
@@ -441,7 +441,8 @@ class RequestSearch(Resource):
                 start += rows
 
             return make_response(jsonify(data), 200)
-        except Exception:
+        except Exception as e:
+            current_app.logger.error(f"Error in /search, {e}")
             return make_response(jsonify({'message': 'Internal server error'}), 500)
 
     @staticmethod

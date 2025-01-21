@@ -147,6 +147,12 @@ def valid_state_transition(user, nr, new_state):
     :param new_state:
     :return: (bool)
     """
+    # when the legacy user just created a new NR from legacy side, the user should be allowed to
+    # modify and cancel it from the legacy side (while the NR still in DRAFT state).
+    if (nr.stateCd == State.DRAFT or nr.stateCd == State.APPROVED  or nr.stateCd == State.CANCELLED)   \
+        and (new_state == State.DRAFT or new_state == State.CANCELLED):
+        return True
+
     if (new_state in (State.APPROVED,
                       State.REJECTED,
                       State.CONDITIONAL)) \

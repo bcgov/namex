@@ -4,6 +4,7 @@ import pytz
 import requests
 from flask import current_app
 from cachetools import cached, TTLCache
+from urllib.parse import urlencode
 
 @staticmethod
 @cached(cache=TTLCache(maxsize=1, ttl=180)) 
@@ -55,3 +56,16 @@ def query_nr_number(identifier: str):
     })
 
     return nr_response
+
+
+@staticmethod
+def get_magic_link(nr_number, email, phone):
+    """Return a magic link."""
+    BUSINESS_REGISTRY_URL = current_app.config.get("BUSINESS_REGISTRY_URL")
+    params = {
+        'nr': nr_number,
+        'email': email,
+        'phone': phone
+    }
+    encoded_params = urlencode(params)
+    return f'{BUSINESS_REGISTRY_URL}incorporateNow/?{encoded_params}'
