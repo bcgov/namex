@@ -32,7 +32,9 @@ class Config(object):
     # SOLR_BASE_URL = os.getenv('SOLR_BASE_URL', None)
     SOLR_BASE_URL = "https://namex-solr-dev.apps.silver.devops.gov.bc.ca"
 
-    SOLR_SYNONYMS_API_URL = f'{os.getenv("SOLR_SYNONYMS_API_URL", None)}{os.getenv("SOLR_SYNONYMS_API_VERSION", None)}'
+    # TO_DO (CHANGE THIS VALUE IN ONEPASSWORD SO IT WORKS WITH GCP, POINT TO IT, SO DONT HAVE TO HARDCOAT)
+    # SOLR_SYNONYMS_API_URL = f'{os.getenv("SOLR_SYNONYMS_API_URL", None)}{os.getenv("SOLR_SYNONYMS_API_VERSION", None)}'
+    SOLR_SYNONYMS_API_URL = "https://namex-solr-dev.apps.silver.devops.gov.bc.ca/solr/api/v1"
 
     AUTO_ANALYZE_URL = os.getenv('AUTO_ANALYZE_URL', None)
     AUTO_ANALYZE_CONFIG = os.getenv('AUTO_ANALYZE_CONFIG', None)
