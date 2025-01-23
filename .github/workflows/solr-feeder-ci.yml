@@ -1,4 +1,4 @@
-name: Solr Feeder CI
+name: NameX Solr Feeder CI
 
 on:
   pull_request:
@@ -15,7 +15,7 @@ jobs:
   solr-feeder-ci:
     uses: bcgov/bcregistry-sre/.github/workflows/backend-ci.yaml@main
     with:
-      app_name: "solr-feeder"
+      app_name: "namex-solr-feeder"
       working_directory: "solr-feeder"
       codecov_flag: "solrfeeder"
       skip_isort: "true"
