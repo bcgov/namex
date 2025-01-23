@@ -1,4 +1,4 @@
-name: Bad Name Notifier CD
+name: NameX Bad Name Notifier CD
 
 on:
   push:
@@ -8,75 +8,27 @@ on:
       - "jobs/bad-name-notifier/**"
   workflow_dispatch:
     inputs:
-      environment:
-        description: "Environment (dev/test/prod)"
+      target:
+        description: "Deploy To"
         required: true
-        default: "dev"
-
-defaults:
-  run:
-    shell: bash
-    working-directory: ./jobs/bad-name-notifier
-
-env:
-  APP_NAME: "bad-name-notifier"
-  TAG_NAME: "dev"
+        type: choice
+        options:
+          - dev
+          - test
+          - sandbox
+          - prod
 
 jobs:
-  bad-name-notifier-cd-by-push:
-    runs-on: ubuntu-20.04
+  namex-bad-name-notifier-cd:
+    permissions:
+      id-token: write
+      contents: write
 
-    if: github.event_name == 'push' && github.repository == 'bcgov/namex'
-    environment:
-      name: "dev"
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Login Openshift
-        shell: bash
-        run: |
-          oc login --server=${{secrets.OPENSHIFT4_LOGIN_REGISTRY}} --token=${{secrets.OPENSHIFT4_SA_TOKEN}}
-
-      - name: CD Flow
-        shell: bash
-        env:
-          OPS_REPOSITORY: ${{ secrets.OPS_REPOSITORY }}
-          OPENSHIFT_DOCKER_REGISTRY: ${{ secrets.OPENSHIFT4_DOCKER_REGISTRY }}
-          OPENSHIFT_SA_NAME: ${{ secrets.OPENSHIFT4_SA_NAME }}
-          OPENSHIFT_SA_TOKEN: ${{ secrets.OPENSHIFT4_SA_TOKEN }}
-          OPENSHIFT_REPOSITORY: ${{ secrets.OPENSHIFT4_REPOSITORY }}
-          TAG_NAME: ${{ env.TAG_NAME }}
-        run: |
-          make cd
-
-  bad-name-notifier-cd-by-dispatch:
-    runs-on: ubuntu-20.04
-
-    if: github.event_name == 'workflow_dispatch' && github.repository == 'bcgov/namex'
-    environment:
-      name: "${{ github.event.inputs.environment }}"
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set env by input
-        run: |
-          echo "TAG_NAME=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
-
-      - name: Login Openshift
-        shell: bash
-        run: |
-          oc login --server=${{secrets.OPENSHIFT4_LOGIN_REGISTRY}} --token=${{secrets.OPENSHIFT4_SA_TOKEN}}
-
-      - name: CD Flow
-        shell: bash
-        env:
-          OPS_REPOSITORY: ${{ secrets.OPS_REPOSITORY }}
-          OPENSHIFT_DOCKER_REGISTRY: ${{ secrets.OPENSHIFT4_DOCKER_REGISTRY }}
-          OPENSHIFT_SA_NAME: ${{ secrets.OPENSHIFT4_SA_NAME }}
-          OPENSHIFT_SA_TOKEN: ${{ secrets.OPENSHIFT4_SA_TOKEN }}
-          OPENSHIFT_REPOSITORY: ${{ secrets.OPENSHIFT4_REPOSITORY }}
-          TAG_NAME: ${{ env.TAG_NAME }}
-        run: |
-          make cd
+    uses: bcgov/bcregistry-sre/.github/workflows/backend-cd.yaml@main
+    with:
+      target: ${{ github.event.inputs.target }}
+      app_name: "namex-bad-name-notifier"
+      working_directory: "./jobs/bad-name-notifier"
+    secrets:
+      WORKLOAD_IDENTIFY_POOLS_PROVIDER: ${{ secrets.WORKLOAD_IDENTIFY_POOLS_PROVIDER }}
+      GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
