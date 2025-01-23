@@ -1,12 +1,24 @@
-from email.mime.text import MIMEText
+import requests
+from http import HTTPStatus
 from flask import current_app
-from .utils import get_yesterday_str
-import smtplib
+from .utils import get_yesterday_str, get_bearer_token
 
 def load_recipients():
     """Load recipients dynamically from an environment variable."""
     recipients = current_app.config["EMAIL_RECIPIENTS"]
     return recipients if isinstance(recipients, list) else []
+
+def send_email(email: dict, token: str):
+    """Send the email"""
+    current_app.logger.info(f"Send Email: {email}")
+    return requests.post(
+        f'{current_app.config.get("NOTIFY_API_URL", "")}',
+        json=email,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {token}",
+        },
+    )
 
 def send_email_notification(bad_names):
     """Sends an email notification with the bad names."""
@@ -22,22 +34,25 @@ def send_email_notification(bad_names):
     # Create email content
     body = generate_report_title() + "\n\n" + generate_report_body(bad_names)
 
-    msg = MIMEText(body)
-    smtp_user = current_app.config["SMTP_USER"]
-    smtp_server = current_app.config["SMTP_SERVER"]
-    msg["Subject"] = "Bad characters in names"
-    msg["From"] = smtp_user
-    msg["To"] = ", ".join(recipients)
+    # Send email via Notify API
+    token = get_bearer_token()
+    for recipient in recipients:
+        email_data = {
+            "recipients": recipient,
+            "content": {
+                "subject": "Bad characters in names",
+                "body": body,
+                "attachments": [],
+            },
+        }
 
-    # Send email
-    try:
-        with smtplib.SMTP(smtp_server) as server:
-            server.starttls()
-            server.sendmail(smtp_user, recipients, msg.as_string())
-        current_app.logger.info("Email sent successfully to: %s", ", ".join(recipients))
-    except Exception as e:
-        current_app.logger.error("Failed to send email: %s", e)
-        raise
+        resp = send_email(email_data, token)
+        if resp.status_code == HTTPStatus.OK:
+            current_app.logger.info(f"Email sent successfully to: {recipient}")
+        else:
+            current_app.logger.error(
+                f"Failed to send email. Status Code: {resp.status_code}, Response: {resp.text}"
+            )
 
 def generate_report_title():
     """Generates an email title with yesterday's date."""
