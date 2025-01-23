@@ -1,5 +1,5 @@
 import os
-from dotenv import find_dotenv, load_dotenv
+from dotenv import load_dotenv
 
 # Get the project root directory
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -15,12 +15,17 @@ class Config:
     _DB_NAME = os.getenv("NAMEX_DATABASE_NAME", "")
     _DB_HOST = os.getenv("NAMEX_DATABASE_HOST", "")
     _DB_PORT = os.getenv("NAMEX_DATABASE_PORT", "5432")
-    NAMEX_DATABASE_URI = f"postgresql://{_DB_USER}:{_DB_PASSWORD}@{_DB_HOST}:{_DB_PORT}/{_DB_NAME}"
+    if DB_UNIX_SOCKET := os.getenv('NAMEX_DATABASE_UNIX_SOCKET', None):
+        NAMEX_DATABASE_URI = f'postgresql+psycopg2://{_DB_USER}:{_DB_PASSWORD}@/{_DB_NAME}?host={DB_UNIX_SOCKET}'
+    else:
+        NAMEX_DATABASE_URI = f'postgresql://{_DB_USER}:{_DB_PASSWORD}@{_DB_HOST}:{int(_DB_PORT)}/{_DB_NAME}'
 
     # Email Configuration
     EMAIL_RECIPIENTS = os.getenv("EMAIL_RECIPIENTS", "").split(",")
-    SMTP_SERVER = os.getenv("SMTP_SERVER", "")
-    SMTP_USER = os.getenv("SMTP_USER", "")
+    NOTIFY_API_URL = f"{os.getenv("NOTIFY_API_URL", "") + os.getenv("NOTIFY_API_VERSION", "")}/notify"
+    ACCOUNT_SVC_AUTH_URL = os.getenv("KEYCLOAK_AUTH_TOKEN_URL", "")
+    ACCOUNT_SVC_CLIENT_ID = os.getenv("KEYCLOAK_CLIENT_ID", "")
+    ACCOUNT_SVC_CLIENT_SECRET = os.getenv("KEYCLOAK_CLIENT_SECRET", "")
 
     # General Settings
     DEBUG = False
