@@ -12,7 +12,6 @@ def create_app(config_name="default"):
 
     app = Flask(__name__) # NOSONAR
     app.config.from_object(get_named_config(config_name))
-    print(app.config)
     return app
 
 def run_task():
