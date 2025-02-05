@@ -174,7 +174,7 @@ class ReportResource(Resource):
             nr_report_json['applicants']['countryName'] = \
                 pycountry.countries.search_fuzzy(nr_report_json['applicants']['countryTypeCd'])[0].name
         action_url = ReportResource._get_action_url(nr_model['entity_type_cd'], instruction_group)
-        actions_obj = ReportResource._get_next_action_text(nr_model['entity_type_cd'], action_url)
+        actions_obj = ReportResource._get_next_action_text(nr_model['entity_type_cd'], action_url, instruction_group)
         if actions_obj:
             action_text = actions_obj.get(nr_report_json['request_action_cd'])
             if not action_text:
@@ -293,6 +293,8 @@ class ReportResource(Resource):
 
     @staticmethod
     def _get_instruction_group(legal_type, request_action, corpNum):
+        if request_action in {RequestAction.REH.value, RequestAction.REST.value}:
+            return 'reh'
         if request_action in {RequestAction.CHG.value, RequestAction.CNV.value}:
             # For the 'Name Change' or 'Alteration', return 'modernized' if the company is in LEAR, and 'colin' if not
             return 'modernized' if ReportResource._is_lear_entity(corpNum) else 'colin'
@@ -386,9 +388,10 @@ class ReportResource(Resource):
         return next_action_text.get(entity_type_cd, None)
 
     @staticmethod
-    def _get_next_action_text(entity_type_cd: str, url: str):
+    def _get_next_action_text(entity_type_cd: str, url: str, instruction_group: str):
 
         BUSINESS_CHANGES_URL =  current_app.config.get('BUSINESS_CHANGES_URL')
+        RESTORATION_FORMS_URL =  current_app.config.get('RESTORATION_FORMS_URL')
 
         next_action_text = {
             # BC Types
@@ -597,6 +600,19 @@ class ReportResource(Resource):
                 'DEFAULT': 'FIRM (Legacy Oracle)'
             }
         }
+
+        # next action text by instruction group
+        next_action_text_by_group = {
+            'reh': {  # Restoration or Reinstatement
+                'DEFAULT': f'To complete your application using this business name, choose the appropriate <a href="{RESTORATION_FORMS_URL}">'
+                           f'information package</a> and submit the required forms to BC Registries.'
+            }
+        }
+
+        text = next_action_text_by_group.get(instruction_group, None)
+        if text:
+            return text
+
         if ReportResource._get_enable_won_emails_ff():
             return next_action_text.get(entity_type_cd, None)
         return old_next_action_text.get(entity_type_cd, None)

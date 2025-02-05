@@ -117,6 +117,7 @@ class Config:  # pylint: disable=too-few-public-methods
     SOCIETIES_URL = os.getenv("SOCIETIES_URL", "")
     AUTH_WEB_URL = os.getenv("AUTH_WEB_URL", "")
     BUSINESS_REGISTRY_URL = os.getenv("BUSINESS_REGISTRY_URL", "https://business-registry-dev.web.app/en-CA/")
+    STEPS_TO_RESTORE_URL = os.getenv("STEPS_TO_RESTORE_URL", "")
 
     PAYMENT_SVC_AUTH_URL = os.getenv('KEYCLOAK_AUTH_TOKEN_URL', '')
     PAYMENT_SVC_AUTH_CLIENT_ID = os.getenv('KEYCLOAK_CLIENT_ID', '')
