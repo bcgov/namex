@@ -1531,7 +1531,7 @@ zipp = "^3.8.1"
 type = "git"
 url = "https://github.com/bcgov/namex.git"
 reference = "HEAD"
-resolved_reference = "810650b8fc1e4c1b83d5ba7347eda4176bf5915e"
+resolved_reference = "0fa781c9330dd959d6c6c2b5da2b2d04080a8d0f"
 subdirectory = "api"
 
 [[package]]
