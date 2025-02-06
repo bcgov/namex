@@ -409,6 +409,16 @@ class RequestSearch(Resource):
 
                 condition += f'({name_condition})'
 
+            # Check if the NR number is less than 7 digits. If so, patch it with zero at the end to increase rows number.
+            # Otherwise, the rows is too small and it will take long time to search in solr and get timeout exception.
+            # So the less of nr_number, the bigger of rows will be.
+            temp_rows = str(rows)
+
+            if (len(nr_number) < 7):
+                temp_rows = str(rows).ljust(9-len(nr_number), '0')
+            rows = int(temp_rows)
+            current_app.logger.info('final rows is: {}'.format(rows))
+
             results = RequestDAO.query.filter(
                 RequestDAO.stateCd.in_([State.DRAFT, State.INPROGRESS, State.REFUND_REQUESTED]),
                 text(f'({condition})')
