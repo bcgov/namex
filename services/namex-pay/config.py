@@ -72,7 +72,10 @@ class Config():  # pylint: disable=too-few-public-methods
     DB_NAME = os.getenv('NAMEX_DATABASE_NAME', '')
     DB_HOST = os.getenv('NAMEX_DATABASE_HOST', '')
     DB_PORT = os.getenv('NAMEX_DATABASE_PORT', '5432')
-    SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
+    if DB_UNIX_SOCKET := os.getenv('NAMEX_DATABASE_UNIX_SOCKET', None):
+        SQLALCHEMY_DATABASE_URI = f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@/{DB_NAME}?host={DB_UNIX_SOCKET}'
+    else:
+        SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
 
     # ORACLE - LEGACY NRO NAMESDB
     NRO_USER = os.getenv('NRO_USER', '')

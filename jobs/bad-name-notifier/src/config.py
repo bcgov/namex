@@ -1,5 +1,5 @@
 import os
-from dotenv import find_dotenv, load_dotenv
+from dotenv import load_dotenv
 
 # Get the project root directory
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -17,12 +17,17 @@ class Config:
     DB_NAME = os.getenv("NAMEX_DATABASE_NAME", "")
     DB_HOST = os.getenv("NAMEX_DATABASE_HOST", "")
     DB_PORT = os.getenv("NAMEX_DATABASE_PORT", "5432")
-    NAMEX_DATABASE_URI = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    if DB_UNIX_SOCKET := os.getenv('NAMEX_DATABASE_UNIX_SOCKET', None):
+        NAMEX_DATABASE_URI = f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@/{DB_NAME}?host={DB_UNIX_SOCKET}'
+    else:
+        NAMEX_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
 
     # Email Configuration
     EMAIL_RECIPIENTS = os.getenv("EMAIL_RECIPIENTS", "").split(",")
-    SMTP_SERVER = os.getenv("SMTP_SERVER", "")
-    SMTP_USER = os.getenv("SMTP_USER", "")
+    NOTIFY_API_URL = f"{os.getenv("NOTIFY_API_URL", "") + os.getenv("NOTIFY_API_VERSION", "")}/notify"
+    ACCOUNT_SVC_AUTH_URL = os.getenv("KEYCLOAK_AUTH_TOKEN_URL", "")
+    ACCOUNT_SVC_CLIENT_ID = os.getenv("KEYCLOAK_CLIENT_ID", "")
+    ACCOUNT_SVC_CLIENT_SECRET = os.getenv("KEYCLOAK_CLIENT_SECRET", "")
 
     # General Settings
     DEBUG = False
@@ -58,7 +63,6 @@ APP_CONFIG = {
 
 def get_named_config(config_name: str = "default"):
     """Return the configuration object based on the name.
-
     :raise: KeyError: if an unknown configuration is requested
     """
     if config_name not in APP_CONFIG:
