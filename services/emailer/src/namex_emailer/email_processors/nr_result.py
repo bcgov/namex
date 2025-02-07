@@ -150,6 +150,7 @@ def _build_email_body(template: str, nr_model, email, phone):
         '{{CORP_ONLINE_URL}}': current_app.config.get('COLIN_URL'),
         '{{CORP_FORMS_URL}}': current_app.config.get('CORP_FORMS_URL'),
         '{{SOCIETIES_URL}}': current_app.config.get('SOCIETIES_URL'),
+        '{{STEPS_TO_RESTORE_URL}}': current_app.config.get('STEPS_TO_RESTORE_URL'),
         '{{EXPIRATION_DATE}}': nr_model['expirationDate'],
         '{{MAGIC_LINK}}': get_magic_link(nr_model['nrNum'], email, phone)
     }
