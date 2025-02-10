@@ -154,8 +154,12 @@ class NameRequestsResource(BaseNameRequestResource):
             customer_data = nr_svc.request_names
             # loop through the list of choices obtained
             for item, index in zip(customer_data, range(len(customer_data))):
-                #concat them with format saving as namesearch
-                name_search_string += f'|{index + 1}{item.get("name")}{index + 1}|'
+                name = item.get("name", "").strip()
+                if name:
+                    #concat them with format saving as namesearch
+                    name_search_string += f'|{index + 1}{name}{index + 1}|'
+                else:
+                    current_app.logger.debug(f"Skipping empty name choice at index {index}")
             #if same user submitted the request of same name choices again raise exception otherwise continue creating nr
             if(Request().find_existing_name_by_user(name_search_string, user_email)):
                 raise NameRequestIsAlreadySubmittedError()
