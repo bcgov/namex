@@ -157,7 +157,7 @@ def process_names_event_message_firm(msg: dict, flask_app: Flask):
         new_state = request_state_change.get('newState')
         if new_state in ('APPROVED', 'CONDITIONAL'):
             process_names_add(request_state_change)
-        elif new_state in ('CANCELLED', 'RESET'):
+        elif new_state in ('CANCELLED', 'RESET', 'CONSUMED', 'EXPIRED'):
             process_names_delete(request_state_change)
         else:
             structured_log(f'no names processing required for request state change message: {msg}')
