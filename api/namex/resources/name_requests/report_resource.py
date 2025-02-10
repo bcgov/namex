@@ -391,7 +391,7 @@ class ReportResource(Resource):
     def _get_next_action_text(entity_type_cd: str, url: str, instruction_group: str):
 
         BUSINESS_CHANGES_URL =  current_app.config.get('BUSINESS_CHANGES_URL')
-        RESTORATION_FORMS_URL =  current_app.config.get('RESTORATION_FORMS_URL')
+        STEPS_TO_RESTORE_URL =  current_app.config.get('STEPS_TO_RESTORE_URL')
 
         next_action_text = {
             # BC Types
@@ -604,7 +604,7 @@ class ReportResource(Resource):
         # next action text by instruction group
         next_action_text_by_group = {
             'reh': {  # Restoration or Reinstatement
-                'DEFAULT': f'To complete your application using this business name, choose the appropriate <a href="{RESTORATION_FORMS_URL}">'
+                'DEFAULT': f'To complete your application using this business name, choose the appropriate <a href="{STEPS_TO_RESTORE_URL}">'
                            f'information package</a> and submit the required forms to BC Registries.'
             }
         }
