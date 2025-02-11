@@ -1,0 +1,15 @@
+Flask-SQLAlchemy==2.5.1
+Flask==1.1.2
+Jinja2==2.11.3
+MarkupSafe==1.1.1
+SQLAlchemy==1.4.11
+Werkzeug==1.0.1
+click==7.1.2
+cx-Oracle==8.1.0
+greenlet==1.0.0
+itsdangerous==1.1.0
+python-dotenv==0.17.1
+git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api
+git+https://github.com/bcgov/namex.git#egg=queue_common&subdirectory=services/common
+git+https://github.com/bcgov/namex-synonyms-api-py-client.git#egg=swagger_client
+git+https://github.com/bcgov/namex-payment-api-py-client.git@dev#egg=openapi_client

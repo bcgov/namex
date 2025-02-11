@@ -1,0 +1,6 @@
+cx_Oracle
+python-dotenv
+
+Flask==1.1.2
+Flask-SQLAlchemy
+werkzeug
