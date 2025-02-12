@@ -1,4 +1,5 @@
-FROM python:3.12-slim
+# FROM python:3.12-slim
+FROM python:3.12.2
 USER root
 
 ARG VCS_REF="missing"
@@ -24,6 +25,10 @@ RUN apt-get update && apt-get install -y libaio1 wget unzip \
     && echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf \
     && ldconfig
 
+RUN apt-get install --assume-yes git
+
+# RUN apt-get -y install gcc && apt-get remove g++  && apt-get install --reinstall g++
+
 # Create working directory
 RUN mkdir /opt/app-root && chmod 755 /opt/app-root
 WORKDIR /opt/app-root
@@ -31,7 +36,7 @@ WORKDIR /opt/app-root
 # Install the requirements
 COPY ./requirements.txt .
 
-#RUN pip install --upgrade pip
+# RUN pip install --upgrade pip
 RUN pip install pip==25.0.1
 RUN pip install --no-cache-dir -r requirements.txt
 
