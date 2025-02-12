@@ -3,8 +3,7 @@ import sys
 from datetime import datetime
 
 from flask import Flask, current_app
-from namex import db, nro
-from namex.models import Event, Request, State, User
+from namex.models import Event, Request, State, User, db
 from namex.services import EventRecorder
 from namex.utils.logging import setup_logging
 from sqlalchemy import text
@@ -20,7 +19,6 @@ def create_app(config=Config):
     app = Flask(__name__)
     app.config.from_object(config)
     db.init_app(app)
-    nro.init_app(app)
     app.app_context().push()
     current_app.logger.debug('created the Flask App and pushed the App Context')
 
@@ -51,19 +49,12 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
             with_for_update().all()
         for request in client_edit_reqs:
             row_count += 1
-
             current_app.logger.debug(f'processing: {request.nrNum}')
             current_app.logger.debug(f'nr {request.nrNum}, state: {request.stateCd} last_update:{request.lastUpdate}')
 
             request.stateCd = State.DRAFT
             request.checkedOutBy = None
-            db.session.add(request)
-            errors = nro.checkin_checkout_nr(request, 'UNLOCK')
-            if errors:
-                raise RuntimeError('Failed to update nro.')
-            # commit here to keep this entry in sync with NRO (in case errors happen later)
-            db.session.commit()
-
+            request.save_to_db()
             EventRecorder.record(user, Event.SET_TO_DRAFT, request, request.json(), save_to_session=True)
 
         # for nrs edited by examiners
@@ -77,7 +68,6 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
 
         for request in examine_reqs:
             row_count += 1
-
             current_app.logger.debug(f'processing: {request.nrNum}')
             current_app.logger.debug(f'nr {request.nrNum}, state: {request.stateCd} last_update:{request.lastUpdate}')
 
@@ -96,32 +86,10 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
             request.save_to_db()
 
             EventRecorder.record(user, event, request, request.json(), save_to_session=True)
-
-        # for NRs showing in NRO_UPDATING status need to be set to DRAFT
-        # nro_updating_reqs = db.session.query(Request). \
-        #     filter(Request.stateCd == State.NRO_UPDATING). \
-        #     order_by(Request.lastUpdate.asc()). \
-        #     limit(max_rows). \
-        #     with_for_update().all()
-
-        # for request in nro_updating_reqs:
-        #     row_count += 1
-        #     current_app.logger.debug(f'processing nr: {request.nrNum}, state: {request.stateCd}, \
-        #         previous state: {request.previousStateCd}, last_update: {request.lastUpdate}')
-
-        #     if request.previousStateCd is None:
-        #         request.stateCd = State.DRAFT
-        #     # otherwise put it to previous status
-        #     else:
-        #         request.stateCd = request.previousStateCd
-        #         request.previousStateCd = None
-
-        #     request.save_to_db()
-
-        #     EventRecorder.record(user, Event.SET_TO_DRAFT, request, request.json(), save_to_session=True)
         return row_count, True
 
     except Exception as err:  # noqa B902
+
         current_app.logger.error(err)
         db.session.rollback()
         return -1, False
