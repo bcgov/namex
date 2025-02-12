@@ -11,7 +11,7 @@ Follow these steps to complete your application using this business name:
 1. Send in your consent letter to [BCRegistries@gov.bc.ca](BCRegistries@gov.bc.ca)
 2. Receive confirmation that the consent letter has been accepted
 3. choose the appropriate
-<a href="{{RESTORATION_FORMS_URL}}" target="_blank" style="text-decoration: underline;">
+<a href="{{STEPS_TO_RESTORE_URL}}" target="_blank" style="text-decoration: underline;">
   information package 
   [[name-request/openInNewIcon.html]]
 </a> and submit the required forms to BC Registries.
