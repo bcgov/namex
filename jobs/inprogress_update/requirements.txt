@@ -9,6 +9,7 @@ cx-Oracle==8.3.0
 greenlet==3.0.3
 itsdangerous==2.1.2
 python-dotenv==0.21.1
+setuptools==3.0
 git+https://github.com/bcgov/namex.git#egg=namex&subdirectory=api
 git+https://github.com/bcgov/namex.git#egg=gcp_queue&subdirectory=services/pubsub
 git+https://github.com/bcgov/namex-synonyms-api-py-client.git#egg=swagger_client
