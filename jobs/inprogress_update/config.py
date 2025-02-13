@@ -44,6 +44,10 @@ class BaseConfig(object):
     NRO_HOST = os.getenv('NRO_HOST', '')
     NRO_PORT = int(os.getenv('NRO_PORT', '1521'))
 
+    GCP_AUTH_KEY = os.getenv('GCP_AUTH_KEY', None)
+    EMAILER_TOPIC = os.getenv('EMAILER_TOPIC', '')
+    NAMEX_NR_STATE_TOPIC = os.getenv('NAMEX_NR_STATE_TOPIC', '')
+
 
 class Config(BaseConfig):
     """Normal config."""

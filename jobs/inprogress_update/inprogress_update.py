@@ -4,7 +4,7 @@ from datetime import datetime
 
 from flask import Flask, current_app
 from namex.models import Event, Request, State, User, db
-from namex.services import EventRecorder
+from namex.services import EventRecorder, queue
 from namex.utils.logging import setup_logging
 from sqlalchemy import text
 
@@ -18,6 +18,7 @@ def create_app(config=Config):
     """Create instance of app."""
     app = Flask(__name__)
     app.config.from_object(config)
+    queue.init_app(app)
     db.init_app(app)
     app.app_context().push()
     current_app.logger.debug('created the Flask App and pushed the App Context')
