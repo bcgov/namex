@@ -120,7 +120,7 @@ push: #build ## Push the docker container to the registry & tag latest
 
 VAULTS=`cat devops/vaults.json`
 update-env: ## Update env from 1pass
-	oc -n "$(OPS_REPOSITORY)-$(TAG_NAME)" exec "dc/vault-service-$(TAG_NAME)" -- ./scripts/1pass.sh \
+	oc -n "$(OPENSHIFT_REPOSITORY)-$(TAG_NAME)" exec "dc/vault-service-$(TAG_NAME)" -- ./scripts/1pass.sh \
 		-m "secret" \
 		-e "$(TAG_NAME)" \
 		-a "$(DOCKER_NAME)-$(TAG_NAME)" \
