@@ -6,11 +6,7 @@ The consent letter for your name request has been received and we have **approve
 
 # You\'re not done yet!
 
-To complete your application using this business name, choose the appropriate
-<a href="{{STEPS_TO_RESTORE_URL}}" target="_blank" style="text-decoration: underline;">
-  information package 
-  [[name-request/openInNewIcon.html]]
-</a> and submit the required forms to BC Registries.
+To complete your application using this business name, choose the appropriate [information package]({{STEPS_TO_RESTORE_URL}}) and submit the required forms to BC Registries.
 
 ---
 
