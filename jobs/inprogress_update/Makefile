@@ -8,6 +8,8 @@ CURRENT_ABS_DIR:=$(patsubst %/,%,$(dir $(MKFILE_PATH)))
 
 PROJECT_NAME:=inprogress_update
 DOCKER_NAME:=inprogress-update
+OPENSHIFT_REPOSITORY:=inprogress-update
+
 
 #################################################################################
 # COMMANDS -- license                                                           #
