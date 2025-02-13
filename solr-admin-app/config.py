@@ -37,26 +37,12 @@ class Config(object):
     DATABASE_PORT = os.getenv('NAMES_ADMIN_DATABASE_PORT', '5432')
     DATABASE_NAME = os.getenv('NAMES_ADMIN_DATABASE_NAME', '')
 
-    SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
-        user=DATABASE_USER,
-        password=DATABASE_PASSWORD,
-        host=DATABASE_HOST,
-        port=int(DATABASE_PORT),
-        name=DATABASE_NAME)
-
-    SYNONYMS_DATABASE_USER = os.getenv('NAMES_ADMIN_SYNONYMS_DATABASE_USERNAME', '')
-    SYNONYMS_DATABASE_PASSWORD = os.getenv('NAMES_ADMIN_SYNONYMS_DATABASE_PASSWORD', '')
-    SYNONYMS_DATABASE_HOST = os.getenv('NAMES_ADMIN_SYNONYMS_DATABASE_HOST', '')
-    SYNONYMS_DATABASE_PORT = os.getenv('NAMES_ADMIN_SYNONYMS_DATABASE_PORT', '5432')
-    SYNONYMS_DATABASE_NAME = os.getenv('NAMES_ADMIN_SYNONYMS_DATABASE_NAME', 'synonyms')
-    SQLALCHEMY_BINDS = {
-        'synonyms': 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
-            user=SYNONYMS_DATABASE_USER,
-            password=SYNONYMS_DATABASE_PASSWORD,
-            host=SYNONYMS_DATABASE_HOST,
-            port=int(SYNONYMS_DATABASE_PORT),
-            name=SYNONYMS_DATABASE_NAME)
-    }
+    if DB_UNIX_SOCKET := os.getenv('NAMES_ADMIN_DATABASE_UNIX_SOCKET', None):
+        SQLALCHEMY_DATABASE_URI = f'postgresql+psycopg2://{DATABASE_USER}:{DATABASE_PASSWORD}@/{DATABASE_NAME}?host={DB_UNIX_SOCKET}'
+        SQLALCHEMY_BINDS = {'synonyms': f'postgresql+psycopg2://{DATABASE_USER}:{DATABASE_PASSWORD}@/{DATABASE_NAME}?host={DB_UNIX_SOCKET}'}
+    else:
+        SQLALCHEMY_DATABASE_URI = f'postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{int(DATABASE_PORT)}/{DATABASE_NAME}'
+        SQLALCHEMY_BINDS = {'synonyms': f'postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{int(DATABASE_PORT)}/{DATABASE_NAME}'}
 
     DEBUG = False
     TESTING = False
