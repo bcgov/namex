@@ -107,6 +107,21 @@ objects:
                       secretKeyRef:
                         name: ${NAME}-${TAG}-secret
                         key: MAX_ROWS_LIMIT
+                  - name: GCP_AUTH_KEY
+                    valueFrom:
+                      secretKeyRef:
+                        name: inprogress-update-test-secret
+                        key: GCP_AUTH_KEY
+                  - name: MAILER_TOPIC
+                    valueFrom:
+                      secretKeyRef:
+                        name: inprogress-update-test-secret
+                        key: MAILER_TOPIC
+                  - name: NAMEX_NR_STATE_TOPIC
+                    valueFrom:
+                      secretKeyRef:
+                        name: inprogress-update-test-secret
+                        key: NAMEX_NR_STATE_TOPIC
             restartPolicy: "Never"
             terminationGracePeriodSeconds: 30
             activeDeadlineSeconds: 1600
@@ -151,7 +166,7 @@ parameters:
   - name: "SCHEDULE"
     displayName: "Cron Schedule"
     description: "Cron Schedule to Execute the Job (using local cluster system TZ)"
-    value: "*/5 * * * *"
+    value: "*/30 * * * *"
     required: true
 
   - name: "SUCCESS_JOBS_HISTORY_LIMIT"
