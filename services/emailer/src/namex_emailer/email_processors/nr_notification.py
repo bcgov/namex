@@ -80,6 +80,7 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
     corp_online_url = current_app.config.get("COLIN_URL")
     form_page_url = current_app.config.get("CORP_FORMS_URL")
     societies_url = current_app.config.get("SOCIETIES_URL")
+    steps_to_restore_url = current_app.config.get("STEPS_TO_RESTORE_URL")
     magic_link = get_magic_link(nr_number, nr_data["applicants"]["emailAddress"], nr_data["applicants"]["phoneNumber"])
 
     file_name_suffix = option.upper()
@@ -108,7 +109,8 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
         corp_online_url=corp_online_url,
         form_page_url=form_page_url,
         societies_url=societies_url,
-        magic_link=magic_link
+        magic_link=magic_link,
+        steps_to_restore_url=steps_to_restore_url
     )
 
     # get recipients

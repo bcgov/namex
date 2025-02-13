@@ -126,7 +126,7 @@ update-env: ## Update env from 1pass
 		-m "secret" \
 		-e "$(TAG_NAME)" \
 		-a "$(DOCKER_NAME)-$(TAG_NAME)" \
-		-n "$(OPENSHIFT_REPOSITORY)-$(TAG_NAME)" \
+		-n "$(DOCKER_NAME)-$(TAG_NAME)" \
 		-v "$(VAULTS)" \
 		-r "false" \
 		-f "false"
