@@ -8,8 +8,6 @@ CURRENT_ABS_DIR:=$(patsubst %/,%,$(dir $(MKFILE_PATH)))
 
 PROJECT_NAME:=inprogress_update
 DOCKER_NAME:=inprogress-update
-OPENSHIFT_REPOSITORY:=inprogress-update
-
 
 #################################################################################
 # COMMANDS -- license                                                           #
@@ -122,14 +120,14 @@ push: #build ## Push the docker container to the registry & tag latest
 
 VAULTS=`cat devops/vaults.json`
 update-env: ## Update env from 1pass
-	oc -n "$(OPENSHIFT_REPOSITORY)-$(TAG_NAME)" exec "dc/vault-service-$(TAG_NAME)" -- ./scripts/1pass.sh \
-		-m "secret" \
-		-e "$(TAG_NAME)" \
-		-a "$(DOCKER_NAME)-$(TAG_NAME)" \
-		-n "$(DOCKER_NAME)-$(TAG_NAME)" \
-		-v "$(VAULTS)" \
-		-r "false" \
-		-f "false"
+	# oc -n "$(OPS_REPOSITORY)-$(TAG_NAME)" exec "dc/vault-service-$(TAG_NAME)" -- ./scripts/1pass.sh \
+	# 	-m "secret" \
+	# 	-e "$(TAG_NAME)" \
+	# 	-a "$(DOCKER_NAME)-$(TAG_NAME)" \
+	# 	-n "$(OPENSHIFT_REPOSITORY)-$(TAG_NAME)" \
+	# 	-v "$(VAULTS)" \
+	# 	-r "false" \
+	# 	-f "false"
 
 tag: push ## tag image
 	oc -n "$(OPENSHIFT_REPOSITORY)-tools" tag $(DOCKER_NAME):latest $(DOCKER_NAME):$(TAG_NAME)
