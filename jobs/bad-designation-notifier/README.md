@@ -7,6 +7,7 @@ Bad-designation-Notifier is a Python application designed to identify designatio
 - Filter out designations that are not in specific states (e.g., 'CANCELLED','EXPIRED','PENDING_DELETION','REJECTED').
 - Send email notifications with formatted data to a configurable list of recipients.
 - Configurable via environment variables for flexibility.
+- to update reciepts, check the environment variable EMAIL_RECIPIENTS in YAML.
 
 ## Requirements
 - Python 3.12+

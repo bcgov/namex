@@ -29,7 +29,7 @@ WORKDIR /app
 
 # Copy dependency files and install dependencies
 COPY pyproject.toml poetry.lock /app/
-RUN poetry install --no-dev --no-interaction --no-ansi
+RUN poetry install --only main --no-interaction --no-ansi --no-root
 
 # Copy the application source code
 COPY src /app/src
