@@ -9,6 +9,9 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 
 class Config:
+
+    PROJECT_ROOT = BASE_DIR
+    
     # Database Configuration
     _DB_USER = os.getenv("NAMEX_DATABASE_USERNAME", "")
     _DB_PASSWORD = os.getenv("NAMEX_DATABASE_PASSWORD", "")
