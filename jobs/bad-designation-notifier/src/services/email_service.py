@@ -5,7 +5,6 @@ import os
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
-from email import encoders
 from flask import current_app
 from .utils import get_yesterday_str, column_keys, column_headers
 
@@ -66,7 +65,7 @@ def format_email_body(formatted_result):
     email_body = f"""
     <html>
         <body>
-            <p><b>--- FIRMS WITH A CORPORATE DESIGNATION {get_yesterday_str()}---</b></p>
+            <p><b>FIRMS WITH A CORPORATE DESIGNATION {get_yesterday_str()}</b></p>
             <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; font-family: 'Arial', sans-serif; font-size: 14px; width: 100%;">
                 <thead>
                     <tr style="background-color: #f2f2f2;">{table_header}</tr>

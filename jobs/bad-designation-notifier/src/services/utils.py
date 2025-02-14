@@ -6,11 +6,11 @@ import pytz
 columns = [
     ("event_time", "EVENT TIME"),
     ("nr_num", "NR NUM"),
-    ("request_type", "REQUEST TYPE"),
-    ("choice", "CHOICE"),
-    ("status", "STATUS"),
     ("name", "NAME"),
-    ("consume_by", "CONSUME BY")
+    ("entity_type_cd", "ENTITY_TYPE"),
+    ("status", "STATUS"),
+    ("consumed_date", "CONSUMED_DATE"),
+    ("consumed_by", "CONSUMED BY")
 ]
 
 # Extract only the keys and headers
