@@ -129,28 +129,28 @@ class NameRequestFilingActions:
         ('ULBE', 'BEN', 'Benefit Company', 'Conversion from ULC', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
 
         # continued in BC Limited Company
-        ('CT_C', 'C', 'Continued In BC Limited Company', 'Continuation In', 'lear', None, None, None),
+        ('CT_CR', 'C', 'Continued In BC Limited Company', 'Continuation In', 'lear', None, None, None),
         ('CCR_C', 'C', 'Continued In BC Limited Company', 'Change of Name', 'lear', None, None, None),
         ('RCR_C', 'C', 'Continued In BC Limited Company', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
         ('BECR_C', 'C', 'Continued In BC Limited Company', 'Conversion from Continued In Benefit Company ', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
         ('ULCB_C', 'C', 'Continued In BC Limited Company', 'Conversion from Continued In ULC', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
 
         # continued in Benefit Company
-        ('BECT_CBEN', 'CBEN', 'Continued In Benefit Company', 'Continuation In', 'lear', None, None, None),
+        ('BECT_BC', 'CBEN', 'Continued In Benefit Company', 'Continuation In', 'lear', None, None, None),
         ('BEC_CBEN', 'CBEN', 'Continued In Benefit Company', 'Change of Name', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
         ('BERE_CBEN', 'CBEN', 'Continued in Benefit Company', 'Restoration', 'lear', None, None, None),
         ('BECV_CBEN', 'CBEN', 'Continued In Benefit Company', 'Conversion from Continued In BC Limited Company', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
         ('ULBE_CBEN', 'CBEN', 'Continued In Benefit Company', 'Conversion from Continued In ULC', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
 
         # continued in Community Contribution Company
-        ('CCCT_CCC', 'CCC', 'Continued In CCC', 'Continuation In', 'lear', None, None, None),
+        ('CCCT_CC', 'CCC', 'Continued In CCC', 'Continuation In', 'lear', None, None, None),
         ('CCC_CCC', 'CCC', 'Continued In CCC', 'Change of Name', 'lear', None, None, None),
         ('RCC_CCC', 'CCC', 'Continued In CCC', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
         ('CCV_CCC', 'CCC', 'Continued In CCC', 'Conversion from Continued In BC Limited Company', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
         ('BECC_CCC', 'CCC', 'Continued In CCC', 'Conversion from Continued In Benefit Company', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
         
         # continued in Unlimited Liability Company
-        ('ULCT_CUL', 'CUL', 'Continued In ULC', 'Continuation In', 'lear', None, None, None),
+        ('ULCT_ULC', 'CUL', 'Continued In ULC', 'Continuation In', 'lear', None, None, None),
         ('CUL_CUL', 'CUL', 'Continued In ULC', 'Change of Name', 'lear', None, None, None),
         ('RUL_CUL', 'CUL', 'Continued In ULC', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),
         ('UC_CUL', 'CUL', 'Continued In ULC', 'Conversion from Continued In BC Limited Company', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
@@ -174,7 +174,7 @@ class NameRequestFilingActions:
         current_app.logger.debug('completed creating nr_filing_actions')
         return d
 
-    def get_actions(self, nr_type: str, entity_type_cd: str) -> Optional[dict]:
+    def get_actions(self, request_type_cd: str, entity_type_cd: str, request_action_cd: str) -> Optional[dict]:
         """Return the target system and filing actions that a nr_type can be used for.
 
         Returns a dict with the following values:
@@ -187,11 +187,15 @@ class NameRequestFilingActions:
             URL: the location of the service
             learTemplate: the templat that can be used to create a draft filing.
         """
-        if nr_type in ['FR', 'CFR'] and entity_type_cd in ['FR', 'DBA', 'GP']:
-            nr_type = nr_type + '_' + entity_type_cd
+        if request_type_cd in ['FR', 'CFR'] and entity_type_cd in ['FR', 'DBA', 'GP']:
+            request_type_cd = request_type_cd + '_' + entity_type_cd
 
-        # special case for continued in types that otherwise have the same NR type as regular companies
+        # special case for continued in request action since entity_type_cd is CR/BC/CC/ULC instead of C/CBEN/CCC/CUL
+        if request_action_cd == 'MVE':
+            request_type_cd = request_type_cd + '_' + entity_type_cd
+
+        # special case for continued in entity types that otherwise have the same NR type as regular companies
         if entity_type_cd in ['C', 'CBEN', 'CCC', 'CUL']:
-            nr_type = nr_type + '_' + entity_type_cd
+            request_type_cd = request_type_cd + '_' + entity_type_cd
 
-        return self.get_dict.get(nr_type)
+        return self.get_dict.get(request_type_cd)

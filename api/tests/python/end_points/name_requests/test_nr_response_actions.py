@@ -483,7 +483,7 @@ def test_hold_response_actions(client, jwt, app):
 
     # Check actions
     actions = nr.get('actions')
-    assert len(actions) is 0
+    assert len(actions) == 0
 
 
 def test_inprogress_response_actions(client, jwt, app):
@@ -518,7 +518,7 @@ def test_inprogress_response_actions(client, jwt, app):
 
     # Check actions
     actions = nr.get('actions')
-    assert len(actions) is 0
+    assert len(actions) == 0
 
 
 def test_cancelled_response_actions(client, jwt, app):
@@ -554,7 +554,7 @@ def test_cancelled_response_actions(client, jwt, app):
     # Check actions
     actions = nr.get('actions')
 
-    assert len(actions) is 0
+    assert len(actions) == 0
     # TODO: Show receipt action ONLY if there is an existing payment!
     # assert_list_contains_exactly(actions, [
     #     NameRequestActions.RECEIPT.value

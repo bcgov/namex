@@ -22,6 +22,7 @@ def test_nr_filing_actions(caplog):
     app = Flask(__name__)
     nr_type_cd = 'BC'
     entity_type_cd = 'BLANK'
+    request_action_cd = 'BLANK'
     nr_filing_actions_debug_msg = 'creating nr_filing_actions'
 
     caplog.clear()
@@ -29,9 +30,9 @@ def test_nr_filing_actions(caplog):
     with app.app_context():
         with caplog.at_level(logging.DEBUG):
 
-            nr_filing_actions.get_actions(nr_type_cd, entity_type_cd)
+            nr_filing_actions.get_actions(nr_type_cd, entity_type_cd, request_action_cd)
             assert  nr_filing_actions_debug_msg in [rec.message for rec in caplog.records]
 
             caplog.clear()
-            nr_filing_actions.get_actions(nr_type_cd, entity_type_cd)
+            nr_filing_actions.get_actions(nr_type_cd, entity_type_cd, request_action_cd)
             assert  nr_filing_actions_debug_msg not in [rec.message for rec in caplog.records]
