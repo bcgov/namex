@@ -126,12 +126,12 @@ class ColinApi(Resource):
             def extract_address(office_type):
                 address = office_data.get(office_type, {}).get("deliveryAddress", {})
                 return [
-                    address.get("streetAddress", "").strip(),
-                    address.get("streetAddressAdditional", "").strip(),
-                    address.get("addressCity", "").strip(),
-                    address.get("addressRegion", "").strip(),
-                    address.get("postalCode", "").strip(),
-                    address.get("addressCountry", "").strip()
+                    (address.get("streetAddress") or "").strip(),
+                    (address.get("streetAddressAdditional") or "").strip(),
+                    (address.get("addressCity") or "").strip(),
+                    (address.get("addressRegion") or "").strip(),
+                    (address.get("postalCode") or "").strip(),
+                    (address.get("addressCountry") or "").strip()
                 ] if address else []
 
             # Return formatted addresses
@@ -180,10 +180,10 @@ class ColinApi(Resource):
                 for party in party_list:
                     roles = party.get("roles", [])
                     if any(role.get("roleType") == role_type for role in roles):
-                        officer = party.get("officer", {})
-                        first_name = officer.get("firstName", "").strip()
-                        middle_initial = officer.get("middleInitial", "").strip()
-                        last_name = officer.get("lastName", "").strip()
+                        officer = party.get("officer") or {}
+                        first_name = (officer.get("firstName") or "").strip()
+                        middle_initial = (officer.get("middleInitial") or "").strip()
+                        last_name = (officer.get("lastName") or "").strip()
                         full_name = f"{first_name} {middle_initial} {last_name}".strip()
                         names.append(full_name)
                 return names
