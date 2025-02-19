@@ -503,11 +503,12 @@ class RequestSearch(Resource):
                     RequestDAO.natureBusinessInfo,
                     RequestDAO._entity_type_cd,
                     RequestDAO.expirationDate,
-                    RequestDAO.consentFlag
+                    RequestDAO.consentFlag,
+                    RequestDAO._request_action_cd
                 ))
 
         requests = request_auth_search_schemas.dump(q.all())
-        actions_array = [nr_filing_actions.get_actions(r['requestTypeCd'], r['entity_type_cd']) for r in requests]
+        actions_array = [nr_filing_actions.get_actions(r['requestTypeCd'], r['entity_type_cd'], r['request_action_cd']) for r in requests]
         for r, additional_fields in zip(requests, actions_array):
             if additional_fields:
                 r.update(additional_fields)
