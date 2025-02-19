@@ -17,7 +17,6 @@ def get_bad_designations():
     session = sessionmaker(bind=engine)()
 
     yesterday_pacific = get_yesterday_str()
-    yesterday_pacific = '2025-02-12'
 
     # Print the timestamps
     current_app.logger.info(f"Yesterday (Pacific): {yesterday_pacific}")
