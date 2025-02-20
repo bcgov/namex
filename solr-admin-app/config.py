@@ -1,5 +1,7 @@
-
 import os
+import base64
+import tempfile
+import atexit
 import dotenv
 
 dotenv.load_dotenv(dotenv.find_dotenv(), override=True)
@@ -15,8 +17,20 @@ CONFIGURATION = {
 class Config(object):
     SECRET_KEY = 'My Secret'
 
-    # Normal Keycloak parameters.
-    OIDC_CLIENT_SECRETS = os.getenv('SOLR_ADMIN_APP_OIDC_CLIENT_SECRETS', 'solr-admin-app/keycloak_client_secrets/secrets.json')
+    _keycloak_secrets_b64 = os.getenv("SOLR_ADMIN_APP_OIDC_CLIENT_SECRETS")
+    if not _keycloak_secrets_b64:
+        raise ValueError("SOLR_ADMIN_APP_OIDC_CLIENT_SECRETS environment variable is not set.")
+
+    try:
+        # Write the JSON to a temporary file.
+        decoded = base64.b64decode(_keycloak_secrets_b64).decode("utf-8")
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
+            temp_file.write(decoded)
+            OIDC_CLIENT_SECRETS = temp_file.name
+            _temp_oidc_client_secrets_path = temp_file.name
+    except Exception as e:
+        raise ValueError("Failed to decode and create temporary Keycloak secrets file.") from e
+
     OIDC_SCOPES = ['openid', 'email', 'profile']
     OIDC_VALID_ISSUERS = [os.getenv('SOLR_ADMIN_APP_OIDC_VALID_ISSUERS', 'http://localhost:8081/auth/realms/master')]
     OVERWRITE_REDIRECT_URI = os.getenv('SOLR_ADMIN_APP_OVERWRITE_REDIRECT_URI', '')
@@ -25,9 +39,6 @@ class Config(object):
     # Undocumented Keycloak parameter: allows sending cookies without the secure flag, which we need for the local
     # non-TLS HTTP server. Set this to non-"True" for local development, and use the default everywhere else.
     OIDC_ID_TOKEN_COOKIE_SECURE = os.getenv('SOLR_ADMIN_APP_OIDC_ID_TOKEN_COOKIE_SECURE', 'True') == 'True'
-
-    # Turn this off to get rid of warning messages. In future versions of SQLAlchemy, False will be the default and
-    # this can be removed.
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # PostgreSQL Connection information.
@@ -46,6 +57,21 @@ class Config(object):
 
     DEBUG = False
     TESTING = False
+
+    @staticmethod
+    def cleanup_temp_file():
+        """Delete the temporary OIDC client secrets file on exit."""
+        temp_path = getattr(Config, '_temp_oidc_client_secrets_path', None)
+        if temp_path and os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+                print("DEBUG: Deleted temporary file:", temp_path)
+            except Exception as e:
+                print("WARNING: Could not delete temporary file:", temp_path, e)
+
+
+# Register the cleanup function with atexit.
+atexit.register(Config.cleanup_temp_file)
 
 
 class DevConfig(Config):
