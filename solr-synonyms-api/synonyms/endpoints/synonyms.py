@@ -4,7 +4,7 @@ import jsonpickle
 from ast import literal_eval
 
 from flask import request, make_response, jsonify
-from flask_restplus import Namespace, Resource, cors, fields, marshal_with, reqparse
+from flask_restx import Namespace, Resource, cors, fields, marshal_with, reqparse
 from flask_jwt_oidc import AuthError
 
 from urllib.parse import unquote_plus
