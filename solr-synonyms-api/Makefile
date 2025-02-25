@@ -71,7 +71,7 @@ run: db ## Run the project in local
 	poetry run flask run -p 5000
 
 db: ## Update the local database
-	poetry run python -m manage.py db upgrade
+	poetry run python -m manage db upgrade
 
 #################################################################################
 # Self Documenting Commands                                                     #
