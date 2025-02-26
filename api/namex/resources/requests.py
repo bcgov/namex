@@ -414,7 +414,7 @@ class RequestSearch(Resource):
             # So the less of nr_number, the bigger of rows will be.
             temp_rows = str(rows)
 
-            if (len(nr_number) < 7):
+            if (nr_number and len(nr_number) < 7):
                 temp_rows = str(rows).ljust(9-len(nr_number), '0')
             rows = int(temp_rows)
             current_app.logger.info('final rows is: {}'.format(rows))
