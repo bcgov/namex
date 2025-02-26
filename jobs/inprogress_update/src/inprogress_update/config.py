@@ -43,7 +43,7 @@ class BaseConfig(object):
         SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
 
     # Normalize the b64 key: strip whitespace and add padding as needed.
-    _key = os.getenv('BUSINESS_GCP_AUTH_KEY', None)
+    _key = os.getenv('GCP_AUTH_KEY', None)
     GCP_AUTH_KEY = None if _key is None else "".join(_key.split()) + "=" * (-len("".join(_key.split())) % 4)
 
     EMAILER_TOPIC = os.getenv('EMAILER_TOPIC', '')
