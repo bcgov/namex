@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "ocp-sftp-relay"
+version = "0.1.0"
+description = ""
+authors = ["EPortman <Ethan.Portman@gov.bc.ca>"]
+readme = "README.md"
+packages = [{include = "ocp_sftp_relay"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+flask-jwt-oidc = { git = "https://github.com/seeker25/flask-jwt-oidc.git" }
+paramiko = "^3.5.1"
+pysftp = "^0.2.9"
+flask-restx = "^1.3.0"
+dotenv = "^0.9.9"
+gunicorn = "^23.0.0"
+requests = "^2.32.3"
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^7.1.2"
+black = "^25.1.0"
+isort = "^6.0.1"
+pylint = "^3.3.4"
+
+[tool.black]
+line-length = 120
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
