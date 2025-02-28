@@ -1,0 +1,56 @@
+name: Namex OCP SFTP Relay API CI
+
+on:
+  pull_request:
+    types: [assigned, synchronize]
+    paths:
+      - "api/**"
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./services/ocp-sftp-relay
+
+jobs:
+  setup-job:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: setup check
+        run: |
+          echo "setup check pass."
+
+  linting:
+    needs: setup-job
+    runs-on: ubuntu-20.04
+
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          make setup
+      - name: Lint with flake8
+        id: flake8
+        run: |
+          poetry run flake8
+
+  build-check:
+    needs: setup-job
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: build to check strictness
+        id: build
+        run: |
+          make build-nc
