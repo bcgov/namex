@@ -1,7 +1,7 @@
 from flask import current_app
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-from src.config import get_named_config
+from config import get_named_config
 from .utils import get_yesterday_utc_range
 
 config = get_named_config
