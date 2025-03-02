@@ -59,11 +59,6 @@ build: ## Build the Docker container
 build-nc: ## Build the Docker container without caching
 	docker build --no-cache -t $(DOCKER_NAME) .
 
-push: build ## Push the Docker container to the registry
-	@echo "$(OPENSHIFT_SA_TOKEN)" | docker login $(OPENSHIFT_DOCKER_REGISTRY) -u $(OPENSHIFT_SA_NAME) --password-stdin ;\
-	docker tag $(DOCKER_NAME) $(OPENSHIFT_DOCKER_REGISTRY)/$(OPENSHIFT_REPOSITORY)-tools/$(DOCKER_NAME):latest ;\
-	docker push $(OPENSHIFT_DOCKER_REGISTRY)/$(OPENSHIFT_REPOSITORY)-tools/$(DOCKER_NAME):latest
-
 #################################################################################
 # Run                                                                           #
 #################################################################################
