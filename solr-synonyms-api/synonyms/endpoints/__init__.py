@@ -1,5 +1,5 @@
 
-import flask_restplus
+import flask_restx
 
 from . import synonyms
 from . import name_processing
@@ -9,7 +9,7 @@ from . import probes
 __all__ = ['api']
 
 
-api = flask_restplus.Api(
+api = flask_restx.Api(
     version='1.0',
     title='Synonyms API',
     description='Retrieves the sets of synonyms for a given word.',
