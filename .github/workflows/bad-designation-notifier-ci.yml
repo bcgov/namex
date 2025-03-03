@@ -11,7 +11,7 @@ defaults:
     working-directory: ./jobs/bad-designation-notifier
 
 jobs:
-  namex-bad-name-notifier-ci:
+  namex-bad-desi-notifier-ci:
     uses: bcgov/bcregistry-sre/.github/workflows/backend-ci.yaml@main
     with:
       app_name: "namex-bad-designation-notifier"
