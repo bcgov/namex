@@ -10,6 +10,7 @@ from namex.utils.api_resource import handle_exception
 from simple_cloudevent import SimpleCloudEvent
 from datetime import datetime
 
+from namex_emailer.email_processors import get_main_template
 from namex_emailer.services.helpers import get_magic_link, query_nr_number
 
 RESULT_EMAIL_SUBJECT = 'Name Request Results from Corporate Registry'
@@ -47,15 +48,14 @@ def email_consent_letter(email_info: SimpleCloudEvent):
         if not nr_model['expirationDate']:
             ReportResource._add_expiry_date(nr_model)
         recipients = ','.join(recipient_emails)
-        template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
         file_name = 'consent'
         legal_type = nr_model['entity_type_cd']
         request_action = nr_model["request_action_cd"]
         corpNum = nr_model["corpNum"]
         instruction_group = ReportResource._get_instruction_group(legal_type, request_action, corpNum)
         if instruction_group:
-            file_name = f"{file_name}-{instruction_group}"
-        email_template = Path(f'{template_path}/{file_name}.md').read_text()
+            file_name = f"{file_name}-{instruction_group}.md"
+        email_template = get_main_template(request_action, file_name, 'consent')
         email_body = _build_email_body(email_template, nr_model, recipient_emails[0], recipient_phones[0])
         email = {
             'recipients': recipients,
@@ -96,24 +96,24 @@ def email_report(email_info: SimpleCloudEvent):
                 recipient_emails.append(applicant['emailAddress'])
                 recipient_phones.append(applicant['phoneNumber'])
         recipients = ','.join(recipient_emails)
-        template_path = current_app.config.get('REPORT_TEMPLATE_PATH')
-        email_template = Path(f'{template_path}/rejected.md').read_text()
+        request_action = nr_model["request_action_cd"]
+        email_template = get_main_template(request_action, 'rejected.md')
         if nr_model['stateCd'] in [State.APPROVED, State.CONDITIONAL]:
             legal_type = nr_model['entity_type_cd']
-            request_action = nr_model["request_action_cd"]
             corpNum = nr_model["corpNum"]
             instruction_group = ReportResource._get_instruction_group(legal_type, request_action, corpNum)
-            file_name=''
+            file_name = ''
             if nr_model['consentFlag'] in ['Y', 'R']:
-                file_name = 'conditional'
+                status = 'conditional'
             else:
-                file_name = 'approved'
+                status = 'approved'
 
+            file_name = status
             if instruction_group:
                 file_name += '-'
                 file_name += instruction_group
 
-            email_template = Path(f'{template_path}/{file_name}.md').read_text()
+            email_template = get_main_template(request_action, f'{file_name}.md', status)
 
         email_body = _build_email_body(email_template, nr_model, recipient_emails[0], recipient_phones[0])
 
