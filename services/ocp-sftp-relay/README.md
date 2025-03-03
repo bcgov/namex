@@ -4,7 +4,7 @@
 
 # Namex OCP SFTP Relay API
 
-An API used to relay a zip file to the government sftp server. This is used by the Namex SFTP Nuans Report Job located in GCP.
+An API used to relay a .gz file to the government sftp server. This is used by the Namex SFTP Nuans Report Job located in GCP.
 
 ## Getting Help or Reporting an Issue
 
