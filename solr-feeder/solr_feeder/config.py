@@ -33,8 +33,8 @@ class Config():  # pylint: disable=too-few-public-methods;
 
     POD_NAMESPACE = os.getenv('POD_NAMESPACE', 'unknown')
 
-    COLIN_API_URL = os.getenv('COLIN_SVC_URL', 'http://') + \
-        os.getenv('COLIN_SVC_VERSION', '/api/v1')
+    COLIN_API_URL = os.getenv('COLIN_API_URL', 'http://') + \
+        os.getenv('COLIN_API_VERSION', '/api/v1')
 
     SEARCH_API_URL = os.getenv('REGISTRIES_SEARCH_API_INTERNAL_URL', 'http://') \
         + os.getenv('REGISTRIES_SEARCH_API_VERSION', '/api/v1')
