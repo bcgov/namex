@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "inprogress-update"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{include = "inprogress_update", from = "src"}]
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.13"
+namex = { git = "https://github.com/bcgov/namex.git", subdirectory = "api" }
+swagger_client = { git = "https://github.com/bcgov/namex-synonyms-api-py-client.git" }
+openapi_client = { git = "https://github.com/bcgov/namex-payment-api-py-client.git", branch = "dev" }
+gcp_queue = { git = "https://github.com/bcgov/namex.git", subdirectory = "services/pubsub" }
+flask = "^3.0.2"
+flask-sqlalchemy = "^3.0.0"
+jinja2 = "^3.1.2"
+markupSafe = "^2.1.1"
+sqlalchemy = "^1.4.18"
+werkzeug = "^3.0.0"
+click = "^8.1.3"
+greenlet = "^3.0.3"
+itsdangerous = "^2.1.2"
+python-dotenv = "^0.21.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+flake8 = "^7.1.2"
+flake8-blind-except = "^0.2.1"
+flake8-debugger = "^4.1.2"
+flake8-docstrings = "^1.7.0"
+flake8-isort = "^6.1.2"
+flake8-quotes = "^3.4.0"
+pep8-naming = "^0.14.1"
+coverage = "^7.6.12"
+autopep8 = "^2.3.2"
+pylint = "^3.3.4"
+pylint-flask = "^0.6"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

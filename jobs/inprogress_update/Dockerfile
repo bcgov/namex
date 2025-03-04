@@ -1,4 +1,3 @@
-# FROM python:3.12-slim
 FROM python:3.12.2
 USER root
 
@@ -9,44 +8,75 @@ ENV VCS_REF=${VCS_REF}
 ENV BUILD_DATE=${BUILD_DATE}
 
 LABEL org.label-schema.vcs-ref=${VCS_REF} \
-    org.label-schema.build-date=${BUILD_DATE}
+      org.label-schema.build-date=${BUILD_DATE}
 
-# Installing Oracle instant client
-WORKDIR /opt/oracle
-RUN apt-get update && apt-get install -y libaio1 wget unzip \
-    && wget https://download.oracle.com/otn_software/linux/instantclient/211000/instantclient-basiclite-linux.x64-21.1.0.0.0.zip \
-    && wget https://download.oracle.com/otn_software/linux/instantclient/211000/instantclient-sqlplus-linux.x64-21.1.0.0.0.zip \
-    && unzip instantclient-basiclite-linux.x64-21.1.0.0.0.zip \
-    && rm -f instantclient-basiclite-linux.x64-21.1.0.0.0.zip \
-    && unzip instantclient-sqlplus-linux.x64-21.1.0.0.0.zip \
-    && rm -f instantclient-sqlplus-linux.x64-21.1.0.0.0.zip \
-    && cd /opt/oracle/instantclient* \
-    && rm -f *jdbc* *occi* *mysql* *README *jar uidrvci genezi adrci \
-    && echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf \
-    && ldconfig
+USER root
 
-RUN apt-get install --assume-yes git
+ARG APP_ENV \
+  # Needed for fixing permissions of files created by Docker:
+  UID=1000 \
+  GID=1000
 
-# RUN apt-get -y install gcc && apt-get remove g++  && apt-get install --reinstall g++
+ENV APP_ENV=${APP_ENV} \
+    # python:
+    PYTHONFAULTHANDLER=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONHASHSEED=random \
+    PYTHONDONTWRITEBYTECODE=1 \
+    # pip:
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_DEFAULT_TIMEOUT=100 \
+    PIP_ROOT_USER_ACTION=ignore \
+    # poetry:
+    POETRY_VERSION=1.3.2 \
+    POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_CREATE=false \
+    POETRY_CACHE_DIR='/var/cache/pypoetry' \
+    POETRY_HOME='/usr/local'
 
-# Create working directory
-RUN mkdir /opt/app-root && chmod 755 /opt/app-root
-WORKDIR /opt/app-root
+SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
-# Install the requirements
-COPY ./requirements.txt .
+# Install system dependencies
+RUN apt-get update && apt-get upgrade -y \
+    && apt-get install --no-install-recommends -y \
+       bash \
+       brotli \
+       build-essential \
+       curl \
+       gettext \
+       git \
+       libpq-dev \
+       wait-for-it \
+    && curl -sSL 'https://install.python-poetry.org' | python - \
+    && poetry --version \
+    && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
+    && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-# RUN pip install --upgrade pip
-RUN pip install pip==25.0.1
-RUN pip install --no-cache-dir -r requirements.txt
+# Setup the application directory
+WORKDIR /code
+RUN groupadd -g "${GID}" -r web \
+    && useradd -d '/code' -g web -l -r -u "${UID}" web \
+    && chown web:web -R '/code'
 
-COPY . .
+# Copy the application code and scripts
+COPY --chown=web:web . /code
+RUN chmod 755 /code/run.sh
 
-USER 1001
+# Echo the current Poetry configuration
+RUN echo "Checking Poetry configurations..." \
+    && poetry config --list
 
-# Set Python path
-ENV PYTHONPATH=/opt/app-root
+# Initialize project and install dependencies
+RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
+    echo "Installing dependencies under APP_ENV=$APP_ENV..." \
+    && poetry run pip install -U pip \
+    && poetry install $(if [ -z ${APP_ENV+x} ] || [ "$APP_ENV" = 'production' ]; then echo '--only main'; fi) \
+    --no-interaction --no-ansi
+
+# Switch to the non-root user
+USER web
 
 EXPOSE 8080
 
-CMD [ "python", "/opt/app-root/inprogress_update.py" ]
+CMD [ "/bin/sh", "/code/run.sh" ]
