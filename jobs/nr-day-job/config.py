@@ -71,7 +71,10 @@ class Config():  # pylint: disable=too-few-public-methods
     else:
         SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
 
-    GCP_AUTH_KEY = os.getenv('BUSINESS_GCP_AUTH_KEY', None)
+    # Normalize the b64 key: strip whitespace and add padding as needed.
+    _key = os.getenv('BUSINESS_GCP_AUTH_KEY', None)
+    GCP_AUTH_KEY = None if _key is None else "".join(_key.split()) + "=" * (-len("".join(_key.split())) % 4)
+
     EMAILER_TOPIC = os.getenv('NAMEX_MAILER_TOPIC', '')
     NAMEX_NR_STATE_TOPIC = os.getenv('NAMEX_NR_STATE_TOPIC', '')
 
