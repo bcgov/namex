@@ -1,71 +1,21 @@
-name: NR Day Job CI
+name: Namex NR Day Job CI
 
 on:
   pull_request:
-    types: [assigned, synchronize]
     paths:
       - "jobs/nr-day-job/**"
   workflow_dispatch:
-
 defaults:
   run:
     shell: bash
     working-directory: ./jobs/nr-day-job
 
 jobs:
-  setup-job:
-    runs-on: ubuntu-20.04
-
-    steps:
-      - uses: actions/checkout@v4
-      - run: "true"
-
-  linting:
-    needs: setup-job
-    runs-on: ubuntu-20.04
-
-    strategy:
-      matrix:
-        python-version: ["3.12"]
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          make setup
-      - name: Lint with flake8
-        id: flake8
-        run: |
-          poetry run flake8 nr_day_job.py
-
-  # testing:
-  #   needs: setup-job
-  #   runs-on: ubuntu-20.04
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Set up Python ${{ matrix.python-version }}
-  #       uses: actions/setup-python@v1
-  #       with:
-  #         python-version: ${{ matrix.python-version }}
-  #     - name: Install dependencies
-  #       run: |
-  #         make setup
-  #     - name: Test with pytest
-  #       id: test
-  #       run: |
-  #         make test
-
-  build-check:
-    needs: setup-job
-    runs-on: ubuntu-20.04
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: build to check strictness
-        id: build
-        run: |
-          make build-nc
+  nr-day-job-ci:
+    uses: bcgov/bcregistry-sre/.github/workflows/backend-ci.yaml@main
+    with:
+      app_name: "nr-day-job"
+      working_directory: "./jobs/nr-day-job"
+      codecov_flag: "nr-day-job"
+      skip_isort: "true"
+      skip_black: "true"

@@ -61,6 +61,8 @@ RUN groupadd -g "${GID}" -r web \
 
 COPY --chown=web:web . /code
 
+COPY --chown=web:web ./run.sh /code/run.sh
+RUN chmod 755 /code/run.sh
 # Project initialization:
 RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
   echo "$APP_ENV" \
@@ -77,7 +79,8 @@ USER web
 # The following stage is only for production:
 # FROM development_build AS production_build
 COPY --chown=web:web . /code
+RUN chmod -R 755 /code/run.sh
 
 EXPOSE 8080
 
-CMD [ "python", "/code/nr_day_job.py" ]
+CMD [ "/bin/sh", "/code/run.sh" ]
