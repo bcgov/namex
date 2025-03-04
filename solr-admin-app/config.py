@@ -1,6 +1,10 @@
 
 import os
+import base64
+import tempfile
+import atexit
 import dotenv
+import json
 
 dotenv.load_dotenv(dotenv.find_dotenv(), override=True)
 
@@ -15,13 +19,22 @@ CONFIGURATION = {
 class Config(object):
     SECRET_KEY = 'My Secret'
 
-    # Normal Keycloak parameters.
-    OIDC_CLIENT_SECRETS = os.getenv('SOLR_ADMIN_APP_OIDC_CLIENT_SECRETS', 'solr-admin-app/keycloak_client_secrets/secrets.json')
+    _keycloak_secrets_b64 = os.getenv("SOLR_ADMIN_APP_OIDC_CLIENT_SECRETS")
+    try:
+        # Write the JSON to a temporary file.
+        decoded = base64.b64decode(_keycloak_secrets_b64).decode("utf-8")
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
+            temp_file.write(decoded)
+            OIDC_CLIENT_SECRETS = temp_file.name
+            _temp_oidc_client_secrets_path = temp_file.name
+    except Exception as e:
+        raise ValueError("Failed to decode and create temporary Keycloak secrets file.") from e
+
     OIDC_SCOPES = ['openid', 'email', 'profile']
     OIDC_VALID_ISSUERS = [os.getenv('SOLR_ADMIN_APP_OIDC_VALID_ISSUERS', 'http://localhost:8081/auth/realms/master')]
     OVERWRITE_REDIRECT_URI = os.getenv('SOLR_ADMIN_APP_OVERWRITE_REDIRECT_URI', '')
 
-    print("OIDC" + OIDC_CLIENT_SECRETS)
+    print("OIDC:\n" + json.dumps(json.loads(decoded), indent=2))
     # Undocumented Keycloak parameter: allows sending cookies without the secure flag, which we need for the local
     # non-TLS HTTP server. Set this to non-"True" for local development, and use the default everywhere else.
     OIDC_ID_TOKEN_COOKIE_SECURE = os.getenv('SOLR_ADMIN_APP_OIDC_ID_TOKEN_COOKIE_SECURE', 'True') == 'True'
@@ -37,29 +50,30 @@ class Config(object):
     DATABASE_PORT = os.getenv('NAMES_ADMIN_DATABASE_PORT', '5432')
     DATABASE_NAME = os.getenv('NAMES_ADMIN_DATABASE_NAME', '')
 
-    SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
-        user=DATABASE_USER,
-        password=DATABASE_PASSWORD,
-        host=DATABASE_HOST,
-        port=int(DATABASE_PORT),
-        name=DATABASE_NAME)
-
-    SYNONYMS_DATABASE_USER = os.getenv('NAMES_ADMIN_SYNONYMS_DATABASE_USERNAME', '')
-    SYNONYMS_DATABASE_PASSWORD = os.getenv('NAMES_ADMIN_SYNONYMS_DATABASE_PASSWORD', '')
-    SYNONYMS_DATABASE_HOST = os.getenv('NAMES_ADMIN_SYNONYMS_DATABASE_HOST', '')
-    SYNONYMS_DATABASE_PORT = os.getenv('NAMES_ADMIN_SYNONYMS_DATABASE_PORT', '5432')
-    SYNONYMS_DATABASE_NAME = os.getenv('NAMES_ADMIN_SYNONYMS_DATABASE_NAME', 'synonyms')
-    SQLALCHEMY_BINDS = {
-        'synonyms': 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
-            user=SYNONYMS_DATABASE_USER,
-            password=SYNONYMS_DATABASE_PASSWORD,
-            host=SYNONYMS_DATABASE_HOST,
-            port=int(SYNONYMS_DATABASE_PORT),
-            name=SYNONYMS_DATABASE_NAME)
-    }
+    if DB_UNIX_SOCKET := os.getenv('NAMES_ADMIN_DATABASE_UNIX_SOCKET', None):
+        SQLALCHEMY_DATABASE_URI = f'postgresql+psycopg2://{DATABASE_USER}:{DATABASE_PASSWORD}@/{DATABASE_NAME}?host={DB_UNIX_SOCKET}'
+        SQLALCHEMY_BINDS = {'synonyms': f'postgresql+psycopg2://{DATABASE_USER}:{DATABASE_PASSWORD}@/{DATABASE_NAME}?host={DB_UNIX_SOCKET}'}
+    else:
+        SQLALCHEMY_DATABASE_URI = f'postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{int(DATABASE_PORT)}/{DATABASE_NAME}'
+        SQLALCHEMY_BINDS = {'synonyms': f'postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{int(DATABASE_PORT)}/{DATABASE_NAME}'}
 
     DEBUG = False
     TESTING = False
+
+    @staticmethod
+    def cleanup_temp_file():
+        """Delete the temporary OIDC client secrets file on exit."""
+        temp_path = getattr(Config, '_temp_oidc_client_secrets_path', None)
+        if temp_path and os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+                print("DEBUG: Deleted temporary file:", temp_path)
+            except Exception as e:
+                print("WARNING: Could not delete temporary file:", temp_path, e)
+
+
+# Register the cleanup function with atexit.
+atexit.register(Config.cleanup_temp_file)
 
 
 class DevConfig(Config):
@@ -71,5 +85,4 @@ class DevConfig(Config):
 class TestConfig(Config):
     DEBUG = True
     TESTING = True
-
 
