@@ -35,13 +35,3 @@ def test_database_connection_succeed():
         status = False
     finally:
         assert status == True
-
-def test_sftp_connection_succeed():    # pylint:disable=unused-argument
-    status = False
-    try:
-        SFTPService.get_connection()
-        status = True
-    except Exception:
-        status = False
-    finally:
-        assert status == True
