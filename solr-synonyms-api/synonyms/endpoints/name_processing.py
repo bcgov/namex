@@ -1,5 +1,5 @@
 from flask import request, make_response, jsonify
-from flask_restplus import Namespace, Resource, cors
+from flask_restx import Namespace, Resource, cors
 from flask_jwt_oidc import AuthError
 
 __all__ = ['api']

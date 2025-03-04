@@ -1,6 +1,7 @@
 from . import db, ma
 
 from sqlalchemy import and_
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 
 from synonyms.criteria.synonym.query_criteria import SynonymQueryCriteria
 
@@ -73,6 +74,6 @@ class Synonym(db.Model):
         return query.all()
 
 
-class SynonymSchema(ma.ModelSchema):
+class SynonymSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = Synonym
