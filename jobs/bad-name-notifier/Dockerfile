@@ -1,44 +1,82 @@
-# Use Python 3.12 slim image
-FROM python:3.12-slim
+FROM python:3.12.2
+USER root
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1 \
+ARG VCS_REF="missing"
+ARG BUILD_DATE="missing"
+
+ENV VCS_REF=${VCS_REF}
+ENV BUILD_DATE=${BUILD_DATE}
+
+LABEL org.label-schema.vcs-ref=${VCS_REF} \
+      org.label-schema.build-date=${BUILD_DATE}
+
+USER root
+
+ARG APP_ENV \
+  # Needed for fixing permissions of files created by Docker:
+  UID=1000 \
+  GID=1000
+
+ENV APP_ENV=${APP_ENV} \
+    # python:
+    PYTHONFAULTHANDLER=1 \
     PYTHONUNBUFFERED=1 \
+    PYTHONHASHSEED=random \
+    PYTHONDONTWRITEBYTECODE=1 \
+    # pip:
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_DEFAULT_TIMEOUT=100 \
+    PIP_ROOT_USER_ACTION=ignore \
+    # poetry:
+    POETRY_VERSION=1.3.2 \
     POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_CREATE=false \
-    PATH="/root/.local/bin:$PATH" \
-    PYTHONPATH="/app/src"
+    POETRY_CACHE_DIR='/var/cache/pypoetry' \
+    POETRY_HOME='/usr/local'
+
+SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
 # Install system dependencies
-RUN apt-get update && apt-get install --no-install-recommends -y \
-    build-essential \
-    libpq-dev \
-    curl \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get upgrade -y \
+    && apt-get install --no-install-recommends -y \
+       bash \
+       brotli \
+       build-essential \
+       curl \
+       gettext \
+       git \
+       libpq-dev \
+       wait-for-it \
+    && curl -sSL 'https://install.python-poetry.org' | python - \
+    && poetry --version \
+    && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
+    && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip and install Poetry
-RUN python3 -m ensurepip --upgrade && \
-    python3 -m pip install --upgrade pip setuptools wheel && \
-    curl --proto "=https" --tlsv1.2 -sSf -L https://install.python-poetry.org | python3 - && \
-    poetry --version
+# Setup the application directory
+WORKDIR /code
+RUN groupadd -g "${GID}" -r web \
+    && useradd -d '/code' -g web -l -r -u "${UID}" web \
+    && chown web:web -R '/code'
 
-# Set working directory
-WORKDIR /app
+# Copy the application code and scripts
+COPY --chown=web:web . /code
+RUN chmod 755 /code/run.sh
 
-# Copy dependency files and install dependencies
-COPY pyproject.toml poetry.lock /app/
-RUN poetry install --no-dev --no-interaction --no-ansi
+# Echo the current Poetry configuration
+RUN echo "Checking Poetry configurations..." \
+    && poetry config --list
 
-# Copy the application source code
-COPY src /app/src
+# Initialize project and install dependencies
+RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
+    echo "Installing dependencies under APP_ENV=$APP_ENV..." \
+    && poetry run pip install -U pip \
+    && poetry install $(if [ -z ${APP_ENV+x} ] || [ "$APP_ENV" = 'production' ]; then echo '--only main'; fi) \
+    --no-interaction --no-ansi
 
-# Ensure all files are group-writable for OpenShift compatibility
-RUN chmod -R g=u /app
+# Switch to the non-root user
+USER web
 
-# OpenShift will assign a random UID at runtime
-USER 1001
+EXPOSE 8080
 
-# Default command
-CMD ["python", "src/app.py"]
+CMD [ "/bin/sh", "/code/run.sh" ]

@@ -1,0 +1,21 @@
+name: Namex Bad Name Notifier CI
+
+on:
+  pull_request:
+    paths:
+      - "jobs/bad-name-notifier/**"
+  workflow_dispatch:
+defaults:
+  run:
+    shell: bash
+    working-directory: ./jobs/bad-name-notifier
+
+jobs:
+  namex-bad-name-notifier-ci:
+    uses: bcgov/bcregistry-sre/.github/workflows/backend-ci.yaml@main
+    with:
+      app_name: "namex-bad-name-notifier"
+      working_directory: "./jobs/bad-name-notifier"
+      codecov_flag: "namexbadnamenotifier"
+      skip_isort: "true"
+      skip_black: "true"
