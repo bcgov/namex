@@ -23,7 +23,7 @@ jobs:
     uses: bcgov/bcregistry-sre/.github/workflows/backend-job-cd.yaml@main
     with:
       target: ${{ inputs.target }}
-      app_name: "namex-sftp-nuans-report"
+      app_name: "namex-sftp-nua-report"
       working_directory: "./jobs/sftp-nuans-report"
     secrets:
       WORKLOAD_IDENTIFY_POOLS_PROVIDER: ${{ secrets.WORKLOAD_IDENTIFY_POOLS_PROVIDER }}
