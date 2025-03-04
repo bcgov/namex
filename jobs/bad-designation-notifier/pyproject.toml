@@ -11,11 +11,12 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.12,<3.13"
 flask = "^3.0.2"
 sqlalchemy = "^1.4.18"
 psycopg2-binary = "^2.9.7"
-secure-smtplib = "^0.1.1"
 pytz = "^2022.4"
 python-dotenv = "0.21.0"
+cachetools = "^5.5.1"
+requests = "^2.32.3"
 namex = { git = "https://github.com/bcgov/namex.git", subdirectory = "api", rev = "main"}

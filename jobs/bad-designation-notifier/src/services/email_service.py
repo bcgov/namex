@@ -1,17 +1,28 @@
 import csv
 import smtplib
 import os
+import requests
 
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
+from http import HTTPStatus
 from flask import current_app
-from .utils import get_yesterday_str, column_keys, column_headers
+from .utils import get_yesterday_str, column_keys, column_headers, get_bearer_token
 
 def load_recipients():
     """Load recipients dynamically from an environment variable."""
     recipients = current_app.config["EMAIL_RECIPIENTS"]
-    return recipients if isinstance(recipients, list) else []
+    return [r.strip('[]') for r in recipients] if isinstance(recipients, list) else []
+
+def send_email(email: dict, token: str):
+    """Send the email"""
+    current_app.logger.info(f"Send Email: {email}")
+    return requests.post(
+        f'{current_app.config.get("NOTIFY_API_URL", "")}',
+        json=email,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {token}",
+        },
+    )
 
 def send_email_notification(formatted_result):
     """Sends an email notification with the bad names."""
@@ -27,58 +38,36 @@ def send_email_notification(formatted_result):
     # Final email body
     email_body = format_email_body (formatted_result)
 
-    smtp_user = current_app.config["SMTP_USER"]
-    smtp_server = current_app.config["SMTP_SERVER"]
-
-    # Compose the email
-    msg = MIMEMultipart()
-    msg.attach(MIMEText(email_body, "html"))
-    msg["Subject"] = "Bad designation in names"
-    msg["From"] = smtp_user
-    msg["To"] = ", ".join(recipients)
-
-    # Send email
-    try:
-        with smtplib.SMTP(smtp_server) as server:
-            server.starttls()
-            server.send_message(msg)
-        current_app.logger.info("Email sent successfully to: %s", ", ".join(recipients))
-    except Exception as e:
-        current_app.logger.error("Failed to send email: %s", e)
-        raise
+    # Send email via Notify API
+    token = get_bearer_token()
+    for recipient in recipients:
+        email_data = {
+            "recipients": recipient,
+            "content": {
+                "subject": "Bad designation in names",
+                "body": email_body,
+                "attachments": [],
+            },
+        }
+    resp = send_email(email_data, token)
+    if resp.status_code == HTTPStatus.OK:
+        current_app.logger.info(f"Email sent successfully to: {recipient}")
+    else:
+        current_app.logger.error(
+            f"Failed to send email. Status Code: {resp.status_code}, Response: {resp.text}"
+        )
 
 def format_email_body(formatted_result):
-    """Formats the email body as an HTML table."""
+    """Formats the email body as a list of key-value lists."""
     if not formatted_result:
-        return f"<p>No bad designations were found on {get_yesterday_str()}.</p>"
+        return f"No bad designations were found on {get_yesterday_str()}."
 
-    # Generate table header
-    table_header = "".join(f"<th>{header}</th>" for header in column_headers)
+    title = f"FIRMS WITH A CORPORATE DESIGNATION {get_yesterday_str()}"
+    records = []
+    for record in formatted_result:
+        lines = [f"**{header}:** {record.get(key, '')}" 
+                 for header, key in zip(column_headers, column_keys)]
+        records.append("\n".join(lines))
+    footer = f"Total {len(formatted_result)} record(s)"
 
-    # Generate table rows
-    table_rows = "".join(
-        f"<tr>{''.join(f'<td>{row[key]}</td>' for key in column_keys)}</tr>"
-        for row in formatted_result
-    )
-
-    # Construct the final HTML email body
-    email_body = f"""
-    <html>
-        <body>
-            <p><b>FIRMS WITH A CORPORATE DESIGNATION {get_yesterday_str()}</b></p>
-            <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; font-family: 'Arial', sans-serif; font-size: 14px; width: 100%;">
-                <thead>
-                    <tr style="background-color: #f2f2f2;">{table_header}</tr>
-                </thead>
-                <tbody>
-                    {table_rows}
-                </tbody>
-            </table>
-        </body>
-        <p>Total {len(formatted_result)} record(s)</p>
-    </html>
-    """ if len(formatted_result) > 0 else f"""
-    No bad designations were found on {get_yesterday_str()}.
-    """
-    
-    return email_body
+    return "\n\n".join([title, "\n\n".join(records), footer])
