@@ -1,3 +1,3 @@
-cd /opt/app-root
+#!/bin/bash
 echo 'run sftpnuans'
-python sftpnuans.py
+python sftp_nuans_report/sftpnuans.py
