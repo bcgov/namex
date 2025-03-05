@@ -1,3 +1,4 @@
+import os
 from flask import current_app, request
 
 from namex.constants import NameRequestPatchActions
@@ -34,8 +35,9 @@ class BaseNameRequestResource(AbstractNameRequestResource):
 
     @classmethod
     def validate_config(cls, app):
-        app_config = app.config.get('DB_HOST', None)
-        if not app_config:
+        db_host = app.config.get('DB_HOST', None)
+        db_unix_socket = os.getenv('NAMEX_DATABASE_UNIX_SOCKET', None)
+        if not db_host and not db_unix_socket:
             cls.log_error('ENV is not set', None)
             raise NameRequestException(message='Internal server error')
 
