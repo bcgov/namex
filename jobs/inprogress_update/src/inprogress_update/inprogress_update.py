@@ -28,13 +28,13 @@ def create_app(config=Config):
 
 def get_ops_params():
     """Get params for job."""
-    client_delay = int(current_app.config.get('MIN_CLIENT_DELAY_SECONDS', 900))
-    examine_delay = int(current_app.config.get('MIN_EXAMINE_DELAY_SECONDS', 1800))
-    max_rows = int(current_app.config.get('MAX_ROW_LIMIT', 100))
+    client_delay = int(Config.MIN_CLIENT_DELAY_SECONDS)
+    examine_delay = int(Config.MIN_EXAMINE_DELAY_SECONDS)
+    max_rows = int(Config.MAX_ROWS_LIMIT)
     return client_delay, examine_delay, max_rows
 
 
-def inprogress_update(user: User, max_rows: int, client_delay: int, examine_delay: int) -> (int, bool):
+def inprogress_update(user: User, max_rows: int, client_delay: int, examine_delay: int) -> tuple[int, bool]:
     """Update inprogress nrs."""
     row_count = 0
 

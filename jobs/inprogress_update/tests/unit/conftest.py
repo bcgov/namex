@@ -2,9 +2,9 @@
 import datetime
 import logging
 import pytest
-from config import TestConfig
+from inprogress_update.config import TestConfig
 from sqlalchemy import event, text
-from inprogress_update import create_app, db as _db
+from inprogress_update.inprogress_update import create_app, db as _db
 from . import FROZEN_DATETIME
 
 
