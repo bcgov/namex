@@ -28,9 +28,10 @@ def create_app(config=Config):
 
 def get_ops_params():
     """Get params for job."""
-    client_delay = int(current_app.config.get('MIN_CLIENT_DELAY_SECONDS', 900))
-    examine_delay = int(current_app.config.get('MIN_EXAMINE_DELAY_SECONDS', 1800))
-    max_rows = int(current_app.config.get('MAX_ROW_LIMIT', 100))
+    client_delay = int(Config.MIN_CLIENT_DELAY_SECONDS)
+    examine_delay = int(Config.MIN_EXAMINE_DELAY_SECONDS)
+    max_rows = int(Config.MAX_ROWS_LIMIT)
+    current_app.logger.debug(f'client_delay: {client_delay}, examine_delay: {examine_delay}, max_rows: {max_rows}')
     return client_delay, examine_delay, max_rows
 
 
@@ -50,7 +51,7 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
             with_for_update().all()
         for request in client_edit_reqs:
             row_count += 1
-            current_app.logger.debug(f'processing: {request.nrNum}')
+            current_app.logger.debug(f'processing for client: {request.nrNum}')
             current_app.logger.debug(f'nr {request.nrNum}, state: {request.stateCd} last_update:{request.lastUpdate}')
 
             request.stateCd = State.DRAFT
@@ -69,7 +70,7 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
 
         for request in examine_reqs:
             row_count += 1
-            current_app.logger.debug(f'processing: {request.nrNum}')
+            current_app.logger.debug(f'processing for examiners: {request.nrNum}')
             current_app.logger.debug(f'nr {request.nrNum}, state: {request.stateCd} last_update:{request.lastUpdate}')
 
             # if this NR was previously in DRAFT, reset it to that state
@@ -101,7 +102,7 @@ if __name__ == '__main__':
     _app = create_app(Config)
     _client_delay, _examine_delay, _max_rows = get_ops_params()
 
-    start_time = datetime.utcnow()
+    start_time = datetime.now()
 
     _user = User.find_by_username(current_app.config[NRO_SERVICE_ACCOUNT])
     if not _user:
@@ -110,7 +111,7 @@ if __name__ == '__main__':
 
     _row_count, success = inprogress_update(_user, _max_rows, _client_delay, _examine_delay)
     _app.do_teardown_appcontext()
-    end_time = datetime.utcnow()
+    end_time = datetime.now()
     if success:
         current_app.logger.debug(f'Requests processed: {_row_count} completed in:{end_time-start_time}')
     else:
