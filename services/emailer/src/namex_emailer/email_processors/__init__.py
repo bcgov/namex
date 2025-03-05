@@ -78,6 +78,8 @@ def get_main_template(request_action, template_name, status=None):
         if template_path.exists():
             return template_path.read_text()
 
+    structured_log(request, "DEBUG", f"Not Found the template from {request_action}/{status}/{template_name}")
+
     # Check the common template fallback
     common_template_path = base_path / "common" / template_name
     if common_template_path.exists():
