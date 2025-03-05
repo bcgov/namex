@@ -25,7 +25,7 @@ from jinja2 import Template
 from simple_cloudevent import SimpleCloudEvent
 
 from namex.resources.name_requests import ReportResource
-from namex_emailer.email_processors import substitute_template_parts
+from namex_emailer.email_processors import get_main_template, substitute_template_parts
 from namex_emailer.services.helpers import as_legislation_timezone, format_as_report_string, get_magic_link, query_nr_number
 
 class Option(Enum):
@@ -84,17 +84,18 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
     magic_link = get_magic_link(nr_number, nr_data["applicants"]["emailAddress"], nr_data["applicants"]["phoneNumber"])
 
     file_name_suffix = option.upper()
+    request_action = nr_data["request_action_cd"]
+    template = get_main_template(request_action, f"NR-{file_name_suffix}.html")
     if option == Option.BEFORE_EXPIRY.value:
         if "entity_type_cd" in nr_data:
             legal_type = nr_data["entity_type_cd"]
-            request_action = nr_data["request_action_cd"]
             corpNum = nr_data["corpNum"]
             group = ReportResource._get_instruction_group(legal_type, request_action, corpNum)
             if group:
                 instruction_group = "-" + group
                 file_name_suffix += instruction_group.upper()
 
-    template = Path(f'{current_app.config.get("TEMPLATE_PATH")}/NR-{file_name_suffix}.html').read_text()
+        template = get_main_template(request_action, f"NR-{file_name_suffix}.html", status=option)
     filled_template = substitute_template_parts(template)
 
     # render template with vars
