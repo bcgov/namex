@@ -191,6 +191,8 @@ class NameRequestsResource(BaseNameRequestResource):
             response_data['actions'] = nr_svc.current_state_actions
             return make_response(jsonify(response_data), 201)
         except NameRequestException as err:
+            current_app.logger.exception("NameRequestException occurred:")
             return handle_exception(err, err.message, 500)
         except Exception as err: # pylint: disable=broad-except
+            current_app.logger.exception("Unexpected exception occurred:")
             return handle_exception(err, repr(err), 500)
