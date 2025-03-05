@@ -13,9 +13,10 @@ class BaseConfig(object):
 
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
-    DISABLE_NAMEREQUEST_NATS_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NATS_UPDATES', 1))
-    MAX_ROW_LIMIT = os.getenv('MAX_ROWS', '100')
-    MIN_DELAY_SECONDS = os.getenv('MIN_DELAY_SECONDS', '600')
+    DISABLE_NAMEREQUEST_NATS_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_NATS_UPDATES', 1))    
+    MIN_CLIENT_DELAY_SECONDS = os.getenv('MIN_CLIENT_DELAY_SECONDS', '300')
+    MIN_EXAMINE_DELAY_SECONDS = os.getenv('MIN_EXAMINE_DELAY_SECONDS', '300')
+    MAX_ROWS_LIMIT = os.getenv('MAX_ROWS_LIMIT', '100')    
     SECRET_KEY = 'a secret'
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -37,12 +38,6 @@ class BaseConfig(object):
         port=int(DB_PORT),
         name=DB_NAME,
     )
-
-    NRO_USER = os.getenv('NRO_USER', '')
-    NRO_PASSWORD = os.getenv('NRO_PASSWORD', '')
-    NRO_DB_NAME = os.getenv('NRO_DB_NAME', '')
-    NRO_HOST = os.getenv('NRO_HOST', '')
-    NRO_PORT = int(os.getenv('NRO_PORT', '1521'))
 
     GCP_AUTH_KEY = os.getenv('GCP_AUTH_KEY', None)
     EMAILER_TOPIC = os.getenv('EMAILER_TOPIC', '')
