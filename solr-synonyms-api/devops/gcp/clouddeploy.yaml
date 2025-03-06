@@ -44,7 +44,7 @@ serialPipeline:
       service-name: "namex-solr-synonyms-api-test"
       container-name: "namex-solr-synonyms-api-test"
       service-account: "sa-api@a083gt-test.iam.gserviceaccount.com"
-      cloudsql-instances: ""
+      cloudsql-instances: "a083gt-test:northamerica-northeast1:namex-db-test"
  - targetId: a083gt-prod
    profiles: [prod]
    strategy:
@@ -57,4 +57,4 @@ serialPipeline:
       service-name: "namex-solr-synonyms-api-prod"
       container-name: "namex-solr-synonyms-api-prod"
       service-account: "sa-api@a083gt-prod.iam.gserviceaccount.com"
-      cloudsql-instances: ""
+      cloudsql-instances: "a083gt-prod:northamerica-northeast1:namex-db-prod"
