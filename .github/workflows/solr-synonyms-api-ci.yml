@@ -14,7 +14,7 @@ jobs:
   namex-solr-synonyms-api-ci:
     uses: bcgov/bcregistry-sre/.github/workflows/backend-ci.yaml@main
     with:
-      app_name: "namex-solr-synonyms-api"
+      app_name: "namex-solr-syn-api"
       working_directory: "./solr-synonyms-api"
       codecov_flag: "namexsolrsynonymsapi"
       skip_isort: "true"
