@@ -11,16 +11,13 @@ to setup your local development environment.
 
 1. Follow the [instructions](https://github.com/bcgov/entity/blob/master/docs/setup-forking-workflow.md) to checkout the project from GitHub.
 2. Open the notebook-report directory in VS Code to treat it as a project (or WSL projec). To prevent version clashes, set up a virtual environment to install the Python packages used by this project.
-3. Run `make setup` to set up the virtual environment and install libraries.
 
 ## Running Notebook Report
-
-1. Run `. venv/bin/activate` to change to `venv` environment.
-2. Run notebook with `python notebookreport.py`
-
-## Running Unit Tests
-
-1. Run `python -m pytest` or `pytest` command.
+1. Run `make setup` to set up the virtual environment and install libraries.
+2. Run `poetry shell` to change to `.venv` environment.
+3. Keep .env file under notebook-report directory
+3. Run 'cd src'.
+4. Run notebook with `poetry run python notebookreport.py` in src directory or './run.sh' in notebook-report directory.
 
 ### Important: Please remember to do "git update-index --add --chmod=+x run.sh" before run.sh is commit to github on first time. 
 ### Build API - can be done in VS Code
