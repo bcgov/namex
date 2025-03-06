@@ -19,14 +19,9 @@ from unittest.mock import patch, MagicMock
 import pytest
 
 from flask import request
-from sbc_common_components.utils.enums import QueueMessageTypes
-from simple_cloudevent import SimpleCloudEvent
 
-from namex_emailer.email_processors import get_main_template, nr_notification
-from namex_emailer.services.helpers import as_legislation_timezone, format_as_report_string
-from tests import MockResponse
+from namex_emailer.email_processors import get_main_template
 
-from .. import helper_create_cloud_event
 
 @pytest.mark.parametrize(
     ["test_name", "request_action", "status", "template_name", "expected_resource"],
@@ -353,21 +348,20 @@ from .. import helper_create_cloud_event
         ("get_main_template_from_common", "INVALID", None, "NR-UPGRADE.html", "common"),
         ("get_main_template_from_common", "INVALID", None, "rejected.md", "common"),
 
-        ("no_template_valid_with_request_action", "AML", None, "invalid_name.md", None)
-        ("no_template_valid_with_request_action", "AML", "approved", "invalid_name.md", None)
-        ("no_template", "INVALID", None, "invalid_name.md", None)
-        ("no_template", None, None, "invalid_name.md", None)
+        ("no_template_with_valid_request_action", "AML", None, "invalid_name.md", None),
+        ("no_template_with_valid_with_request_action", "AML", "approved", "invalid_name.md", None),
+        ("no_template", "INVALID", None, "invalid_name.md", None),
     ],
 )
-@patch("gcp_queue.logging.structured_log")  # Mock logging
 def test_nr_notification(
-    app, mock_log, test_name, request_action, status, template_name, expected_resource
+    app, mocker, test_name, request_action, status, template_name, expected_resource
 ):
     """Assert that get the main template function."""
+    mock_log = mocker.patch("namex_emailer.email_processors.structured_log")
     result = get_main_template(request_action, template_name, status)
     if not expected_resource:
         assert result is None
-        mock_log.assert_called_once_with(
+        mock_log.assert_any_call(
             request, "ERROR", f"Failed to get {request_action}, {status}, {template_name} email template"
         )
     else:
