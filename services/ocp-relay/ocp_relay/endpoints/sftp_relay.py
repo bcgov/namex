@@ -3,20 +3,20 @@ import logging
 from flask_restx import Namespace, Resource, cors
 from werkzeug.datastructures import FileStorage
 
-from ocp_sftp_relay.services.auth import jwt, requires_role
-from ocp_sftp_relay.services.sftp import SftpHandler
+from ocp_relay.services.auth import jwt, requires_role
+from ocp_relay.services.sftp import SftpHandler
 
 # Register a local namespace for the sftp relay.
-sftp_api = Namespace("sftp", description="Upload Endpoint for the SFTP Relay service.")
+sftp_api = Namespace("sftp", description="Endpoint for the SFTP Relay to upload a .gz file to the Government Server.")
 
-# Defines and Validates the incoming zip archive in the request.
-zip_archive_parser = sftp_api.parser()
-zip_archive_parser.add_argument(
+# Defines and validates the incoming gz archive in the request.
+gz_archive_parser = sftp_api.parser()
+gz_archive_parser.add_argument(
     "file",
     type=FileStorage,
     location="files",
     required=True,
-    help="A zip archive (compressed file with a .zip extension) containing exactly one file. "
+    help="A gz archive (compressed file with a .gz extension) containing exactly one file. "
     "Received from multipart/form-data http request under the key 'file'.",
 )
 
@@ -27,10 +27,10 @@ class SftpRelay(Resource):
     @cors.crossdomain(origin="*")
     @jwt.requires_auth
     @requires_role("system")
-    @sftp_api.expect(zip_archive_parser)
+    @sftp_api.expect(gz_archive_parser)
     def post():
         """
-        Accepts a zip archive and uploads the zip file to the Gov SFTP Server.
+        Accepts a gz archive and uploads the file to the Gov SFTP Server.
 
         Authentication:
             JWT authentication and 'system' role.
@@ -40,18 +40,18 @@ class SftpRelay(Resource):
                 - On success: ({"message": "Success, file received"}, 200)
                 - On failure: ({"message": "<error details>"}, <error_code>)
         """
-        # Parse the zip archive from the request.
-        zip_archive = zip_archive_parser.parse_args().get("file")
+        # Parse the gz archive from the request.
+        gz_archive = gz_archive_parser.parse_args().get("file")
 
-        # Ensure a zip file was extracted.
-        if zip_archive is None:
+        # Ensure a file was provided and that it has a .gz extension.
+        if gz_archive is None:
             return {"message": "No file provided"}, 400
-        if not zip_archive.filename.lower().endswith(".zip"):
-            return {"message": "Invalid file type. A zip file is required."}, 400
+        if not gz_archive.filename.lower().endswith(".gz"):
+            return {"message": "Invalid file type. A .gz file is required."}, 400
 
-        # Upload zip file to Gov SFTP Server.
+        # Uploag gzip file to Gov SFTP Server
         try:
-            SftpHandler.upload_zip_contents(zip_archive)
+            SftpHandler.upload_gz_contents(gz_archive)
             return {"message": "Success, file received"}, 200
         except Exception:
             logging.exception("Error uploading file")

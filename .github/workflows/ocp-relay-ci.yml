@@ -1,16 +1,16 @@
-name: Namex OCP SFTP Relay API CI
+name: Namex OCP Relay API CI
 
 on:
   pull_request:
     types: [assigned, synchronize]
     paths:
-      - "api/**"
+      - "services/ocp-relay/**"
   workflow_dispatch:
 
 defaults:
   run:
     shell: bash
-    working-directory: ./services/ocp-sftp-relay
+    working-directory: ./services/ocp-relay
 
 jobs:
   setup-job:
