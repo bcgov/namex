@@ -17,7 +17,13 @@ on:
           - test
           - sandbox
           - prod
-
+      redeploy:
+        description: "Redeploy Application"
+        required: true
+        type: choice
+        options:
+          - "false"
+          - "true"
 jobs:
   namex-emailer-cd:
     permissions:
@@ -29,6 +35,7 @@ jobs:
       target: ${{ github.event.inputs.target }}  # Corrected the input reference
       app_name: "namex-emailer"
       working_directory: "./services/emailer"
+      redeploy: ${{ inputs.redeploy }}
     secrets:
       WORKLOAD_IDENTIFY_POOLS_PROVIDER: ${{ secrets.WORKLOAD_IDENTIFY_POOLS_PROVIDER }}
       GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
