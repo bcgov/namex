@@ -2,20 +2,16 @@
 import fnmatch
 import logging
 import os
-import smtplib
 import sys
 import traceback
 from datetime import datetime, timedelta
-from email import encoders
-from email.mime.base import MIMEBase
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 import papermill as pm
 from flask import Flask, current_app
 
 from config import Config
 from util.logging import setup_logging
+from util.email import send_email_notification
 
 setup_logging(os.path.join(os.path.abspath(os.path.dirname(
     __file__)), 'logging.conf'))  # important to do this first
@@ -54,49 +50,23 @@ def send_email(emailtype, errormessage):
     if os.getenv('ENVIRONMENT', '') != 'prod':
         ext = ' on ' + os.getenv('ENVIRONMENT', '')
 
-    message = MIMEMultipart()
-    sender_email = os.getenv('SENDER_EMAIL', '')
-
     if emailtype == 'ERROR':
         subject = 'NR Duplicates Report Error Notification on ' + date + ext
         filename = ''
-        recipients = os.getenv('ERROR_EMAIL_RECIPIENTS', '')
-        message.attach(MIMEText('ERROR!!! \n' + errormessage, 'plain'))
+        recipients = Config.ERROR_EMAIL_RECIPIENTS
+        email_list = [email.strip() for email in (recipients.strip("[]").split(",") if isinstance(recipients, str) else recipients)]
+        message = 'ERROR!!! \n' + errormessage
+        attatchments = []
     else:
         subject = 'NR Duplicates Report ' + date + ext
         filename = 'nr_duplicates_' + date + '.csv'
-        recipients = os.getenv('DAILY_REPORT_RECIPIENTS', '')
-        # Add body to email
-        message.attach(MIMEText('Please see the attachment(s).', 'plain'))
+        recipients = Config.REPORT_RECIPIENTS
+        email_list = [email.strip() for email in (recipients.strip("[]").split(",") if isinstance(recipients, str) else recipients)]
+        message = 'Please see the attachment(s).'
+        attatchments = [(os.path.join(os.getcwd(), r'nr_duplicates_report/data/')+filename)]
 
-        # Open file in binary mode
-        with open(os.path.join(os.getcwd(), r'data/')+filename, 'rb') as attachment:
-            # Add file as application/octet-stream
-            # Email client can usually download this automatically as attachment
-            part = MIMEBase('application', 'octet-stream')
-            part.set_payload(attachment.read())
-
-        # Encode file in ASCII characters to send by email
-        encoders.encode_base64(part)
-
-        # Add header as key/value pair to attachment part
-        part.add_header(
-            'Content-Disposition',
-            f'attachment; filename= {filename}',
-        )
-
-        # Add attachment to message and convert message to string
-        message.attach(part)
-
-    message['Subject'] = subject
-    server = smtplib.SMTP(os.getenv('EMAIL_SMTP', ''))
-    email_list = []
-    email_list = recipients.strip('][').split(', ')
     logging.info('Email recipients list is: %s', email_list)
-    server.sendmail(sender_email, email_list, message.as_string())
-    logging.info(
-        'Email with subject \"%s\" has been sent successfully!', subject)
-    server.quit()
+    send_email_notification(email_list, subject, message, attatchments)
 
 
 def processnotebooks(notebookdirectory, data_dir):
@@ -112,21 +82,21 @@ def processnotebooks(notebookdirectory, data_dir):
         send_email('', '')
         os.remove(data_dir+'temp.ipynb')
         status = True
-    except Exception:  # noqa: B902
+    except Exception as e:  # noqa: B902
         logging.exception(
             'NR Duplicates Report Error processing %s.', notebookdirectory)
-        send_email('ERROR', traceback.format_exc())
+        send_email('ERROR', f'An error occurred: {str(e)}')
     return status
 
 
 if __name__ == '__main__':
     start_time = datetime.utcnow()
 
-    temp_dir = os.path.join(os.getcwd(), r'data/')
+    temp_dir = os.path.join(os.getcwd(), r'nr_duplicates_report/data/')
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
 
-    processnotebooks('daily', temp_dir)
+    processnotebooks('nr_duplicates_report/daily', temp_dir)
     # shutil.rmtree(temp_dir)
 
     end_time = datetime.utcnow()
