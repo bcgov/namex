@@ -1,77 +1,21 @@
-name: SFTP NUANS Report Job CI
+name: Namex SFTP NUANS Report Job CI
 
 on:
   pull_request:
-    types: [assigned, synchronize]
     paths:
       - "jobs/sftp-nuans-report/**"
-                    
-
+  workflow_dispatch:
 defaults:
   run:
     shell: bash
     working-directory: ./jobs/sftp-nuans-report
 
 jobs:
-  setup-job:
-    runs-on: ubuntu-20.04
-
-    if: github.repository == 'bcgov/namex'
-
-    steps:
-      - uses: actions/checkout@v3
-      - run: "true"
-
-  linting:
-    needs: setup-job
-    runs-on: ubuntu-20.04
-
-    strategy:
-      matrix:
-        python-version: [3.8.12]
-
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          make setup
-      - name: Lint with pylint
-        id: pylint
-        run: |
-          make pylint
-      - name: Lint with flake8
-        id: flake8
-        run: |
-          make flake8
-
-  testing:
-    needs: setup-job
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          make setup
-      - name: Test with pytest
-        id: test
-        run: |
-      #    make test
-
-  build-check:
-    needs: setup-job
-    runs-on: ubuntu-20.04
-
-    steps:
-      - uses: actions/checkout@v3
-      - name: build to check strictness
-        id: build
-        run: |
-          make build-nc
+  namex-sftp-nuans-report-ci:
+    uses: bcgov/bcregistry-sre/.github/workflows/backend-ci.yaml@main
+    with:
+      app_name: "namex-sftp-nuans-report"
+      working_directory: "./jobs/sftp-nuans-report"
+      codecov_flag: "namexsftpnuansreport"
+      skip_isort: "true"
+      skip_black: "true"
