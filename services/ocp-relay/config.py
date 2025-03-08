@@ -27,3 +27,18 @@ class Config:
     SFTP_USERNAME = os.getenv("SFTP_USERNAME")
     BCREG_FTP_PRIVATE_KEY = os.getenv("BCREG_FTP_PRIVATE_KEY").replace("\\n", "\n")
     BCREG_FTP_PRIVATE_KEY_PASSPHRASE = os.getenv("BCREG_FTP_PRIVATE_KEY_PASSPHRASE")
+
+    # Pay DB
+    PAY_DB_NAME = os.getenv("PAY_DB_NAME")
+    PAY_HOST = os.getenv("PAY_HOST")
+    PAY_PORT = os.getenv("PAY_PORT")
+    PAY_USER = os.getenv("PAY_USER")
+    PAY_PASSWORD = os.getenv("PAY_PASSWORD")
+    PAY_SQLALCHEMY_DATABASE_URI = f"postgresql://{PAY_USER}:{PAY_PASSWORD}@" f"{PAY_HOST}:{int(PAY_PORT)}/{PAY_DB_NAME}"
+
+    # Colin DB
+    COLIN_DB_NAME = os.getenv("COLIN_DB_NAME")
+    COLIN_HOST = os.getenv("COLIN_HOST")
+    COLIN_PORT = os.getenv("COLIN_PORT")
+    COLIN_USER = os.getenv("COLIN_USER")
+    COLIN_PASSWORD = os.getenv("COLIN_PASSWORD")

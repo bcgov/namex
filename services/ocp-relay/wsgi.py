@@ -1,4 +1,4 @@
-from ocp_sftp_relay import create_app
+from ocp_relay import create_app
 
 app = create_app()
 

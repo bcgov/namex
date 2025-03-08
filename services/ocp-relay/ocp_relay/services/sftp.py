@@ -1,6 +1,6 @@
+import gzip
 import logging
 import tempfile
-import zipfile
 from base64 import decodebytes
 from io import BytesIO, StringIO
 from typing import IO
@@ -12,39 +12,46 @@ from pysftp import CnOpts, Connection
 
 class SftpHandler:
     @classmethod
-    def upload_zip_contents(cls, zip_archive: IO[bytes]):
+    def upload_gz_contents(cls, gz_archive: IO[bytes]):
         """
-        Extract the first file from the provided zip archive and upload it to the Gov SFTP server.
+        Decompress the provided gz archive and upload the contained file to the Gov SFTP server.
 
-        This method reads the zip archive from a file-like object, extracts the first file,
-        and uploads it using an SFTP connection.
+        This method reads the gzip archive from a file-like object, decompresses its content,
+        and uploads the resulting file using an SFTP connection.
 
         Args:
-            zip_archive (IO[bytes]): A file-like object containing the ZIP archive's data.
+            gz_archive (IO[bytes]): A file-like object containing the gzip archive's data.
         """
         try:
-            # Create an in-memory binary stream from the raw bytes.
-            zip_data = zip_archive.read()
-            zip_io = BytesIO(zip_data)
+            # Ensure we're at the start of the file
+            gz_archive.seek(0)
+            gz_data = gz_archive.read()
 
-            # Open the in-memory binary stream as a ZIP archive.
-            with zipfile.ZipFile(zip_io) as archive:
-                inner_zip_file_name = archive.namelist()[0]
-                logging.info("Processing file %s from zip archive.", inner_zip_file_name)
+            # Decompress the gz archive using a BytesIO wrapper.
+            with gzip.GzipFile(fileobj=BytesIO(gz_data)) as gz_file:
+                decompressed_data = gz_file.read()
 
-                # Open the inner file in the ZIP archive.
-                with archive.open(inner_zip_file_name) as file_obj:
-                    # Establish SFTP connection and upload the file.
-                    with cls._get_connection() as sftp_client:
-                        remote_path = inner_zip_file_name
-                        sftp_client.putfo(file_obj, remote_path)
-                        logging.info("SFTP upload completed for file: %s", inner_zip_file_name)
+            # Derive the remote filename by stripping the '.gz' extension.
+            original_filename = gz_archive.filename
+            if original_filename.lower().endswith(".gz"):
+                remote_filename = original_filename[:-3]
+            else:
+                remote_filename = original_filename
+            logging.info("Processing file %s from gz archive.", remote_filename)
+
+            # Upload the decompressed data to the SFTP server.
+            with cls.get_connection() as sftp_client:
+                # Create a BytesIO stream for the decompressed data.
+                file_obj = BytesIO(decompressed_data)
+                remote_path = remote_filename
+                sftp_client.putfo(file_obj, remote_path)
+                logging.info("SFTP upload completed for file: %s", remote_filename)
         except Exception as e:
-            logging.error("Error processing zip file: %s", e)
+            logging.error("Error processing gz file: %s", e)
             raise e
 
     @staticmethod
-    def _get_connection() -> Connection:
+    def get_connection() -> Connection:
         """Establish and return an SFTP connection."""
         config = current_app.config
         sftp_username = config.get("SFTP_USERNAME")
