@@ -1,8 +1,0 @@
-[MASTER]
-ignore=.venv,venv,__pycache__,poetry.locl,README.md
-
-[FORMAT]
-max-line-length=120
-
-[MESSAGES CONTROL]
-disable=missing-module-docstring,missing-class-docstring,missing-function-docstring,too-few-public-methods,broad-exception-caught,invalid-name,missing-timeout
