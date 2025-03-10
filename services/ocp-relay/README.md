@@ -2,9 +2,12 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![img](https://img.shields.io/badge/Lifecycle-Stable-97ca00)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
-# Namex OCP SFTP Relay API
+# Namex OCP Relay API
 
-An API used to relay a zip file to the government sftp server. This is used by the Namex SFTP Nuans Report Job located in GCP.
+An API used to relay information that can only be obtained / sent while being on the Government Network.
+- SFTP Relay: To upload .gz files to the government sftp server.
+- Pay Relay: To get paid invoices from the pay db.
+- Colin Relay: To get paid invoices from the colin db.
 
 ## Getting Help or Reporting an Issue
 
