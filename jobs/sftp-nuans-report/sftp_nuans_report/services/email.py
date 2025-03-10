@@ -37,10 +37,10 @@ class EmailService:
     @staticmethod
     def load_recipients() -> list[str]:
         """
-        Assumes ERROR_EMAIL_RECIPIENTS is defined in .env as a comma-separated list inside square brackets.
-        E.g.: [foo@example.com,@example.com]
+        Assumes ERROR_EMAIL_RECIPIENTS is defined in .env as a comma-separated list.
+        E.g.: foo@example.com,@bar@example.com
         """
-        recipients_str = Config.ERROR_EMAIL_RECIPIENTS[1:-1]
+        recipients_str = Config.ERROR_EMAIL_RECIPIENTS
         recipients = [r.strip() for r in recipients_str.split(",") if r.strip()]
         return recipients
 
