@@ -1,9 +1,9 @@
 from flask import Flask
 
 from config import Config
-from ocp_sftp_relay.endpoints import init_api
-from ocp_sftp_relay.services.auth import jwt, setup_jwt_manager
-from ocp_sftp_relay.services.logging import setup_logging
+from ocp_relay.endpoints import init_api
+from ocp_relay.services.auth import jwt, setup_jwt_manager
+from ocp_relay.services.logging import setup_logging
 
 setup_logging()
 

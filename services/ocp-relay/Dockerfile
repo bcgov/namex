@@ -12,6 +12,20 @@ LABEL org.label-schema.vcs-ref=${VCS_REF} \
 
 USER root
 
+# Installing Oracle instant client
+WORKDIR /opt/oracle
+RUN apt-get update && apt-get install -y libaio1 gdb wget unzip \
+  && wget https://download.oracle.com/otn_software/linux/instantclient/211000/instantclient-basiclite-linux.x64-21.1.0.0.0.zip \
+  && wget https://download.oracle.com/otn_software/linux/instantclient/211000/instantclient-sqlplus-linux.x64-21.1.0.0.0.zip \
+  && unzip instantclient-basiclite-linux.x64-21.1.0.0.0.zip \
+  && rm -f instantclient-basiclite-linux.x64-21.1.0.0.0.zip \
+  && unzip instantclient-sqlplus-linux.x64-21.1.0.0.0.zip \
+  && rm -f instantclient-sqlplus-linux.x64-21.1.0.0.0.zip \
+  && cd /opt/oracle/instantclient* \
+  && rm -f *jdbc* *occi* *mysql* *README *jar uidrvci genezi adrci \
+  && echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf \
+  && ldconfig
+
 ARG APP_ENV \
   # Needed for fixing permissions of files created by Docker:
   UID=1000 \
@@ -63,7 +77,7 @@ RUN groupadd -g "${GID}" -r web \
 # Copy only requirements, to cache them in docker layer
 COPY --chown=web:web ./poetry.lock ./pyproject.toml /code/
 
-COPY --chown=web:web ./ocp_sftp_relay /code/ocp_sftp_relay
+COPY --chown=web:web ./ocp_relay /code/ocp_relay
 COPY --chown=web:web ./README.md /code
 
 # Project initialization:

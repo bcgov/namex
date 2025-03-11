@@ -1,11 +1,11 @@
-name: Namex OCP SFTP Relay API CD
+name: Namex OCP Relay API CD
 
 on:
   push:
     branches:
       - main
     paths:
-      - "services/ocp-sftp-relay/**"
+      - "services/ocp-relay/**"
   workflow_dispatch:
     inputs:
       environment:
@@ -16,14 +16,14 @@ on:
 defaults:
   run:
     shell: bash
-    working-directory: ./services/ocp-sftp-relay
+    working-directory: ./services/ocp-relay
 
 env:
-  APP_NAME: "ocp-sftp-relay"
+  APP_NAME: "ocp-relay"
   TAG_NAME: "dev"
 
 jobs:
-  ocp-sftp-relay-cd-by-push:
+  ocp-relay-cd-by-push:
     runs-on: ubuntu-20.04
 
     if: github.event_name == 'push' && github.repository == 'bcgov/namex'
@@ -60,13 +60,13 @@ jobs:
         if: failure()
         with:
           type: ${{ job.status }}
-          job_name: "*Namex API Built and Deployed to ${{env.TAG_NAME}}*"
+          job_name: "*Namex OCP Relay API Built and Deployed to ${{env.TAG_NAME}}*"
           channel: "#registries-bot"
           url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
           commit: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  ocp-sftp-relay-cd-by-dispatch:
+  ocp-relay-cd-by-dispatch:
     runs-on: ubuntu-20.04
 
     if: github.event_name == 'workflow_dispatch' && github.repository == 'bcgov/namex'
@@ -106,7 +106,7 @@ jobs:
         if: failure()
         with:
           type: ${{ job.status }}
-          job_name: "*Namex API Built and Deployed to ${{env.TAG_NAME}}*"
+          job_name: "*Namex OCP Relay API Built and Deployed to ${{env.TAG_NAME}}*"
           channel: "#registries-bot"
           url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
           commit: true
