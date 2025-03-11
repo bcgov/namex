@@ -3,20 +3,16 @@
 import fnmatch
 import logging
 import os
-import shutil
-import smtplib
 import sys
-import traceback
 from datetime import datetime
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 import papermill as pm
 from flask import Flask, current_app
 
 from config import Config
-from tasks.ftp_processor import FtpProcessor
 from util.logging import setup_logging
+from services.sftp import SftpService
+from services.email import EmailService
 
 setup_logging(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.conf'))  # important to do this first
 
@@ -44,29 +40,6 @@ def findfiles(directory, pattern):
             yield os.path.join(directory, filename)
 
 
-def send_email(note_book, errormessage):
-    """Send email for results."""
-    message = MIMEMultipart()
-    date = datetime.strftime(datetime.now(), '%Y%m%d')
-
-    ext = ''
-    if not os.getenv('ENVIRONMENT', '') == 'prod':
-        ext = ' on ' + os.getenv('ENVIRONMENT', '')
-
-    subject = "SFTP NUANS Error Notification from LEAR for processing '" \
-        + note_book + "' on " + date + ext
-    recipients = os.getenv('ERROR_EMAIL_RECIPIENTS', '')
-    message.attach(MIMEText('ERROR!!! \n' + errormessage, 'plain'))
-
-    message['Subject'] = subject
-    server = smtplib.SMTP(os.getenv('EMAIL_SMTP', ''))
-    email_list = recipients.strip('][').split(', ')
-    logging.info('Email recipients list is: %s', email_list)
-    server.sendmail(os.getenv('SENDER_EMAIL', ''), email_list, message.as_string())
-    logging.info("Email with subject \'%s\' has been sent successfully!", subject)
-    server.quit()
-
-
 def processnotebooks(notebookdirectory, data_dir):
     """Process data."""
     status = False
@@ -78,23 +51,23 @@ def processnotebooks(notebookdirectory, data_dir):
                             data_dir + 'temp.ipynb', parameters=None)
         os.remove(data_dir+'temp.ipynb')
 
-        FtpProcessor.process_ftp(data_dir)
+        SftpService.send_to_ocp_sftp_relay(data_dir)
 
         status = True
-    except Exception:  # noqa: B902
+    except Exception as e:  # noqa: B902
         logging.exception('Error processing notebook %s.', notebookdirectory)
-        send_email(notebookdirectory, traceback.format_exc())
+        EmailService.send_email_to_notify_api(notebookdirectory, str(e))
     return status
 
 
 if __name__ == '__main__':
     start_time = datetime.utcnow()
 
-    temp_dir = os.path.join(os.getcwd(), r'data/')
+    temp_dir = os.path.join(os.getcwd(), r'sftp_nuans_report/data/')
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
 
-    processnotebooks('notebook', temp_dir)
+    processnotebooks('sftp_nuans_report/notebook', temp_dir)
     # shutil.rmtree(temp_dir)
 
     end_time = datetime.utcnow()
