@@ -12,7 +12,7 @@ class Config(object):
     # POSTGRESQL
     PG_USER = os.getenv('PG_USER', '')
     PG_PASSWORD = os.getenv('PG_PASSWORD', '')
-    PG_NAME = os.getenv('PG_DB_NAME', '')
+    PG_NAME = os.getenv('PG_NAME', '')
     PG_HOST = os.getenv('PG_HOST', '')
     PG_PORT = os.getenv('PG_PORT', '5432')
     if DB_UNIX_SOCKET := os.getenv('PG_UNIX_SOCKET', None):
