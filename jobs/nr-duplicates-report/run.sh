@@ -1,4 +1,3 @@
-#! /bin/sh
-cd /opt/app-root
+#!/bin/bash
 echo 'run notebookreport to generate NR Duplicates Report'
-python notebookreport.py
+python nr_duplicates_report/notebookreport.py
