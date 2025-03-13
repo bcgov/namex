@@ -29,7 +29,7 @@ serialPipeline:
    - values:
       deploy-env: "development"
       deploy-project-id: "a083gt-dev"
-      job-name: "notebook-report-dev"
+      job-name: "namex-notebook-report-dev"
       service-account: "sa-api@a083gt-dev.iam.gserviceaccount.com"
       cloudsql-instances: "a083gt-dev:northamerica-northeast1:namex-db-dev"
       run-command: "./run.sh"
@@ -42,7 +42,7 @@ serialPipeline:
    - values:
       deploy-env: "test"
       deploy-project-id: "a083gt-test"
-      job-name: "notebook-report-test"
+      job-name: "namex-notebook-report-test"
       service-account: "sa-api@a083gt-test.iam.gserviceaccount.com"
       cloudsql-instances: "a083gt-test:northamerica-northeast1:namex-db-test"
       run-command: "./run.sh" 
@@ -55,9 +55,7 @@ serialPipeline:
    - values:
       deploy-env: "production"
       deploy-project-id: "a083gt-prod"
-      job-name: "notebook-report-prod"
+      job-name: "namex-notebook-report-prod"
       service-account: "sa-api@a083gt-prod.iam.gserviceaccount.com"
-      max-scale: "10"
-      container-concurrency: "20"
       cloudsql-instances: "a083gt-prod:northamerica-northeast1:namex-db-prod"
       run-command: "./run.sh"
