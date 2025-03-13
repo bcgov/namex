@@ -1,30 +1,42 @@
-# Consent Letter Accepted
+# Results of your Name Request
 
-The consent letter for your name request has been received and we have **approved** your name request. Follow the steps below to complete your application using this name. If the name request expires before the business is registered, a new name request will be required. 
+The consent letter for your Name Request has been received and we have **approved** your Name Request. Follow the steps below to complete your application using this name. If the Name Request expires before the business is registered, a new Name Request will be required.
 
 ---
 
-# Your Next Steps
+# You\'re not done yet!
 
-Follow these steps to complete your application using this name:
-1. Visit [BC Registries and Online Services]({{DECIDE_BUSINESS_URL}})
-2. Log in with your BC Registries Account
-3. Look-up your Name Request
-4. Complete and submit the form along with any required documentation and payment
+At the moment, there are two options to complete your application.
 
+---
 
-If you don\'t have a BC Registries Account, [create one here]({{BUSINESS_URL}}).
+# Option 1: Use BC Registries
 
-If you were not signed into your BC Registries Account when this Name Request was created, you will need to affiliate the two together. Follow these steps to affiliate a Name Request with your BC Registries Account.
+Complete your application using BC Registries and Online Services, if the following statements apply to you:
 
-1. Log in at [BC Registries and Online Services]({{DECIDE_BUSINESS_URL}})
-2. Log in with your BC Registries Account
-3. Navigate to My Business Registry
-4. Select Name Request radio button
-5. Enter the NR number in the field provided and select the match found
-6. Enter the phone number or email address used to create the Name Request and press Manage This Name Request
-7. The Name Request is successfully affiliated with your BC Registries Account if you see the Name Request in My List
-8. Follow the action button beside the name to start the application
+- This is your first time registering a business in B.C.
+
+- You plan to only use the following basic filings:
+  - Incorporation Application
+  - Continuation Application
+  - Change of Address
+  - Change of Director
+  - Business Alterations
+
+- You will be managing your own business information online instead of using a law firm or another third party.
+
+If you have a BC Registries account, [complete your application]({{MAGIC_LINK}}) now.
+
+If you don’t have a BC Registries account, [create an account]({{BUSINESS_URL}}) and then [complete your application]({{MAGIC_LINK}}).
+
+---
+
+# Option 2: Use BC Corporate Online
+
+Use [BC Corporate Online]({{CORP_ONLINE_URL}}) to complete your application if you are an existing user, or if you need to file more complex documents like amalgamations.
+
+1. Go to [BC Corporate Online]({{CORP_ONLINE_URL}})
+2. Complete and submit the form along with any required documentation and payment
 
 ---
 
@@ -38,9 +50,17 @@ If you were not signed into your BC Registries Account when this Name Request wa
 
 ---
 
+# Attached to this Email
+
+The following documents are attached to this email:
+
+* Results of Name Request
+
+---
+
 **Business Registry**
 BC Registries and Online Services
-Toll Free: 1-877-370-1033
-Victoria Office: 250-370-1033
-Email: [BCRegistries@gov.bc.ca](BCRegistries@gov.bc.ca)
 
+Toll Free: [1-877-370-1033](1-877-370-1033)
+Victoria Office: [250-370-1033](250-370-1033)
+Email: [BCRegistries@gov.bc.ca](BCRegistries@gov.bc.ca)

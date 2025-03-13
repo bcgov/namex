@@ -59,13 +59,41 @@ def query_nr_number(identifier: str):
 
 
 @staticmethod
-def get_magic_link(nr_number, email, phone):
+def get_magic_link(nr_data):
     """Return a magic link."""
     BUSINESS_REGISTRY_URL = current_app.config.get("BUSINESS_REGISTRY_URL")
+    magic_link_route = {
+        'NEW': 'incorporateNow',
+        'MVE': 'continueInNow',
+        'AML': 'amalgamateNow',
+        # 'REN': 'registerNow'
+    }
+    emails, phones = get_contact_info(nr_data)
+    route = magic_link_route.get(nr_data["request_action_cd"])
     params = {
-        'nr': nr_number,
-        'email': email,
-        'phone': phone
+        'nr': nr_data['nrNum'],
+        'email': emails[0],
+        'phone': phones[0]
     }
     encoded_params = urlencode(params)
-    return f'{BUSINESS_REGISTRY_URL}incorporateNow/?{encoded_params}'
+    return f'{BUSINESS_REGISTRY_URL}{route}/?{encoded_params}'
+
+
+@staticmethod
+def get_contact_info(nr_data):
+    applicants = nr_data.get('applicants', [])
+    
+    if isinstance(applicants, dict):  # Handle single applicant case
+        applicants = [applicants]
+
+    recipient_emails, recipient_phones = [], []
+    for applicant in applicants:
+        email = applicant.get('emailAddress')
+        phone = applicant.get('phoneNumber')
+
+        if email:  # Exclude empty values
+            recipient_emails.append(email)
+        if phone:  # Exclude empty values
+            recipient_phones.append(phone)
+
+    return recipient_emails, recipient_phones
