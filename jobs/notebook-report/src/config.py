@@ -25,8 +25,8 @@ class Config(object):
     ENVIRONMENT = os.getenv('ENVIRONMENT', '')
      
     NOTIFY_API_URL = f"{os.getenv("NOTIFY_API_URL", "") + os.getenv("NOTIFY_API_VERSION", "")}/notify"
-    NOTIFY_CLIENT_ID = os.getenv("NOTIFY_CLIENT_ID")
-    NOTIFY_CLIENT_SECRET = os.getenv("NOTIFY_CLIENT_SECRET")
+    NOTIFY_CLIENT_ID = os.getenv("KEYCLOAK_CLIENT_ID")
+    NOTIFY_CLIENT_SECRET = os.getenv("KEYCLOAK_CLIENT_SECRET")
     KEYCLOAK_AUTH_TOKEN_URL = os.getenv("KEYCLOAK_AUTH_TOKEN_URL")
 
 
