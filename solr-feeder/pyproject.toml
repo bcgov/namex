@@ -8,6 +8,8 @@ packages = [{include = "solr_feeder"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
+gcp_queue = { git = "https://github.com/bcgov/namex.git", subdirectory = "services/pubsub" }
+structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", rev = "7f1cc0ea4a374310ac558ff435fa6b7ea7bb2f8b", subdirectory = "python/structured-logging" }
 flask = "^3.1.0"
 jinja2 = "^3.1.5"
 markupsafe = "^3.0.2"

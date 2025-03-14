@@ -61,16 +61,16 @@ def _get_colin_api_resp(path: str, token: str, accepted_codes: list[HTTPStatus])
                             timeout=current_app.config['COLIN_API_TIMEOUT'])
 
         if resp.status_code not in accepted_codes:
-            logging.debug('COLIN service unexpected response code %s %s %s', resp.status_code, path, resp.json())
+            current_app.logger.debug('COLIN service unexpected response code %s %s %s', resp.status_code, path, resp.json())
             return None, {'message': resp.json(), 'status_code': resp.status_code}
 
         return resp.json(), None
 
     except (exceptions.ConnectionError, exceptions.Timeout) as err:
-        logging.debug('COLIN connection failure %s', err)
+        current_app.logger.error('COLIN connection failure %s', err)
         return None, {'message': 'COLIN connection failure.', 'status_code': HTTPStatus.GATEWAY_TIMEOUT}
     except Exception as err:
-        logging.debug('COLIN service error %s', err.with_traceback(None))
+        current_app.logger.error('COLIN service error %s', err.with_traceback(None))
         return None, {'message': 'COLIN service error.', 'status_code': HTTPStatus.INTERNAL_SERVER_ERROR}
 
 
@@ -91,7 +91,7 @@ def get_business_info(legal_type: str, identifier: str, token: str) -> tuple[dic
                                                        [HTTPStatus.OK])
             if error:
                 # log error for ops and continue (address info should not block the update)
-                logging.error('Error getting address data while updating %s.', identifier)
+                current_app.logger.error('Error getting address data while updating %s.', identifier)
 
         business = {
             'email': business_json['business']['email'],
@@ -109,10 +109,10 @@ def get_business_info(legal_type: str, identifier: str, token: str) -> tuple[dic
         return {'business': business}, None
 
     except (exceptions.ConnectionError, exceptions.Timeout) as err:
-        logging.error('COLIN connection failure %s', err)
+        current_app.logger.error('COLIN connection failure %s', err)
         return None, {'message': 'COLIN connection failure.', 'status_code': HTTPStatus.GATEWAY_TIMEOUT}
     except Exception as err:
-        logging.error('COLIN service error %s', err.with_traceback(None))
+        current_app.logger.error('COLIN service error %s', err.with_traceback(None))
         return None, {'message': 'COLIN service error.', 'status_code': HTTPStatus.INTERNAL_SERVER_ERROR}
 
 
