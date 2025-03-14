@@ -4,7 +4,7 @@ from uuid import uuid4
 import requests
 from flask import current_app, jsonify, request, make_response
 
-from namex import jwt
+from namex import jwt, db
 from namex.constants import NameRequestPatchActions, NameRequestRollbackActions, PaymentState
 from namex.models import Event, Payment, Request, State, User
 from namex.services import EventRecorder
@@ -320,6 +320,11 @@ class NameRequestFields(BaseNameRequestResource):
 
         # This handles updates if the NR state is 'patchable'
         nr_model = self.update_nr(nr_model, nr_model.stateCd, self.handle_nr_patch)
+        # Commit the transaction to ensure changes are saved
+        db.session.commit()
+
+        # Refresh the nr_model to ensure the changes are reflected
+        db.session.refresh(nr_model)
 
         # Record the event
         EventRecorder.record(nr_svc.user, Event.PATCH + ' [edit]', nr_model, nr_svc.request_data)
