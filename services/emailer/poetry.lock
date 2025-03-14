@@ -779,7 +779,7 @@ simple_cloudevent = {git = "https://github.com/daxiom/simple-cloudevent.py"}
 type = "git"
 url = "https://github.com/bcgov/namex.git"
 reference = "HEAD"
-resolved_reference = "13463ec47fe51e1d3ef40ed4c8bae8a0f1405dbb"
+resolved_reference = "66a4102bbd156296a580359bda51ce4911010c83"
 subdirectory = "services/pubsub"
 
 [[package]]
@@ -1754,7 +1754,7 @@ zipp = "^3.8.1"
 type = "git"
 url = "https://github.com/bcgov/namex.git"
 reference = "HEAD"
-resolved_reference = "72ff2acb203f2819c2955ecdd8aaca0097a5bbba"
+resolved_reference = "66a4102bbd156296a580359bda51ce4911010c83"
 subdirectory = "api"
 [[package]]
 name = "nltk"
