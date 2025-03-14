@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Manages feeder api endpoints."""
-import logging
 from http import HTTPStatus
 
 import flask
-from flask import Blueprint
+from flask import Blueprint, current_app
 
 from solr_feeder import solr
 from solr_feeder.services import update_search_cores
@@ -45,9 +44,10 @@ def feed_solr():
             legalType: str
         }
     """
-    logging.debug('request raw data: %s', flask.request.data)
+    current_app.logger.debug('request raw data: %s', flask.request.data)
     json_data = flask.request.get_json()
     if error := feeds_validate(json_data):
+        current_app.logger.error(error)
         return {'message': error}, HTTPStatus.BAD_REQUEST
 
     solr_core = json_data['solr_core']
@@ -59,12 +59,12 @@ def feed_solr():
             return error
 
     else:
-        logging.debug('Updating namex core record...')
+        current_app.logger.debug('Updating namex core record...')
         error_response = solr.update_core(solr_core, json_data['request'])
         if error_response:
-            logging.error('Error updating namex core: %s', error_response)
+            current_app.logger.error(f'Error updating namex core: {error_response}')
             return {'message': error_response['message']}, error_response['status_code']
 
-        logging.debug('Namex core updated.')
+        current_app.logger.debug('Namex core updated.')
 
     return {'message': 'Solr core updated'}, HTTPStatus.OK
