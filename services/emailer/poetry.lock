@@ -779,7 +779,7 @@ simple_cloudevent = {git = "https://github.com/daxiom/simple-cloudevent.py"}
 type = "git"
 url = "https://github.com/bcgov/namex.git"
 reference = "HEAD"
-resolved_reference = "99b2af049435ae3ee41d67babf26f5caa615d055"
+resolved_reference = "13463ec47fe51e1d3ef40ed4c8bae8a0f1405dbb"
 subdirectory = "services/pubsub"
 
 [[package]]

@@ -81,7 +81,7 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
     form_page_url = current_app.config.get("CORP_FORMS_URL")
     societies_url = current_app.config.get("SOCIETIES_URL")
     steps_to_restore_url = current_app.config.get("STEPS_TO_RESTORE_URL")
-    magic_link = get_magic_link(nr_number, nr_data["applicants"]["emailAddress"], nr_data["applicants"]["phoneNumber"])
+    magic_link = get_magic_link(nr_data)
 
     file_name_suffix = option.upper()
     request_action = nr_data["request_action_cd"]
