@@ -65,8 +65,7 @@ def get_magic_link(nr_data):
     magic_link_route = {
         'NEW': 'incorporateNow',
         'MVE': 'continueInNow',
-        'AML': 'amalgamateNow',
-        # 'REN': 'registerNow'
+        'AML': 'amalgamateNow'
     }
     emails, phones = get_contact_info(nr_data)
     route = magic_link_route.get(nr_data["request_action_cd"])

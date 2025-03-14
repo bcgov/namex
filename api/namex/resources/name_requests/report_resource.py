@@ -278,7 +278,7 @@ class ReportResource(Resource):
 
     @staticmethod
     def _is_colin(legal_type):
-        colin_list = ['XCR', 'XUL', 'RLC']
+        colin_list = ['XCR', 'XUL', 'RLC', 'CR', 'UL', 'CC']
         return legal_type in colin_list
     
     @staticmethod
@@ -287,9 +287,12 @@ class ReportResource(Resource):
         return legal_type in society_list
 
     @staticmethod
-    def _is_potential_colin(legal_type):
-        potential_colin_list = ['CR', 'UL', 'CC']
-        return legal_type in potential_colin_list
+    def _is_magic_link(legal_type, request_action):
+        magic_link_list = {
+            'NEW': ['CR', 'UL', 'CC'],
+            'MVE': ['CR', 'UL', 'CC']
+        }
+        return legal_type in magic_link_list.get(request_action)
 
     @staticmethod
     def _get_instruction_group(legal_type, request_action, corpNum):
@@ -300,17 +303,18 @@ class ReportResource(Resource):
         if request_action in {RequestAction.CHG.value, RequestAction.CNV.value}:
             # For the 'Name Change' or 'Alteration', return 'modernized' if the company is in LEAR, and 'colin' if not
             return 'modernized' if ReportResource._is_lear_entity(corpNum) else 'colin'
+        # Check for magic link conditions
+        if ReportResource._is_magic_link(legal_type, request_action) and (
+            (request_action == RequestAction.NEW.value and email_feature_flags.get('enable_won_emails')) or
+            (request_action == RequestAction.MVE.value and email_feature_flags.get('enable_cont_in_emails'))
+        ):
+            return 'magic-link'
         if ReportResource._is_modernized(legal_type):
-            if request_action == RequestAction.MVE.value and not email_feature_flags.get('enable_cont_in_emails'):
-                return 'modernized-old'
             return 'modernized'
         if ReportResource._is_colin(legal_type):
             return 'colin'
         if ReportResource._is_society(legal_type):
             return 'so'
-        # return "new" for BC/CC/ULC IAs, "colin" for for BC/CC/ULC others
-        if ReportResource._is_potential_colin(legal_type):
-            return 'new' if request_action == RequestAction.NEW.value and email_feature_flags.get('enable_won_emails') else 'colin'
         return ''
 
     @staticmethod
