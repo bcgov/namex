@@ -1,0 +1,12 @@
+
+The scripts should be run in the following order:
+
+  1. As NAMEX@NAMES[D|T|P]: names/namex/create.sql
+  2. As NAMEX@NAMES[D|T|P]: names/namex/create_[dev|tst|prd].sql
+
+  3. As NAMESDB@NAMES[D|T|P]: names/namesdb/create.sql
+
+  4. As NAMEX@C[DEV|TST|PRD]: registry/namex/create.sql
+  5. As NAMEX@C[DEV|TST|PRD]: registry/namex/create_[dev|tst|prd].sql
+
+  6. As COLIN_MGR_[DEV|TST|PRD]@C[DEV|TST|PRD]: registry/colin_mgr/create.sql
