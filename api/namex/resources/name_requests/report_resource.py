@@ -151,8 +151,7 @@ class ReportResource(Resource):
         nr_report_json['isModernized'] = True if instruction_group == 'modernized' else False
         nr_report_json['isColin'] = True if instruction_group == 'colin' else False
         nr_report_json['isSociety'] = True if instruction_group == 'so' else False
-        nr_report_json['isNew'] = True if instruction_group == 'new' else False
-        nr_report_json['isPaper'] = not (ReportResource._is_colin(nr_model['entity_type_cd']) or ReportResource._is_modernized(nr_model['entity_type_cd']) or ReportResource._is_society(nr_model['entity_type_cd']) or ReportResource._is_potential_colin(nr_model['entity_type_cd']))
+        nr_report_json['isPaper'] = not (ReportResource._is_colin(nr_model['entity_type_cd']) or ReportResource._is_modernized(nr_model['entity_type_cd']) or ReportResource._is_society(nr_model['entity_type_cd']))
         nr_report_json['requestCodeDescription'] = \
             ReportResource._get_request_action_cd_description(nr_report_json['request_action_cd'])
         nr_report_json['nrStateDescription'] = \
