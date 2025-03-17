@@ -79,6 +79,19 @@ def _get_pdfs(nr_id: str, payment_token: str) -> list:
         json={},
         headers={"Accept": "application/json", "Authorization": f"Bearer {token}"},
     )
+
+    # Temp debug output
+    structured_log(request, "DEBUG", f"Calling payments URL: {current_app.config.get('NAMEX_SVC_URL')}/payments/{nr_id}")
+    structured_log(request, "DEBUG", f"Payments API status code: {nr_payments.status_code}")
+    structured_log(request, "DEBUG", f"Payments API response: {nr_payments.text}")
+    try:
+        payments_json = nr_payments.json()
+    except Exception as e:
+        structured_log(request, "ERROR", f"JSON parsing error: {e}, response: {nr_payments.text}")
+        return []
+    structured_log(request, "DEBUG", f"Payments API parsed JSON: {payments_json}")
+    # End Temp debug output
+
     if nr_payments.status_code != HTTPStatus.OK:
         structured_log(request, "ERROR", f"Failed to get payment info for name request id: {nr_id}")
         return []
