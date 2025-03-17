@@ -49,13 +49,13 @@ def send_email_notification(formatted_result):
                 "attachments": [],
             },
         }
-    resp = send_email(email_data, token)
-    if resp.status_code == HTTPStatus.OK:
-        current_app.logger.info(f"Email sent successfully to: {recipient}")
-    else:
-        current_app.logger.error(
-            f"Failed to send email. Status Code: {resp.status_code}, Response: {resp.text}"
-        )
+        resp = send_email(email_data, token)
+        if resp.status_code == HTTPStatus.OK:
+            current_app.logger.info(f"Email sent successfully to: {recipient}")
+        else:
+            current_app.logger.error(
+                f"Failed to send email. Status Code: {resp.status_code}, Response: {resp.text}"
+            )
 
 def format_email_body(formatted_result):
     """Formats the email body as a list of key-value lists."""
