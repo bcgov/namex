@@ -649,8 +649,8 @@ class Request(db.Model):
         """
         Retrieve the nature_business_info for the given corp_num.
         """
-        subquery = db.session.query(Name.nrId).filter(Name.corpNum == corp_num).order_by(Name.consumptionDate.desc()).subquery()
-        result = db.session.query(Request.natureBusinessInfo).filter(Request.id._in(subquery)).first()
+        subquery = db.session.query(Name.nrId).filter(Name.corpNum == corp_num).subquery()
+        result = db.session.query(Request.natureBusinessInfo).filter(Request.id == subquery).first()
         return result[0] if result else None
 
 
