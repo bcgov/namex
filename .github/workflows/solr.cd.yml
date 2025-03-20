@@ -25,7 +25,7 @@ env:
 jobs:
   # TODO: uncomment once build is working (current workflow is manual build in ocp and then use this to tag image across)
   # solr-cd-by-push:
-  #   runs-on: ubuntu-20.04
+  #   runs-on: ubuntu-24.04
 
   #   if: github.event_name == 'push' && github.repository == 'bcgov/namex'
   #   environment:
@@ -68,7 +68,7 @@ jobs:
   #         token: ${{ secrets.GITHUB_TOKEN }}
 
   solr-cd-by-dispatch:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     if: github.event_name == 'workflow_dispatch' && github.repository == 'bcgov/namex'
     environment:
