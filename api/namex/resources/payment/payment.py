@@ -499,14 +499,13 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                                            nr_model,
                                            nr_svc)
             # after a new NR saved
-            # if logged in user is a staff, affiliate the new NR with the business_account_id
-            if is_new_nr and is_staff:
-                business_account_id = json_input.get("businessAccountId")
-                if business_account_id:
-                    current_app.logger.debug(f"Affiliating to business account ID: {business_account_id} with {nr_model.nrNum}")
-                    # affiliate the new NR to the account_info
-                    #affiliate_business_account(business_account_id, nr_model.nrNum)
-                    self._affiliate_business_account(auth_header, business_account_id, nr_model)
+            # Affiliate the new NR with the business_account_id
+            business_account_id = json_input.get("businessAccountId")
+            if is_new_nr and business_account_id:
+                current_app.logger.debug(f"Affiliating to business account ID: {business_account_id} with {nr_model.nrNum}")
+                # affiliate the new NR to the account_info
+                #affiliate_business_account(business_account_id, nr_model.nrNum)
+                self._affiliate_business_account(auth_header, business_account_id, nr_model)
 
             return payment_response_result
 
