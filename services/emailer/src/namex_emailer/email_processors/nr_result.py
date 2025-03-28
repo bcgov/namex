@@ -56,7 +56,7 @@ def email_consent_letter(email_info: SimpleCloudEvent):
         if instruction_group:
             file_name = f"{file_name}-{instruction_group}.md"
         email_template = get_main_template(request_action, file_name, 'consent')
-        email_body = _build_email_body(email_template, nr_model, recipient_emails[0], recipient_phones[0])
+        email_body = _build_email_body(email_template, nr_model)
         email = {
             'recipients': recipients,
             'content': {
