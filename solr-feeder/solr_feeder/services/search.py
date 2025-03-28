@@ -43,7 +43,7 @@ def _update_solr(url: str, payload: dict[str, str], timeout: int, token: str):
 
 def update_search_cores(identifier: str, legal_type: str):
     """Update registries search AND bor search."""
-    current_app.logger.error('Updating registries search and bor core records for %s...', identifier)
+    current_app.logger.debug('Updating registries search and bor core records for %s...', identifier)
     # get token
     token, error = get_bearer_token()
     if error:
