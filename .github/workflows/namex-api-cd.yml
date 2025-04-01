@@ -24,7 +24,7 @@ env:
 
 jobs:
   namex-api-cd-by-push:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     if: github.event_name == 'push' && github.repository == 'bcgov/namex'
     environment:
@@ -32,6 +32,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Install CLI tools from OpenShift
+        uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          oc: "4"
 
       - name: Login Openshift
         shell: bash
@@ -78,6 +83,11 @@ jobs:
       - name: Set env by input
         run: |
           echo "TAG_NAME=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+
+      - name: Install CLI tools from OpenShift
+        uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          oc: "4"
 
       - name: Login Openshift
         shell: bash
