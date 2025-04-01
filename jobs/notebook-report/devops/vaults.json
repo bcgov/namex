@@ -1,9 +1,0 @@
-[
-    {
-        "vault": "namex",
-        "application": [
-            "postgres-namex",
-            "notebook-report"
-        ]
-    }
-]

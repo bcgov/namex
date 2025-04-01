@@ -22,7 +22,8 @@ from pathlib import Path
 from typing import Tuple
 
 import requests
-from flask import current_app
+from flask import current_app, request
+from gcp_queue.logging import structured_log
 
 
 def substitute_template_parts(template_code: str) -> str:
@@ -46,3 +47,50 @@ def substitute_template_parts(template_code: str) -> str:
         template_code = template_code.replace("[[{}.html]]".format(template_part), template_part_code)
 
     return template_code
+
+
+def get_main_template(request_action, template_name, status=None):
+    """
+    Retrieve the appropriate email template based on request action and status.
+
+    The function first checks for a request-specific template.
+    If not found, it looks for a status-based version.
+    If still not found, it falls back to a common default template.
+
+    Args:
+        request_action (str): The category or type of request (e.g., "CNV", "AML").
+        template_name (str): The name of the email template file (e.g., "NR-PAID.html").
+        status (str, optional): The specific status subdirectory (e.g., "approved", "rejected"). Defaults to None.
+
+    Returns:
+        str: The content of the template if found, otherwise None.
+    """
+    base_path = Path(current_app.config.get("TEMPLATE_PATH", ""))
+
+    # Check the request_action template first
+    template_path = base_path / request_action / template_name
+    if template_path.exists():
+        return template_path.read_text()
+
+    # Check the specific status-based template
+    if status:
+        template_path = base_path / request_action / status / template_name
+        if template_path.exists():
+            return template_path.read_text()
+
+    structured_log(request, "DEBUG", f"Not Found the template from {request_action}/{status}/{template_name}")
+
+    # Check the common template fallback
+    common_template_path = base_path / "common" / template_name
+    if common_template_path.exists():
+        return common_template_path.read_text()
+
+    # Check the status-based common template
+    if status:
+        common_template_path = base_path / "common" / status / template_name
+        if common_template_path.exists():
+            return common_template_path.read_text()
+
+    # Log error if template not found
+    structured_log(request, "ERROR", f"Failed to get {request_action}, {status}, {template_name} email template")
+    return None

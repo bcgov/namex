@@ -153,7 +153,7 @@ class NameRequestFilingActions:
         ('BECC_CCC', 'CCC', 'Continued In CCC', 'Conversion from Continued In Benefit Company', 'lear', 'alteration', None, "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}"),
         
         # continued in Unlimited Liability Company
-        ('ULCT_ULC', 'CUL', 'Continued In ULC', 'Continuation In', 'lear', None, None, None),
+        ('ULCT_UL', 'CUL', 'Continued In ULC', 'Continuation In', 'lear', None, None, None),
         ('ULCT_CUL', 'CUL', 'Continued In ULC', 'Continuation In', 'lear', None, None, None),
         ('CUL_CUL', 'CUL', 'Continued In ULC', 'Change of Name', 'lear', None, None, None),
         ('RUL_CUL', 'CUL', 'Continued In ULC', 'Restoration', 'static', None, 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/forms-corporate-registry#information-packages', None),

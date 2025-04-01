@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Manages Namex solr update."""
-import logging
 import os
 
 import requests
@@ -28,7 +27,7 @@ _SOLR_URL = _SOLR_INSTANCE + '/{}/update/json'
 
 def update_core(core_name: str, json_string: str):
     """Update the core with the given data."""
-    logging.debug('json Solr command: %s', json_string)
+    current_app.logger.debug('json Solr command: %s', json_string)
 
     response = requests.post(_SOLR_URL.format(core_name),
                              data=json_string,
@@ -37,7 +36,7 @@ def update_core(core_name: str, json_string: str):
     # By the way, if your request is mangled, Solr will sometimes happily return a 200 with a responseHeader['status']
     # value of 0 (meaning all is good).
     if response.status_code != 200:
-        logging.error('%s core: %s', core_name, response.json())
+        current_app.logger.error('%s core: %s', core_name, response.json())
 
         return {
             'message': f"{core_name} core: {response.json()['error']['msg']}",

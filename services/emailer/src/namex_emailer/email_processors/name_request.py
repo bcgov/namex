@@ -24,7 +24,7 @@ from gcp_queue.logging import structured_log
 from jinja2 import Template
 
 from namex_emailer.services.helpers import query_nr_number, get_bearer_token
-from namex_emailer.email_processors import substitute_template_parts
+from namex_emailer.email_processors import get_main_template, substitute_template_parts
 
 
 def process(email_info: dict) -> dict:
@@ -32,11 +32,6 @@ def process(email_info: dict) -> dict:
     structured_log(request, "DEBUG", f"NR_notification: {email_info}")
     nr_number = email_info.data.get("request", {}).get("header", {}).get("nrNum", "")
     payment_token = email_info.data.get("request", {}).get("paymentToken", "")
-    template = Path(f'{current_app.config.get("REPORT_TEMPLATE_PATH")}/NR-PAID.html').read_text()
-    filled_template = substitute_template_parts(template)
-    # render template with vars
-    mail_template = Template(filled_template, autoescape=True)
-    html_out = mail_template.render(identifier=nr_number)
 
     # get nr data
     nr_response = query_nr_number(nr_number)
@@ -44,6 +39,13 @@ def process(email_info: dict) -> dict:
         structured_log(request, "ERROR", f"Failed to get nr info for name request: {nr_number}")
         return {}
     nr_data = nr_response.json()
+    request_action = nr_data["request_action_cd"]
+
+    template = get_main_template(request_action, "NR-PAID.html")
+    filled_template = substitute_template_parts(template)
+    # render template with vars
+    mail_template = Template(filled_template, autoescape=True)
+    html_out = mail_template.render(identifier=nr_number)
 
     # get attachments
     pdfs = _get_pdfs(nr_data["id"], payment_token)
@@ -74,7 +76,6 @@ def _get_pdfs(nr_id: str, payment_token: str) -> list:
     # get nr payments
     nr_payments = requests.get(
         f'{current_app.config.get("NAMEX_SVC_URL")}/payments/{nr_id}',
-        json={},
         headers={"Accept": "application/json", "Authorization": f"Bearer {token}"},
     )
     if nr_payments.status_code != HTTPStatus.OK:

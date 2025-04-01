@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "solr-feeder"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{include = "solr_feeder"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+gcp_queue = { git = "https://github.com/bcgov/namex.git", subdirectory = "services/pubsub" }
+structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", rev = "7f1cc0ea4a374310ac558ff435fa6b7ea7bb2f8b", subdirectory = "python/structured-logging" }
+flask = "^3.1.0"
+jinja2 = "^3.1.5"
+markupsafe = "^3.0.2"
+werkzeug = "^3.1.3"
+blinker = "^1.9.0"
+certifi = "^2024.12.14"
+charset-normalizer = "^3.4.1"
+click = "^8.1.8"
+gunicorn = "^23.0.0"
+idna = "^3.10"
+itsdangerous = "^2.2.0"
+python-dotenv = "^1.0.1"
+requests = "^2.32.3"
+sentry-sdk = "^2.20.0"
+urllib3 = "^2.3.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

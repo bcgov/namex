@@ -1,3 +1,3 @@
-cd /opt/app-root
+#!/bin/bash
 echo 'run inprogress-update'
-python inprogress_update.py
+python src/inprogress_update/inprogress_update.py

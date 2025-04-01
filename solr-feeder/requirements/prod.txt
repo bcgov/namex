@@ -1,6 +1,0 @@
-Flask
-Werkzeug
-gunicorn
-python-dotenv
-requests
-sentry-sdk[flask]
