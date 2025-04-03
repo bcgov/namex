@@ -1754,7 +1754,7 @@ zipp = "^3.8.1"
 type = "git"
 url = "https://github.com/bcgov/namex.git"
 reference = "HEAD"
-resolved_reference = "6574bf53d46c90fc2def969663f13ca0eacc05fe"
+resolved_reference = "8399615407ad6e0d5601957f61cd2d59c972bbc2"
 subdirectory = "api"
 [[package]]
 name = "nltk"
