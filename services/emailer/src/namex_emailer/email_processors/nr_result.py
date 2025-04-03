@@ -9,6 +9,7 @@ from namex.resources.name_requests import ReportResource
 from namex.utils.api_resource import handle_exception
 from simple_cloudevent import SimpleCloudEvent
 from datetime import datetime
+import traceback
 
 from namex_emailer.email_processors import get_main_template
 from namex_emailer.services.helpers import get_contact_info, get_magic_link, query_nr_number
@@ -67,6 +68,7 @@ def email_consent_letter(email_info: SimpleCloudEvent):
         }
         return email
     except Exception as err:
+        structured_log(request, "ERROR", f"Error retrieving the report: {traceback.format_exc()}")
         return handle_exception(err, 'Error retrieving the report.', 500)
 
 def email_report(email_info: SimpleCloudEvent):
@@ -128,6 +130,7 @@ def email_report(email_info: SimpleCloudEvent):
         email['content']['attachments'] = attachments
         return email
     except Exception as err:
+        structured_log(request, "ERROR", f"Error retrieving the report: {traceback.format_exc()}")
         return handle_exception(err, 'Error retrieving the report.', 500)
 
 
