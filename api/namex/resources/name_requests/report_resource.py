@@ -291,7 +291,7 @@ class ReportResource(Resource):
             'NEW': ['CR', 'UL', 'CC'],
             'MVE': ['CR', 'UL', 'CC']
         }
-        return legal_type in magic_link_list.get(request_action)
+        return legal_type in magic_link_list.get(request_action, [])
 
     @staticmethod
     def _get_instruction_group(legal_type, request_action, corpNum):
