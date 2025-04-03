@@ -176,10 +176,10 @@ class BCProtectedNameEntityTypes(AbstractEnum):
     PRIVATE_ACT = EntityTypes.PRIVATE_ACT.value
     PARISH = EntityTypes.PARISH.value
     SOCIETY = EntityTypes.SOCIETY.value
-    CONTINUE_IN = EntityTypes.CONTINUE_IN
-    BEN_CONTINUE_IN = EntityTypes.BEN_CONTINUE_IN
-    CCC_CONTINUE_IN = EntityTypes.CCC_CONTINUE_IN
-    ULC_CONTINUE_IN = EntityTypes.ULC_CONTINUE_IN
+    CONTINUE_IN = EntityTypes.CONTINUE_IN.value
+    BEN_CONTINUE_IN = EntityTypes.BEN_CONTINUE_IN.value
+    CCC_CONTINUE_IN = EntityTypes.CCC_CONTINUE_IN.value
+    ULC_CONTINUE_IN = EntityTypes.ULC_CONTINUE_IN.value
 
 
 # TODO: Are these still valid for unprotected?
