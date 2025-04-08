@@ -74,7 +74,6 @@ def _get_pdfs(nr_id: str, payment_token: str) -> list:
     # get nr payments
     nr_payments = requests.get(
         f'{current_app.config.get("NAMEX_SVC_URL")}/payments/{nr_id}',
-        json={},
         headers={"Accept": "application/json", "Authorization": f"Bearer {token}"},
     )
     if nr_payments.status_code != HTTPStatus.OK:
