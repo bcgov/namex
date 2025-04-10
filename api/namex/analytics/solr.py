@@ -900,15 +900,11 @@ class SolrQueries:
             'llp', 'ltd.', 'ltd', 'ltee', 'sencrl', 'societe a responsabilite limitee',
             'societe en nom collectif a responsabilite limitee', 'limited', 'srl', 'ulc', 'unlimited liability company']
 
-        stop_words = []
-        try:
-            with open('stopwords.txt') as stop_words_file:
-                stop_words = []
-                for line in stop_words_file.readlines():
-                    if line.find('#') == -1:
-                        stop_words.append(line.strip('\n').strip())
-        except Exception as err:
-            current_app.logger.error(err)
+        # TODO: these should be loaded from somewhere.
+        stop_words = [
+            'an', 'and', 'are', 'as', 'at', 'be', 'but', 'by', 'corp', 'if', 'in', 'incorporation', 'into', 'is', 'it',
+            'no', 'not', 'of', 'on', 'or', 'such', 'that', 'the', 'their', 'then', 'there', 'these', 'they', 'this', 'to' 
+        ]
 
         # remove designations if they are at the end of the name
         for designation in designations:
