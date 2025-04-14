@@ -1,4 +1,3 @@
-
 import os
 import base64
 import tempfile
@@ -34,7 +33,6 @@ class Config(object):
     OIDC_VALID_ISSUERS = [os.getenv('SOLR_ADMIN_APP_OIDC_VALID_ISSUERS', 'http://localhost:8081/auth/realms/master')]
     OVERWRITE_REDIRECT_URI = os.getenv('SOLR_ADMIN_APP_OVERWRITE_REDIRECT_URI', '')
 
-    print("OIDC:\n" + json.dumps(json.loads(decoded), indent=2))
     # Undocumented Keycloak parameter: allows sending cookies without the secure flag, which we need for the local
     # non-TLS HTTP server. Set this to non-"True" for local development, and use the default everywhere else.
     OIDC_ID_TOKEN_COOKIE_SECURE = os.getenv('SOLR_ADMIN_APP_OIDC_ID_TOKEN_COOKIE_SECURE', 'True') == 'True'
@@ -67,10 +65,8 @@ class Config(object):
         if temp_path and os.path.exists(temp_path):
             try:
                 os.remove(temp_path)
-                print("DEBUG: Deleted temporary file:", temp_path)
             except Exception as e:
-                print("WARNING: Could not delete temporary file:", temp_path, e)
-
+                pass
 
 # Register the cleanup function with atexit.
 atexit.register(Config.cleanup_temp_file)
