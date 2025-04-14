@@ -1,7 +1,6 @@
 """s2i based launch script to run the notebook."""
 import ast
 import fnmatch
-import logging
 import os
 import sys
 import traceback
@@ -9,15 +8,13 @@ import requests
 import base64
 from datetime import datetime, timedelta
 from pathlib import Path
+from structured_logging import StructuredLogging
 
 import papermill as pm
 from flask import Flask, current_app
 
 from config import Config
-from util.logging import setup_logging
 
-
-setup_logging(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.conf'))  # important to do this first
 
 # Notebook Scheduler
 # ---------------------------------------
@@ -29,9 +26,11 @@ def create_app(config=Config):
     """create_app."""
     app = Flask(__name__)
     app.config.from_object(config)
-    # db.init_app(app)
-    app.app_context().push()
-    current_app.logger.debug('created the Flask App and pushed the App Context')
+
+    # Configure Structured Logging
+    structured_logger = StructuredLogging()
+    structured_logger.init_app(app)
+    app.logger = structured_logger.get_logger()
 
     return app
 
@@ -46,7 +45,7 @@ def findfiles(directory, pattern):
 
 def send_email(email: dict, token):
     """Send the email."""
-    logging.info('email is: %s', str(email))
+    current_app.logger.info('email is: %s', str(email))
     
     response = requests.request("POST",
         Config.NOTIFY_API_URL,
@@ -57,7 +56,7 @@ def send_email(email: dict, token):
         },
     )
     if response.status_code != 200:
-        logging.info(f'response:{response}')
+        current_app.logger.info(f'response:{response}')
         # print(response)
         # current_app.logger.info(f'response:{response}')
         raise Exception('Unsuccessful response when sending email.')
@@ -73,7 +72,7 @@ def processnotebooks(notebookdirectory, token):
     # For weekly tasks, we only run on the specified days
     # Only run weekly report on Monday (index is 0) for previous 7 days data
     if (notebookdirectory == 'daily' or (notebookdirectory == 'weekly' and datetime.now().weekday() in weekreportday)):
-        logging.info('Processing: %s', notebookdirectory)
+        current_app.logger.info('Processing: %s', notebookdirectory)
                    
         for file in findfiles(notebookdirectory, '*.ipynb'):
             nbfile = os.path.basename(file).split('.ipynb')[0]
@@ -130,18 +129,20 @@ def processnotebooks(notebookdirectory, token):
 
 
 if __name__ == '__main__':
+    app = create_app(Config)
+    app.app_context().push()
     START_TIME = datetime.now()
     
     client = Config.NOTIFY_CLIENT_ID
     secret = Config.NOTIFY_CLIENT_SECRET
     kc_url = Config.KEYCLOAK_AUTH_TOKEN_URL
-    logging.info('token retrieved kc_url: ' + kc_url)   
+    current_app.logger.info('token retrieved kc_url: ' + kc_url)   
     response = requests.post(url=kc_url,
         data='grant_type=client_credentials',
         headers={'content-type': 'application/x-www-form-urlencoded'},
         auth=(client, secret))
     token = response.json()['access_token']
-    logging.info('token retrieved')   
+    current_app.logger.info('token retrieved')   
     
     # Check if the subfolders for notebooks exist, and create them if they don't
     for _directory in ['daily', 'weekly']:
@@ -150,5 +151,5 @@ if __name__ == '__main__':
 
         processnotebooks(_directory, token)
     END_TIME = datetime.now()
-    logging.info('job - jupyter notebook report completed in: %s', (END_TIME - START_TIME))
+    current_app.logger.info('job - jupyter notebook report completed in: %s', (END_TIME - START_TIME))
     sys.exit()
