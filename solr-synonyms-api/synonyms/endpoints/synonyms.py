@@ -3,13 +3,11 @@ import jsonpickle
 
 from ast import literal_eval
 
-from flask import request, make_response, jsonify
+from flask import current_app, request, make_response, jsonify
 from flask_restx import Namespace, Resource, cors, fields, marshal_with, reqparse
 from flask_jwt_oidc import AuthError
 
 from urllib.parse import unquote_plus
-
-from synonyms.utils.logging import logging
 
 from synonyms.services.synonyms.synonym import SynonymService
 from synonyms.models import synonym
@@ -767,7 +765,7 @@ class _Synonyms(Resource):
     @staticmethod
     def get(col, term):
         term = term.strip().lower()
-        logging.debug('Doing {} search for "{}"'.format(col, term))
+        current_app.logger.debug('Doing {} search for "{}"'.format(col, term))
 
         results = synonym.Synonym.find(term, col)
 
@@ -781,5 +779,5 @@ class _Synonyms(Resource):
             # col == stems_text
             else:
                 response_list.append(result.stems_text)
-        print(response_list)
+        current_app.logger.debug(response_list)
         return ('results', response_list), 200
