@@ -1,8 +1,8 @@
-import logging
 import requests
 import re
 from datetime import datetime
 from http import HTTPStatus
+from flask import current_app
 from config import Config
 from util.token import get_bearer_token
 
@@ -12,11 +12,11 @@ class EmailService:
         """Send the email via the Notify API."""
         recipients = EmailService.load_recipients()
         token = get_bearer_token()
-        logging.info("Email recipients list: %s", recipients)
+        current_app.logger.info("Email recipients list: %s", recipients)
 
         for recipient in recipients:
             email_data = EmailService.build_email_data(note_book, error_message, recipient)
-            logging.info("Sending email with data: %s", email_data)
+            current_app.logger.info("Sending email with data: %s", email_data)
             response = requests.post(
                 Config.NOTIFY_API_URL,
                 json=email_data,
@@ -26,9 +26,9 @@ class EmailService:
                 }
             )
             if response.status_code == HTTPStatus.OK:
-                logging.info("Email sent successfully to: %s", recipient)
+                current_app.logger.info("Email sent successfully to: %s", recipient)
             else:
-                logging.error(
+                current_app.logger.error(
                     "Failed to send email. Status Code: %s, Response: %s",
                     response.status_code,
                     response.text
