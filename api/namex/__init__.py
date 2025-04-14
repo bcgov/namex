@@ -6,10 +6,6 @@ This module is the API for the Names Examination system
 TODO: Fill in a larger description once the API is defined for V1
 """
 import config
-from namex.utils.logging import setup_logging
-
-setup_logging()  # important to do this first
-
 import os
 
 from flask import Flask
@@ -23,6 +19,7 @@ import sentry_sdk  # noqa: I001; pylint: disable=ungrouped-imports,wrong-import-
 from flask_cors import CORS
 from flask_migrate import Migrate
 from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001
+from structured_logging import StructuredLogging
 
 from namex.services.cache import cache
 from namex.services.lookup import nr_filing_actions
@@ -44,6 +41,11 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     app = Flask(__name__)
     CORS(app)
     app.config.from_object(config.CONFIGURATION[run_mode])
+
+    # Configure Structured Logging
+    structured_logger = StructuredLogging()
+    structured_logger.init_app(app)
+    app.logger = structured_logger.get_logger()
 
     # Configure Sentry
     if str(app.config.get('SENTRY_ENABLE')).lower() == 'true':

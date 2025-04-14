@@ -1,5 +1,6 @@
 import pandas as pd
 
+from flask import current_app
 from enum import Enum
 
 from ..name_request.auto_analyse.name_analysis_utils import data_frame_to_list
@@ -114,7 +115,7 @@ class TokenClassifier:
                 word_classification = wc_svc.find_one(word)
                 new_row = []
                 if not word_classification:
-                    print('No word classification found for: ' + word)
+                    current_app.logger.debug('No word classification found for: ' + word)
                     new_row.append({
                         'word': word.lower().strip(),
                         'word_classification': DataFrameFields.UNCLASSIFIED.value
@@ -131,5 +132,5 @@ class TokenClassifier:
             self.distinctive_word_tokens, self.descriptive_word_tokens, self.unclassified_word_tokens = data_frame_to_list(cf)
 
         except Exception as error:
-            print('Token classification failed! ' + repr(error))
+            current_app.logger.error('Token classification failed! ' + repr(error))
             raise

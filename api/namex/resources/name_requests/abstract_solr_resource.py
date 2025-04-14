@@ -3,12 +3,9 @@ import pysolr
 from flask import current_app
 from flask_restx import Resource
 
-from namex.utils.logging import setup_logging
 from namex.models import State
 
 from namex.services.name_request.exceptions import SolrUpdateError
-
-setup_logging()  # Important to do this first
 
 
 class AbstractSolrResource(Resource):

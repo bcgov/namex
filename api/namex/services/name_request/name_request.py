@@ -1,8 +1,6 @@
 from datetime import datetime
 from pytz import timezone
 
-from namex.utils.logging import setup_logging
-
 from namex.constants import NameState, RequestAction, ExpiryDays
 
 from namex.models import Request, Name, State, Applicant
@@ -22,7 +20,6 @@ from .utils import get_item_from_list
 from .exceptions import CreateNameRequestError, SaveNameRequestError, MapRequestDataError, \
     MapRequestApplicantError, MapRequestNamesError, UpdateSubmitCountError, ExtendExpiryDateError
 
-setup_logging()  # Important to do this first
 
 
 class NameRequestService(AbstractNameRequestMixin):

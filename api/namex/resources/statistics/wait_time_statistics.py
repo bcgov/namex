@@ -6,14 +6,11 @@ from namex.utils.api_resource import handle_exception
 from namex.services.cache import cache
 from namex.services.statistics.wait_time_statistics import WaitTimeStatsService
 from namex.services.exceptions import ApiServiceException
-from namex.utils.logging import setup_logging
 from flask_restx import Namespace, Resource, cors, fields
 from flask_jwt_oidc import AuthError
 
 from http import HTTPStatus
 
-
-setup_logging()  # important to do this first
 
 # Register a local namespace for the requests
 api = Namespace('waitTimeStats', description='API for Wait Time Statistics')

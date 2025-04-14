@@ -7,10 +7,7 @@ from lxml import etree  # Don't worry about this it exists... the module is dyna
 
 from namex.utils.api_resource import handle_exception
 from namex.utils.auth import cors_preflight
-from namex.utils.logging import setup_logging
 
-
-setup_logging()  # Important to do this first
 
 MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'

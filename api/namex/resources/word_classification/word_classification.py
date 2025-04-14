@@ -5,13 +5,10 @@ from flask_jwt_oidc import AuthError
 from http import HTTPStatus
 
 from namex.utils.auth import cors_preflight
-from namex.utils.logging import setup_logging
 
 from namex.services.word_classification.word_classification import WordClassificationService
 from namex.models import User
 from namex import jwt
-
-setup_logging()  # important to do this first
 
 # Register a local namespace for the requests
 api = Namespace('wordClassification', description='API for Word Classifications')

@@ -1,6 +1,7 @@
 import abc
 import re
 from collections import deque
+from flask import current_app
 import re
 
 # Import DTOs
@@ -35,7 +36,7 @@ class AnalysisResponseIssue:
             converted_list = list(map(lambda d: d.upper() if isinstance(d, str) else '', str_list)) \
                 if convert else list(map(lambda d: d.upper(), str_list))
         except Exception as err:
-            print('List is not a list of strings ' + repr(err))
+            current_app.logger.error('List is not a list of strings ' + repr(err))
 
         return converted_list
 
@@ -259,7 +260,7 @@ class AnalysisResponseIssue:
 
         offset_idx = word_idx + word_idx_offset + composite_token_offset
 
-        print('Adjusted word index for word [' + target_word + '] from [' + str(word_idx) + '] -> [' + str(
+        current_app.logger.debug('Adjusted word index for word [' + target_word + '] from [' + str(word_idx) + '] -> [' + str(
             offset_idx) + ']')
 
         return offset_idx, word_idx, word_idx_offset, composite_token_offset

@@ -5,12 +5,9 @@ from namex.constants import NameRequestPatchActions
 from namex.models import Request, State
 from namex.services.name_request.exceptions import NameRequestException
 from namex.services.name_request.name_request import NameRequestService
-from namex.utils.logging import setup_logging
 
 from .abstract_nr_resource import AbstractNameRequestResource
 from .constants import contact_editable_states, request_editable_states
-
-setup_logging()  # Important to do this first
 
 
 class BaseNameRequestResource(AbstractNameRequestResource):

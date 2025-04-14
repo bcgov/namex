@@ -1,3 +1,4 @@
+from flask import current_app
 from namex.utils.api_resource import log_error
 from namex.utils.common import convert_to_ascii
 from namex.constants import NameState
@@ -129,7 +130,7 @@ def _map_submitted_name_macros(submitted_name: Name, macro_list: list):
             if macro != '' or len(macro) > 0:
                 macro_text = DecisionReason.find_by_name(macro)
         except Exception as err:
-            log_error('Error on get decision reason word. Macro Word[0]'.format(macro), err)
+            current_app.logger.error('Error on get decision reason word. Macro Word[0]'.format(macro), err)
             raise MapRequestNamesError('Error mapping macro words.')
 
         try:
@@ -159,7 +160,7 @@ def _map_submitted_name_consent_words(submitted_name: Name, consent_list: list):
                 # cnd_instructions = virtual_wc_svc.get_word_condition_instructions(consent)
                 pass
         except Exception as err:
-            log_error('Error on get consent word. Consent Word[0]'.format(consent), err)
+            current_app.logger.error('Error on get consent word. Consent Word[0]'.format(consent), err)
             raise MapRequestNamesError('Error mapping consent words.')
 
         try:

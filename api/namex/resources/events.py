@@ -6,9 +6,6 @@ from namex import jwt
 from namex.models import Event as EventDAO, Request as RequestDAO, User, State, Payment
 from namex.utils.auth import cors_preflight
 
-from namex.utils.logging import setup_logging
-setup_logging()  # important to do this first
-
 
 # Register a local namespace for the event history
 api = Namespace('events', description='Audit trail of events for a Name Request')
