@@ -36,29 +36,28 @@ def send_email_notification(recipients: list[str], subject: str, body: str, atta
         raise ValueError("Email recipients are not defined. Please check the configuration.")
 
     processed_attachments = process_attachments(attachments)
-    for recipient in recipients:
-        email_data = {
-            "recipients": recipient,
-            "content": {
-                "subject": subject,
-                "body": body,
-                "attachments": processed_attachments,
-            },
-        }
-        current_app.logger.info(f"Send Email: {email_data}")
-        resp = requests.post(
-            Config.NOTIFY_API_URL,
-            json=email_data,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {get_bearer_token()}",
-            },
-        )
+    email_data = {
+        "recipients": ",".join(recipients),
+        "content": {
+            "subject": subject,
+            "body": body,
+            "attachments": processed_attachments,
+        },
+    }
+    current_app.logger.info(f"Send Email: {email_data}")
+    resp = requests.post(
+        Config.NOTIFY_API_URL,
+        json=email_data,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {get_bearer_token()}",
+        },
+    )
 
-        if resp.status_code == HTTPStatus.OK:
-            current_app.logger.info(f"Email with subject '{subject}' sent successfully to: {recipient}")
-        else:
-            current_app.logger.error(
-                f"Failed to send email with subject '{subject}' to {recipient}. "
-                f"Response code: {resp.status_code}, Response text: {resp.text}"
-            )
+    if resp.status_code == HTTPStatus.OK:
+        current_app.logger.info(f"Email with subject '{subject}' sent successfully to: {recipients}")
+    else:
+        current_app.logger.error(
+            f"Failed to send email with subject '{subject}' to {recipients}. "
+            f"Response code: {resp.status_code}, Response text: {resp.text}"
+        )

@@ -3,7 +3,8 @@ import fnmatch
 import os
 import sys
 import traceback
-from datetime import datetime, timedelta
+import logging
+from datetime import datetime, timedelta, timezone
 
 import papermill as pm
 from flask import Flask, current_app
@@ -11,6 +12,9 @@ from flask import Flask, current_app
 from config import Config
 from util.email import send_email_notification
 from structured_logging import StructuredLogging
+
+# Suppress verbose papermill logging
+logging.getLogger("papermill").setLevel(logging.ERROR)
 
 # Notebook Scheduler
 # ---------------------------------------
@@ -72,7 +76,7 @@ def processnotebooks(notebookdirectory, data_dir):
     app = create_app(Config)
     app.app_context().push()
     status = False
-    current_app.logger.info('NR Duploicates Report start processing directory: %s',
+    current_app.logger.info('NR Duplicates Report start processing directory: %s',
                  notebookdirectory)
     try:
         pm.execute_notebook(os.path.join(notebookdirectory, 'nr-duplicates.ipynb'),
@@ -93,7 +97,7 @@ def processnotebooks(notebookdirectory, data_dir):
 
 
 if __name__ == '__main__':
-    start_time = datetime.utcnow()
+    start_time = datetime.now(timezone.utc)
 
     temp_dir = os.path.join(os.getcwd(), r'nr_duplicates_report/data/')
     if not os.path.exists(temp_dir):
@@ -102,7 +106,7 @@ if __name__ == '__main__':
     processnotebooks('nr_duplicates_report/daily', temp_dir)
     # shutil.rmtree(temp_dir)
 
-    end_time = datetime.utcnow()
+    end_time = datetime.now(timezone.utc)
     current_app.logger.info('job - jupyter notebook report completed in: %s',
                  end_time - start_time)
     sys.exit()
