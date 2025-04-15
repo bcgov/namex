@@ -2,7 +2,6 @@ from flask import request, make_response, jsonify
 from flask_restx import Resource, cors, fields
 from flask_jwt_oidc import AuthError
 
-from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight
 from namex.utils.api_resource import handle_exception
 
@@ -10,8 +9,6 @@ from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentErr
 from namex.services.payment.fees import calculate_fees, CalculateFeesRequest
 
 from .api_namespace import api as payment_api
-
-setup_logging()  # It's important to do this first
 
 MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'

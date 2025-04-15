@@ -3,7 +3,6 @@ from flask_restx import Resource, cors
 from flask_jwt_oidc import AuthError
 from pytz import timezone
 
-from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight
 from namex.utils.api_resource import handle_exception
 
@@ -14,8 +13,6 @@ from namex.services.payment.receipts import get_receipt, generate_receipt
 from namex.services.payment.models import ReceiptRequest
 
 from .api_namespace import api as payment_api
-
-setup_logging()  # It's important to do this first
 
 MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'

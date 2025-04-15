@@ -6,11 +6,12 @@ authors = ["Steven Chen <steven.chen@gov.bc.ca>"]
 license = "Apache-2.0"
 readme = "README.md"
 packages = [    
-    { include = "src" }                      # Ensure `src` folder is packaged
+    { include = "src" }
 ]
 
 [tool.poetry.dependencies]
 python = "^3.12"
+structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging" }
 flask = "^3.0.2"
 sqlalchemy = "^1.4.18"
 psycopg2-binary = "^2.9.7"

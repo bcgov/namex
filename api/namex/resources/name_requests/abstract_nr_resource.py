@@ -3,7 +3,6 @@ from typing import Callable
 
 from namex.models import Request, State
 from namex.services.name_request.generate_new_nr_number import NRNumberService
-from namex.utils.logging import setup_logging
 from namex.services.name_request.utils import is_temp_nr_num
 from namex.services.name_request import NameRequestService
 from namex.services.name_request.exceptions import NameRequestException
@@ -11,8 +10,6 @@ from namex.services.virtual_word_condition import VirtualWordConditionService
 
 from .abstract_solr_resource import AbstractSolrResource
 
-
-setup_logging()  # Important to do this first
 
 
 class AbstractNameRequestResource(AbstractSolrResource):

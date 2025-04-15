@@ -8,8 +8,6 @@ from namex import jwt
 from namex.models import State, PaymentSociety as PaymentSocietyDAO, Request as RequestDAO, User
 from namex.utils.auth import cors_preflight
 
-from namex.utils.logging import setup_logging
-setup_logging()  # important to do this first
 
 # Register a local namespace for the payment_society
 api = Namespace('payment_society', description='Store data for society from home legancy app')

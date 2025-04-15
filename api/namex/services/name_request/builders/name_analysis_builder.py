@@ -199,7 +199,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         list_conflict_details.extend(list_details)
 
         if not forced:
-            print("Search for conflicts considering compound-distinctive words.")
+            current_app.logger.debug("Search for conflicts considering compound-distinctive words.")
             dist_compound_dict = self.get_compound_distinctives(dist_substitution_dict)
             list_details, forced = self.get_conflicts_db(dist_compound_dict, desc_synonym_criteria_dict,
                                                          desc_synonym_dict,
@@ -208,7 +208,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             list_conflict_details.extend(list_details)
 
         if not forced:
-            print("Search for conflicts considering compound-distinctive words taking one simple descriptive")
+            current_app.logger.debug("Search for conflicts considering compound-distinctive words taking one simple descriptive")
             dist_compound_dict, desc_synonym_dict_new = self.get_compound_distinctive_hybrid(dist_substitution_dict,
                                                                                              desc_synonym_dict,
                                                                                              list_name)
@@ -233,17 +233,17 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         forced = False
 
         if check_name_is_well_formed:
-            print("Search conflicts for not well formed name")
+            current_app.logger.debug("Search conflicts for not well formed name")
         elif queue:
-            print("Search conflicts for INPROGRESS, HOLD, DRAFT")
+            current_app.logger.debug("Search conflicts for INPROGRESS, HOLD, DRAFT")
         else:
-            print("Search conflicts for APPROVED, CONDITIONAL, COND_RESERVED, RESERVED")
+            current_app.logger.debug("Search conflicts for APPROVED, CONDITIONAL, COND_RESERVED, RESERVED")
 
         for key_dist, value_dist in dist_substitution_dict.items():
             criteria = Request.get_general_query(change_filter, queue)
             name_criteria = Request.get_distinctive_query(value_dist, stop_words, check_name_is_well_formed)
             for key_desc, value_desc in desc_synonym_criteria_dict.items():
-                print(key_dist, ":DIST ", key_desc, ":DESC")
+                current_app.logger.debug(key_dist, ":DIST ", key_desc, ":DESC")
                 criteria = Request.get_descriptive_query(value_desc, criteria, name_criteria)
                 matches = Request.find_by_criteria_array(criteria, queue)
                 matches = self.skip_name_matches_processed(matches)
@@ -264,9 +264,9 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result.is_valid = False
 
         if queue:
-            print("Search for exact match in INPROGRESS, HOLD, DRAFT")
+            current_app.logger.debug("Search for exact match in INPROGRESS, HOLD, DRAFT")
         else:
-            print("Search for exact match in APPROVED, CONDITIONAL, COND_RESERVED, RESERVED")
+            current_app.logger.debug("Search for exact match in APPROVED, CONDITIONAL, COND_RESERVED, RESERVED")
 
         criteria = Request.get_general_query(change_filter=False, queue=queue)
         criteria = Request.get_query_exact_match(criteria, list_name, list_dist_words, list_desc_words,
@@ -278,7 +278,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         for match in matches:
             dict_highest_counter[match.name] = 1.0
             list_details = self.get_details_higher_score(dict_highest_counter, [match], {})
-            print("Exact match: {}".format(match.name))
+            current_app.logger.debug("Exact match: {}".format(match.name))
             break
 
         return self.prepare_response(list_details, queue, list_name, list_dist_words, list_desc_words)
@@ -483,7 +483,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
         if db_matches:
             total = len(db_matches)
-            print("Possible conflicts returned: ", total)
+            current_app.logger.debug("Possible conflicts returned: ", total)
 
             json_analyze = {'names': [match.name for match in db_matches],
                             'list_name': list_name,

@@ -1,3 +1,5 @@
+
+from flask import current_app
 from synonyms.services import SynonymService
 
 
@@ -8,4 +10,4 @@ def test_get_synonyms(app, db):
 
         syn_svc = SynonymService()
         result = syn_svc.get_synonyms()
-        print(result)
+        current_app.logger.debug(result)

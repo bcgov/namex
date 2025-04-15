@@ -391,7 +391,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
             return analysis
 
         except Exception as error:
-            print('Error executing name analysis: ' + repr(error))
+            current_app.logger.error('Error executing name analysis: ' + repr(error))
             raise
 
     def sort_analysis_issues(self, analysis_issues, sort_order):

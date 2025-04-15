@@ -9,20 +9,16 @@ from pytz import timezone
 import requests
 from flask import current_app, jsonify, request, make_response
 from flask_restx import Resource
-from gcp_queue.logging import structured_log
 
 from namex.constants import RequestAction
 from namex.models import Request, State
 from namex.utils.api_resource import handle_exception
 from namex.utils.auth import cors_preflight, full_access_to_name_request
-from namex.utils.logging import setup_logging
 from namex.services.name_request import NameRequestService
 from namex.services.name_request.utils import get_mapped_entity_and_action_code
 from namex.utils.auth import get_client_credentials
 from .api_namespace import api
 from ..utils import EntityUtils
-
-setup_logging()  # Important to do this first
 
 DATE_FORMAT = '%B %-d, %Y at %-I:%M %p Pacific time'
 
@@ -296,7 +292,7 @@ class ReportResource(Resource):
     @staticmethod
     def _get_instruction_group(legal_type, request_action, corpNum):
         email_feature_flags = ReportResource._get_email_feature_flags()
-        structured_log(request, 'DEBUG', f'NR-Email: NameX API - Email Feature Flags: {email_feature_flags}')
+        current_app.logger.debug(f'NR-Email: NameX API - Email Feature Flags: {email_feature_flags}')
         if request_action in {RequestAction.REH.value, RequestAction.REST.value}:
             return 'reh'
         if request_action in {RequestAction.CHG.value, RequestAction.CNV.value}:

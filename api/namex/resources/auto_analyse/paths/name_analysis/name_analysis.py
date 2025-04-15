@@ -21,13 +21,10 @@ from namex.services.name_request.auto_analyse.xpro_name_analysis import XproName
 from namex.services.name_request.builders.name_analysis_builder import NameAnalysisBuilder
 from namex.utils.api_resource import get_query_param_str
 from namex.utils.auth import cors_preflight
-from namex.utils.logging import setup_logging
 
 from .bc_name_analysis_response import BcAnalysisResponse
 from .xpro_name_analysis_response import XproAnalysisResponse
 
-
-setup_logging()  # It's important to do this first
 
 # Register a local namespace for the requests
 api = Namespace('nameAnalysis', description='API for Analysing BC Names')

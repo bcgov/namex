@@ -5,12 +5,8 @@ from namex.models import db
 from namex.models.nr_number import NRNumber
 from namex.models.user import User
 
-from namex.utils.logging import setup_logging
-
 from namex.services.name_request.utils import get_mapped_request_type, get_mapped_entity_and_action_code
 from namex.services.name_request.exceptions import GetUserIdError, GenerateNRKeysError, MapRequestTypeError
-
-setup_logging()  # Important to do this first
 
 
 class AbstractNameRequestMixin(object):
