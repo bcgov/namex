@@ -6,6 +6,7 @@ import sys
 import traceback
 import requests
 import base64
+import logging
 from datetime import datetime, timedelta
 from pathlib import Path
 from structured_logging import StructuredLogging
@@ -15,6 +16,8 @@ from flask import Flask, current_app
 
 from config import Config
 
+# Suppress verbose papermill logging
+logging.getLogger("papermill").setLevel(logging.ERROR)
 
 # Notebook Scheduler
 # ---------------------------------------
@@ -135,14 +138,12 @@ if __name__ == '__main__':
     
     client = Config.NOTIFY_CLIENT_ID
     secret = Config.NOTIFY_CLIENT_SECRET
-    kc_url = Config.KEYCLOAK_AUTH_TOKEN_URL
-    current_app.logger.info('token retrieved kc_url: ' + kc_url)   
+    kc_url = Config.KEYCLOAK_AUTH_TOKEN_URL 
     response = requests.post(url=kc_url,
         data='grant_type=client_credentials',
         headers={'content-type': 'application/x-www-form-urlencoded'},
         auth=(client, secret))
     token = response.json()['access_token']
-    current_app.logger.info('token retrieved')   
     
     # Check if the subfolders for notebooks exist, and create them if they don't
     for _directory in ['daily', 'weekly']:
