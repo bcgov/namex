@@ -4,7 +4,8 @@ import fnmatch
 import os
 import sys
 import traceback
-from datetime import datetime
+import logging
+from datetime import datetime, timezone
 
 import papermill as pm
 from flask import Flask, current_app
@@ -14,6 +15,8 @@ from config import Config
 from services.sftp import SftpService
 from services.email import EmailService
 
+# Suppress verbose papermill logging
+logging.getLogger("papermill").setLevel(logging.ERROR)
 
 # Notebook Scheduler
 # ---------------------------------------
@@ -68,7 +71,7 @@ def processnotebooks(notebookdirectory, data_dir):
 if __name__ == '__main__':
     app = create_app(Config)
     app.app_context().push()
-    start_time = datetime.utcnow()
+    start_time = datetime.now(timezone.utc)
 
     temp_dir = os.path.join(os.getcwd(), r'sftp_nuans_report/data/')
     if not os.path.exists(temp_dir):
@@ -77,6 +80,6 @@ if __name__ == '__main__':
     processnotebooks('sftp_nuans_report/notebook', temp_dir)
     # shutil.rmtree(temp_dir)
 
-    end_time = datetime.utcnow()
+    end_time = datetime.now(timezone.utc)
     current_app.logger.info('job - jupyter notebook report completed in: %s', end_time - start_time)
     sys.exit()
