@@ -425,6 +425,19 @@ class RequestSearch(Resource):
             } for nr in results])
 
             while len(data) < rows:
+                if start < rows:
+                    # Check if the search length is less than 7 digits. If so, patch it with zero at the end to increase rows number.
+                    # After this, the search cycles to solr will be reduced a lot.
+                    # Otherwise, the rows is too small and it will take long time (many times solr calling) to search in solr and get timeout exception.
+                    # So the less of search length, the bigger of rows will be.
+                    temp_rows = str(rows)
+                    if nr_number and len(nr_number) < 7:
+                        temp_rows = str(rows).ljust(9-len(nr_number), '0')
+                    if nr_name and len(nr_name) < 7:
+                        temp_rows = str(rows).ljust(9-len(nr_name), '0')
+
+                    rows = int(temp_rows)
+
                 nr_data, have_more_data = RequestSearch._get_next_set_from_solr(solr_query, start, rows)
                 nr_data = nr_data[:(rows - len(data))]
                 data.extend([{
