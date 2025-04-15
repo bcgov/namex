@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from flask_restx.fields import Boolean
+from flask import current_app
 
 from namex.constants import \
     NameRequestActions, \
@@ -110,7 +111,7 @@ def display_resend_action(nr_model=None):
 def display_retry_payment(nr_model=None):
     """Logic for displaying retry payment button."""
     try:
-        print('retry payment method')
+        current_app.logger.debug('retry payment method')
         if nr_model and nr_model.stateCd in (State.PENDING_PAYMENT):
             payment = nr.payments.one_or_none()
             if payment:

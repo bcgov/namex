@@ -8,6 +8,7 @@ packages = [{include = "solr_admin"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
+structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging" }
 flask-admin = "^1.6.1"
 flask-migrate = "^4.1.0"
 flask-script = "^2.0.6"

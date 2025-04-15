@@ -8,6 +8,7 @@ packages = [{include = "nr_duplicates_report"}]
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
+structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging" }
 attrs = "^25.1.0"
 certifi = "^2025.1.31"
 click = "^8.1.8"

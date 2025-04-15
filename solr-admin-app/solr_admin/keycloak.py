@@ -1,8 +1,6 @@
 """
 
 """
-import logging
-
 import flask_oidc
 
 

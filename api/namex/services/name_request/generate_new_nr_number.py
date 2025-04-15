@@ -2,7 +2,6 @@ from flask import current_app
 from namex.models import NRNumberLifespan, NRNumberExclude, Request
 
 import random
-import logging
 
 
 def set_nr_num_lifespan(nr_num, span):
@@ -68,5 +67,5 @@ class NRNumberService:
                 f'Unable to generate random number from range {floor} to {ceiling} after {count} attempts.'
                 )
         except Exception as e:
-            logging.error(f'Exception in get_new_nr_num; {str(e)}')
+            current_app.logger.error(f'Exception in get_new_nr_num; {str(e)}')
             raise

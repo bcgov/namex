@@ -142,7 +142,7 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
             return analysis
 
         except Exception as error:
-            print('Error executing name analysis: ' + repr(error))
+            current_app.logger.error('Error executing name analysis: ' + repr(error))
             raise
 
     '''

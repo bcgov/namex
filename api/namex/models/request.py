@@ -591,7 +591,7 @@ class Request(db.Model):
         else:
             query_all = queries[0].union(queries[1])
 
-        print(query_all.statement)
+        current_app.logger.debug(query_all.statement)
         return query_all.all()
 
     @classmethod

@@ -73,7 +73,7 @@ def with_authentication(func):
 
 
 def log_api_error_response(err, func_call_name='function'):
-    print('Error when calling {func}'.format(func=func_call_name))
+    current_app.logger.error('Error when calling {func}'.format(func=func_call_name))
 
 
 class HttpVerbs(Enum):

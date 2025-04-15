@@ -1,3 +1,4 @@
+from flask import current_app
 from namex.models import User
 import os
 import requests
@@ -75,12 +76,12 @@ def verify(data, expected=None, not_expected=None):
         assert False
 
     verified = False
-    print(data['names'])
-    print('EXPECTED ', expected)
-    print('NOT EXPECTED ', not_expected)
+    current_app.logger.debug(data['names'])
+    current_app.logger.debug('EXPECTED ', expected)
+    current_app.logger.debug('NOT EXPECTED ', not_expected)
     for result in data['names']:
         name = result['name_info']
-        print('ACTUAL ', name['name'])
+        current_app.logger.debug('ACTUAL ', name['name'])
 
         if expected is []:
             # check that the name is the title of a query sent (no real names were returned from solr)
@@ -116,26 +117,26 @@ def verify_synonym_match(client, jwt, query, expected_list=None, not_expected_li
 
 def verify_order(client, jwt, query, expected_order):
     data = search_synonym_match(client, jwt, query)
-    print('data[names]: ', data['names'])
+    current_app.logger.debug('data[names]: ', data['names'])
     for result, expected in zip(data['names'], expected_order):
         actual = result['name_info']['name']
-        print('Actual: ', actual)
-        print('Expected: ', expected)
+        current_app.logger.debug('Actual: ', actual)
+        current_app.logger.debug('Expected: ', expected)
         assert actual.upper() == expected.upper()
 
 def verify_stems(client, jwt, query, stems):
     data = search_synonym_match(client, jwt, query)
 
     for actual,expected in zip(data['names'][0]['stems'], stems):
-        print('Actual: ', actual)
-        print('Expected: ', expected)
+        current_app.logger.debug('Actual: ', actual)
+        current_app.logger.debug('Expected: ', expected)
         assert actual.upper() == expected.upper()
 
 def search_synonym_match(client, jwt, query, exact_phrase='*'):
     token = jwt.create_jwt(claims, token_header)
     headers = {'Authorization': 'Bearer ' + token}
     url = '/api/v1/requests/synonymbucket/' + query + '/' + exact_phrase
-    print(url)
+    current_app.logger.debug(url)
     rv = client.get(url, headers=headers)
 
     assert rv.status_code == 200

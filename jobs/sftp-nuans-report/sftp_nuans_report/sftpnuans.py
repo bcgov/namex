@@ -1,20 +1,19 @@
 """The Notebook Report - This module is the API for the Filings Notebook Report."""
 
 import fnmatch
-import logging
 import os
 import sys
+import traceback
 from datetime import datetime
 
 import papermill as pm
 from flask import Flask, current_app
+from structured_logging import StructuredLogging
 
 from config import Config
-from util.logging import setup_logging
 from services.sftp import SftpService
 from services.email import EmailService
 
-setup_logging(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.conf'))  # important to do this first
 
 # Notebook Scheduler
 # ---------------------------------------
@@ -26,9 +25,11 @@ def create_app(config=Config):
     """Create app."""
     app = Flask(__name__)
     app.config.from_object(config)
-    # db.init_app(app)
-    app.app_context().push()
-    current_app.logger.debug('created the Flask App and pushed the App Context')
+
+    # Configure Structured Logging
+    structured_logger = StructuredLogging()
+    structured_logger.init_app(app)
+    app.logger = structured_logger.get_logger()
 
     return app
 
@@ -44,7 +45,7 @@ def processnotebooks(notebookdirectory, data_dir):
     """Process data."""
     status = False
 
-    logging.info('Start processing directory: %s', notebookdirectory)
+    current_app.logger.info('Start processing directory: %s', notebookdirectory)
 
     try:
         pm.execute_notebook(os.path.join(notebookdirectory, 'generate_files.ipynb'),
@@ -55,12 +56,18 @@ def processnotebooks(notebookdirectory, data_dir):
 
         status = True
     except Exception as e:  # noqa: B902
-        logging.exception('Error processing notebook %s.', notebookdirectory)
+        current_app.logger.error(
+            "Error processing notebook %s. Traceback:\n%s",
+            notebookdirectory,
+            traceback.format_exc()
+        )
         EmailService.send_email_to_notify_api(notebookdirectory, str(e))
     return status
 
 
 if __name__ == '__main__':
+    app = create_app(Config)
+    app.app_context().push()
     start_time = datetime.utcnow()
 
     temp_dir = os.path.join(os.getcwd(), r'sftp_nuans_report/data/')
@@ -71,5 +78,5 @@ if __name__ == '__main__':
     # shutil.rmtree(temp_dir)
 
     end_time = datetime.utcnow()
-    logging.info('job - jupyter notebook report completed in: %s', end_time - start_time)
+    current_app.logger.info('job - jupyter notebook report completed in: %s', end_time - start_time)
     sys.exit()

@@ -1,6 +1,5 @@
 """s2i based launch script to run the notebook."""
 import fnmatch
-import logging
 import os
 import sys
 import traceback
@@ -10,11 +9,8 @@ import papermill as pm
 from flask import Flask, current_app
 
 from config import Config
-from util.logging import setup_logging
 from util.email import send_email_notification
-
-setup_logging(os.path.join(os.path.abspath(os.path.dirname(
-    __file__)), 'logging.conf'))  # important to do this first
+from structured_logging import StructuredLogging
 
 # Notebook Scheduler
 # ---------------------------------------
@@ -26,9 +22,11 @@ def create_app(config=Config):
     """create_app."""
     app = Flask(__name__)
     app.config.from_object(config)
-    app.app_context().push()
-    current_app.logger.debug(
-        'created the Flask App and pushed the App Context')
+
+    # Configure Structured Logging
+    structured_logger = StructuredLogging()
+    structured_logger.init_app(app)
+    app.logger = structured_logger.get_logger()
 
     return app
 
@@ -65,14 +63,16 @@ def send_email(emailtype, errormessage):
         message = 'Please see the attachment(s).'
         attatchments = [(os.path.join(os.getcwd(), r'nr_duplicates_report/data/')+filename)]
 
-    logging.info('Email recipients list is: %s', email_list)
+    current_app.logger.info('Email recipients list is: %s', email_list)
     send_email_notification(email_list, subject, message, attatchments)
 
 
 def processnotebooks(notebookdirectory, data_dir):
     """Process Notebook."""
+    app = create_app(Config)
+    app.app_context().push()
     status = False
-    logging.info('NR Duploicates Report start processing directory: %s',
+    current_app.logger.info('NR Duploicates Report start processing directory: %s',
                  notebookdirectory)
     try:
         pm.execute_notebook(os.path.join(notebookdirectory, 'nr-duplicates.ipynb'),
@@ -83,8 +83,11 @@ def processnotebooks(notebookdirectory, data_dir):
         os.remove(data_dir+'temp.ipynb')
         status = True
     except Exception as e:  # noqa: B902
-        logging.exception(
-            'NR Duplicates Report Error processing %s.', notebookdirectory)
+        current_app.logger.error(
+            'NR Duplicates Report Error processing %s. Traceback:\n%s',
+            notebookdirectory,
+            traceback.format_exc()
+        )
         send_email('ERROR', f'An error occurred: {str(e)}')
     return status
 
@@ -100,6 +103,6 @@ if __name__ == '__main__':
     # shutil.rmtree(temp_dir)
 
     end_time = datetime.utcnow()
-    logging.info('job - jupyter notebook report completed in: %s',
+    current_app.logger.info('job - jupyter notebook report completed in: %s',
                  end_time - start_time)
     sys.exit()

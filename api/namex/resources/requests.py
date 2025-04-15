@@ -13,7 +13,6 @@ from marshmallow import ValidationError
 
 from namex.constants import DATE_TIME_FORMAT_SQL
 from namex.models.request import RequestsAuthSearchSchema
-from namex.utils.logging import setup_logging
 
 from sqlalchemy.orm import load_only, lazyload, eagerload
 from sqlalchemy.orm.exc import NoResultFound
@@ -42,8 +41,6 @@ from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANAL
 from namex.utils import queue_util
 from .utils import DateUtils
 
-
-setup_logging()  # Important to do this first
 
 # Register a local namespace for the requests
 api = Namespace('namexRequests', description='Namex - Requests API')

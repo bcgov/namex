@@ -8,6 +8,7 @@ packages = [{include = "synonyms"}]
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
+structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging" }
 flask-migrate = "^2.7.0"
 flask-sqlalchemy = "^3.0.0"
 flask-script = "^2.0.6"

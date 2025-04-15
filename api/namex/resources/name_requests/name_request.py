@@ -16,15 +16,12 @@ from namex.services.payment.payments import get_payment, refund_payment
 from namex.services.statistics.wait_time_statistics import WaitTimeStatsService
 from namex.utils.api_resource import handle_exception
 from namex.utils.auth import cors_preflight, full_access_to_name_request
-from namex.utils.logging import setup_logging
 from namex.utils.queue_util import publish_email_notification
 
 from .api_models import nr_request
 from .api_namespace import api
 from .base_nr_resource import BaseNameRequestResource
 from .constants import contact_editable_states, request_editable_states
-
-setup_logging()  # Important to do this first
 
 MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'
@@ -76,7 +73,7 @@ class NameRequestResource(BaseNameRequestResource):
                     response_data['actions'] = get_nr_state_actions(nr_model.stateCd, nr_model)
                     return make_response(jsonify(response_data), 200)
         except Exception as err:
-            current_app.logger.debug(repr(err))
+            current_app.logger.error(repr(err))
             return handle_exception(err, 'Error retrieving the NR.', 500)
 
     # REST Method Handlers

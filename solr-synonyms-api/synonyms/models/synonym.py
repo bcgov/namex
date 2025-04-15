@@ -1,5 +1,6 @@
 from . import db, ma
 
+from flask import current_app
 from sqlalchemy import and_
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 
@@ -37,7 +38,7 @@ class Synonym(db.Model):
     '''
     @classmethod
     def find(cls, term, col):
-        print('finding {} for {}'.format(col, term))
+        current_app.logger.debug('finding {} for {}'.format(col, term))
         synonyms_list = []
         term = term.lower()
         if col == 'synonyms_text':

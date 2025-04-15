@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import re
+import traceback
 from sqlalchemy import func
 
 from flask import request, jsonify, current_app, make_response
 from flask_restx import cors
 
-from namex.utils.logging import setup_logging
 from namex.utils.auth import cors_preflight, full_access_to_name_request
 from namex.utils.api_resource import handle_exception
 
@@ -37,7 +37,6 @@ from .api_models import nr_request
 from .base_nr_resource import BaseNameRequestResource
 from .utils import parse_nr_num
 
-setup_logging()  # Important to do this first
 
 @cors_preflight('GET, POST')
 @api.route('/', strict_slashes=False, methods=['GET', 'POST', 'OPTIONS'])
@@ -191,8 +190,8 @@ class NameRequestsResource(BaseNameRequestResource):
             response_data['actions'] = nr_svc.current_state_actions
             return make_response(jsonify(response_data), 201)
         except NameRequestException as err:
-            current_app.logger.exception("NameRequestException occurred:")
+            current_app.logger.error("NameRequestException occurred: %s", traceback.format_exc())
             return handle_exception(err, err.message, 500)
         except Exception as err: # pylint: disable=broad-except
-            current_app.logger.exception("Unexpected exception occurred:")
+            current_app.logger.error("NameRequestException occurred: %s", traceback.format_exc())
             return handle_exception(err, repr(err), 500)

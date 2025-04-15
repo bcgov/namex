@@ -9,11 +9,8 @@ from namex.models.request import Request
 
 from namex.utils.api_resource import handle_exception
 from namex.utils.auth import MSG_CLIENT_CREDENTIALS_REQ_FAILED, cors_preflight
-from namex.utils.logging import setup_logging
 from .utils import EntityUtils
 
-
-setup_logging()  # Important to do this first
 
 MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'

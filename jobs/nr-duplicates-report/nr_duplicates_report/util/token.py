@@ -1,5 +1,6 @@
 import requests
-import logging
+import traceback
+from flask import current_app
 from cachetools import TTLCache, cached
 from config import Config
 
@@ -22,5 +23,5 @@ def get_bearer_token():
     try:
         return res.json().get("access_token")
     except Exception:
-        logging.exception(f"Error getting Bearer Token.")
+        current_app.logger.error("Error getting Bearer Token. Traceback:\n%s", traceback.format_exc())
         return None

@@ -1,7 +1,8 @@
 import base64
 import os
-import logging
 import requests
+import traceback
+from flask import current_app
 from config import Config
 from http import HTTPStatus
 from util.token import get_bearer_token
@@ -19,7 +20,11 @@ def process_attachments(attachments: list[str]) -> list:
                 "attachOrder": order
             })
         except Exception:
-            logging.exception(f"Failed to process attachment {file_path}")
+            current_app.logger.error(
+                "Failed to process attachment %s. Traceback:\n%s",
+                file_path,
+                traceback.format_exc()
+            )
             raise
     return processed_attachments
 
@@ -27,7 +32,7 @@ def process_attachments(attachments: list[str]) -> list:
 def send_email_notification(recipients: list[str], subject: str, body: str, attachments: list[str]):
     """Sends an email notification via the Notify API with file attachments."""
     if not recipients:
-        logging.error("No recipients found in the configuration.")
+        current_app.logger.error("No recipients found in the configuration.")
         raise ValueError("Email recipients are not defined. Please check the configuration.")
 
     processed_attachments = process_attachments(attachments)
@@ -40,7 +45,7 @@ def send_email_notification(recipients: list[str], subject: str, body: str, atta
                 "attachments": processed_attachments,
             },
         }
-        logging.info(f"Send Email: {email_data}")
+        current_app.logger.info(f"Send Email: {email_data}")
         resp = requests.post(
             Config.NOTIFY_API_URL,
             json=email_data,
@@ -51,9 +56,9 @@ def send_email_notification(recipients: list[str], subject: str, body: str, atta
         )
 
         if resp.status_code == HTTPStatus.OK:
-            logging.info(f"Email with subject '{subject}' sent successfully to: {recipient}")
+            current_app.logger.info(f"Email with subject '{subject}' sent successfully to: {recipient}")
         else:
-            logging.error(
+            current_app.logger.error(
                 f"Failed to send email with subject '{subject}' to {recipient}. "
                 f"Response code: {resp.status_code}, Response text: {resp.text}"
             )

@@ -11,10 +11,9 @@ import config
 from synonyms import models
 from synonyms.endpoints import api
 from synonyms.models import db, ma
-from synonyms.utils.logging import setup_logging
 from synonyms.utils.run_version import get_run_version
+from structured_logging import StructuredLogging
 
-setup_logging()
 jwt = JwtManager()
 run_version = get_run_version()
 
@@ -23,6 +22,11 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     """Create app."""
     app = flask.Flask(__name__)
     app.config.from_object(config.CONFIGURATION[run_mode])
+
+    # Configure Structured Logging
+    structured_logger = StructuredLogging()
+    structured_logger.init_app(app)
+    app.logger = structured_logger.get_logger()
 
     db.init_app(app)
     ma.init_app(app)

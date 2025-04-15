@@ -1,5 +1,4 @@
-
-import logging
+from flask import current_app
 import os
 import re
 
@@ -32,4 +31,4 @@ def _core_reload_callback(session, response) -> None:
     query_time = response.json()['responseHeader']['QTime']
 
     # Provide some debugging info on how long it takes for a core reload.
-    logging.debug('Reloaded %s in %sms', core_name, query_time)
+    current_app.logger.debug('Reloaded %s in %sms', core_name, query_time)
