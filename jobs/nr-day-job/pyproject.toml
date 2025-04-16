@@ -9,9 +9,9 @@ license = "Apache Software License Version 2.0"
 python = ">=3.12,<3.13"
 namex = { git = "https://github.com/bcgov/namex.git", subdirectory = "api", rev = "main"}
 gcp_queue = { git = "https://github.com/bcgov/namex.git", subdirectory = "services/pubsub" }
-# flask-jwt-oidc = { git = "https://github.com/thorwolpert/flask-jwt-oidc.git" }
 flask-jwt-oidc = { git = "https://github.com/seeker25/flask-jwt-oidc.git" }
 sbc-common-components = { git = "https://github.com/bcgov/sbc-common-components.git", subdirectory = "python" }
+structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", rev = "7f1cc0ea4a374310ac558ff435fa6b7ea7bb2f8b", subdirectory = "python/structured-logging" }
 
 flask = "^3.0.2"
 flask-moment = "^0.11.0"

@@ -1,27 +1,28 @@
 """Script used to regularly update INPROGRESS NRs."""
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import Flask, current_app
+from structured_logging import StructuredLogging
 from namex.models import Event, Request, State, User, db
 from namex.services import EventRecorder, queue
-from namex.utils.logging import setup_logging
 from sqlalchemy import text
 
 from config import Config
-
-
-setup_logging()  # important to do this first
 
 
 def create_app(config=Config):
     """Create instance of app."""
     app = Flask(__name__)
     app.config.from_object(config)
+
+    # Configure Structured Logging
+    structured_logger = StructuredLogging()
+    structured_logger.init_app(app)
+    app.logger = structured_logger.get_logger()
+
     queue.init_app(app)
     db.init_app(app)
-    app.app_context().push()
-    current_app.logger.debug('created the Flask App and pushed the App Context')
 
     return app
 
@@ -99,9 +100,10 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
 if __name__ == '__main__':
     NRO_SERVICE_ACCOUNT = 'NRO_SERVICE_ACCOUNT'
     _app = create_app(Config)
+    _app.app_context().push()
     _client_delay, _examine_delay, _max_rows = get_ops_params()
 
-    start_time = datetime.utcnow()
+    start_time = datetime.now(timezone.utc)
 
     _user = User.find_by_username(current_app.config[NRO_SERVICE_ACCOUNT])
     if not _user:
@@ -110,7 +112,7 @@ if __name__ == '__main__':
 
     _row_count, success = inprogress_update(_user, _max_rows, _client_delay, _examine_delay)
     _app.do_teardown_appcontext()
-    end_time = datetime.utcnow()
+    end_time = datetime.now(timezone.utc)
     if success:
         current_app.logger.debug(f'Requests processed: {_row_count} completed in:{end_time-start_time}')
     else:

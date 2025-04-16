@@ -1699,6 +1699,7 @@ sentry-sdk = "^1.20.0"
 simple_cloudevent = {git = "https://github.com/daxiom/simple-cloudevent.py"}
 six = "^1.16.0"
 SQLAlchemy = "^1.4.18"
+structured_logging = {git = "https://github.com/bcgov/sbc-connect-common.git", rev = "7f1cc0ea4a374310ac558ff435fa6b7ea7bb2f8b"}
 swagger_client = {git = "https://github.com/bcgov/namex-synonyms-api-py-client.git"}
 toolz = "^0.12.0"
 tqdm = "^4.64.1"
@@ -1712,9 +1713,8 @@ zipp = "^3.8.1"
 type = "git"
 url = "https://github.com/bcgov/namex.git"
 reference = "HEAD"
-resolved_reference = "f20f060aea4f4b173867605f01a3b27096d09968"
+resolved_reference = "7d67e94366a868272790b9e4514b516a86038369"
 subdirectory = "api"
-
 [[package]]
 name = "nltk"
 version = "3.9.1"
@@ -3306,4 +3306,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.12,<3.13"
-content-hash = "8a52b572274632a68eac125665bf9e59f462bf0ee72863f29230c6ecf506d6c3"
+content-hash = "9a8de6d31c68f6a2dfa44b817199ba81da3f4200eef08ba580547ef02c423796"

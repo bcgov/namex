@@ -22,9 +22,9 @@ from namex.services import queue, EventRecorder
 from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent
 from sqlalchemy import text
+from structured_logging import StructuredLogging
 
 import config
-from utils.logging import setup_logging
 
 APP_CONFIG = config.get_named_config(os.getenv('FLASK_ENV', 'production'))
 
@@ -33,6 +33,11 @@ def create_app():
     """Return a configured Flask App using the Factory method."""
     app = Flask(__name__)
     app.config.from_object(APP_CONFIG)
+
+    # Configure Structured Logging
+    structured_logger = StructuredLogging()
+    structured_logger.init_app(app)
+    app.logger = structured_logger.get_logger()
 
     queue.init_app(app)
     db.init_app(app)
@@ -127,9 +132,6 @@ def notify_nr_expired():
 
 
 if __name__ == '__main__':
-    setup_logging(
-        os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.conf'))
-
     application = create_app()
     with application.app_context():
         notify_nr_expired()

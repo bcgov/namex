@@ -20,3 +20,4 @@ python-dotenv = "0.21.0"
 cachetools = "^5.5.1"
 requests = "^2.32.3"
 namex = { git = "https://github.com/bcgov/namex.git", subdirectory = "api", rev = "main"}
+structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", rev = "7f1cc0ea4a374310ac558ff435fa6b7ea7bb2f8b", subdirectory = "python/structured-logging" }
