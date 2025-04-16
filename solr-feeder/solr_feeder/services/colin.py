@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Manages colin-api interactions."""
-import logging
 from http import HTTPStatus
 
 import requests
@@ -26,8 +25,8 @@ FIRM_LEGAL_TYPES = ['SP', 'GP', 'LP', 'XP', 'LL', 'XL', 'MF']
 def _parse_party(party: dict, legal_type: str):
     """Return the party information with parsed data expected by the apis."""
     officer = {'id': party.get('id')}
-    if party['officer'].get('orgName'):
-        officer['organizationName'] = party['officer']['orgName']
+    if org_name := party['officer'].get('organizationName'):
+        officer['organizationName'] = org_name
         officer['partyType'] = 'organization'
     else:
         officer['firstName'] = party['officer']['firstName']
