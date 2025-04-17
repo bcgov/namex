@@ -34,7 +34,7 @@ from namex.services import flags
 # noqa: I003; dont know what flake8 wants here
 
 run_version = get_run_version()
-
+# TEST CHANGING APPLICATION CODE TO BREAK CHECKSUM AND SEE HOW LONG BUILD TAKES
 
 def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     """Create app."""
