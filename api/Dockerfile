@@ -59,8 +59,14 @@ RUN groupadd -g "${GID}" -r web \
   && useradd -d '/code' -g web -l -r -u "${UID}" web \
   && chown web:web -R '/code'
 
-# Copy only requirements, to cache them in docker layer
-COPY --chown=web:web ./poetry.lock ./pyproject.toml /code/
+# Copy requirements and static config, to cache deps + config in one layer
+COPY --chown=web:web \
+     ./poetry.lock \
+     ./pyproject.toml \
+     ./config.py \
+     ./gunicorn_config.py \
+     ./wsgi.py \
+     /code/
 
 # Project initialization:
 RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
