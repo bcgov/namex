@@ -1,15 +1,6 @@
+# ─── 1. Base + static installs ────────────────────────────────────────────────
 FROM python:3.12-slim AS development_build
-
 USER root
-
-ARG VCS_REF="missing"
-ARG BUILD_DATE="missing"
-
-ENV VCS_REF=${VCS_REF}
-ENV BUILD_DATE=${BUILD_DATE}
-
-LABEL org.label-schema.vcs-ref=${VCS_REF} \
-    org.label-schema.build-date=${BUILD_DATE}
 
 ARG APP_ENV \
   # Needed for fixing permissions of files created by Docker:
@@ -36,6 +27,7 @@ ENV APP_ENV=${APP_ENV} \
 
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
+# 1.1 Install OS deps + Poetry
 RUN apt-get update && apt-get upgrade -y \
   && apt-get install --no-install-recommends -y \
     bash \
@@ -52,23 +44,20 @@ RUN apt-get update && apt-get upgrade -y \
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-
 WORKDIR /code
 
+# 1.2 Create non‑root user
 RUN groupadd -g "${GID}" -r web \
   && useradd -d '/code' -g web -l -r -u "${UID}" web \
   && chown web:web -R '/code'
 
-# Copy requirements and static config, to cache deps + config in one layer
+
+# ─── 2. Copy static files + install deps ─────────────────────────────────────
 COPY --chown=web:web \
-     ./poetry.lock \
-     ./pyproject.toml \
-     ./config.py \
-     ./gunicorn_config.py \
-     ./wsgi.py \
+     poetry.lock pyproject.toml \
+     config.py gunicorn_config.py wsgi.py \
      /code/
 
-# Project initialization:
 RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
   echo "$APP_ENV" \
   && poetry version \
@@ -78,14 +67,24 @@ RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
     $(if [ -z ${APP_ENV+x} ] | [ "$APP_ENV" = 'production' ]; then echo '--only main'; fi) \
     --no-interaction --no-ansi
 
-# Copy application code
-COPY --chown=web:web ./namex /code/namex
 
-# Running as non-root user:
+# ─── 3. Copy application code ────────────────────────────────────────────────
+COPY --chown=web:web ./namex /code/namex
 USER web
 
-# Run the server
+
+# ─── 4. Final production image ───────────────────────────────────────────────
 FROM development_build AS production_build
+
+# 4.1 Inject dynamic metadata
+ARG VCS_REF="missing"
+ARG BUILD_DATE="missing"
+LABEL org.label-schema.vcs-ref=${VCS_REF} \
+      org.label-schema.build-date=${BUILD_DATE}
+ENV VCS_REF=${VCS_REF} \
+    BUILD_DATE=${BUILD_DATE}
+
+# 4.2 Runtime settings
 ENV PYTHONPATH=/code
 EXPOSE 8080
 CMD gunicorn --bind 0.0.0.0:8080 --config /code/gunicorn_config.py wsgi:app
