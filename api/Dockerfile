@@ -1,5 +1,6 @@
-# platform=linux/amd64
-FROM python:3.12.2
+FROM python:3.12-slim AS development_build
+
+USER root
 
 ARG VCS_REF="missing"
 ARG BUILD_DATE="missing"
@@ -9,8 +10,6 @@ ENV BUILD_DATE=${BUILD_DATE}
 
 LABEL org.label-schema.vcs-ref=${VCS_REF} \
     org.label-schema.build-date=${BUILD_DATE}
-
-USER root
 
 ARG APP_ENV \
   # Needed for fixing permissions of files created by Docker:
@@ -63,28 +62,24 @@ RUN groupadd -g "${GID}" -r web \
 # Copy only requirements, to cache them in docker layer
 COPY --chown=web:web ./poetry.lock ./pyproject.toml /code/
 
-COPY --chown=web:web ./namex /code/namex
-COPY --chown=web:web ./README.md /code
-
 # Project initialization:
 RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
   echo "$APP_ENV" \
   && poetry version \
   # Install deps:
-  && poetry run pip install -U pip \
+  && poetry run pip install -U pip setuptools \
   && poetry install \
     $(if [ -z ${APP_ENV+x} ] | [ "$APP_ENV" = 'production' ]; then echo '--only main'; fi) \
     --no-interaction --no-ansi
 
+# Copy application code
+COPY --chown=web:web ./namex /code/namex
+
 # Running as non-root user:
 USER web
 
-# The following stage is only for production:
-# FROM development_build AS production_build
-COPY --chown=web:web . /code
-
 # Run the server
+FROM development_build AS production_build
 ENV PYTHONPATH=/code
 EXPOSE 8080
-
 CMD gunicorn --bind 0.0.0.0:8080 --config /code/gunicorn_config.py wsgi:app
