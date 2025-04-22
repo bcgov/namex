@@ -485,11 +485,23 @@ class RequestSearch(Resource):
     def post():
         search = request.get_json()
         identifiers = search.get('identifiers', [])
+        nr_name = search.get('name', None)
+        state = search.get('state', [])
 
         # Only names and applicants are needed for this query, we want this query to be lighting fast
         # to prevent putting a load on namex-api.
-        q = RequestDAO.query.filter(RequestDAO.nrNum.in_(identifiers)) \
-            .options(
+        # Base query with the common identifier filter
+        q = RequestDAO.query.filter(RequestDAO.nrNum.in_(identifiers))
+
+        # Add the state filter if 'state' is provided
+        if state:
+            q = q.filter(RequestDAO.stateCd.in_(state))
+
+        # Add the nr_name filter if 'nr_name' is provided
+        if nr_name:
+            q = q.filter(RequestDAO.nameSearch.ilike(f'%{nr_name}%'))
+            
+        q = q.options(
                 lazyload('*'),
                 eagerload(RequestDAO.names).load_only(Name.state, Name.name),
                 eagerload(RequestDAO.applicants).load_only(
