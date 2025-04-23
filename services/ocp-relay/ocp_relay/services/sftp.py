@@ -31,20 +31,15 @@ class SftpHandler:
             with gzip.GzipFile(fileobj=BytesIO(gz_data)) as gz_file:
                 decompressed_data = gz_file.read()
 
-            # Derive the remote filename by stripping the '.gz' extension.
-            original_filename = gz_archive.filename
-            if original_filename.lower().endswith(".gz"):
-                remote_filename = original_filename[:-3]
-            else:
-                remote_filename = original_filename
+            # Derive the remote filename.
+            remote_filename = gz_archive.filename
             logging.info("Processing file %s from gz archive.", remote_filename)
 
             # Upload the decompressed data to the SFTP server.
             with cls.get_connection() as sftp_client:
                 # Create a BytesIO stream for the decompressed data.
                 file_obj = BytesIO(decompressed_data)
-                remote_path = remote_filename
-                sftp_client.putfo(file_obj, remote_path)
+                sftp_client.putfo(file_obj, remote_filename)
                 logging.info("SFTP upload completed for file: %s", remote_filename)
         except Exception as e:
             logging.error("Error processing gz file: %s", e)
