@@ -491,7 +491,6 @@ class RequestSearch(Resource):
         page = search.get('page', 1)
         limit = search.get('limit', 100)
 
-       
         try:
             page = int(page)
             limit = int(limit)
