@@ -1,12 +1,11 @@
-from flask import request, make_response, jsonify
-from flask_restx import Resource, cors, fields
+from flask import jsonify, make_response, request
 from flask_jwt_oidc import AuthError
+from flask_restx import Resource, fields
 
-from namex.utils.auth import cors_preflight
+from namex.services.payment.exceptions import PaymentServiceError, SBCPaymentError, SBCPaymentException
+from namex.services.payment.fees import CalculateFeesRequest, calculate_fees
 from namex.utils.api_resource import handle_exception
-
-from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
-from namex.services.payment.fees import calculate_fees, CalculateFeesRequest
+from namex.utils.auth import cors_preflight
 
 from .api_namespace import api as payment_api
 

@@ -1,13 +1,15 @@
 import copy
-from flask import request, jsonify, current_app, make_response
+
+from flask import current_app, jsonify, make_response, request
 from flask_restx import Namespace, cors
-from namex.resources.name_requests.abstract_nr_resource import AbstractNameRequestResource
 from sqlalchemy.orm.exc import NoResultFound
 
 from namex import jwt
-from namex.models import State, PaymentSociety as PaymentSocietyDAO, Request as RequestDAO, User
+from namex.models import PaymentSociety as PaymentSocietyDAO
+from namex.models import Request as RequestDAO
+from namex.models import State, User
+from namex.resources.name_requests.abstract_nr_resource import AbstractNameRequestResource
 from namex.utils.auth import cors_preflight
-
 
 # Register a local namespace for the payment_society
 api = Namespace('payment_society', description='Store data for society from home legancy app')
@@ -25,7 +27,7 @@ class PaymentSocietiesSearch(AbstractNameRequestResource):
             nrd = RequestDAO.query.filter_by(nrNum=nr).first()
             if not nrd:
                 return make_response(jsonify({'message': 'Request: {} not found in requests table'.format(nr)}), 404)
-        except NoResultFound as nrf:
+        except NoResultFound:
             # not an error we need to track in the log
             return make_response(jsonify({'message': 'Request: {} not found in requests table'.format(nr)}), 404)
         except Exception as err:
@@ -100,7 +102,7 @@ class PaymentSocieties(AbstractNameRequestResource):
             # replacing temp NR number to a formal NR number if needed.
             nrd = self.add_new_nr_number(nrd, False)
             current_app.logger.debug(f'Formal NR nubmer is: {nrd.nrNum}')
-        except NoResultFound as nrf:
+        except NoResultFound:
             # not an error we need to track in the log
             return make_response(jsonify({'message': 'Request: {} not found'.format(nr_num)}), 404)
         except Exception as err:
@@ -123,11 +125,11 @@ class PaymentSocieties(AbstractNameRequestResource):
         ps_instance.paymentAction = json_input.get('paymentAction', None)
 
         ps_instance.save_to_db()
-        current_app.logger.debug(f'ps_instance saved...')
+        current_app.logger.debug('ps_instance saved...')
 
         if nrd.stateCd == State.PENDING_PAYMENT:
             nrd.stateCd = 'DRAFT'
         nrd.save_to_db()
-        current_app.logger.debug(f'nrd saved...')
+        current_app.logger.debug('nrd saved...')
 
         return make_response(jsonify(ps_instance.json()), 200)

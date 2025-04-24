@@ -1,6 +1,7 @@
+import requests
 from dateutil import parser
 from flask import current_app
-import requests
+
 from namex.exceptions import EntityServiceException
 from namex.utils.auth import get_client_credentials
 

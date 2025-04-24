@@ -1,11 +1,14 @@
-import copy, json
+import copy
+import json
+
 from flask import jsonify, make_response
-from flask_restx import Resource, Namespace
+from flask_restx import Namespace, Resource
 
 from namex import jwt
-from namex.models import Event as EventDAO, Request as RequestDAO, User, State, Payment
+from namex.models import Event as EventDAO
+from namex.models import Payment, State, User
+from namex.models import Request as RequestDAO
 from namex.utils.auth import cors_preflight
-
 
 # Register a local namespace for the event history
 api = Namespace('events', description='Audit trail of events for a Name Request')
@@ -25,7 +28,7 @@ class Events(Resource):
             return make_response(jsonify({'message': 'Request NR:{} not found'.format(nr)}), 404)
 
         event = EventDAO.query.filter_by(nrId=request_id).order_by('id').first_or_404().json()
-        if not 'id' in event:
+        if 'id' not in event:
             return make_response(jsonify({'message': 'No events for NR:{} not found'.format(nr)}), 404)
 
         event_results = EventDAO.query.filter_by(nrId=request_id).order_by('id').all()

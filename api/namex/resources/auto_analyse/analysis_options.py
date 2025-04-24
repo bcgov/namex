@@ -1,5 +1,6 @@
-from .response_objects.setup import Setup
 from string import Template
+
+from .response_objects.setup import Setup
 from .utils import join_list_words
 
 

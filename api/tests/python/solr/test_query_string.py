@@ -2,13 +2,11 @@
 # Pytests for checking the code that produces the more intricate components of the Solr query string.
 #
 import string
-from typing import List
 from urllib import parse
 
 import pytest
 
 from namex.analytics.solr import NO_SYNONYMS_INDICATOR, NO_SYNONYMS_PREFIX, RESERVED_CHARACTERS, SolrQueries
-
 
 compress_name_test_data = [
     ('Waffle Mania', 'wafflemania'),

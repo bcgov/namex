@@ -3,7 +3,6 @@ from sqlalchemy.sql.expression import false, true
 
 from namex.criteria.virtual_word_condition.query_criteria import VirtualWordConditionCriteria
 from namex.models import VirtualWordCondition
-
 from namex.utils.common import flatten_tuple_results
 
 

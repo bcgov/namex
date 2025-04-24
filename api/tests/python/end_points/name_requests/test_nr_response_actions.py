@@ -5,12 +5,11 @@ Integration tests for Name Request state transitions.
 import datetime
 import json
 
+from namex.constants import NameRequestActions
+from namex.models import State
 from tests.python.common.test_name_request_utils import assert_field_is_mapped, assert_list_contains_exactly
 
 from .test_setup_utils.test_helpers import create_test_nr, get_nr
-
-from namex.models import State
-from namex.constants import NameRequestActions
 
 
 # Define our data

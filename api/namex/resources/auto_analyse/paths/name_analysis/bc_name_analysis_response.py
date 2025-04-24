@@ -1,47 +1,71 @@
-from ... import QueueNameConflictIssue
-from ...analysis_response import AnalysisResponse
-
-from .issues import (
-    BcCheckIsValidIssue as CheckIsValidIssue,
-    BcAddDistinctiveWordIssue as AddDistinctiveWordIssue,
-    BcAddDescriptiveWordIssue as AddDescriptiveWordIssue,
-    BcContainsWordsToAvoidIssue as ContainsWordsToAvoidIssue,
-    BcDesignationMismatchIssue as DesignationMismatchIssue,
-    BcTooManyWordsIssue as TooManyWordsIssue,
-    BcNameRequiresConsentIssue as NameRequiresConsentIssue,
-    BcContainsUnclassifiableWordIssue as ContainsUnclassifiableWordIssue,
-    BcCorporateNameConflictIssue as CorporateNameConflictIssue,
-    BcIncorrectCategoryIssue as IncorrectCategoryIssue,
-    BcWordSpecialUseIssue as WordSpecialUseIssue,
-    BcEndDesignationMoreThanOnceIssue as EndDesignationMoreThanOnceIssue,
-    BcDesignationMisplacedIssue as DesignationMisplacedIssue,
-    BcDesignationNonExistentIssue as DesignationNonExistentIssue,
-    BcIncorrectYearIssue as IncorrectYearIssue,
-)
-
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
+from ... import QueueNameConflictIssue
 from ...analysis_options import (
-    add_distinctive_setup,
     add_descriptive_setup,
-    too_many_words_setup,
-    remove_setup,
+    add_designation_setup,
+    add_distinctive_setup,
+    change_designation_order_setup,
+    change_entity_type_setup,
+    conflict_self_consent_setup,
+    obtain_consent_setup,
+    remove_designation_setup,
     remove_or_replace_setup,
+    remove_setup,
+    replace_designation_setup,
     resolve_conflict_setup,
     send_to_examiner_setup,
-    obtain_consent_setup,
-    conflict_self_consent_setup,
-    replace_designation_setup,
-    change_entity_type_setup,
-    change_designation_order_setup,
-    add_designation_setup,
-    two_designations_order_setup,
-    remove_designation_setup,
+    too_many_words_setup,
 )
-
+from ...analysis_response import AnalysisResponse
 
 # Execute analysis returns a response strategy code
 from ...issues.designation_removal import DesignationRemovalIssue
+from .issues import (
+    BcAddDescriptiveWordIssue as AddDescriptiveWordIssue,
+)
+from .issues import (
+    BcAddDistinctiveWordIssue as AddDistinctiveWordIssue,
+)
+from .issues import (
+    BcCheckIsValidIssue as CheckIsValidIssue,
+)
+from .issues import (
+    BcContainsUnclassifiableWordIssue as ContainsUnclassifiableWordIssue,
+)
+from .issues import (
+    BcContainsWordsToAvoidIssue as ContainsWordsToAvoidIssue,
+)
+from .issues import (
+    BcCorporateNameConflictIssue as CorporateNameConflictIssue,
+)
+from .issues import (
+    BcDesignationMismatchIssue as DesignationMismatchIssue,
+)
+from .issues import (
+    BcDesignationMisplacedIssue as DesignationMisplacedIssue,
+)
+from .issues import (
+    BcDesignationNonExistentIssue as DesignationNonExistentIssue,
+)
+from .issues import (
+    BcEndDesignationMoreThanOnceIssue as EndDesignationMoreThanOnceIssue,
+)
+from .issues import (
+    BcIncorrectCategoryIssue as IncorrectCategoryIssue,
+)
+from .issues import (
+    BcIncorrectYearIssue as IncorrectYearIssue,
+)
+from .issues import (
+    BcNameRequiresConsentIssue as NameRequiresConsentIssue,
+)
+from .issues import (
+    BcTooManyWordsIssue as TooManyWordsIssue,
+)
+from .issues import (
+    BcWordSpecialUseIssue as WordSpecialUseIssue,
+)
 
 
 def response_issues(issue_code):

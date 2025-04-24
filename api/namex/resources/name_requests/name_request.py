@@ -2,16 +2,19 @@ from datetime import datetime
 from uuid import uuid4
 
 import requests
-from flask import current_app, jsonify, request, make_response
+from flask import current_app, jsonify, make_response, request
 
-from namex import jwt, db
+from namex import db, jwt
 from namex.constants import NameRequestPatchActions, NameRequestRollbackActions, PaymentState
 from namex.models import Event, Payment, Request, State, User
 from namex.services import EventRecorder
 from namex.services.name_request.exceptions import InvalidInputError, NameRequestException, NameRequestIsInProgressError
-from namex.services.name_request.name_request_state import get_nr_state_actions
+from namex.services.name_request.name_request_state import (
+    get_nr_state_actions,
+    is_name_request_refundable,
+    is_request_editable,
+)
 from namex.services.name_request.utils import get_mapped_entity_and_action_code
-from namex.services.name_request.name_request_state import is_request_editable, is_name_request_refundable
 from namex.services.payment.payments import get_payment, refund_payment
 from namex.services.statistics.wait_time_statistics import WaitTimeStatsService
 from namex.utils.api_resource import handle_exception

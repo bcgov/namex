@@ -1,10 +1,8 @@
 import pysolr
-
 from flask import current_app
 from flask_restx import Resource
 
 from namex.models import State
-
 from namex.services.name_request.exceptions import SolrUpdateError
 
 

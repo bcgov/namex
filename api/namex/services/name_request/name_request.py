@@ -1,31 +1,28 @@
 from datetime import datetime
-from pytz import timezone
 
-from namex.constants import NameState, RequestAction, ExpiryDays
-
-from namex.models import Request, Name, State, Applicant
+from namex.constants import ExpiryDays, NameState, RequestAction
+from namex.models import Applicant, Name, Request, State
 
 from .abstract_name_request import AbstractNameRequestMixin
-from .name_request_state import apply_nr_state_change, get_nr_state_actions
+from .exceptions import (
+    CreateNameRequestError,
+    ExtendExpiryDateError,
+    MapRequestApplicantError,
+    MapRequestDataError,
+    MapRequestNamesError,
+    SaveNameRequestError,
+    UpdateSubmitCountError,
+)
+from .mappers.request_applicants import map_request_applicant
+from .mappers.request_attrs import map_request_attrs
+from .mappers.request_comments import map_request_comments
+from .mappers.request_draft_attrs import map_draft_attrs
 
 # Mapping utils used to map HTTP request data to a Request model
 from .mappers.request_header_attrs import map_request_header_attrs
-from .mappers.request_draft_attrs import map_draft_attrs
-from .mappers.request_attrs import map_request_attrs
-from .mappers.request_applicants import map_request_applicant
-from .mappers.request_comments import map_request_comments
 from .mappers.request_names import map_submitted_name
-
+from .name_request_state import apply_nr_state_change, get_nr_state_actions
 from .utils import get_item_from_list
-from .exceptions import (
-    CreateNameRequestError,
-    SaveNameRequestError,
-    MapRequestDataError,
-    MapRequestApplicantError,
-    MapRequestNamesError,
-    UpdateSubmitCountError,
-    ExtendExpiryDateError,
-)
 
 
 class NameRequestService(AbstractNameRequestMixin):

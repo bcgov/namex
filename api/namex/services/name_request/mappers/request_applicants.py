@@ -1,5 +1,5 @@
-from namex.utils.common import convert_to_ascii
 from namex.models import Applicant
+from namex.utils.common import convert_to_ascii
 
 
 def map_request_applicant(applicant: Applicant, request_applicant: dict):

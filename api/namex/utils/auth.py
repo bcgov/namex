@@ -1,9 +1,9 @@
 import string
 
-from jose import jwt
 import requests
 from flask import Request, current_app
 from flask_jwt_oidc.jwt_manager import JwtManager
+from jose import jwt
 
 from namex.models import Request as RequestDAO
 
@@ -21,7 +21,7 @@ def cors_preflight(methods):
                 },
             )
 
-        setattr(f, 'options', options)
+        f.options = options
         return f
 
     return wrapper

@@ -1,35 +1,35 @@
-from flask import current_app
-import re
 import itertools
-from collections import ChainMap
+import re
 import warnings
+from collections import ChainMap
 
 import requests
-from . import (
-    EXACT_MATCH,
-    HIGH_CONFLICT_RECORDS,
-    HIGH_SIMILARITY,
-    CURRENT_YEAR,
-    LOWER_LIMIT_TIME,
-    UPPER_LIMIT_TIME,
-    EXCEPTION_YEARS,
-    CURRENT_MONTH,
-    CURRENT_DAY,
-)
-from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
-from ..auto_analyse import AnalysisIssueCodes, MAX_LIMIT, MAX_MATCHES_LIMIT, porter
-from ..auto_analyse.name_analysis_utils import (
-    get_conflicts_same_classification,
-    get_all_dict_substitutions,
-    subsequences,
-    remove_double_letters,
-    remove_double_letters_list_dist_words,
-)
+from flask import current_app
 
 from namex.models.request import Request
-
-from namex.utils.common import parse_dict_of_lists, get_plural_singular_name
 from namex.services.name_request.auto_analyse import DataFrameFields
+from namex.utils.common import get_plural_singular_name, parse_dict_of_lists
+
+from ..auto_analyse import MAX_LIMIT, MAX_MATCHES_LIMIT, AnalysisIssueCodes, porter
+from ..auto_analyse.abstract_name_analysis_builder import AbstractNameAnalysisBuilder, ProcedureResult
+from ..auto_analyse.name_analysis_utils import (
+    get_all_dict_substitutions,
+    get_conflicts_same_classification,
+    remove_double_letters,
+    remove_double_letters_list_dist_words,
+    subsequences,
+)
+from . import (
+    CURRENT_DAY,
+    CURRENT_MONTH,
+    CURRENT_YEAR,
+    EXACT_MATCH,
+    EXCEPTION_YEARS,
+    HIGH_CONFLICT_RECORDS,
+    HIGH_SIMILARITY,
+    LOWER_LIMIT_TIME,
+    UPPER_LIMIT_TIME,
+)
 
 WORD = re.compile(r'\w+')
 
@@ -854,6 +854,6 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def get_different_key(self, desc_synonym_dict_delta, desc_synonym_dict):
         diff_key = list()
         for key in desc_synonym_dict.keys():
-            if not key in desc_synonym_dict_delta:
+            if key not in desc_synonym_dict_delta:
                 diff_key.append(key)
         return diff_key

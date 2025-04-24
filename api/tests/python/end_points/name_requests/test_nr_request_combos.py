@@ -1,15 +1,13 @@
-import pytest
 import json
 
+import pytest
+
+from namex.constants import NameRequestActions
 from tests.python.common.test_name_request_utils import (
-    assert_field_is_mapped,
     assert_field_equals_value,
-    assert_field_is_lt_value,
 )
 
 from .test_setup_utils.test_helpers import create_draft_nr, patch_nr
-
-from namex.constants import NameRequestActions
 
 # Define our data
 # Check NR number is the same because these are PATCH and call change_nr

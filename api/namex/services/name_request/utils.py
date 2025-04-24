@@ -1,4 +1,5 @@
 import re
+
 from flask import current_app
 
 from namex import jwt
@@ -7,7 +8,6 @@ from namex.models import State, User
 from namex.services.exceptions import ServicesError
 
 from .exceptions import MapRequestTypeError
-
 
 nr_regex = r'^(NR\ ?L{0,1}|L{0,1})?([\d]{6,8})$'
 

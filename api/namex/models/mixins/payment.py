@@ -1,8 +1,8 @@
-from datetime import date, datetime
+from datetime import datetime
 
 # TODO: We may need this import later
 # from http import HTTPStatus
-from sqlalchemy import desc, event, inspect, or_
+from sqlalchemy import inspect
 from sqlalchemy.ext.hybrid import hybrid_property
 
 COMPLETED_VALUE = None

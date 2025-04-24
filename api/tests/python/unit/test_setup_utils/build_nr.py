@@ -1,4 +1,6 @@
-from namex.models import db, State, Request as RequestDAO, Name as NameDAO
+from namex.models import Name as NameDAO
+from namex.models import Request as RequestDAO
+from namex.models import State, db
 
 default_test_names = [
     {

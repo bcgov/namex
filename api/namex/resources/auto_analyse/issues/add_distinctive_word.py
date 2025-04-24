@@ -2,10 +2,10 @@ from string import Template
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
+from ..response_objects import NameAction, NameActions, NameAnalysisIssue, WordPositions
+
 # Import DTOs
 from .abstract import AnalysisResponseIssue
-from ..response_objects import NameAnalysisIssue
-from ..response_objects import NameAction, NameActions, WordPositions
 
 
 class AddDistinctiveWordIssue(AnalysisResponseIssue):

@@ -1,8 +1,8 @@
 """Name hold a name choice for a Request"""
 
-from . import db, ma
-from sqlalchemy.orm import backref
 from marshmallow import fields
+
+from . import db, ma
 
 
 class Applicant(db.Model):

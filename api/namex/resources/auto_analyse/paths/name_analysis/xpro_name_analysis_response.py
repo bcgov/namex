@@ -1,39 +1,58 @@
-from namex.constants import EntityTypes
-from ... import QueueNameConflictIssue
-from ...analysis_response import AnalysisResponse
-
-from .issues import (
-    XproCheckIsValidIssue as CheckIsValidIssue,
-    XproAddDistinctiveWordIssue as AddDistinctiveWordIssue,
-    XproAddDescriptiveWordIssue as AddDescriptiveWordIssue,
-    XproContainsWordsToAvoidIssue as ContainsWordsToAvoidIssue,
-    XproDesignationMismatchIssue as DesignationMismatchIssue,
-    XproTooManyWordsIssue as TooManyWordsIssue,
-    XproNameRequiresConsentIssue as NameRequiresConsentIssue,
-    XproContainsUnclassifiableWordIssue as ContainsUnclassifiableWordIssue,
-    XproCorporateNameConflictIssue as CorporateNameConflictIssue,
-    XproIncorrectCategoryIssue as IncorrectCategoryIssue,
-    XproWordSpecialUseIssue as WordSpecialUseIssue,
-    XproDesignationMisplacedIssue as DesignationMisplacedIssue,
-    XproDesignationNonExistentIssue as DesignationNonExistentIssue,
-)
-
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
+from ... import QueueNameConflictIssue
 from ...analysis_options import (
-    add_distinctive_setup,
     add_descriptive_setup,
-    too_many_words_setup,
-    remove_setup,
-    remove_or_replace_setup,
-    assumed_name_setup,
-    alternative_assumed_name_setup,
-    send_to_examiner_setup,
-    obtain_consent_setup,
-    replace_designation_setup,
-    change_entity_type_setup,
-    change_designation_order_setup,
     add_designation_setup,
+    add_distinctive_setup,
+    change_designation_order_setup,
+    change_entity_type_setup,
+    obtain_consent_setup,
+    remove_or_replace_setup,
+    remove_setup,
+    replace_designation_setup,
+    send_to_examiner_setup,
+    too_many_words_setup,
+)
+from ...analysis_response import AnalysisResponse
+from .issues import (
+    XproAddDescriptiveWordIssue as AddDescriptiveWordIssue,
+)
+from .issues import (
+    XproAddDistinctiveWordIssue as AddDistinctiveWordIssue,
+)
+from .issues import (
+    XproCheckIsValidIssue as CheckIsValidIssue,
+)
+from .issues import (
+    XproContainsUnclassifiableWordIssue as ContainsUnclassifiableWordIssue,
+)
+from .issues import (
+    XproContainsWordsToAvoidIssue as ContainsWordsToAvoidIssue,
+)
+from .issues import (
+    XproCorporateNameConflictIssue as CorporateNameConflictIssue,
+)
+from .issues import (
+    XproDesignationMismatchIssue as DesignationMismatchIssue,
+)
+from .issues import (
+    XproDesignationMisplacedIssue as DesignationMisplacedIssue,
+)
+from .issues import (
+    XproDesignationNonExistentIssue as DesignationNonExistentIssue,
+)
+from .issues import (
+    XproIncorrectCategoryIssue as IncorrectCategoryIssue,
+)
+from .issues import (
+    XproNameRequiresConsentIssue as NameRequiresConsentIssue,
+)
+from .issues import (
+    XproTooManyWordsIssue as TooManyWordsIssue,
+)
+from .issues import (
+    XproWordSpecialUseIssue as WordSpecialUseIssue,
 )
 
 

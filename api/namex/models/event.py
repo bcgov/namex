@@ -1,17 +1,15 @@
 """Events keep an audit trail of all changes submitted to the datastore"""
 
-from sqlalchemy import and_, func
-
-from . import db
-from namex.exceptions import BusinessException
-from marshmallow import Schema, fields, post_load
 from datetime import datetime
-from sqlalchemy.orm import backref
-from sqlalchemy import cast, Date
-from sqlalchemy.dialects.postgresql import JSONB
-from datetime import datetime, timedelta
 
-from ..constants import EventAction, EventUserId, EventState, RequestState, RequestPriority
+from sqlalchemy import func
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import backref
+
+from namex.exceptions import BusinessException
+
+from ..constants import EventUserId
+from . import db
 
 
 class Event(db.Model):

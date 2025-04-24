@@ -1,12 +1,13 @@
-import pytest
-import jsonpickle
-
 from urllib.parse import quote_plus
 
+import jsonpickle
+import pytest
+
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
-from ..common import save_words_list_classification, assert_has_no_issue_type
+
+from ...common import claims, token_header
+from ..common import assert_has_no_issue_type, save_words_list_classification
 from ..configuration import ENDPOINT_PATH
-from ...common import token_header, claims
 
 
 @pytest.mark.xfail(raises=ValueError)

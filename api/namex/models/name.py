@@ -4,7 +4,6 @@
 from marshmallow import fields
 from sqlalchemy import event
 from sqlalchemy.orm import backref
-from sqlalchemy.orm.attributes import get_history
 
 from namex.models import db, ma
 
@@ -100,10 +99,8 @@ class Name(db.Model):
 @event.listens_for(Name, 'after_update')
 def update_nr_name_search(mapper, connection, target):
     """Add any changes to the name to the request.nameSearch column and publish name state changes where applicable."""
-    from flask.globals import current_app
 
-    from namex.models import Event, Request, State
-    from namex.services.audit_trail.event_recorder import EventRecorder
+    from namex.models import Request
 
     name = target
     nr = Request.find_by_id(name.nrId)

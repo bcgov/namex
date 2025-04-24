@@ -6,8 +6,9 @@ import pytest
 from flask import Request
 from werkzeug.test import EnvironBuilder
 
-from namex.models import Request as RequestDAO, State, User, Applicant
 from namex.constants import ValidSources
+from namex.models import Applicant, State
+from namex.models import Request as RequestDAO
 
 
 @pytest.mark.parametrize(

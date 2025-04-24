@@ -1,20 +1,16 @@
 import re
 import warnings
 
-from datetime import datetime
-
 from flask.globals import current_app
-
-from . import LanguageCodes
-from ..name_request.auto_analyse.mixins.get_designations_lists import GetDesignationsListsMixin
-from ..name_request.auto_analyse.name_analysis_utils import remove_french, remove_stop_words, check_numbers_beginning
-from namex.services.word_classification.word_classification import WordClassificationService
-
-from .mixins.get_synonym_lists import GetSynonymListsMixin
-
 from swagger_client import SynonymsApi as SynonymService
 
+from namex.services.word_classification.word_classification import WordClassificationService
+
+from ..name_request.auto_analyse.mixins.get_designations_lists import GetDesignationsListsMixin
+from ..name_request.auto_analyse.name_analysis_utils import remove_french, remove_stop_words
 from ..virtual_word_condition.virtual_word_condition import VirtualWordConditionService
+from . import LanguageCodes
+from .mixins.get_synonym_lists import GetSynonymListsMixin
 
 """
 Service for pre-processing of a user submitted name request name string.

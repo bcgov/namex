@@ -1,21 +1,22 @@
 from __future__ import annotations
 
 import json
-import pytest
 from contextlib import suppress
 from datetime import datetime, timedelta
 from http import HTTPStatus
 from typing import List
-from namex.analytics.solr import SolrQueries
 
+import pytest
+
+from namex.analytics.solr import SolrQueries
 from namex.models import Applicant, Name, Request, State, User
-from tests.python.end_points.util import create_header
 from tests.python.end_points.common.utils import (
-    get_utc_server_now_with_delta,
     get_server_now_str,
     get_server_now_with_delta_str,
     get_utc_server_now,
+    get_utc_server_now_with_delta,
 )
+from tests.python.end_points.util import create_header
 
 # TODO: import these helper functions from somewhere shared by the tests
 
@@ -81,7 +82,7 @@ def test_namex_search_default(client, jwt, app):
     generate_nrs(14, [], [], [])
 
     # get the resource (this is what we are testing)
-    rv = client.get(f'api/v1/requests', headers=create_header(jwt, [User.EDITOR]))
+    rv = client.get('api/v1/requests', headers=create_header(jwt, [User.EDITOR]))
     data = rv.data
     assert data
     resp = json.loads(data.decode('utf-8'))

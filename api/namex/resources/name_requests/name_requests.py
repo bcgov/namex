@@ -13,30 +13,27 @@
 # limitations under the License.
 import re
 import traceback
+
+from flask import current_app, jsonify, make_response, request
 from sqlalchemy import func
 
-from flask import request, jsonify, current_app, make_response
-from flask_restx import cors
-
-from namex.utils.auth import cors_preflight, full_access_to_name_request
-from namex.utils.api_resource import handle_exception
-
-from namex.models import Request, Event, State, Applicant
 from namex.criteria.request import RequestQueryCriteria
-
+from namex.models import Applicant, Event, Request, State
 from namex.services import EventRecorder
 from namex.services.audit_trail.hotjar_tracking import HotjarTracking
-from namex.services.name_request.name_request_state import get_nr_state_actions
-from namex.services.name_request.utils import get_mapped_entity_and_action_code
 from namex.services.name_request.exceptions import (
-    NameRequestException,
     InvalidInputError,
+    NameRequestException,
     NameRequestIsAlreadySubmittedError,
 )
+from namex.services.name_request.name_request_state import get_nr_state_actions
+from namex.services.name_request.utils import get_mapped_entity_and_action_code
 from namex.services.statistics.wait_time_statistics import WaitTimeStatsService
+from namex.utils.api_resource import handle_exception
+from namex.utils.auth import cors_preflight, full_access_to_name_request
 
-from .api_namespace import api
 from .api_models import nr_request
+from .api_namespace import api
 from .base_nr_resource import BaseNameRequestResource
 from .utils import parse_nr_num
 

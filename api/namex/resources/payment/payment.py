@@ -1,18 +1,17 @@
 import json
-import requests
-from datetime import datetime, timedelta
+from datetime import datetime
 
+import requests
 from dateutil import parser as dateutil_parser
 from flask import current_app, jsonify, make_response, request
 from flask_jwt_oidc import AuthError
-from flask_restx import cors, fields
+from flask_restx import fields
 
 from namex import jwt
 from namex.constants import NameRequestActions, PaymentState, PaymentStatusCode
-from namex.models import Event
+from namex.models import Event, State, User
 from namex.models import Payment as PaymentDAO
 from namex.models import Request as RequestDAO
-from namex.models import State, User
 from namex.resources.name_requests.abstract_nr_resource import AbstractNameRequestResource
 from namex.services import EventRecorder
 from namex.services.name_request.name_request_state import get_nr_state_actions, is_reapplication_eligible
@@ -25,7 +24,6 @@ from namex.utils.auth import cors_preflight, validate_roles
 
 from .api_namespace import api as payment_api
 from .utils import build_payment_request, merge_payment_request
-
 
 MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'

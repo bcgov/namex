@@ -2,7 +2,6 @@
 
 from enum import Enum
 
-from flask import current_app
 from sqlalchemy import event
 from sqlalchemy.orm.attributes import get_history
 

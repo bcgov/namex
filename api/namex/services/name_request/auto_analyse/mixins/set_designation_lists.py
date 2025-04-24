@@ -1,12 +1,9 @@
 from namex.constants import (
     BCProtectedNameEntityTypes,
-    BCUnprotectedNameEntityTypes,
-    EntityTypes,
-    XproUnprotectedNameEntityTypes,
     DesignationPositionCodes,
+    EntityTypes,
     LanguageCodes,
 )
-
 from namex.utils.common import parse_dict_of_lists
 
 

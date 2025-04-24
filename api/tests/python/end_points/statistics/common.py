@@ -9,7 +9,8 @@ num_records = 0
 
 
 def save_names_queue(queue_number_records, priority=False):
-    from namex.models import Request as RequestDAO, State
+    from namex.models import Request as RequestDAO
+    from namex.models import State
 
     num = 0
     global num_records
@@ -29,7 +30,10 @@ def save_names_queue(queue_number_records, priority=False):
 
 
 def save_auto_approved_names(approved_number_records):
-    from namex.models import Event as EventDAO, Request as RequestDAO, User as UserDAO, State
+    from namex.models import Event as EventDAO
+    from namex.models import Request as RequestDAO
+    from namex.models import State
+    from namex.models import User as UserDAO
 
     num = 0
     global num_records
@@ -60,7 +64,9 @@ def save_auto_approved_names(approved_number_records):
 
 
 def save_approved_names_by_examiner(approved_number_records):
-    from namex.models import Request as RequestDAO, State, Event as EventDAO
+    from namex.models import Event as EventDAO
+    from namex.models import Request as RequestDAO
+    from namex.models import State
 
     num = 0
     global num_records
@@ -86,7 +92,8 @@ def save_approved_names_by_examiner(approved_number_records):
 
 
 def save_name(submitted_date, nr_num, priority=False):
-    from namex.models import Request as RequestDAO, State
+    from namex.models import Request as RequestDAO
+    from namex.models import State
 
     num = 0
     global num_records

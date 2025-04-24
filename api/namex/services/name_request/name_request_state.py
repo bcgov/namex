@@ -1,36 +1,34 @@
-from datetime import datetime, timedelta, timezone
-from flask_restx.fields import Boolean
+from datetime import datetime, timezone
+
 from flask import current_app
+from flask_restx.fields import Boolean
 
 from namex.constants import (
+    EntityTypes,
     NameRequestActions,
-    NameRequestDraftActions,
-    NameRequestReservedActions,
     NameRequestActiveActions,
+    NameRequestActiveRejectedActions,
     NameRequestCancelledActions,
+    NameRequestCompletedActions,
+    NameRequestConsumedActions,
+    NameRequestDraftActions,
+    NameRequestExpiredActions,
+    NameRequestHistoricalActions,
     NameRequestHoldActions,
     NameRequestInProgressActions,
-    NameRequestExpiredActions,
-    NameRequestConsumedActions,
-    NameRequestHistoricalActions,
-    NameRequestActiveRejectedActions,
-    NameRequestExpiredRejectedActions,
-    EntityTypes,
-    NameRequestCompletedActions,
     NameRequestPendingPaymentActions,
+    NameRequestReservedActions,
+    PaymentState,
 )
-
-from namex.constants import PaymentState
 from namex.models import State
 
-from .utils import has_active_payment, has_complete_payment, has_completed_or_refunded_payment
 from .exceptions import (
-    NameRequestException,
     InvalidStateError,
+    NameRequestActionError,
     NameRequestIsConsumedError,
     NameRequestIsExpiredError,
-    NameRequestActionError,
 )
+from .utils import has_complete_payment, has_completed_or_refunded_payment
 
 state_transition_error_msg = 'Invalid state transition [{current_state}] -> [{next_state}]'
 invalid_state_transition_msg = (

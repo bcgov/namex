@@ -1,6 +1,6 @@
-from flask import jsonify
-from flask_restx import Resource, Namespace
-from sqlalchemy import text, exc
+from flask_restx import Namespace, Resource
+from sqlalchemy import exc, text
+
 from namex.models import db
 
 api = Namespace('namexRequestOPS', description='Namex - OPS checks')

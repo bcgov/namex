@@ -283,7 +283,7 @@ class SBCPaymentClient(BaseClient):
         response = None
         try:
             response = self.call_api(HttpVerbs.POST, request_url, data=data)
-        except ApiRequestError as err:  # ROUTING_SLIP_REFUND and NO_FEE_REFUND return http 400.
+        except ApiRequestError:  # ROUTING_SLIP_REFUND and NO_FEE_REFUND return http 400.
             return response
 
         return response

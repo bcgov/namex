@@ -1,18 +1,18 @@
-import pytest
-import jsonpickle
-
 from urllib.parse import quote_plus
+
+import jsonpickle
+import pytest
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
+from ...common import claims, token_header
 from ..common import (
-    assert_issues_count_is_gt,
-    assert_issue_type_is_one_of,
     assert_has_word_upper,
+    assert_issue_type_is_one_of,
+    assert_issues_count_is_gt,
     save_words_list_classification,
 )
 from ..configuration import ENDPOINT_PATH
-from ...common import token_header, claims
 
 
 # 2.- Unique word classified as distinctive

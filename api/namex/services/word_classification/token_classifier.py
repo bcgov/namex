@@ -1,7 +1,7 @@
-import pandas as pd
-
-from flask import current_app
 from enum import Enum
+
+import pandas as pd
+from flask import current_app
 
 from ..name_request.auto_analyse.name_analysis_utils import data_frame_to_list
 

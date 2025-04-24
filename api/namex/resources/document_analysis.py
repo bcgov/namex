@@ -1,12 +1,14 @@
-from flask import request, jsonify, current_app, make_response
-from flask_restx import Namespace, Resource, cors, fields as rp_fields
-from marshmallow import Schema, validates, ValidationError, fields as ma_fields
-from namex import jwt
-
 import enum
 
+from flask import current_app, jsonify, make_response, request
+from flask_restx import Namespace, Resource
+from flask_restx import fields as rp_fields
+from marshmallow import Schema, ValidationError, validates
+from marshmallow import fields as ma_fields
+
+from namex import jwt
+from namex.analytics import VALID_ANALYSIS, RestrictedWords, SolrQueries
 from namex.utils.auth import cors_preflight
-from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS
 
 api = Namespace('namexDocuments', description='Namex - OPS checks')
 

@@ -1,9 +1,8 @@
-from flask import current_app, jsonify, g, request, make_response
-from flask_restx import cors, Resource, Namespace
-from sqlalchemy import text, exc
+from flask import current_app, g, jsonify, make_response, request
+from flask_restx import Namespace, Resource
 
 from namex import jwt
-from namex.models import User, State, Comment, NameCommentSchema, Event
+from namex.models import User
 from namex.services.name_request.utils import get_or_create_user_by_jwt
 from namex.utils.auth import cors_preflight
 
@@ -49,4 +48,4 @@ class UserSettings(Resource):
 
         except Exception as err:
             current_app.logger.error(f'unable to update user settings: {err.with_traceback(None)}')
-            return make_response(jsonify({'message': f'Error updating user settings.'}), 500)
+            return make_response(jsonify({'message': 'Error updating user settings.'}), 500)

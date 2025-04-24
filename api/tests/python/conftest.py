@@ -1,18 +1,16 @@
 import datetime
-
-import pytest
-from pytest_mock import mocker
-from flask import current_app
-from sqlalchemy import event, text
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.schema import MetaData, DropConstraint
-from flask_migrate import Migrate, upgrade
 from contextlib import suppress
 
-from namex import create_app, jwt as _jwt
+import pytest
+from flask_migrate import Migrate, upgrade
+from sqlalchemy import event, text
+from sqlalchemy.schema import DropConstraint, MetaData
+
+from namex import create_app
+from namex import jwt as _jwt
 from namex.models import db as _db
 
-from . import FROZEN_DATETIME, EPOCH_DATETIME
+from . import FROZEN_DATETIME
 
 
 # fixture to freeze utcnow to a fixed date-time

@@ -1,11 +1,12 @@
-from flask import current_app
 from typing import Callable
 
+from flask import current_app
+
 from namex.models import Request, State
-from namex.services.name_request.generate_new_nr_number import NRNumberService
-from namex.services.name_request.utils import is_temp_nr_num
 from namex.services.name_request import NameRequestService
 from namex.services.name_request.exceptions import NameRequestException
+from namex.services.name_request.generate_new_nr_number import NRNumberService
+from namex.services.name_request.utils import is_temp_nr_num
 from namex.services.virtual_word_condition import VirtualWordConditionService
 
 from .abstract_solr_resource import AbstractSolrResource

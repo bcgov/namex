@@ -1,13 +1,12 @@
 import math
 from datetime import datetime, timedelta
+
 import numpy as np
 
-from flask import current_app
-from namex.models import Request
-from namex.models import Event
-from namex.services.statistics import response_keys, UnitTime, get_utc_now
-from namex.utils.sql_alchemy import query_result_to_dict
+from namex.models import Event, Request
+from namex.services.statistics import get_utc_now, response_keys
 from namex.utils.api_resource import handle_exception
+from namex.utils.sql_alchemy import query_result_to_dict
 
 
 class WaitTimeStatsService:

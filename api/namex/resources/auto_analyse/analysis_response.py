@@ -1,28 +1,29 @@
 import abc
 
-# Import DTOs
-from .response_objects.name_analysis_response import NameAnalysisResponse
+from namex.services.name_request.auto_analyse import AnalysisIssueCodes, AnalysisResponseCodes
+
 from ..auto_analyse.analysis_issues import (
-    CheckIsValidIssue,
-    AddDistinctiveWordIssue,
     AddDescriptiveWordIssue,
-    ContainsWordsToAvoidIssue,
-    DesignationMismatchIssue,
-    DesignationRemovalIssue,
-    TooManyWordsIssue,
-    NameRequiresConsentIssue,
+    AddDistinctiveWordIssue,
+    CheckIsValidIssue,
     ContainsUnclassifiableWordIssue,
+    ContainsWordsToAvoidIssue,
     CorporateNameConflictIssue,
-    IncorrectCategoryIssue,
-    WordSpecialUseIssue,
+    DesignationMismatchIssue,
     DesignationMisplacedIssue,
-    EndDesignationMoreThanOnceIssue,
     DesignationNonExistentIssue,
-    QueueNameConflictIssue,
+    DesignationRemovalIssue,
+    EndDesignationMoreThanOnceIssue,
+    IncorrectCategoryIssue,
     IncorrectYearIssue,
+    NameRequiresConsentIssue,
+    QueueNameConflictIssue,
+    TooManyWordsIssue,
+    WordSpecialUseIssue,
 )
 
-from namex.services.name_request.auto_analyse import AnalysisIssueCodes, AnalysisResponseCodes
+# Import DTOs
+from .response_objects.name_analysis_response import NameAnalysisResponse
 
 
 # Execute analysis returns a response strategy code

@@ -1,10 +1,9 @@
-import time
 import uuid
 from datetime import datetime, timezone
 
 from flask import current_app
-from simple_cloudevent import SimpleCloudEvent
 from sbc_common_components.utils.enums import QueueMessageTypes
+from simple_cloudevent import SimpleCloudEvent
 
 from namex.services import queue
 

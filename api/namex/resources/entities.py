@@ -1,11 +1,12 @@
 from http import HTTPStatus
-from flask import current_app, jsonify, make_response
-from flask_restx import Namespace, Resource, cors
+
+from flask import current_app, make_response
+from flask_restx import Namespace, Resource
 
 from namex.utils.api_resource import handle_exception
-from namex.utils.auth import MSG_CLIENT_CREDENTIALS_REQ_FAILED, cors_preflight, get_client_credentials
-from .utils import EntityUtils
+from namex.utils.auth import cors_preflight
 
+from .utils import EntityUtils
 
 MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'

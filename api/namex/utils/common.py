@@ -1,7 +1,8 @@
 import re
-import inflect
-from itertools import product
 from datetime import datetime, time
+from itertools import product
+
+import inflect
 from dateutil import tz
 
 from namex.constants import DATE_FORMAT_NAMEX_SEARCH
@@ -96,7 +97,7 @@ def get_plural_singular_name(name):
 def convert_to_ascii(value):
     try:
         return value.encode('ascii', 'ignore').decode('ascii')
-    except Exception as err:
+    except Exception:
         return value
 
 

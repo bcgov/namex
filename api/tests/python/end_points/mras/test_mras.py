@@ -1,14 +1,14 @@
 from http import HTTPStatus
+
 import pytest
 
-from .common import API_BASE_URI
+from tests.python import integration_mras
 
 # Import token and claims if you need it
 # from ..common import token_header, claims
-from ..common.http import build_test_query, build_request_uri
+from ..common.http import build_request_uri, build_test_query
 from ..common.logging import log_request_path
-
-from tests.python import integration_mras
+from .common import API_BASE_URI
 
 
 @pytest.mark.parametrize(

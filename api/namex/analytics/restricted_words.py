@@ -1,5 +1,6 @@
-from flask import jsonify, current_app
-from sqlalchemy import text, exc
+from flask import current_app
+from sqlalchemy import exc, text
+
 from namex.models import db
 
 

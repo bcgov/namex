@@ -1,8 +1,9 @@
-from . import db, ma
-from flask import current_app
-
 # from marshmallow import Schema, fields, post_load
 from datetime import datetime
+
+from flask import current_app
+
+from . import db, ma
 
 
 class User(db.Model):

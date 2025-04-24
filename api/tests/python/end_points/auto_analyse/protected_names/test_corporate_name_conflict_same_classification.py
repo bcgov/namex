@@ -1,21 +1,19 @@
-import pytest
-import jsonpickle
-
 from urllib.parse import quote_plus
+
+import jsonpickle
+import pytest
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
+from ...common import claims, token_header
 from ..common import (
+    assert_additional_conflict_parameters,
+    assert_correct_conflict,
     assert_issues_count_is_gt,
-    assert_issue_type_is_one_of,
-    assert_has_word_upper,
     save_words_list_classification,
     save_words_list_name,
-    assert_correct_conflict,
-    assert_additional_conflict_parameters,
 )
 from ..configuration import ENDPOINT_PATH
-from ...common import token_header, claims
 
 
 @pytest.mark.parametrize(

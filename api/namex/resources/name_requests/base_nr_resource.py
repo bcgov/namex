@@ -1,4 +1,5 @@
 import os
+
 from flask import current_app, request
 
 from namex.constants import NameRequestPatchActions

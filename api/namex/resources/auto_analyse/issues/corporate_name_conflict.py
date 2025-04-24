@@ -3,10 +3,10 @@ from string import Template
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
+from ..response_objects import Conflict, NameAction, NameActions, NameAnalysisIssue
+
 # Import DTOs
 from .abstract import AnalysisResponseIssue
-from ..response_objects import NameAnalysisIssue
-from ..response_objects import NameAction, NameActions, Conflict
 
 
 class CorporateNameConflictIssue(AnalysisResponseIssue):

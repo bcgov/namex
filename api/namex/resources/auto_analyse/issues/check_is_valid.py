@@ -1,8 +1,9 @@
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
+from ..response_objects import NameAnalysisIssue
+
 # Import DTOs
 from .abstract import AnalysisResponseIssue
-from ..response_objects import NameAnalysisIssue
 
 
 class CheckIsValid(AnalysisResponseIssue):

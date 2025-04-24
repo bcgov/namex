@@ -1,7 +1,9 @@
-from . import db, ma
 from datetime import datetime
+
 from sqlalchemy.orm import backref
-from .user import User, UserSchema
+
+from . import db, ma
+from .user import UserSchema
 
 
 class Comment(db.Model):

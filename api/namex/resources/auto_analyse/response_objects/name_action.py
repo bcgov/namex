@@ -1,6 +1,6 @@
-from .abstract import Serializable
-
 from enum import Enum
+
+from .abstract import Serializable
 
 
 class NameActions(Enum):
@@ -34,7 +34,7 @@ class WordPositions(Enum):
 class NameAction(Serializable):
     def __init__(self, **kwargs):
         # Required!
-        if not kwargs.get('type').value in NameActions.list():
+        if kwargs.get('type').value not in NameActions.list():
             raise TypeError('Invalid NameAction, please supply a valid NameAction type')
 
         if kwargs.get('position') and kwargs.get('position').value not in WordPositions.list():

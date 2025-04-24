@@ -1,7 +1,8 @@
-from flask import current_app
-from namex.models import NRNumberLifespan, NRNumberExclude, Request
-
 import random
+
+from flask import current_app
+
+from namex.models import NRNumberExclude, NRNumberLifespan, Request
 
 
 def set_nr_num_lifespan(nr_num, span):

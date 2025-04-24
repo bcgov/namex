@@ -5,9 +5,10 @@ import datetime
 import pytest
 from dateutil.tz import gettz
 
-from namex.services.name_request import NameRequestService
-from namex.models import State, Request as RequestDAO
 from namex.constants import RequestAction
+from namex.models import Request as RequestDAO
+from namex.models import State
+from namex.services.name_request import NameRequestService
 
 nr_svc = NameRequestService()
 pacific_tz = gettz('US/Pacific')

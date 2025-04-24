@@ -1,5 +1,5 @@
+
 from namex.models import Name, NameSchema
-import sys
 
 
 def test_name_create(session):

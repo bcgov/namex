@@ -2,10 +2,12 @@
 Virtual word classification classifies all words in a name approved by an examiner to be used for auto-approval
 """
 
-from . import db, ma
-from datetime import datetime, date
-from sqlalchemy import func, or_
+from datetime import date, datetime
+
+from sqlalchemy import func
 from sqlalchemy.orm import backref
+
+from . import db, ma
 
 
 class WordClassification(db.Model):

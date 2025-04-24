@@ -1,10 +1,11 @@
-from namex.models import User
-import os
-import requests
 import json
+import os
+
 import pytest
+import requests
+
+from namex.models import User
 from tests.python import integration_solr
-import urllib
 
 token_header = {'alg': 'RS256', 'typ': 'JWT', 'kid': 'flask-jwt-oidc-test-client'}
 claims = {
@@ -262,7 +263,7 @@ def test_numbers_preserved(client, jwt, app):
         ('J!M HOLDINGS', 'J. & M. HOLDINGS'),
         ('J!=@_M HOLDINGS', 'J. & M. HOLDINGS'),
         ('J+M HOLDINGS', 'J. & M. HOLDINGS'),
-        ('J\M HOLDINGS', 'J. & M. HOLDINGS'),
+        (r'J\M HOLDINGS', 'J. & M. HOLDINGS'),
         ('GREAT NORTH OIL AND GAS LIMITED', 'GREAT NORTH OIL AND GAS LIMITED'),
         ('JM HOLDINGS', 'J   \t \r M HOLDINGS INC'),
         ('J AND M Van AND Damme Inc', 'JM Van Damme Ltd'),

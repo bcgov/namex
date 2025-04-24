@@ -1,6 +1,6 @@
 import pytest
+
 from namex.constants import EntityTypes, RequestAction, request_type_mapping
-from tests.python.conftest import app
 
 
 @pytest.mark.skip

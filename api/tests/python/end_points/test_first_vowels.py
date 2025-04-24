@@ -1,4 +1,5 @@
 from hamcrest import *
+
 from namex.analytics.phonetic import first_vowels
 
 

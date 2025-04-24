@@ -1,24 +1,24 @@
 import base64
-from http import HTTPStatus
 import json
 from datetime import datetime
+from http import HTTPStatus
 from pathlib import Path
-import pycountry
-from pytz import timezone
 
+import pycountry
 import requests
-from flask import current_app, jsonify, request, make_response
+from flask import current_app, jsonify, make_response, request
 from flask_restx import Resource
+from pytz import timezone
 
 from namex.constants import RequestAction
 from namex.models import Request, State
-from namex.utils.api_resource import handle_exception
-from namex.utils.auth import cors_preflight, full_access_to_name_request
 from namex.services.name_request import NameRequestService
 from namex.services.name_request.utils import get_mapped_entity_and_action_code
-from namex.utils.auth import get_client_credentials
-from .api_namespace import api
+from namex.utils.api_resource import handle_exception
+from namex.utils.auth import cors_preflight, full_access_to_name_request, get_client_credentials
+
 from ..utils import EntityUtils
+from .api_namespace import api
 
 DATE_FORMAT = '%B %-d, %Y at %-I:%M %p Pacific time'
 
@@ -59,13 +59,13 @@ class ReportResource(Resource):
             State.REJECTED,
         ]:
             return make_response(
-                jsonify(message='Invalid NR state'.format(nr_id=nr_model['id'])), HTTPStatus.BAD_REQUEST
+                jsonify(message='Invalid NR state'.format()), HTTPStatus.BAD_REQUEST
             )
 
         authenticated, token = ReportResource._get_service_client_token()
         if not authenticated:
             return make_response(
-                jsonify(message='Error in authentication'.format(nr_id=nr_model['id'])),
+                jsonify(message='Error in authentication'.format()),
                 HTTPStatus.INTERNAL_SERVER_ERROR,
             )
 

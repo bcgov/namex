@@ -1,5 +1,6 @@
-from . import db, ma
 from marshmallow import fields
+
+from . import db, ma
 
 
 class PartnerNameSystem(db.Model):

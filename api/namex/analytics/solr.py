@@ -1,19 +1,19 @@
 import json
+import re
 import string
 from typing import List
+from urllib import parse, request
+from urllib.error import HTTPError
 
 from flask import current_app
-from urllib import request, parse
-from urllib.error import HTTPError
-import re
+
 from namex.analytics.phonetic import (
-    first_vowels,
     designations,
     first_consonants,
+    first_vowels,
     has_leading_vowel,
     replace_special_leading_sounds,
 )
-
 
 # Use this character in the search strings to indicate that the word should not by synonymized.
 NO_SYNONYMS_INDICATOR = '@'
@@ -1085,7 +1085,7 @@ class SolrQueries:
             term = full_words[index]
             try:
                 stemmed_term = stemmed_words[index]
-            except IndexError as err:
+            except IndexError:
                 stemmed_term = ''
             num_terms += 1
 

@@ -1,15 +1,24 @@
 from contextlib import suppress
 from http import HTTPStatus
 
-from flask import jsonify
-from flask import json
+from flask import json, jsonify
 
 from namex.models import (
     Applicant as ApplicantDAO,
+)
+from namex.models import (
     Comment as CommentDAO,
+)
+from namex.models import (
     Event as EventDAO,
+)
+from namex.models import (
     Name as NameDAO,
+)
+from namex.models import (
     Request as RequestDAO,
+)
+from namex.models import (
     State,
     User,
 )
@@ -287,7 +296,6 @@ def test_remove_name_from_nr(client, jwt, app):
 
 
 def test_add_new_comment_to_nr(client, jwt, app):
-    from sqlalchemy import desc
 
     # add a user for the comment
     user = User(

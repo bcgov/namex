@@ -1,9 +1,8 @@
-from namex.models import WordClassification
 from datetime import datetime
 
-from namex.models import User
-# from namex.services.name_request.utils import get_or_create_user_by_jwt
+from namex.models import User, WordClassification
 
+# from namex.services.name_request.utils import get_or_create_user_by_jwt
 from .token_classifier import TokenClassifier
 
 

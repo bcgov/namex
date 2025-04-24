@@ -1,5 +1,5 @@
-from namex.services.name_request.utils import normalize_nr_num
 from namex.services.name_request.exceptions import InvalidInputError
+from namex.services.name_request.utils import normalize_nr_num
 
 
 def parse_nr_num(nr_num_str):

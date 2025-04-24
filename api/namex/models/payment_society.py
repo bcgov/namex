@@ -1,9 +1,10 @@
 """Payment_societies keep data for society from home legancy app"""
 
-from . import db
 from datetime import datetime
+
 from sqlalchemy.dialects.postgresql import JSONB
-from datetime import datetime
+
+from . import db
 
 
 class PaymentSociety(db.Model):

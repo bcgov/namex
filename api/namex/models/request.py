@@ -1,53 +1,44 @@
 """Request is the main business class that is the real top level object in the system"""
 
-import sqlalchemy
-from sqlalchemy.sql.schema import Index
-from sqlalchemy.event import listen
-from sqlalchemy.orm.attributes import get_history
-# TODO: Only trace if LOCAL_DEV_MODE / DEBUG conf exists
-# import traceback
+import re
+from datetime import datetime, timedelta
 
-from . import db, ma
+import sqlalchemy
 from flask import current_app
+from marshmallow import fields, post_dump
+from sqlalchemy import Date, and_, event, func
+from sqlalchemy.orm import backref
+from sqlalchemy.orm.attributes import get_history
+
+from namex.constants import (
+    EntityTypes,
+    EventAction,
+    EventState,
+    EventUserId,
+    LegacyEntityTypes,
+    NameState,
+    RequestPriority,
+)
+from namex.exceptions import BusinessException
 
 # TODO: Only trace if LOCAL_DEV_MODE / DEBUG conf exists
 # from flask_sqlalchemy import get_debug_queries
 from namex.services.lookup import nr_filing_actions
-from namex.exceptions import BusinessException
 from namex.utils import queue_util
-from sqlalchemy import event
-from sqlalchemy.orm import backref
-from sqlalchemy.orm.attributes import set_committed_value
-from sqlalchemy.dialects import postgresql
-from sqlalchemy import and_, func, Date
-from marshmallow import Schema, fields, post_load, post_dump
-from .nwpta import PartnerNameSystem
-from .user import User, UserSchema
-from .comment import Comment, CommentSchema
-from .applicant import Applicant, ApplicantSchema
-from .name import Name, NameSchema
-from .payment import Payment
-from .event import Event
-from .state import State, StateSchema
-from datetime import datetime, timedelta
-import re
-
-from namex.constants import (
-    ValidSources,
-    NameState,
-    EntityTypes,
-    LegacyEntityTypes,
-    request_type_mapping,
-    RequestPriority,
-    EventAction,
-    EventState,
-    EventUserId,
-    DesignationPositionCodes,
-)
 
 # noinspection PyPep8Naming
 from ..criteria.request.query_criteria import RequestConditionCriteria
 from ..services.statistics import UnitTime
+
+# TODO: Only trace if LOCAL_DEV_MODE / DEBUG conf exists
+# import traceback
+from . import db, ma
+from .applicant import Applicant, ApplicantSchema
+from .comment import CommentSchema
+from .event import Event
+from .name import Name, NameSchema
+from .state import State
+from .user import UserSchema
 
 
 class Request(db.Model):

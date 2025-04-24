@@ -1,8 +1,8 @@
 import abc
 import re
 from collections import deque
+
 from flask import current_app
-import re
 
 # Import DTOs
 from ...response_objects import NameAnalysisIssue

@@ -5,7 +5,7 @@ import pytest
 from sbc_common_components.utils.enums import QueueMessageTypes
 
 from namex.constants import NameRequestPatchActions, NameRequestPaymentActions, PaymentState
-from namex.models import Payment, Request, State, User
+from namex.models import Payment, State, User
 from namex.services.payment.client import SBCPaymentClient
 from tests.python.end_points.common.http import get_test_headers
 from tests.python.end_points.name_requests.test_setup_utils.test_helpers import post_test_nr_json

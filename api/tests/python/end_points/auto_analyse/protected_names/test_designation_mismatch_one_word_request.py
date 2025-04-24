@@ -1,19 +1,19 @@
-import pytest
-import jsonpickle
-
 from urllib.parse import quote_plus
+
+import jsonpickle
+import pytest
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
+from ...common import claims, token_header
 from ..common import (
-    assert_issues_count_is_gt,
-    assert_has_word_upper,
     assert_has_designations_upper,
+    assert_has_word_upper,
+    assert_issues_count_is_gt,
     save_words_list_classification,
     save_words_list_virtual_word_condition,
 )
 from ..configuration import ENDPOINT_PATH
-from ...common import token_header, claims
 
 
 # TODO: COOP is also a special word. What if coop is typed in CR entity type. Do we show mismatch designation and special word use?

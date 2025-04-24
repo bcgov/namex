@@ -1,5 +1,3 @@
-import os
-from datetime import datetime
 
 from flask import current_app
 from swagger_client import SynonymsApi as SynonymService
@@ -11,17 +9,12 @@ from namex.services.word_classification.token_classifier import TokenClassifier
 from namex.services.word_classification.word_classification import WordClassificationService
 
 from ..auto_analyse.name_analysis_utils import (
-    change_descriptive,
-    check_synonyms,
     get_classification,
-    get_classification_summary,
-    update_none_list,
 )
 from . import AnalysisIssueCodes
 from .mixins.get_designations_lists import GetDesignationsListsMixin
 from .mixins.get_synonyms_lists import GetSynonymsListsMixin
 from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
-
 
 """
 This is the director for AutoAnalyseService.

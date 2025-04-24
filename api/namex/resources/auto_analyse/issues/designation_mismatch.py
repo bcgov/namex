@@ -1,13 +1,12 @@
 from string import Template
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
-
 from namex.utils.entity_type import get_entity_type_description
+
+from ..response_objects import NameAction, NameActions, NameAnalysisIssue
 
 # Import DTOs
 from .abstract import AnalysisResponseIssue
-from ..response_objects import NameAnalysisIssue
-from ..response_objects import NameAction, NameActions
 
 
 class DesignationMismatchIssue(AnalysisResponseIssue):

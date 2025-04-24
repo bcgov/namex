@@ -4,20 +4,19 @@ Unit tests for Name Request mapping methods.
 
 import pytest
 
-from namex.models import db, State, Request, Name
-from namex.services.name_request import NameRequestService
+from namex.models import Name, Request, State, db
 
 # from namex.services.name_request.name_request_state import get_nr_state_actions
 # Use the static methods in the NameRequest(s) class
-from namex.resources.name_requests import NameRequestResource
+from namex.services.name_request import NameRequestService
+from tests.python.common.test_name_request_utils import (
+    assert_field_is_mapped,
+    assert_name_has_id,
+    assert_name_has_name,
+    pick_name_from_list,
+)
 
 from .test_setup_utils import build_nr
-from tests.python.common.test_name_request_utils import (
-    pick_name_from_list,
-    assert_name_has_name,
-    assert_name_has_id,
-    assert_field_is_mapped,
-)
 
 test_names_no_id = [
     {

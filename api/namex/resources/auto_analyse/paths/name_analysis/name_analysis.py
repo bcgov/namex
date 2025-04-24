@@ -7,7 +7,7 @@ from http import HTTPStatus
 
 from flask import jsonify, make_response
 from flask.globals import current_app
-from flask_restx import Namespace, Resource, cors
+from flask_restx import Namespace, Resource
 
 from namex.constants import (  # noqa: I001
     BCProtectedNameEntityTypes,  # noqa: I001
@@ -17,15 +17,11 @@ from namex.constants import (  # noqa: I001
 )  # noqa: I001
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes, AnalysisRequestActions  # noqa: I005
 from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
-from namex.services.name_request.auto_analyse.unprotected_name_analysis import UnprotectedNameAnalysisService
-from namex.services.name_request.auto_analyse.xpro_name_analysis import XproNameAnalysisService
 from namex.services.name_request.builders.name_analysis_builder import NameAnalysisBuilder
 from namex.utils.api_resource import get_query_param_str
 from namex.utils.auth import cors_preflight
 
 from .bc_name_analysis_response import BcAnalysisResponse
-from .xpro_name_analysis_response import XproAnalysisResponse
-
 
 # Register a local namespace for the requests
 api = Namespace('nameAnalysis', description='API for Analysing BC Names')

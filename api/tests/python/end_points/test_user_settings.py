@@ -1,10 +1,6 @@
 from __future__ import annotations
 
-from flask import jsonify
 import json
-import pytest
-from datetime import datetime, timedelta
-from typing import List
 
 from namex.models import User
 from tests.python.end_points.util import create_header
@@ -12,7 +8,7 @@ from tests.python.end_points.util import create_header
 
 def test_get_new_user_settings(client, jwt, app):
     """Test getting user settings for a new user."""
-    new_user_settings = client.get(f'api/v1/usersettings', headers=create_header(jwt, [User.EDITOR], 'test-settings'))
+    new_user_settings = client.get('api/v1/usersettings', headers=create_header(jwt, [User.EDITOR], 'test-settings'))
     data = new_user_settings.data
     assert data
     resp = json.loads(data.decode('utf-8'))
@@ -52,7 +48,7 @@ def test_get_existing_user_settings(client, jwt, app):
 
     # check it gets the existing settings stored in the db
     existing_user_settings = client.get(
-        f'api/v1/usersettings', headers=create_header(jwt, [User.EDITOR], 'test-settings')
+        'api/v1/usersettings', headers=create_header(jwt, [User.EDITOR], 'test-settings')
     )
     data = existing_user_settings.data
     assert data
@@ -78,7 +74,7 @@ def test_update_user_settings(client, jwt, app):
     user.save_to_db()
     # update user with put endpoint
     update_user_settings = client.put(
-        f'api/v1/usersettings',
+        'api/v1/usersettings',
         json={'searchColumns': ['Status', 'LastModifiedBy']},
         headers=create_header(jwt, [User.EDITOR], 'test-settings'),
     )

@@ -1,6 +1,6 @@
 import datetime
+
 from . import db
-from sqlalchemy.schema import Column
 
 
 def _to_string(string):

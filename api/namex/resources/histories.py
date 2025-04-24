@@ -2,11 +2,10 @@ import json
 import urllib
 
 from flask import current_app, jsonify, request
-from flask_restx import Namespace, Resource, cors
+from flask_restx import Namespace, Resource
 
 from namex import jwt
 from namex.utils.auth import cors_preflight
-
 
 api = Namespace('historiesMeta', description='Histories Match - Metadata')
 SOLR_URL = current_app.config.get('SOLR_BASE_URL')

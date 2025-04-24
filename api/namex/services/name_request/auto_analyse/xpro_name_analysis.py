@@ -1,4 +1,3 @@
-import os
 from datetime import datetime
 
 from flask import current_app
@@ -7,7 +6,6 @@ from . import AnalysisIssueCodes, request_types
 from .mixins.set_designation_lists import SetDesignationsListsMixin
 from .name_analysis_director import NameAnalysisDirector
 from .name_analysis_utils import get_classification
-
 
 """
 The XproNameAnalysisService returns an analysis response using the strategies in analysis_strategies.py

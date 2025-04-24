@@ -1,6 +1,6 @@
-from ..configuration import API_BASE_URI
-from ...common.http import build_test_query, build_request_uri
+from ...common.http import build_request_uri, build_test_query
 from ...common.logging import log_request_path
+from ..configuration import API_BASE_URI
 
 # These utils are in progress...
 

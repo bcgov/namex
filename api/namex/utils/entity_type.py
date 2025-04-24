@@ -8,10 +8,10 @@ either reside here, or be imported and exported from here.
 from namex.constants import (
     BCProtectedNameEntityTypes,
     BCUnprotectedNameEntityTypes,
-    XproUnprotectedNameEntityTypes,
-    EntityTypes,
-    EntityTypeDescriptions,
     DesignationPositionCodes,
+    EntityTypeDescriptions,
+    EntityTypes,
+    XproUnprotectedNameEntityTypes,
 )
 
 """

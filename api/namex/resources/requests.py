@@ -4,41 +4,50 @@ TODO: Fill in a larger description once the API is defined for V1
 """
 
 from datetime import datetime
-from pytz import timezone, UTC
 
-from flask import request, jsonify, g, current_app, make_response
-from flask_restx import Namespace, Resource, fields, cors
+from flask import current_app, g, jsonify, make_response, request
 from flask_jwt_oidc import AuthError
+from flask_restx import Namespace, Resource, cors, fields
 from marshmallow import ValidationError
-
-from namex.constants import DATE_TIME_FORMAT_SQL
-from namex.models.request import RequestsAuthSearchSchema
-
-from sqlalchemy.orm import load_only, lazyload, eagerload
-from sqlalchemy.orm.exc import NoResultFound
+from pytz import timezone
 from sqlalchemy import func, or_, text
 from sqlalchemy.inspection import inspect
+from sqlalchemy.orm import eagerload, lazyload, load_only
+from sqlalchemy.orm.exc import NoResultFound
 
 from namex import jwt
+from namex.analytics import VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
+from namex.analytics import RestrictedWords, SolrQueries
+from namex.constants import DATE_TIME_FORMAT_SQL
 from namex.exceptions import BusinessException
-from namex.models import db
-from namex.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema, RequestsSearchSchema
-from namex.models import Applicant, Name, NameSchema, PartnerNameSystemSchema
-from namex.models import User, State, Comment, NameCommentSchema, Event
-from namex.models import ApplicantSchema
-from namex.models import DecisionReason
-
+from namex.models import (
+    Applicant,
+    ApplicantSchema,
+    Comment,
+    DecisionReason,
+    Event,
+    Name,
+    NameCommentSchema,
+    NameSchema,
+    PartnerNameSystemSchema,
+    RequestsHeaderSchema,
+    RequestsSchema,
+    RequestsSearchSchema,
+    State,
+    User,
+    db,
+)
+from namex.models import Request as RequestDAO
+from namex.models.request import RequestsAuthSearchSchema
+from namex.services import EventRecorder, MessageServices, ServicesError
 from namex.services.lookup import nr_filing_actions
-from namex.services import ServicesError, MessageServices, EventRecorder
 from namex.services.name_request import NameRequestService
 from namex.services.name_request.utils import check_ownership, get_or_create_user_by_jwt, valid_state_transition
-
-from namex.utils.common import convert_to_ascii, convert_to_utc_min_date_time, convert_to_utc_max_date_time
-from namex.utils.auth import cors_preflight
-from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 from namex.utils import queue_util
-from .utils import DateUtils
+from namex.utils.auth import cors_preflight
+from namex.utils.common import convert_to_ascii, convert_to_utc_max_date_time, convert_to_utc_min_date_time
 
+from .utils import DateUtils
 
 # Register a local namespace for the requests
 api = Namespace('namexRequests', description='Namex - Requests API')
@@ -357,7 +366,7 @@ class Requests(Resource):
                     RequestDAO.submittedDate
                     >= text("'{submittedStartDateTimeUtc}'".format(submittedStartDateTimeUtc=submittedStartDateTimeUtc))
                 )
-            except ValueError as ve:
+            except ValueError:
                 return make_response(
                     jsonify(
                         {
@@ -378,7 +387,7 @@ class Requests(Resource):
                     RequestDAO.submittedDate
                     <= text("'{submittedEndDateTimeUtc}'".format(submittedEndDateTimeUtc=submittedEndDateTimeUtc))
                 )
-            except ValueError as ve:
+            except ValueError:
                 return make_response(
                     jsonify(
                         {
@@ -671,7 +680,7 @@ class Request(Resource):
             if not nrd:
                 return make_response(jsonify({'message': 'Request:{} not found'.format(nr)}), 404)
             start_state = nrd.stateCd
-        except NoResultFound as nrf:
+        except NoResultFound:
             # not an error we need to track in the log
             return make_response(jsonify({'message': 'Request:{} not found'.format(nr)}), 404)
         except Exception as err:
@@ -766,7 +775,7 @@ class Request(Resource):
                         consumed = True
 
                 if not consumed:
-                    return False, f'Cannot find an Approved or Condition name to be consumed.'
+                    return False, 'Cannot find an Approved or Condition name to be consumed.'
 
                 return True, None  # Return success and no error message
 
@@ -818,7 +827,7 @@ class Request(Resource):
             if not nrd:
                 return make_response(jsonify({'message': 'Request:{} not found'.format(nr)}), 404)
             orig_nrd = nrd.json()
-        except NoResultFound as nrf:
+        except NoResultFound:
             # not an error we need to track in the log
             return make_response(jsonify({'message': 'Request:{} not found'.format(nr)}), 404)
         except Exception as err:
@@ -1277,7 +1286,7 @@ class Request(Resource):
         except ValidationError as ve:
             return make_response(jsonify(ve.messages), 400)
 
-        except NoResultFound as nrf:
+        except NoResultFound:
             # not an error we need to track in the log
             return make_response(jsonify(message='Request:{} not found'.format(nr)), 404)
 
@@ -1586,7 +1595,7 @@ class SyncNR(Resource):
         try:
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
             nrd = RequestDAO.find_by_nr(nr)
-        except NoResultFound as nrf:
+        except NoResultFound:
             # not an error we need to track in the log
             return make_response(jsonify({'message': 'Request:{} not found'.format(nr)}), 404)
         except Exception as err:
@@ -1687,7 +1696,7 @@ class NRComment(Resource):
             if not nrd:
                 return make_response(jsonify({'message': 'Request:{} not found'.format(nr)}), 404)
 
-        except NoResultFound as nrf:
+        except NoResultFound:
             # not an error we need to track in the log
             return make_response(jsonify({'message': 'Request:{} not found'.format(nr)}), 404)
         except Exception as err:

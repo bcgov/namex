@@ -2,9 +2,7 @@ import urllib
 
 import pytest
 
-from namex.analytics.solr import SolrQueries, SYNONYMS_PREFIX, current_app
-from tests.python import integration_synonym_api
-
+from namex.analytics.solr import SYNONYMS_PREFIX, SolrQueries, current_app
 
 solr_name_test_data = [
     ('some name', 'somename', 'some%20name', 'some%20name%20somename'),

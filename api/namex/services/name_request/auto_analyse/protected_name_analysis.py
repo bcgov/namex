@@ -1,14 +1,10 @@
-import os
 from datetime import datetime
 
 from flask import current_app
 
-from namex.constants import DesignationPositionCodes
-
 from . import request_types
 from .mixins.set_designation_lists import SetDesignationsListsMixin
 from .name_analysis_director import NameAnalysisDirector
-
 
 """
 The ProtectedNameAnalysisService returns an analysis response using the strategies in analysis_strategies.py

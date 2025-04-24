@@ -1,12 +1,12 @@
-import pytest
 from datetime import datetime
-from flask import jsonify
+
 from flask import json
 
 from namex.constants import ValidSources
-from namex.models import Event, Name as NameDAO, Request as RequestDAO, State, User
+from namex.models import Event, State, User
+from namex.models import Name as NameDAO
+from namex.models import Request as RequestDAO
 from namex.services import EventRecorder
-
 from tests.python.end_points.util import create_header
 
 
@@ -125,7 +125,7 @@ def test_get_inprogress_event_history(client, jwt, app):
 
 
 def test_get_next_event_history(client, jwt, app):
-    from namex.models import Request as RequestDAO, State, Name as NameDAO, User, Event
+    from namex.models import Event, State, User
     from namex.services import EventRecorder
 
     # add a user for the comment
@@ -160,7 +160,7 @@ def test_get_next_event_history(client, jwt, app):
 
 
 def test_on_hold_event_history(client, jwt, app):
-    from namex.models import Request as RequestDAO, State, Name as NameDAO, User, Event
+    from namex.models import Event, State, User
     from namex.services import EventRecorder
 
     # add a user for the comment
@@ -191,7 +191,7 @@ def test_on_hold_event_history(client, jwt, app):
 
 
 def test_expired_event_history(client, jwt, app):
-    from namex.models import Request as RequestDAO, State, Name as NameDAO, User, Event
+    from namex.models import Event, State, User
     from namex.services import EventRecorder
 
     # add a user for the comment
@@ -223,7 +223,7 @@ def test_expired_event_history(client, jwt, app):
 
 
 def test_cancelled_in_nro_event_history(client, jwt, app):
-    from namex.models import Request as RequestDAO, State, Name as NameDAO, User, Event
+    from namex.models import Event, State, User
     from namex.services import EventRecorder
 
     # add a user for the comment
@@ -254,7 +254,7 @@ def test_cancelled_in_nro_event_history(client, jwt, app):
 
 
 def test_cancelled_in_namex_event_history(client, jwt, app):
-    from namex.models import Request as RequestDAO, State, Name as NameDAO, User, Event
+    from namex.models import Event, State, User
     from namex.services import EventRecorder
 
     # add a user for the comment
@@ -285,7 +285,7 @@ def test_cancelled_in_namex_event_history(client, jwt, app):
 
 
 def test_decision_event_history(client, jwt, app):
-    from namex.models import Request as RequestDAO, State, Name as NameDAO, User, Event
+    from namex.models import Event, State, User
     from namex.services import EventRecorder
 
     # add a user for the comment
@@ -316,7 +316,7 @@ def test_decision_event_history(client, jwt, app):
 
 
 def test_edit_event_history(client, jwt, app):
-    from namex.models import Request as RequestDAO, State, Name as NameDAO, User, Event
+    from namex.models import Event, State, User
     from namex.services import EventRecorder
 
     # add a user for the comment
@@ -348,7 +348,9 @@ def test_edit_event_history(client, jwt, app):
 
 
 def test_reopen_event_history(client, jwt, app):
-    from namex.models import Request as RequestDAO, State, Name as NameDAO, User, Event
+    from namex.models import Event, State, User
+    from namex.models import Name as NameDAO
+    from namex.models import Request as RequestDAO
     from namex.services import EventRecorder
 
     # add a user for the comment
@@ -389,7 +391,9 @@ def test_reopen_event_history(client, jwt, app):
 
 
 def test_edit_inprogress_event_history(client, jwt, app):
-    from namex.models import Request as RequestDAO, State, Name as NameDAO, User, Event
+    from namex.models import Event, State, User
+    from namex.models import Name as NameDAO
+    from namex.models import Request as RequestDAO
     from namex.services import EventRecorder
 
     # add a user for the comment
@@ -471,7 +475,7 @@ def test_get_staff_comment_event_history(client, jwt, app):
 
 
 def test_consumed_event_history(client, jwt, app):
-    from namex.models import State, User, Event
+    from namex.models import Event, State, User
     from namex.services import EventRecorder
 
     # add a user for the comment

@@ -1,16 +1,15 @@
-from flask import send_file, make_response, jsonify
-from flask_restx import Resource, cors
+from flask import jsonify, make_response, send_file
 from flask_jwt_oidc import AuthError
+from flask_restx import Resource
 from pytz import timezone
 
-from namex.utils.auth import cors_preflight
-from namex.utils.api_resource import handle_exception
-
-from namex.models import Request as RequestDAO, Payment as PaymentDAO
-
-from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
-from namex.services.payment.receipts import get_receipt, generate_receipt
+from namex.models import Payment as PaymentDAO
+from namex.models import Request as RequestDAO
+from namex.services.payment.exceptions import PaymentServiceError, SBCPaymentError, SBCPaymentException
 from namex.services.payment.models import ReceiptRequest
+from namex.services.payment.receipts import generate_receipt, get_receipt
+from namex.utils.api_resource import handle_exception
+from namex.utils.auth import cors_preflight
 
 from .api_namespace import api as payment_api
 

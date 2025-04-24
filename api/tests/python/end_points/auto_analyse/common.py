@@ -1,5 +1,6 @@
-import pytest
 import datetime
+
+import pytest
 
 from namex.constants import EntityTypes
 
@@ -148,7 +149,9 @@ def save_words_list_virtual_word_condition(words_list):
 
 
 def save_words_list_name(words_list, queue=False):
-    from namex.models import Request as RequestDAO, State, Name as NameDAO
+    from namex.models import Name as NameDAO
+    from namex.models import Request as RequestDAO
+    from namex.models import State
 
     num = 0
     req = 1460775

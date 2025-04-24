@@ -1,13 +1,13 @@
 from http import HTTPStatus
 
-import requests, xmltodict
-from flask import current_app, jsonify, make_response, current_app
-from flask_restx import Namespace, Resource, cors
+import requests
+import xmltodict
+from flask import current_app, jsonify, make_response
+from flask_restx import Namespace, Resource
 from lxml import etree  # Don't worry about this it exists... the module is dynamically loaded
 
 from namex.utils.api_resource import handle_exception
 from namex.utils.auth import cors_preflight
-
 
 MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'

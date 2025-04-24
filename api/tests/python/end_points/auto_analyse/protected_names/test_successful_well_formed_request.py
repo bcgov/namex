@@ -1,11 +1,11 @@
-import pytest
-import jsonpickle
-
 from urllib.parse import quote_plus
 
+import jsonpickle
+import pytest
+
+from ...common import claims, token_header
 from ..common import save_words_list_classification
 from ..configuration import ENDPOINT_PATH
-from ...common import token_header, claims
 
 
 # 5.- Successful well formed name:

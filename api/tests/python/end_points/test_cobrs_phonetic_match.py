@@ -1,10 +1,11 @@
-from namex.models import User
-import os
-import requests
 import json
+import os
+
 import pytest
+import requests
+
+from namex.models import User
 from tests.python import integration_solr, integration_synonym_api
-import urllib
 
 token_header = {'alg': 'RS256', 'typ': 'JWT', 'kid': 'flask-jwt-oidc-test-client'}
 claims = {
