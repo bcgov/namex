@@ -487,7 +487,17 @@ class RequestSearch(Resource):
         identifiers = search.get('identifiers', [])
         nr_name = search.get('name', None)
         state = search.get('state', [])
+        type = search.get('type', [])
+        page = search.get('page', 1)
+        limit = search.get('limit', 100)
 
+        try:
+            page = int(page)
+            limit = int(limit)
+            if page < 1 or limit < 1:
+                raise ValueError
+        except ValueError:
+            return jsonify({'error': 'Invalid pagination parameters'}), 400
         # Only names and applicants are needed for this query, we want this query to be lighting fast
         # to prevent putting a load on namex-api.
         # Base query with the common identifier filter
@@ -518,12 +528,15 @@ class RequestSearch(Resource):
                     RequestDAO.consentFlag,
                     RequestDAO._request_action_cd
                 ))
-
+        q = q.offset((page - 1) * limit).limit(limit)
         requests = request_auth_search_schemas.dump(q.all())
         actions_array = [nr_filing_actions.get_actions(r['requestTypeCd'], r['entity_type_cd'], r['request_action_cd']) for r in requests]
         for r, additional_fields in zip(requests, actions_array):
             if additional_fields:
                 r.update(additional_fields)
+                
+        if type:
+            requests = [ r for r in requests if r['legalType'] in type ]
         return jsonify(requests)
 
 
