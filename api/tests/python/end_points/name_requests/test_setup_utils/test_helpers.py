@@ -1,6 +1,7 @@
 """
 Test helpers for Name Requests.
 """
+
 import pytest
 import json
 
@@ -13,9 +14,13 @@ from tests.python.end_points.common.http import get_test_headers
 # from tests.python.end_points.common.configuration import claims, token_header
 
 from ..configuration import API_BASE_URI
-from tests.python.common.test_name_request_utils import \
-    pick_name_from_list, assert_name_has_name, assert_name_has_id, assert_applicant_has_id, \
-    assert_field_is_mapped
+from tests.python.common.test_name_request_utils import (
+    pick_name_from_list,
+    assert_name_has_name,
+    assert_name_has_id,
+    assert_applicant_has_id,
+    assert_field_is_mapped,
+)
 
 from namex.models import State, User
 
@@ -49,7 +54,10 @@ state_data = [
     # ('NRO_UPDATING', 'NRO_UPDATING - internal state used when updating records from NRO'),
     # TODO: These states are missing in Test DB
     ('COND-RESERVE', 'Temporary reserved state with consent required'),
-    ('RESERVED', 'Temporary reserved state between name available and paid.  Once paid it is set to APPROVED or CONDITIONAL approval.')
+    (
+        'RESERVED',
+        'Temporary reserved state between name available and paid.  Once paid it is set to APPROVED or CONDITIONAL approval.',
+    ),
 ]
 
 
@@ -104,7 +112,15 @@ def add_states_to_db(states):
 
 @pytest.mark.skip
 def add_test_user_to_db():
-    user = User(username='name_request_service_account', firstname='Test', lastname='User', sub='idir/name_request_service_account', iss='keycloak', idp_userid = '123', login_source = 'IDIR')
+    user = User(
+        username='name_request_service_account',
+        firstname='Test',
+        lastname='User',
+        sub='idir/name_request_service_account',
+        iss='keycloak',
+        idp_userid='123',
+        login_source='IDIR',
+    )
     user.save_to_db()
 
     return user
@@ -119,13 +135,16 @@ def create_approved_nr(client, nr_data=None):
 def create_cancelled_nr(client, nr_data=None):
     return create_test_nr(nr_data, State.CANCELLED)
 
+
 @pytest.mark.skip
 def create_expired_nr(client, nr_data=None):
     return create_test_nr(nr_data, State.EXPIRED)
 
+
 @pytest.mark.skip
 def create_consumed_nr(client, nr_data=None):
     return create_test_nr(nr_data, State.CONSUMED)
+
 
 @pytest.mark.skip
 def create_draft_nr(client, nr_data=None, use_api=True):
@@ -158,15 +177,17 @@ def create_test_nr(nr_data=None, nr_state=State.DRAFT):
         # Optionally supply the field data
         custom_names = nr_data.get('names', None)
         if not custom_names:
-            custom_names = [{
-                'name': 'BLUE HERON TOURS LTD.',
-                'choice': 1,
-                'designation': 'LTD.',
-                'name_type_cd': 'CO',
-                'consent_words': '',
-                'conflict1': 'BLUE HERON TOURS LTD.',
-                'conflict1_num': '0515211'
-            }]
+            custom_names = [
+                {
+                    'name': 'BLUE HERON TOURS LTD.',
+                    'choice': 1,
+                    'designation': 'LTD.',
+                    'name_type_cd': 'CO',
+                    'consent_words': '',
+                    'conflict1': 'BLUE HERON TOURS LTD.',
+                    'conflict1_num': '0515211',
+                }
+            ]
 
         nr = build_nr(nr_state, nr_data, custom_names, False)
 
@@ -206,41 +227,44 @@ def post_test_nr(client, nr_data=None, nr_state=State.DRAFT):
         # Optionally supply the field data
         custom_names = nr_data.get('names', None)
         if not custom_names:
-            custom_names = [{
-                'name': 'BLUE HERON TOURS LTD.',
-                'choice': 1,
-                'designation': 'LTD.',
-                'name_type_cd': 'CO',
-                'consent_words': '',
-                'conflict1': 'BLUE HERON TOURS LTD.',
-                'conflict1_num': '0515211'
-            }]
+            custom_names = [
+                {
+                    'name': 'BLUE HERON TOURS LTD.',
+                    'choice': 1,
+                    'designation': 'LTD.',
+                    'name_type_cd': 'CO',
+                    'consent_words': '',
+                    'conflict1': 'BLUE HERON TOURS LTD.',
+                    'conflict1_num': '0515211',
+                }
+            ]
 
         nr = build_nr(nr_state, nr_data, custom_names, False)
 
         nr_data = nr.json()
 
-        nr_data['applicants'] = [{
-            'addrLine1': '1796 KINGS RD',
-            'addrLine2': '',
-            'addrLine3': '',
-            'city': 'VICTORIA',
-            'clientFirstName': '',
-            'clientLastName': '',
-            'contact': '',
-            'countryTypeCd': 'CA',
-            # 'declineNotificationInd': None,
-            'emailAddress': 'bob.johnson@example.com',
-            'faxNumber': '',
-            'firstName': 'BOB',
-            'lastName': 'JOHNSON',
-            'middleName': '',
-            # 'partyId': None,
-            'phoneNumber': '2505320083',
-            'postalCd': 'V8R 2P1',
-            'stateProvinceCd': 'BC'
-
-        }]
+        nr_data['applicants'] = [
+            {
+                'addrLine1': '1796 KINGS RD',
+                'addrLine2': '',
+                'addrLine3': '',
+                'city': 'VICTORIA',
+                'clientFirstName': '',
+                'clientLastName': '',
+                'contact': '',
+                'countryTypeCd': 'CA',
+                # 'declineNotificationInd': None,
+                'emailAddress': 'bob.johnson@example.com',
+                'faxNumber': '',
+                'firstName': 'BOB',
+                'lastName': 'JOHNSON',
+                'middleName': '',
+                # 'partyId': None,
+                'phoneNumber': '2505320083',
+                'postalCd': 'V8R 2P1',
+                'stateProvinceCd': 'BC',
+            }
+        ]
 
         # Create a new DRAFT NR using the NR we just created
         request_uri = API_BASE_URI
@@ -284,9 +308,9 @@ def post_test_nr_json(client, nr_data=None):
 @pytest.mark.skip
 def patch_nr(client, action, nr_id, nr_data, mocker):
     try:
-        access_mock = mocker.patch("namex.resources.name_requests.name_request.full_access_to_name_request")
+        access_mock = mocker.patch('namex.resources.name_requests.name_request.full_access_to_name_request')
         access_mock.return_value = True
-        refundable_mock = mocker.patch("namex.resources.name_requests.name_request.is_name_request_refundable")
+        refundable_mock = mocker.patch('namex.resources.name_requests.name_request.is_name_request_refundable')
         refundable_mock.return_value = True
 
         request_uri = API_BASE_URI + str(nr_id) + '/' + action
@@ -295,7 +319,14 @@ def patch_nr(client, action, nr_id, nr_data, mocker):
         headers = get_test_headers()
         query = build_test_query(test_params)
         path = build_request_uri(request_uri, query)
-        print('Patch (' + action + ') Name Request [' + str(nr_id) + ']: \n' + json.dumps(nr_data, sort_keys=True, indent=4, separators=(',', ': ')))
+        print(
+            'Patch ('
+            + action
+            + ') Name Request ['
+            + str(nr_id)
+            + ']: \n'
+            + json.dumps(nr_data, sort_keys=True, indent=4, separators=(',', ': '))
+        )
         log_request_path(path)
 
         patch_response = client.patch(path, data=json.dumps(nr_data), headers=headers)

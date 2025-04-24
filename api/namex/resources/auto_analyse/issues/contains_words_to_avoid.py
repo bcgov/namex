@@ -10,21 +10,21 @@ from ..response_objects import NameAction, NameActions
 
 class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
     issue_type = AnalysisIssueCodes.WORDS_TO_AVOID
-    status_text = "Further Action Required"
+    status_text = 'Further Action Required'
     issue = None
 
     def create_issue(self):
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="",
-            line2="",
+            line1='',
+            line2='',
             consenting_body=None,
             designations=None,
             show_reserve_button=False,
             show_examination_button=False,
             conflicts=None,
             setup=None,
-            name_actions=[]
+            name_actions=[],
         )
 
         return issue
@@ -35,7 +35,7 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
         list_avoid_compound = self._lc_list_items(procedure_result.values['list_avoid_compound'])
 
         issue = self.create_issue()
-        issue.line1 = "The word(s) " + self._join_list_words(list_avoid_compound) + " cannot be used."
+        issue.line1 = 'The word(s) ' + self._join_list_words(list_avoid_compound) + ' cannot be used.'
 
         # TODO: If there's a duplicate of a word to avoid, just grabbing the index might not do!
         issue.name_actions = []
@@ -47,13 +47,7 @@ class ContainsWordsToAvoidIssue(AnalysisResponseIssue):
             #     list_name.index(word)
             # )
 
-            issue.name_actions.append(
-                NameAction(
-                    type=NameActions.STRIKE,
-                    word=word,
-                    index=0
-                )
-            )
+            issue.name_actions.append(NameAction(type=NameActions.STRIKE, word=word, index=0))
 
         # Setup boxes
         issue.setup = self.setup_config

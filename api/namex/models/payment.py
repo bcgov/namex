@@ -1,4 +1,5 @@
 """Payments for a Request."""
+
 from enum import Enum
 
 from flask import current_app
@@ -11,13 +12,13 @@ from namex.utils import queue_util
 
 
 class Payment(db.Model):
-
     class PaymentActions(Enum):
         """Valid actions for a payment."""
-        CREATE='CREATE'
-        UPGRADE='UPGRADE'
-        REAPPLY='REAPPLY'
-        RESUBMIT='RESUBMIT'
+
+        CREATE = 'CREATE'
+        UPGRADE = 'UPGRADE'
+        REAPPLY = 'REAPPLY'
+        RESUBMIT = 'RESUBMIT'
 
     __tablename__ = 'payments'
 
@@ -28,8 +29,7 @@ class Payment(db.Model):
     _payment_status_code = db.Column('payment_status_code', db.String(50))
     payment_note = db.Column('payment_note', db.String(100))
     payment_action = db.Column('payment_action', db.String(50))
-    furnished = db.Column('furnished',db.Boolean, default=False)
-
+    furnished = db.Column('furnished', db.Boolean, default=False)
 
     nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'), index=True)
 
@@ -69,10 +69,13 @@ class Payment(db.Model):
     @classmethod
     def find_by_existing_nr_id(cls, nr_id, payment_action):
         """Find existing payment by nr_id and payment_action."""
-        return cls.query.filter_by(nrId = nr_id).\
-                filter_by(payment_action = payment_action).\
-                filter(Payment._payment_status_code != PaymentStatusCode.CANCELLED.value).\
-                order_by(Payment.id.desc()).first()
+        return (
+            cls.query.filter_by(nrId=nr_id)
+            .filter_by(payment_action=payment_action)
+            .filter(Payment._payment_status_code != PaymentStatusCode.CANCELLED.value)
+            .order_by(Payment.id.desc())
+            .first()
+        )
 
     def as_dict(self):
         return {
@@ -83,7 +86,7 @@ class Payment(db.Model):
             'payment_completion_date': self.payment_completion_date,
             'payment_status_code': self.payment_status_code,
             'payment_action': self.payment_action,
-            'receipt_sent': self.furnished
+            'receipt_sent': self.furnished,
         }
 
     def save_to_db(self):
@@ -92,6 +95,7 @@ class Payment(db.Model):
 
     def delete_from_db(self):
         pass
+
 
 @event.listens_for(Payment, 'after_insert')
 @event.listens_for(Payment, 'before_update')
@@ -116,7 +120,6 @@ def update_nr_state(mapper, connection, target):
                 queue_util.send_name_request_state_msg(nr.nrNum, State.DRAFT, State.PENDING_PAYMENT)
 
 
-
 @event.listens_for(Payment, 'after_update')
 def after_update_payment(mapper, connection, target):
     """Publish email notification."""
@@ -124,7 +127,9 @@ def after_update_payment(mapper, connection, target):
 
     nr = Request.find_by_id(target.nrId)
     payment_completion_date_history = get_history(target, '_payment_completion_date')
-    if target.payment_action in [Payment.PaymentActions.REAPPLY.value, Payment.PaymentActions.UPGRADE.value] \
-            and len(payment_completion_date_history.added) > 0:
+    if (
+        target.payment_action in [Payment.PaymentActions.REAPPLY.value, Payment.PaymentActions.UPGRADE.value]
+        and len(payment_completion_date_history.added) > 0
+    ):
         option = 'renewal' if target.payment_action == Payment.PaymentActions.REAPPLY.value else 'upgrade'
         queue_util.publish_email_notification(nr.nrNum, option)

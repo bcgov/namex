@@ -48,10 +48,7 @@ class WordClassificationService:
 
     @classmethod
     def create_or_update(cls, word_classification):
-        entity = cls.find_one_by_class(
-            word_classification['word'],
-            word_classification['classification']
-        ) or None
+        entity = cls.find_one_by_class(word_classification['word'], word_classification['classification']) or None
 
         # user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
         user = User.find_by_username(word_classification['examiner'])

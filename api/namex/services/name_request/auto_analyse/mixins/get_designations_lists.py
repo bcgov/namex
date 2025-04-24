@@ -33,7 +33,7 @@ class GetDesignationsListsMixin(object):
     # Designation_any_list and designation_end_list based on company name typed by user
     _all_designations = []
     _designation_any_list = []
-    _designation_end_list =[]
+    _designation_end_list = []
 
     # Wrong any_list and end_list based on company name typed by user
     _misplaced_designation_any_list = []

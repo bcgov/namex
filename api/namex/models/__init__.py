@@ -1,6 +1,7 @@
 """Models for the business objects in the application
-   This is picked up by the DB management system to maintain tables, etc.
+This is picked up by the DB management system to maintain tables, etc.
 """
+
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()

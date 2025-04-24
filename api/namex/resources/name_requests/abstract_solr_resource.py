@@ -13,6 +13,7 @@ class AbstractSolrResource(Resource):
     Abstract class. Extended by AbstractNameRequestResource.
     Avoid using this class elsewhere, please use AbstractNameRequestResource instead.
     """
+
     @classmethod
     def create_solr_nr_doc(cls, solr_core, name_request):
         try:
@@ -23,7 +24,7 @@ class AbstractSolrResource(Resource):
                 'id': name_request.nrNum,
                 'name': solr_name,
                 'source': 'NR',
-                'start_date': name_request.submittedDate.strftime('%Y-%m-%dT%H:%M:00Z')
+                'start_date': name_request.submittedDate.strftime('%Y-%m-%dT%H:%M:00Z'),
             }
 
             solr_docs.append(nr_doc)
@@ -65,9 +66,27 @@ class AbstractSolrResource(Resource):
 
         # Only update solr for corp entity types
         # TODO: Use the actual codes from the constants file...
-        if nr_model.stateCd in [State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED, State.CANCELLED] and \
-                nr_model.entity_type_cd in ['CR', 'UL', 'BC', 'CP', 'PA', 'XCR', 'XUL', 'XCP', 'CC', 'FI', 'XCR', 'XUL', 'XCP']:
-
+        if nr_model.stateCd in [
+            State.COND_RESERVE,
+            State.RESERVED,
+            State.CONDITIONAL,
+            State.APPROVED,
+            State.CANCELLED,
+        ] and nr_model.entity_type_cd in [
+            'CR',
+            'UL',
+            'BC',
+            'CP',
+            'PA',
+            'XCR',
+            'XUL',
+            'XCP',
+            'CC',
+            'FI',
+            'XCR',
+            'XUL',
+            'XCP',
+        ]:
             cls.create_solr_nr_doc(SOLR_CORE, nr_model)
             if temp_nr_num:
                 # This performs a safe delete, we check to see if the temp ID exists before deleting

@@ -1,14 +1,13 @@
 """
 Integration tests for Name Request state transitions.
 """
+
 import datetime
 import json
 
-from tests.python.common.test_name_request_utils import \
-    assert_field_is_mapped, assert_list_contains_exactly
+from tests.python.common.test_name_request_utils import assert_field_is_mapped, assert_list_contains_exactly
 
-from .test_setup_utils.test_helpers import \
-    create_test_nr, get_nr
+from .test_setup_utils.test_helpers import create_test_nr, get_nr
 
 from namex.models import State
 from namex.constants import NameRequestActions
@@ -44,7 +43,7 @@ def build_test_input_fields():
         # 'submittedDate': None,
         'submitter_userid': 'name_request_service_account',
         'userId': 'name_request_service_account',
-        'xproJurisdiction': ''
+        'xproJurisdiction': '',
     }
 
 
@@ -81,16 +80,19 @@ def test_draft_response_actions(client, jwt, app):
 
     # Check actions
     actions = nr.get('actions')
-    assert_list_contains_exactly(actions, [
-        NameRequestActions.EDIT.value,
-        # TODO: Upgrade only should show up if priorityCd has not already been set to 'Y'
-        NameRequestActions.UPGRADE.value,
-        # TODO: Spreadsheet conflicts with task
-        # TODO: Show refund action ONLY if there is an existing payment!
-        # NameRequestActions.REQUEST_REFUND.value,
-        # TODO: Show receipt action ONLY if there is an existing payment!
-        # NameRequestActions.RECEIPT.value
-    ])
+    assert_list_contains_exactly(
+        actions,
+        [
+            NameRequestActions.EDIT.value,
+            # TODO: Upgrade only should show up if priorityCd has not already been set to 'Y'
+            NameRequestActions.UPGRADE.value,
+            # TODO: Spreadsheet conflicts with task
+            # TODO: Show refund action ONLY if there is an existing payment!
+            # NameRequestActions.REQUEST_REFUND.value,
+            # TODO: Show receipt action ONLY if there is an existing payment!
+            # NameRequestActions.RECEIPT.value
+        ],
+    )
 
 
 def test_approved_response_actions(client, jwt, app):
@@ -125,15 +127,18 @@ def test_approved_response_actions(client, jwt, app):
 
     # Check actions
     actions = nr.get('actions')
-    assert_list_contains_exactly(actions, [
-        NameRequestActions.EDIT.value,
-        NameRequestActions.CANCEL.value,
-        # TODO: Show receipt action ONLY if there is an existing payment!
-        # NameRequestActions.RECEIPT.value,
-        # TODO: Add logic to test 5 days / expiry
-        # NameRequestActions.REAPPLY.value,
-        NameRequestActions.RESEND.value
-    ])
+    assert_list_contains_exactly(
+        actions,
+        [
+            NameRequestActions.EDIT.value,
+            NameRequestActions.CANCEL.value,
+            # TODO: Show receipt action ONLY if there is an existing payment!
+            # NameRequestActions.RECEIPT.value,
+            # TODO: Add logic to test 5 days / expiry
+            # NameRequestActions.REAPPLY.value,
+            NameRequestActions.RESEND.value,
+        ],
+    )
 
 
 def test_approved_and_expired_response_actions(client, jwt, app):
@@ -171,13 +176,16 @@ def test_approved_and_expired_response_actions(client, jwt, app):
 
     # Check actions
     actions = nr.get('actions')
-    assert_list_contains_exactly(actions, [
-        NameRequestActions.EDIT.value,
-        # TODO: Show receipt action ONLY if there is an existing payment!
-        # NameRequestActions.RECEIPT.value,
-        NameRequestActions.REAPPLY.value,
-        NameRequestActions.RESEND.value
-    ])
+    assert_list_contains_exactly(
+        actions,
+        [
+            NameRequestActions.EDIT.value,
+            # TODO: Show receipt action ONLY if there is an existing payment!
+            # NameRequestActions.RECEIPT.value,
+            NameRequestActions.REAPPLY.value,
+            NameRequestActions.RESEND.value,
+        ],
+    )
 
 
 def test_conditional_response_actions(client, jwt, app):
@@ -212,15 +220,18 @@ def test_conditional_response_actions(client, jwt, app):
 
     # Check actions
     actions = nr.get('actions')
-    assert_list_contains_exactly(actions, [
-        NameRequestActions.EDIT.value,
-        NameRequestActions.CANCEL.value,
-        # TODO: Show receipt action ONLY if there is an existing payment!
-        # NameRequestActions.RECEIPT.value,
-        # TODO: Add logic to test 5 days / expiry
-        # NameRequestActions.REAPPLY.value,
-        NameRequestActions.RESEND.value
-    ])
+    assert_list_contains_exactly(
+        actions,
+        [
+            NameRequestActions.EDIT.value,
+            NameRequestActions.CANCEL.value,
+            # TODO: Show receipt action ONLY if there is an existing payment!
+            # NameRequestActions.RECEIPT.value,
+            # TODO: Add logic to test 5 days / expiry
+            # NameRequestActions.REAPPLY.value,
+            NameRequestActions.RESEND.value,
+        ],
+    )
 
 
 def test_conditional_and_expired_response_actions(client, jwt, app):
@@ -258,13 +269,16 @@ def test_conditional_and_expired_response_actions(client, jwt, app):
 
     # Check actions
     actions = nr.get('actions')
-    assert_list_contains_exactly(actions, [
-        NameRequestActions.EDIT.value,
-        # TODO: Show receipt action ONLY if there is an existing payment!
-        # NameRequestActions.RECEIPT.value,
-        NameRequestActions.REAPPLY.value,
-        NameRequestActions.RESEND.value
-    ])
+    assert_list_contains_exactly(
+        actions,
+        [
+            NameRequestActions.EDIT.value,
+            # TODO: Show receipt action ONLY if there is an existing payment!
+            # NameRequestActions.RECEIPT.value,
+            NameRequestActions.REAPPLY.value,
+            NameRequestActions.RESEND.value,
+        ],
+    )
 
 
 def test_consumed_and_conditional_response_actions(client, jwt, app):
@@ -279,17 +293,19 @@ def test_consumed_and_conditional_response_actions(client, jwt, app):
     """
     # Define our data
     input_fields = build_test_input_fields()
-    custom_names = [{
-        'name': 'BLUE HERON TOURS LTD.',
-        'choice': 1,
-        'designation': 'LTD.',
-        'name_type_cd': 'CO',
-        'consent_words': '',
-        'conflict1': 'BLUE HERON TOURS LTD.',
-        'conflict1_num': '0515211',
-        # Custom name has a corp num to make it 'consumed'
-        'corpNum': '12345'
-    }]
+    custom_names = [
+        {
+            'name': 'BLUE HERON TOURS LTD.',
+            'choice': 1,
+            'designation': 'LTD.',
+            'name_type_cd': 'CO',
+            'consent_words': '',
+            'conflict1': 'BLUE HERON TOURS LTD.',
+            'conflict1_num': '0515211',
+            # Custom name has a corp num to make it 'consumed'
+            'corpNum': '12345',
+        }
+    ]
 
     input_fields['names'] = custom_names
 
@@ -312,12 +328,15 @@ def test_consumed_and_conditional_response_actions(client, jwt, app):
 
     # Check actions
     actions = nr.get('actions')
-    assert_list_contains_exactly(actions, [
-        NameRequestActions.EDIT.value,
-        # TODO: Show receipt action ONLY if there is an existing payment!
-        # NameRequestActions.RECEIPT.value,
-        NameRequestActions.RESEND.value
-    ])
+    assert_list_contains_exactly(
+        actions,
+        [
+            NameRequestActions.EDIT.value,
+            # TODO: Show receipt action ONLY if there is an existing payment!
+            # NameRequestActions.RECEIPT.value,
+            NameRequestActions.RESEND.value,
+        ],
+    )
 
 
 def test_consumed_and_approved_response_actions(client, jwt, app):
@@ -332,17 +351,19 @@ def test_consumed_and_approved_response_actions(client, jwt, app):
     """
     # Define our data
     input_fields = build_test_input_fields()
-    custom_names = [{
-        'name': 'BLUE HERON TOURS LTD.',
-        'choice': 1,
-        'designation': 'LTD.',
-        'name_type_cd': 'CO',
-        'consent_words': '',
-        'conflict1': 'BLUE HERON TOURS LTD.',
-        'conflict1_num': '0515211',
-        # Custom name has a corp num to make it 'consumed'
-        'corpNum': '12345'
-    }]
+    custom_names = [
+        {
+            'name': 'BLUE HERON TOURS LTD.',
+            'choice': 1,
+            'designation': 'LTD.',
+            'name_type_cd': 'CO',
+            'consent_words': '',
+            'conflict1': 'BLUE HERON TOURS LTD.',
+            'conflict1_num': '0515211',
+            # Custom name has a corp num to make it 'consumed'
+            'corpNum': '12345',
+        }
+    ]
 
     input_fields['names'] = custom_names
 
@@ -365,12 +386,15 @@ def test_consumed_and_approved_response_actions(client, jwt, app):
 
     # Check actions
     actions = nr.get('actions')
-    assert_list_contains_exactly(actions, [
-        NameRequestActions.EDIT.value,
-        # TODO: Show receipt action ONLY if there is an existing payment!
-        # NameRequestActions.RECEIPT.value,
-        NameRequestActions.RESEND.value
-    ])
+    assert_list_contains_exactly(
+        actions,
+        [
+            NameRequestActions.EDIT.value,
+            # TODO: Show receipt action ONLY if there is an existing payment!
+            # NameRequestActions.RECEIPT.value,
+            NameRequestActions.RESEND.value,
+        ],
+    )
 
 
 def test_rejected_response_actions(client, jwt, app):
@@ -405,12 +429,15 @@ def test_rejected_response_actions(client, jwt, app):
 
     # Check actions
     actions = nr.get('actions')
-    assert_list_contains_exactly(actions, [
-        NameRequestActions.EDIT.value,  # TODO: Make sure we can only edit contact info somehow as part of this test
-        # TODO: Show receipt action ONLY if there is an existing payment!
-        # NameRequestActions.RECEIPT.value,
-        NameRequestActions.RESEND.value,
-    ])
+    assert_list_contains_exactly(
+        actions,
+        [
+            NameRequestActions.EDIT.value,  # TODO: Make sure we can only edit contact info somehow as part of this test
+            # TODO: Show receipt action ONLY if there is an existing payment!
+            # NameRequestActions.RECEIPT.value,
+            NameRequestActions.RESEND.value,
+        ],
+    )
 
 
 def test_historical_response_actions(client, jwt, app):
@@ -445,10 +472,13 @@ def test_historical_response_actions(client, jwt, app):
 
     # Check actions
     actions = nr.get('actions')
-    assert_list_contains_exactly(actions, [
-        # TODO: Show receipt action ONLY if there is an existing payment!
-        # NameRequestActions.RECEIPT.value
-    ])
+    assert_list_contains_exactly(
+        actions,
+        [
+            # TODO: Show receipt action ONLY if there is an existing payment!
+            # NameRequestActions.RECEIPT.value
+        ],
+    )
 
 
 def test_hold_response_actions(client, jwt, app):

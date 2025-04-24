@@ -9,6 +9,7 @@ from namex.services.statistics import response_keys, UnitTime, get_utc_now
 from namex.utils.sql_alchemy import query_result_to_dict
 from namex.utils.api_resource import handle_exception
 
+
 class WaitTimeStatsService:
     def __init__(self):
         pass
@@ -73,9 +74,11 @@ class WaitTimeStatsService:
         if np.is_busday(todays_date) or delta == 0:
             delta += 1
 
-        response_values = [0,
-                           0, #cls.get_waiting_time_priority_queue(unit=UnitTime.HR.value),
-                           delta]
+        response_values = [
+            0,
+            0,  # cls.get_waiting_time_priority_queue(unit=UnitTime.HR.value),
+            delta,
+        ]
 
         response = query_result_to_dict(response_keys, response_values)
 

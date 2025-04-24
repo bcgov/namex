@@ -1,4 +1,5 @@
 """Util functions for name analysis."""
+
 import collections
 import itertools
 import re
@@ -34,12 +35,14 @@ def get_flat_list(lst):
 
 
 def remove_french(text, all_designations_alternators):
-    text = re.sub(r'^([^-/]*?\b({0})(?!\w)[^-/\n]*)(?:[-/]\s*(.*))?$'.format(all_designations_alternators),
-                  r'\1 ',
-                  text,
-                  0,
-                  re.IGNORECASE)
-    return " ".join(text.lower().split())
+    text = re.sub(
+        r'^([^-/]*?\b({0})(?!\w)[^-/\n]*)(?:[-/]\s*(.*))?$'.format(all_designations_alternators),
+        r'\1 ',
+        text,
+        0,
+        re.IGNORECASE,
+    )
+    return ' '.join(text.lower().split())
 
 
 def remove_stop_words(name, stop_words, exception_stop_word_designation):
@@ -48,9 +51,9 @@ def remove_stop_words(name, stop_words, exception_stop_word_designation):
     ws_generic_rx = r'\b({0})\b'.format(stop_words_rx)
     ws_rx = re.compile(r'({0})|{1}'.format(exception_designation_rx, ws_generic_rx), re.I)
 
-    text = ws_rx.sub(lambda x: x.group(1) or "", name)
+    text = ws_rx.sub(lambda x: x.group(1) or '', name)
 
-    return " ".join(text.split())
+    return ' '.join(text.split())
 
 
 def list_distinctive_descriptive(name_list, dist_list, desc_list):
@@ -100,8 +103,7 @@ def get_all_dict_substitutions(dist_substitution_dict, desc_substitution_dict, l
 
 def get_distinctive_substitutions(syn_svc, list_dist):
     all_dist_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
-        words=list_dist,
-        words_are_distinctive=True
+        words=list_dist, words_are_distinctive=True
     ).data
 
     dist_substitution_dict = parse_dict_of_lists(all_dist_substitutions_synonyms)
@@ -111,8 +113,7 @@ def get_distinctive_substitutions(syn_svc, list_dist):
 
 def get_descriptive_substitutions(syn_svc, list_desc):
     all_desc_substitutions_synonyms = syn_svc.get_all_substitutions_synonyms(
-        words=list_desc,
-        words_are_distinctive=False
+        words=list_desc, words_are_distinctive=False
     ).data
 
     desc_substitution_dict = parse_dict_of_lists(all_desc_substitutions_synonyms)
@@ -143,7 +144,7 @@ def check_numbers_beginning(syn_svc, tokens):
         for idx, token in enumerate(tokens[1:]):
             if not token.isdigit():
                 if not syn_svc.get_word_synonyms(word=token).data:
-                    tokens = tokens[idx + 1:]
+                    tokens = tokens[idx + 1 :]
                 break
     return tokens
 
@@ -188,21 +189,23 @@ def change_descriptive(list_dist_words, list_desc_words, list_name):
 
 def get_classification_summary(list_dist, list_desc, list_name):
     classification_summary = {
-        word.replace(" ",
-                     ""): DataFrameFields.DISTINCTIVE.value if word in list_dist else DataFrameFields.DESCRIPTIVE.value if any(
-            word in desc_word for desc_word in list_desc) else DataFrameFields.UNCLASSIFIED.value for word
-        in
-        list_name}
+        word.replace(' ', ''): DataFrameFields.DISTINCTIVE.value
+        if word in list_dist
+        else DataFrameFields.DESCRIPTIVE.value
+        if any(word in desc_word for desc_word in list_desc)
+        else DataFrameFields.UNCLASSIFIED.value
+        for word in list_name
+    }
     return classification_summary
 
 
 def get_conflicts_same_classification(builder, name_tokens, processed_name, stand_alone_words, list_dist, list_desc):
     current_app.logger.debug('get_conflicts_same_classification')
-    list_dist, list_desc = \
-        list_distinctive_descriptive(name_tokens, list_dist, list_desc)
+    list_dist, list_desc = list_distinctive_descriptive(name_tokens, list_dist, list_desc)
     # Search conflicts coming from check_name_is_well_formed analysis
-    check_conflicts = builder.search_conflicts(list_dist, list_desc, list_desc, name_tokens, processed_name, stand_alone_words,
-                                               check_name_is_well_formed=True)
+    check_conflicts = builder.search_conflicts(
+        list_dist, list_desc, list_desc, name_tokens, processed_name, stand_alone_words, check_name_is_well_formed=True
+    )
 
     return check_conflicts
 
@@ -215,18 +218,19 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
     service._list_dist_words, service._list_desc_words, service._list_none_words = service.word_classification_tokens
 
     if service.get_list_none() and service.get_list_none().__len__() > 0:
-        service._list_dist_words, service._list_desc_words = \
-            token_svc.handle_unclassified_words(
-                service.get_list_dist(),
-                service.get_list_desc(),
-                service.get_list_none(),
-                service.compound_descriptive_name_tokens
-            )
-    service._list_dist_words, service._list_desc_words, dict_desc = check_synonyms(syn_svc,
-                                                                                   stand_alone_words,
-                                                                                   service.get_list_dist(),
-                                                                                   service.get_list_desc(),
-                                                                                   service.compound_descriptive_name_tokens)
+        service._list_dist_words, service._list_desc_words = token_svc.handle_unclassified_words(
+            service.get_list_dist(),
+            service.get_list_desc(),
+            service.get_list_none(),
+            service.compound_descriptive_name_tokens,
+        )
+    service._list_dist_words, service._list_desc_words, dict_desc = check_synonyms(
+        syn_svc,
+        stand_alone_words,
+        service.get_list_dist(),
+        service.get_list_desc(),
+        service.compound_descriptive_name_tokens,
+    )
 
     service._list_none_words = update_none_list(service.get_list_none(), service.get_list_desc())
 
@@ -241,44 +245,54 @@ def get_classification(service, stand_alone_words, syn_svc, match, wc_svc, token
             dict_desc.pop(service.get_list_dist()[0], None)
 
     service.set_compound_descriptive_name_tokens(
-        update_compound_tokens(service.get_list_dist() + service.get_list_desc(),
-                               service.compound_descriptive_name_tokens))
+        update_compound_tokens(
+            service.get_list_dist() + service.get_list_desc(), service.compound_descriptive_name_tokens
+        )
+    )
 
-    service._dict_name_words = get_classification_summary(service.get_list_dist(), service.get_list_desc(),
-                                                          service.compound_descriptive_name_tokens)
+    service._dict_name_words = get_classification_summary(
+        service.get_list_dist(), service.get_list_desc(), service.compound_descriptive_name_tokens
+    )
 
     current_app.logger.debug(f'Original Classification: {service.get_dict_name()}')
 
     service.set_name_tokens_search_conflict(service.compound_descriptive_name_tokens)
-    service._list_dist_words_search_conflicts = remove_misplaced_distinctive(list(service.get_list_dist()),
-                                                                             service.get_list_desc(),
-                                                                             service.name_tokens_search_conflict)
+    service._list_dist_words_search_conflicts = remove_misplaced_distinctive(
+        list(service.get_list_dist()), service.get_list_desc(), service.name_tokens_search_conflict
+    )
 
-    service._list_desc_words_search_conflicts, service._dict_desc_words_search_conflicts = remove_descriptive_same_category(
-        dict_desc)
+    service._list_desc_words_search_conflicts, service._dict_desc_words_search_conflicts = (
+        remove_descriptive_same_category(dict_desc)
+    )
 
     service.set_name_tokens_search_conflict(
-        update_token_list(service.get_list_dist_search_conflicts() + service.get_list_desc_search_conflicts(),
-                          service.name_tokens_search_conflict))
+        update_token_list(
+            service.get_list_dist_search_conflicts() + service.get_list_desc_search_conflicts(),
+            service.name_tokens_search_conflict,
+        )
+    )
 
-    service._dict_name_words_search_conflicts = get_classification_summary(service.get_list_dist_search_conflicts(),
-                                                                           service.get_list_desc_search_conflicts(),
-                                                                           service.name_tokens_search_conflict)
+    service._dict_name_words_search_conflicts = get_classification_summary(
+        service.get_list_dist_search_conflicts(),
+        service.get_list_desc_search_conflicts(),
+        service.name_tokens_search_conflict,
+    )
 
     service.set_name_tokens_search_conflict(remove_spaces_list(service.name_tokens_search_conflict))
 
     current_app.logger.debug(
-        f'Classification for searching conflicts in NameX DB: {service.get_dict_name_search_conflicts()}')
+        f'Classification for searching conflicts in NameX DB: {service.get_dict_name_search_conflicts()}'
+    )
 
 
 def subsequences(iterable, length):
-    return [" ".join(iterable[i: i + length]) for i in range(len(iterable) - length + 1)]
+    return [' '.join(iterable[i : i + length]) for i in range(len(iterable) - length + 1)]
 
 
 def get_valid_compound_descriptive(syn_svc, list_compound):
     desc_dist = dict()
     for compound in list_compound:
-        substitution = syn_svc.get_word_synonyms(word=compound.replace(" ", "")).data
+        substitution = syn_svc.get_word_synonyms(word=compound.replace(' ', '')).data
         if substitution:
             desc_dist[compound] = substitution
 
@@ -296,7 +310,7 @@ def search_word(d, search_item):
 
 def update_compound_tokens(list_desc_compound, original_list):
     list_compound = sorted(list_desc_compound + original_list, key=len, reverse=True)
-    str_original = " ".join(original_list)
+    str_original = ' '.join(original_list)
 
     compound_alternators = '|'.join(map(re.escape, list_compound))
     regex = re.compile(r'(?<!\w)({0})(?!\w)'.format(compound_alternators))
@@ -338,15 +352,18 @@ def list_to_string(lst):
 
 def remove_misplaced_distinctive(list_dist, list_desc, list_name):
     if list_desc.__len__() > 0 and list_dist.__len__() > 0:
-        for word in list_name[list_name.index(list_desc[0]) + 1:]:
+        for word in list_name[list_name.index(list_desc[0]) + 1 :]:
             if word in list_dist:
                 list_dist.remove(word)
     return list_dist
 
 
 def remove_descriptive_same_category(dict_desc):
-    dict_desc_unique_category = {key: val for i, (key, val) in enumerate(dict_desc.items())
-                                 if porter.stem(key) not in itertools.chain(*list(dict_desc.values())[:i])}
+    dict_desc_unique_category = {
+        key: val
+        for i, (key, val) in enumerate(dict_desc.items())
+        if porter.stem(key) not in itertools.chain(*list(dict_desc.values())[:i])
+    }
 
     return list(dict_desc_unique_category.keys()), dict_desc_unique_category
 
@@ -356,10 +373,14 @@ def remove_double_letters_list_dist_words(list_dist, name_tokens, dist_substitut
     for item in list_dist:
         not_double_letters_item = remove_double_letters(item)
         list_dist_final.append(not_double_letters_item)
-        name_tokens = list(map(
-            lambda x, value=item, singular_letter_value=not_double_letters_item: str.replace(x, value,
-                                                                                             singular_letter_value),
-            name_tokens))
+        name_tokens = list(
+            map(
+                lambda x, value=item, singular_letter_value=not_double_letters_item: str.replace(
+                    x, value, singular_letter_value
+                ),
+                name_tokens,
+            )
+        )
         if dist_substitution_dict:
             dist_substitution_dict[not_double_letters_item] = dist_substitution_dict.pop(item)
             if not dist_substitution_dict.get(not_double_letters_item):

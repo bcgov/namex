@@ -10,13 +10,13 @@ from ..response_objects import NameAction, NameActions
 
 class DesignationMisplacedIssue(AnalysisResponseIssue):
     issue_type = AnalysisIssueCodes.DESIGNATION_MISPLACED
-    status_text = "Further Action Required"
+    status_text = 'Further Action Required'
     issue = None
 
     def create_issue(self):
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="",
+            line1='',
             line2=None,
             consenting_body=None,
             designations=None,
@@ -24,7 +24,7 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
             show_examination_button=False,
             conflicts=None,
             setup=None,
-            name_actions=[]
+            name_actions=[],
         )
 
         return issue
@@ -37,8 +37,11 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
         # list_name_incl_designation_lc = self._lc_list_items(list_name_incl_designation)
 
         issue = self.create_issue()
-        issue.line1 = "The " + self._join_list_words(misplaced_end_designation_lc) + \
-                      " designation must be at the end of the name."
+        issue.line1 = (
+            'The '
+            + self._join_list_words(misplaced_end_designation_lc)
+            + ' designation must be at the end of the name.'
+        )
 
         # Loop over the list_name words, we need to decide to do with each word
         # for word in list_name_incl_designation_lc:
@@ -64,7 +67,7 @@ class DesignationMisplacedIssue(AnalysisResponseIssue):
                 NameAction(
                     word=phrase,
                     index=0,  # not used
-                    type=NameActions.HIGHLIGHT  # not used
+                    type=NameActions.HIGHLIGHT,  # not used
                 )
             )
 

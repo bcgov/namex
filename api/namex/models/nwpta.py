@@ -46,6 +46,7 @@ class PartnerNameSystemSchema(ma.SQLAlchemySchema):
             'partnerJurisdictionTypeCd',
             'partnerNameDate',
             'partnerName',
-            'requested'
+            'requested',
         )
+
     partnerName = fields.String(required=False, allow_none=True)

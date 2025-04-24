@@ -10,11 +10,11 @@ def _to_string(string):
     return string
 
 
-'''
+"""
 @deprecated
-'''
+"""
 
-'''
+"""
 class VirtualWordCondition(db.Model):
     __tablename__ = 'virtual_word_condition'
 
@@ -26,7 +26,7 @@ class VirtualWordCondition(db.Model):
     rc_instructions = Column(db.VARCHAR(1000))
     rc_consent_required = db.Column(db.Boolean(), default=False)
     rc_allow_use = db.Column(db.Boolean(), default=True)
-'''
+"""
 
 
 # The class that corresponds to the database table for decision reasons audits.
@@ -41,9 +41,7 @@ class DecisionReasonAudit(db.Model):
     name = db.Column(db.VARCHAR(1024))
     reason = db.Column(db.VARCHAR(1024))
 
-    def __init__(
-            self, username: str, action: str, id: str,
-            name: str, reason: str) -> None:
+    def __init__(self, username: str, action: str, id: str, name: str, reason: str) -> None:
         self.username = username
         self.timestamp = datetime.datetime.now()
         self.action = action
@@ -69,9 +67,17 @@ class RestrictedConditionAudit(db.Model):
     allow_use = db.Column(db.Boolean(), default=True)
 
     def __init__(
-            self, username: str, action: str, cnd_id: int, cnd_text: str, words: str,
-            consent_required: bool, consenting_body: str, instructions: str,
-            allow_use: bool) -> None:
+        self,
+        username: str,
+        action: str,
+        cnd_id: int,
+        cnd_text: str,
+        words: str,
+        consent_required: bool,
+        consenting_body: str,
+        instructions: str,
+        allow_use: bool,
+    ) -> None:
         self.username = username
         self.timestamp = datetime.datetime.now()
         self.action = action
@@ -100,8 +106,15 @@ class SynonymAudit(db.Model):
     enabled = db.Column(db.Boolean())
 
     def __init__(
-            self, username: str, action: str, synonym_id: int, category: str, synonyms_text: str, comment: str,
-            enabled: bool) -> None:
+        self,
+        username: str,
+        action: str,
+        synonym_id: int,
+        category: str,
+        synonyms_text: str,
+        comment: str,
+        enabled: bool,
+    ) -> None:
         self.username = username
         self.timestamp = datetime.datetime.now()
         self.action = action

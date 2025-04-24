@@ -63,9 +63,7 @@ class NRNumberService:
 
                 return nr_num
 
-            raise Exception(
-                f'Unable to generate random number from range {floor} to {ceiling} after {count} attempts.'
-                )
+            raise Exception(f'Unable to generate random number from range {floor} to {ceiling} after {count} attempts.')
         except Exception as e:
             current_app.logger.error(f'Exception in get_new_nr_num; {str(e)}')
             raise

@@ -32,8 +32,9 @@ def test_get_new_user_settings(client, jwt, app):
         'ClientNotification',
         'Submitted',
         'LastUpdate',
-        'LastComment'
+        'LastComment',
     ]
+
 
 def test_get_existing_user_settings(client, jwt, app):
     """Test getting user settings for an existing user."""
@@ -43,20 +44,23 @@ def test_get_existing_user_settings(client, jwt, app):
         firstname='',
         lastname='',
         iss='',
-        idp_userid='123', # this needs to match the sub in create_header
-        login_source='IDIR'
+        idp_userid='123',  # this needs to match the sub in create_header
+        login_source='IDIR',
     )
     user.searchColumns = 'Status'
     user.save_to_db()
 
     # check it gets the existing settings stored in the db
-    existing_user_settings = client.get(f'api/v1/usersettings', headers=create_header(jwt, [User.EDITOR], 'test-settings'))
+    existing_user_settings = client.get(
+        f'api/v1/usersettings', headers=create_header(jwt, [User.EDITOR], 'test-settings')
+    )
     data = existing_user_settings.data
     assert data
     resp = json.loads(data.decode('utf-8'))
 
     assert resp.get('searchColumns')
     assert resp.get('searchColumns') == ['Status']
+
 
 def test_update_user_settings(client, jwt, app):
     """Test updating user settings for an existing user."""
@@ -68,15 +72,15 @@ def test_update_user_settings(client, jwt, app):
         lastname='',
         iss='',
         idp_userid='123',
-        login_source='IDIR'
+        login_source='IDIR',
     )
     user.searchColumns = 'Status'
     user.save_to_db()
     # update user with put endpoint
     update_user_settings = client.put(
         f'api/v1/usersettings',
-        json={ 'searchColumns': ['Status','LastModifiedBy'] },
-        headers=create_header(jwt, [User.EDITOR], 'test-settings')
+        json={'searchColumns': ['Status', 'LastModifiedBy']},
+        headers=create_header(jwt, [User.EDITOR], 'test-settings'),
     )
     # assert user was successfully updated
     assert update_user_settings.status_code == 204

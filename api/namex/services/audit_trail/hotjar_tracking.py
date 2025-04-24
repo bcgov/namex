@@ -34,9 +34,4 @@ class HotjarTracking(object):
     @staticmethod
     def create(nr_model, hotjar_user):
         """Create a hotjar tracking object."""
-        return HotjarTrackingModel(
-            nrId=nr_model.id,
-            hotjarUser=hotjar_user,
-            lastUpdate=datetime.utcnow()
-        )
-        
+        return HotjarTrackingModel(nrId=nr_model.id, hotjarUser=hotjar_user, lastUpdate=datetime.utcnow())

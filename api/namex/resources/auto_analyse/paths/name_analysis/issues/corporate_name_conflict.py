@@ -1,4 +1,5 @@
 """Corporate Name Conflict issue classes."""
+
 from namex.resources.auto_analyse.issues import CorporateNameConflictIssue
 
 from ....response_objects import NameAnalysisIssue
@@ -26,7 +27,7 @@ class XproCorporateNameConflictIssue(CorporateNameConflictIssue):
             show_examination_button=False,
             conflicts=[],
             setup=None,
-            name_actions=[]
+            name_actions=[],
         )
 
         return issue

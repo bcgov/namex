@@ -70,7 +70,7 @@ class AnalysisIssueCodes(str, Enum):
     CONTAINS_UNCLASSIFIABLE_WORD = 'unclassified_word'  # To examiner
     # Stop if error
     CORPORATE_CONFLICT = 'corp_conflict'
-    QUEUE_CONFLICT = "queue_conflict"
+    QUEUE_CONFLICT = 'queue_conflict'
     # Stop if error
     # TODO: What about these other guys?
     WORDS_TO_AVOID = 'word_to_avoid'
@@ -100,7 +100,8 @@ request_types = {
     EntityTypes.UNLIMITED_LIABILITY_COMPANY.value: [DesignationPositionCodes.END.value],
     EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value: [
         DesignationPositionCodes.ANY.value,
-        DesignationPositionCodes.END.value
+        DesignationPositionCodes.END.value,
     ],
     EntityTypes.COOPERATIVE.value: [DesignationPositionCodes.ANY.value],
-    EntityTypes.SOCIETY.value: [DesignationPositionCodes.ANY.value]}
+    EntityTypes.SOCIETY.value: [DesignationPositionCodes.ANY.value],
+}

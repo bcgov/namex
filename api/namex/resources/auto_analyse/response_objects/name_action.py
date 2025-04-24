@@ -43,7 +43,9 @@ class NameAction(Serializable):
         if kwargs.get('index') and (isinstance(kwargs.get('index'), int) is False or kwargs.get('index', 0) < 0):
             raise TypeError('Invalid index, index must be a positive integer or zero')
 
-        if kwargs.get('endIndex') and (isinstance(kwargs.get('endIndex'), int) is False or kwargs.get('endIndex', 0) < 0):
+        if kwargs.get('endIndex') and (
+            isinstance(kwargs.get('endIndex'), int) is False or kwargs.get('endIndex', 0) < 0
+        ):
             raise TypeError('Invalid endIndex, endIndex must be a positive integer or zero')
 
         self.type = kwargs.get('type').value if kwargs.get('type') else None

@@ -2,6 +2,7 @@
 
 TODO: Fill in a larger description once the API is defined for V1
 """
+
 from http import HTTPStatus
 
 from flask import jsonify, make_response
@@ -53,7 +54,7 @@ def bc_validate_name_request(location, entity_type, request_action):
             AnalysisRequestActions.REH.value,
             AnalysisRequestActions.REN.value,
             AnalysisRequestActions.CNV.value,
-            AnalysisRequestActions.AML.value
+            AnalysisRequestActions.AML.value,
         ]
     # elif entity_type in BCUnprotectedNameEntityTypes.list():
     #     is_unprotected = True
@@ -95,7 +96,7 @@ def xpro_validate_name_request(location, entity_type, request_action):
         AnalysisRequestActions.ASSUMED.value,
         AnalysisRequestActions.REN.value,
         AnalysisRequestActions.REH.value,
-        AnalysisRequestActions.MVE.value
+        AnalysisRequestActions.MVE.value,
     ]
 
     if not valid_location:
@@ -156,18 +157,40 @@ class NameAnalysis(Resource):
     @staticmethod
     # @jwt.requires_auth
     # @api.expect()
-    @api.doc(params={
-        'name': 'A company / organization name string',
-        'location': 'A location code [ BC (only)]',
-        'entity_type_cd': 'An entity type code [ CR, UL, CC ]',
-        'request_action_cd': 'A request action code [ NEW ]',
-        'analysis_type': '[ designation, structure ]',
-        'jurisdiction': '[ BC, XPRO ]'
-    })
+    @api.doc(
+        params={
+            'name': 'A company / organization name string',
+            'location': 'A location code [ BC (only)]',
+            'entity_type_cd': 'An entity type code [ CR, UL, CC ]',
+            'request_action_cd': 'A request action code [ NEW ]',
+            'analysis_type': '[ designation, structure ]',
+            'jurisdiction': '[ BC, XPRO ]',
+        }
+    )
     def get():
         """Get structure analysis for a name."""
         name = get_query_param_str('name')
-        allowed_special_chars = ['/', '[', ']', '^', '*', '+', '=', '&', '(', ')', ',', '”', '’', '#', '@', '!', '?', ';', ':']
+        allowed_special_chars = [
+            '/',
+            '[',
+            ']',
+            '^',
+            '*',
+            '+',
+            '=',
+            '&',
+            '(',
+            ')',
+            ',',
+            '”',
+            '’',
+            '#',
+            '@',
+            '!',
+            '?',
+            ';',
+            ':',
+        ]
         for special_char in allowed_special_chars:
             name = name.replace(special_char, ' ')
         location = get_query_param_str('location')
@@ -181,7 +204,7 @@ class NameAnalysis(Resource):
         service = None
 
         errors = bc_validate_name_request(location, entity_type, request_action)  # \
-            # if not xpro else xpro_validate_name_request(location, entity_type, request_action)
+        # if not xpro else xpro_validate_name_request(location, entity_type, request_action)
         if errors:
             return make_response(jsonify(message=errors), HTTPStatus.BAD_REQUEST)
 
@@ -233,16 +256,20 @@ class NameAnalysis(Resource):
             service = ProtectedNameAnalysisService()
             builder = NameAnalysisBuilder(service)
             # else:  # valid_location and valid_unprotected_entity_type:  # and is_unprotected_action:
-                # Use UnprotectedNameAnalysisService
-                # service = UnprotectedNameAnalysisService()
-                # builder = NameAnalysisBuilder(service)
+            # Use UnprotectedNameAnalysisService
+            # service = UnprotectedNameAnalysisService()
+            # builder = NameAnalysisBuilder(service)
             # else:
             #     return make_response(jsonify(message=['Invalid scenario']), HTTPStatus.BAD_REQUEST
 
             if not service:
-                return make_response(jsonify(message=['Failed to initialize service']), HTTPStatus.INTERNAL_SERVER_ERROR)
+                return make_response(
+                    jsonify(message=['Failed to initialize service']), HTTPStatus.INTERNAL_SERVER_ERROR
+                )
             if not builder:
-                return make_response(jsonify(message=['Failed to initialize builder']), HTTPStatus.INTERNAL_SERVER_ERROR)
+                return make_response(
+                    jsonify(message=['Failed to initialize builder']), HTTPStatus.INTERNAL_SERVER_ERROR
+                )
 
             # Register and initialize the builder
             service.use_builder(builder)  # Required step! TODO: Enforce this!
@@ -259,7 +286,7 @@ class NameAnalysis(Resource):
 
         # Build the appropriate response for the analysis result
         analysis_response = BcAnalysisResponse(service, analysis)  # \
-            # if not xpro else XproAnalysisResponse(service, analysis)
+        # if not xpro else XproAnalysisResponse(service, analysis)
 
         # Remove issues for end designation more than once if they are not duplicates
         valid_issues = []

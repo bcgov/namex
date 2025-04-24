@@ -17,14 +17,8 @@ class DocumentType(enum.Enum):
 
 
 class DocumentSchema(Schema):
-    type = ma_fields.String(
-        required=True,
-        error_messages={'required': {'message': 'type is a required field'}}
-    )
-    content = ma_fields.String(
-        required=True,
-        error_messages={'required': {'message': 'content is a required field'}}
-    )
+    type = ma_fields.String(required=True, error_messages={'required': {'message': 'type is a required field'}})
+    content = ma_fields.String(required=True, error_messages={'required': {'message': 'content is a required field'}})
 
     @validates('type')
     def validate_type(self, value):
@@ -38,23 +32,27 @@ class DocumentSchema(Schema):
             raise ValidationError('Document Content must have more than 1 character.')
 
 
-@cors_preflight("POST, GET")
+@cors_preflight('POST, GET')
 @api.route(':<string:analysis>', methods=['POST', 'GET', 'OPTIONS'])
 class DocumentAnalysis(Resource):
     """
-        :param analysis (str): the type of analysis to perform
-        :param args: start: number of hits to start from, default is 0
-        :param args: names_per_page: number of names to return per page, default is 50
-        :param kwargs: __futures__
-        :return: 200 - success; 40X for errors
+    :param analysis (str): the type of analysis to perform
+    :param args: start: number of hits to start from, default is 0
+    :param args: names_per_page: number of names to return per page, default is 50
+    :param kwargs: __futures__
+    :return: 200 - success; 40X for errors
     """
+
     START = 0
     ROWS = 50
 
-    a_document = api.model('document', {
-        'type': rp_fields.String(description='The object type', enum=DocumentType._member_names_),
-        'content': rp_fields.String(description='string content of the document', required=True),
-    })
+    a_document = api.model(
+        'document',
+        {
+            'type': rp_fields.String(description='The object type', enum=DocumentType._member_names_),
+            'content': rp_fields.String(description='string content of the document', required=True),
+        },
+    )
 
     @staticmethod
     @jwt.requires_auth
@@ -100,10 +98,7 @@ class DocumentAnalysis(Resource):
             current_app.logger.info('requested analysis:{} is not valid'.format(analysis.lower()))
             return make_response(jsonify(message='{analysis} is not a valid analysis'.format(analysis=analysis)), 404)
 
-        json_input = {
-            'content': request.args.get('content'),
-            'type': request.args.get('type', 'plain_text')
-        }
+        json_input = {'content': request.args.get('content'), 'type': request.args.get('type', 'plain_text')}
         if not json_input:
             return make_response(jsonify(message='No JSON data provided'), 400)
 

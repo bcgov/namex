@@ -1,5 +1,6 @@
 from . import db, ma
 from flask import current_app
+
 # from marshmallow import Schema, fields, post_load
 from datetime import datetime
 
@@ -20,7 +21,7 @@ class User(db.Model):
     searchColumns = db.Column(
         db.String(1000),
         nullable=False,
-        default='Status,LastModifiedBy,NameRequestNumber,Names,ApplicantFirstName,ApplicantLastName,NatureOfBusiness,ConsentRequired,Priority,ClientNotification,Submitted,LastUpdate,LastComment'
+        default='Status,LastModifiedBy,NameRequestNumber,Names,ApplicantFirstName,ApplicantLastName,NatureOfBusiness,ConsentRequired,Priority,ClientNotification,Submitted,LastUpdate,LastComment',
     )
 
     SYSTEM = 'system'
@@ -39,8 +40,15 @@ class User(db.Model):
         self.login_source = login_source
 
     def json(self):
-        return {"username": self.username, "firstname": self.firstname, "lastname": self.lastname,
-                "sub": self.sub, "iss": self.iss, "idp_userid": self.idp_userid, "login_source": self.login_source}
+        return {
+            'username': self.username,
+            'firstname': self.firstname,
+            'lastname': self.lastname,
+            'sub': self.sub,
+            'iss': self.iss,
+            'idp_userid': self.idp_userid,
+            'login_source': self.login_source,
+        }
 
     @classmethod
     def find_by_jwtToken(cls, token):
@@ -60,7 +68,7 @@ class User(db.Model):
                 iss=token['iss'],
                 sub=token['sub'],
                 idp_userid=token['idp_userid'],
-                login_source=token['loginSource']
+                login_source=token['loginSource'],
             )
             current_app.logger.debug('Creating user from JWT:{}; User:{}'.format(token, user))
             db.session.add(user)
@@ -96,16 +104,7 @@ class User(db.Model):
 class UserSchema(ma.SQLAlchemySchema):
     class Meta:
         model = User
-        fields = (
-            'username',
-            'firstname',
-            'lastname',
-            'sub',
-            'iss',
-            'creationDate',
-            'idp_userid',
-            'login_source'
-        )
+        fields = ('username', 'firstname', 'lastname', 'sub', 'iss', 'creationDate', 'idp_userid', 'login_source')
 
     # id = fields.Int(dump_only=False)
     # username = fields.String()
@@ -125,6 +124,7 @@ class UserSchema(ma.SQLAlchemySchema):
     #                 lastname=data['lastname'],
     #                 sub=data['sub'],
     #                 iss=data['iss'])
+
 
 # class KeycloakUserSchema(Schema):
 #     id = fields.Int(dump_only=True)

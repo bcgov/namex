@@ -14,6 +14,7 @@
 """
 Provides end points to submit, retrieve and cancel a name analysis request.
 """
+
 from http import HTTPStatus
 from unittest.mock import patch
 
@@ -24,6 +25,7 @@ from .configuration import ENDPOINT_PATH
 
 class MockResponse:  # pylint: disable=too-few-public-methods
     """Mock response class"""
+
     def __init__(self, json_data, status_code):
         self.json_data = json_data
         self.status_code = status_code
@@ -36,22 +38,10 @@ class MockResponse:  # pylint: disable=too-few-public-methods
 def test_auto_analyze_post(client):
     """Test to ensure that post endpoint works as expected."""
     headers = {'content-type': 'application/json'}
-    request_json = {
-        "name": "ADEA HEATING INC.",
-        "location": "BC",
-        "entity_type_cd": "CR",
-        "request_action_cd": "NEW"
-    }
+    request_json = {'name': 'ADEA HEATING INC.', 'location': 'BC', 'entity_type_cd': 'CR', 'request_action_cd': 'NEW'}
     post_name_analysis_response = {
-        "header": {
-            "uuid": "sdf321421344",
-            "state": "running",
-            "processed": 10,
-            "total": 200
-        },
-        "analysis": {
-            "issues": []
-        }
+        'header': {'uuid': 'sdf321421344', 'state': 'running', 'processed': 10, 'total': 200},
+        'analysis': {'issues': []},
     }
     mock_response = MockResponse(post_name_analysis_response, HTTPStatus.CREATED)
     with patch.object(requests, 'post', return_value=mock_response):
@@ -67,19 +57,10 @@ def test_auto_analyze_post(client):
 
 def test_auto_analyze_get(client):
     """Test to ensure that get endpoint works as expected."""
-    identifier = "sdf321421344"
+    identifier = 'sdf321421344'
     get_name_analysis_response = {
-        "header": {
-            "uuid": identifier,
-            "state": "completed",
-            "processed": 200,
-            "total": 200
-        },
-        "analysis": {
-            "header": "Available",
-            "status": "Available",
-            "issues": []
-        }
+        'header': {'uuid': identifier, 'state': 'completed', 'processed': 200, 'total': 200},
+        'analysis': {'header': 'Available', 'status': 'Available', 'issues': []},
     }
     mock_response = MockResponse(get_name_analysis_response, HTTPStatus.OK)
     with patch.object(requests, 'get', return_value=mock_response):
@@ -95,7 +76,7 @@ def test_auto_analyze_get(client):
 
 def test_auto_analyze_delete(client):
     """Test to ensure that delete endpoint works as expected."""
-    identifier = "sdf321421344"
+    identifier = 'sdf321421344'
     delete_name_analysis_response = {}
     mock_response = MockResponse(delete_name_analysis_response, HTTPStatus.OK)
     with patch.object(requests, 'delete', return_value=mock_response):

@@ -10,13 +10,13 @@ from ..response_objects import NameAction, NameActions
 
 class IncorrectYear(AnalysisResponseIssue):
     issue_type = AnalysisIssueCodes.INCORRECT_YEAR
-    status_text = "Further Action Required"
+    status_text = 'Further Action Required'
     issue = None
 
     def create_issue(self):
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="",
+            line1='',
             line2=None,
             consenting_body=None,
             designations=None,
@@ -24,7 +24,7 @@ class IncorrectYear(AnalysisResponseIssue):
             show_examination_button=True,
             conflicts=None,
             setup=None,
-            name_actions=[]
+            name_actions=[],
         )
 
         return issue
@@ -34,7 +34,7 @@ class IncorrectYear(AnalysisResponseIssue):
         list_years = self._lc_list_items(procedure_result.values['incorrect_years'])
 
         issue = self.create_issue()
-        issue.line1 = "4 digit numbers need to be reviewed"
+        issue.line1 = '4 digit numbers need to be reviewed'
 
         issue.name_actions = []
         for year in list_years:
@@ -45,13 +45,7 @@ class IncorrectYear(AnalysisResponseIssue):
             #     list_name.index(year)
             # )
 
-            issue.name_actions.append(
-                NameAction(
-                    type=NameActions.HIGHLIGHT,
-                    word=year,
-                    index=0
-                )
-            )
+            issue.name_actions.append(NameAction(type=NameActions.HIGHLIGHT, word=year, index=0))
 
         # Setup boxes
         issue.setup = self.setup_config

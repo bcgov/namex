@@ -11,7 +11,6 @@ from namex.services.virtual_word_condition import VirtualWordConditionService
 from .abstract_solr_resource import AbstractSolrResource
 
 
-
 class AbstractNameRequestResource(AbstractSolrResource):
     _request_data = None
     _nr_action = None
@@ -166,12 +165,18 @@ class AbstractNameRequestResource(AbstractSolrResource):
         is_temp_nr = is_temp_nr_num(nr_model.nrNum)
         temp_nr_num = None
 
-        if nr_model.stateCd in [State.PENDING_PAYMENT, 
-                                State.DRAFT, 
-                                State.COND_RESERVE, 
-                                State.RESERVED, 
-                                State.CONDITIONAL, 
-                                State.APPROVED] and is_temp_nr:
+        if (
+            nr_model.stateCd
+            in [
+                State.PENDING_PAYMENT,
+                State.DRAFT,
+                State.COND_RESERVE,
+                State.RESERVED,
+                State.CONDITIONAL,
+                State.APPROVED,
+            ]
+            and is_temp_nr
+        ):
             temp_nr_num = nr_model.nrNum
 
             nr_num = NRNumberService.get_new_nr_num()
@@ -179,7 +184,9 @@ class AbstractNameRequestResource(AbstractSolrResource):
             current_app.logger.debug('NR is using the temporary NR Number {num}'.format(num=nr_num))
 
             # Set the temp NR number if its different
-            current_app.logger.debug('Replacing temporary NR Number {temp} -> {new}'.format(temp=temp_nr_num, new=nr_model.nrNum))
+            current_app.logger.debug(
+                'Replacing temporary NR Number {temp} -> {new}'.format(temp=temp_nr_num, new=nr_model.nrNum)
+            )
 
             current_app.logger.debug(repr(nr_model))
 
@@ -197,7 +204,7 @@ class AbstractNameRequestResource(AbstractSolrResource):
             State.CONDITIONAL,
             State.APPROVED,
             State.CANCELLED,
-            State.INPROGRESS
+            State.INPROGRESS,
         ]
 
         # Check if the current state of the request is in the list of states to update

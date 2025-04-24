@@ -10,13 +10,13 @@ from ..response_objects import NameAction, NameActions
 
 class EndDesignationMoreThanOnceIssue(AnalysisResponseIssue):
     issue_type = AnalysisIssueCodes.END_DESIGNATION_MORE_THAN_ONCE
-    status_text = "Further Action Required"
+    status_text = 'Further Action Required'
     issue = None
 
     def create_issue(self):
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="",
+            line1='',
             line2=None,
             consenting_body=None,
             designations=None,
@@ -24,7 +24,7 @@ class EndDesignationMoreThanOnceIssue(AnalysisResponseIssue):
             show_examination_button=True,
             conflicts=None,
             setup=None,
-            name_actions=[]
+            name_actions=[],
         )
 
         return issue
@@ -37,7 +37,7 @@ class EndDesignationMoreThanOnceIssue(AnalysisResponseIssue):
         # list_name_incl_designation_lc = self._lc_list_items(list_name_incl_designation)
 
         issue = self.create_issue()
-        issue.line1 = "You are including multiple corporate designations which will need to be examined. "
+        issue.line1 = 'You are including multiple corporate designations which will need to be examined. '
 
         # Loop over the list_name words, we need to decide to do with each word
         # for word in correct_end_designations_lc:
@@ -63,7 +63,7 @@ class EndDesignationMoreThanOnceIssue(AnalysisResponseIssue):
                 NameAction(
                     word=phrase,
                     index=0,  # not used
-                    type=NameActions.HIGHLIGHT  # not used
+                    type=NameActions.HIGHLIGHT,  # not used
                 )
             )
 

@@ -10,13 +10,13 @@ from ..response_objects import NameAction, NameActions, WordPositions
 
 class AddDescriptiveWordIssue(AnalysisResponseIssue):
     issue_type = AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD
-    status_text = "Further Action Required"
+    status_text = 'Further Action Required'
     issue = None
 
     def create_issue(self):
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="",
+            line1='',
             line2=None,
             consenting_body=None,
             designations=None,
@@ -24,7 +24,7 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
             show_examination_button=False,
             conflicts=None,
             setup=None,
-            name_actions=[]
+            name_actions=[],
         )
 
         return issue
@@ -34,7 +34,7 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
         list_dist = self._lc_list_items(procedure_result.values['list_dist'])
 
         issue = self.create_issue()
-        issue.line1 = "Requires a word that describes the nature of your business."
+        issue.line1 = 'Requires a word that describes the nature of your business.'
 
         last_dist_word = list_dist[-1] if list_dist.__len__() > 0 else None
         # TODO: Why was this like this before?
@@ -51,9 +51,9 @@ class AddDescriptiveWordIssue(AnalysisResponseIssue):
             NameAction(
                 type=NameActions.BRACKETS,
                 position=WordPositions.END,
-                message="Add a Descriptive Word Here",
+                message='Add a Descriptive Word Here',
                 word=last_dist_word,
-                index=0
+                index=0,
             )
         ]
 

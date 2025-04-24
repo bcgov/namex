@@ -21,13 +21,16 @@ def validate_request(request):
 
 # Define our request objects
 # Snake case as these are GET params
-calculate_fees_request_schema = payment_api.model('CalculateFeesRequest', {
-    'corp_type': fields.String,
-    'filing_type_code': fields.String,
-    'jurisdiction': fields.String,
-    'date': fields.String,
-    'priority': fields.String
-})
+calculate_fees_request_schema = payment_api.model(
+    'CalculateFeesRequest',
+    {
+        'corp_type': fields.String,
+        'filing_type_code': fields.String,
+        'jurisdiction': fields.String,
+        'date': fields.String,
+        'priority': fields.String,
+    },
+)
 
 
 @payment_api.errorhandler(AuthError)
@@ -45,17 +48,22 @@ class PaymentFees(Resource):
     @payment_api.response(200, 'Success')
     @payment_api.response(400, 'Bad Request')
     @payment_api.response(500, 'Internal Server Error')
-    @payment_api.doc(params={
-    })
+    @payment_api.doc(params={})
     def post():
         try:
             json_input = request.get_json()
             if not json_input:
                 return make_response(jsonify(message=MSG_BAD_REQUEST_NO_JSON_BODY), 400)
 
-            corp_type = json_input.get('corp_type', 'NRO')  # TODO: Maybe use a constant for this, it's the default corp_type, and I am not aware of a situation where it would be changed...
-            filing_type_code = json_input.get('filing_type_code')  # TODO: Maybe throw an error if these don't exist, we can't really get fees without them
-            jurisdiction = json_input.get('jurisdiction', None)  # TODO: Maybe throw an error if these don't exist, we can't really get fees without them
+            corp_type = json_input.get(
+                'corp_type', 'NRO'
+            )  # TODO: Maybe use a constant for this, it's the default corp_type, and I am not aware of a situation where it would be changed...
+            filing_type_code = json_input.get(
+                'filing_type_code'
+            )  # TODO: Maybe throw an error if these don't exist, we can't really get fees without them
+            jurisdiction = json_input.get(
+                'jurisdiction', None
+            )  # TODO: Maybe throw an error if these don't exist, we can't really get fees without them
             date = json_input.get('date', None)
             priority = json_input.get('priority', None)
             headers = json_input.get('headers', None)
@@ -67,7 +75,7 @@ class PaymentFees(Resource):
                 jurisdiction=jurisdiction,
                 date=date,
                 priority=priority,
-                headers=headers
+                headers=headers,
             )
 
             fees = calculate_fees(req)

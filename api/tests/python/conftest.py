@@ -18,7 +18,6 @@ from . import FROZEN_DATETIME, EPOCH_DATETIME
 # fixture to freeze utcnow to a fixed date-time
 @pytest.fixture
 def freeze_datetime_utcnow(monkeypatch):
-
     class _Datetime:
         @classmethod
         def utcnow(cls):
@@ -27,7 +26,7 @@ def freeze_datetime_utcnow(monkeypatch):
     monkeypatch.setattr(datetime, 'datetime', _Datetime)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def app(request):
     """
     Returns session-wide application.
@@ -37,7 +36,7 @@ def app(request):
     return app
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def client(app):
     """
     Returns session-wide Flask test client.
@@ -45,7 +44,7 @@ def client(app):
     return app.test_client()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def jwt(app):
     """
     Returns session-wide jwt manager
@@ -53,13 +52,14 @@ def jwt(app):
     return _jwt
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def solr(app):
     import os
+
     return os.getenv('SOLR_TEST_URL')
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def client_ctx(app):
     """
     Returns session-wide Flask test client.
@@ -68,7 +68,7 @@ def client_ctx(app):
         yield c
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def db(app, request):
     """
     Returns session-wide initialised database.
@@ -86,9 +86,9 @@ def db(app, request):
         with suppress(Exception):
             _db.drop_all()
 
-        sequence_sql = '''SELECT sequence_name FROM information_schema.sequences
+        sequence_sql = """SELECT sequence_name FROM information_schema.sequences
                           WHERE sequence_schema='public'  
-                       '''
+                       """
 
         sess = _db.session()
         for seq in [name for (name,) in sess.execute(text(sequence_sql))]:
@@ -114,7 +114,7 @@ def db(app, request):
         return _db
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(scope='function', autouse=True)
 def session(app, db, request):
     """
     Returns function-scoped session.

@@ -31,8 +31,7 @@ class VirtualWordCondition(db.Model):
     def find_by_criteria(cls, criteria=None):
         VirtualWordConditionCriteria.is_valid_criteria(criteria)
 
-        query = cls.query.with_entities(*criteria.fields) \
-            .filter(and_(*criteria.filters))
+        query = cls.query.with_entities(*criteria.fields).filter(and_(*criteria.filters))
 
         results = query.all()
         cls.close_session()

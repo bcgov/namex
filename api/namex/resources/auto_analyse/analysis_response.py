@@ -2,24 +2,25 @@ import abc
 
 # Import DTOs
 from .response_objects.name_analysis_response import NameAnalysisResponse
-from ..auto_analyse.analysis_issues import \
-    CheckIsValidIssue, \
-    AddDistinctiveWordIssue, \
-    AddDescriptiveWordIssue, \
-    ContainsWordsToAvoidIssue, \
-    DesignationMismatchIssue, \
-    DesignationRemovalIssue,\
-    TooManyWordsIssue, \
-    NameRequiresConsentIssue, \
-    ContainsUnclassifiableWordIssue, \
-    CorporateNameConflictIssue, \
-    IncorrectCategoryIssue, \
-    WordSpecialUseIssue, \
-    DesignationMisplacedIssue, \
-    EndDesignationMoreThanOnceIssue, \
-    DesignationNonExistentIssue, \
-    QueueNameConflictIssue, \
-    IncorrectYearIssue
+from ..auto_analyse.analysis_issues import (
+    CheckIsValidIssue,
+    AddDistinctiveWordIssue,
+    AddDescriptiveWordIssue,
+    ContainsWordsToAvoidIssue,
+    DesignationMismatchIssue,
+    DesignationRemovalIssue,
+    TooManyWordsIssue,
+    NameRequiresConsentIssue,
+    ContainsUnclassifiableWordIssue,
+    CorporateNameConflictIssue,
+    IncorrectCategoryIssue,
+    WordSpecialUseIssue,
+    DesignationMisplacedIssue,
+    EndDesignationMoreThanOnceIssue,
+    DesignationNonExistentIssue,
+    QueueNameConflictIssue,
+    IncorrectYearIssue,
+)
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes, AnalysisResponseCodes
 
@@ -43,7 +44,7 @@ def response_issues(issue_code):
         AnalysisIssueCodes.DESIGNATION_MISPLACED: DesignationMisplacedIssue,
         AnalysisIssueCodes.CORPORATE_CONFLICT: CorporateNameConflictIssue,
         AnalysisIssueCodes.QUEUE_CONFLICT: QueueNameConflictIssue,
-        AnalysisIssueCodes.WORD_SPECIAL_USE: WordSpecialUseIssue
+        AnalysisIssueCodes.WORD_SPECIAL_USE: WordSpecialUseIssue,
     }
 
     return issue_types.get(issue_code, CheckIsValidIssue)
@@ -154,16 +155,15 @@ class AnalysisResponse:
     def build_word_special_use_issue(self, procedure_result, issue_count, issue_idx):
         return None
 
-
-    '''
+    """
     @:param analysis_result ProcedureResult[]
-    '''
+    """
 
     def __init__(self, analysis_service, analysis_result):
         self.analysis_service = analysis_service
         self.entity_type = analysis_service.entity_type
-        self.header = ""
-        self.status_code = ""
+        self.header = ''
+        self.status_code = ''
         self.issues = []
         self.executed_procedures = []
 
@@ -212,7 +212,9 @@ class AnalysisResponse:
                         issue = self.build_designation_removal_issue(procedure_result, issue_count, issue_idx)
 
                     if procedure_result.result_code == AnalysisIssueCodes.END_DESIGNATION_MORE_THAN_ONCE:
-                        issue = self.build_end_designation_more_than_once_issue(procedure_result,issue_count, issue_idx)
+                        issue = self.build_end_designation_more_than_once_issue(
+                            procedure_result, issue_count, issue_idx
+                        )
 
                     if procedure_result.result_code == AnalysisIssueCodes.DESIGNATION_MISPLACED:
                         issue = self.build_designation_misplaced_issue(procedure_result, issue_count, issue_idx)
@@ -239,22 +241,18 @@ class AnalysisResponse:
         # TODO: This is an incomplete implementation! Get returned status codes from ProcedureResult
         if not is_valid_name_request:
             self.status_code = AnalysisResponseCodes.FURTHER_ACTION_REQUIRED.value
-            self.header = "Further Action Required"
+            self.header = 'Further Action Required'
         else:
             self.status_code = AnalysisResponseCodes.AUTO_APPROVED.value
-            self.header = "Available"
+            self.header = 'Available'
 
     def prepare_payload(self):
-        payload = NameAnalysisResponse(
-            header=self.header,
-            status=self.status_code,
-            issues=self.issues
-        )
+        payload = NameAnalysisResponse(header=self.header, status=self.status_code, issues=self.issues)
         return payload
 
-    '''
+    """
     This is invoked by consumers of this class
-    '''
+    """
 
     def build_response(self):
         response = self.prepare_payload()

@@ -12,18 +12,13 @@ MSG_SERVER_ERROR = 'Server Error!'
 MSG_NOT_FOUND = 'Resource not found'
 
 
-
-
-
 # Register a local namespace for the NR reserve
 entity_api = Namespace('entity', description='ENTITY API')
 
 
 @cors_preflight('GET')
 @entity_api.route('/<string:corp_num>', methods=['GET', 'OPTIONS'])
-@entity_api.doc(params={
-    'corp_num': 'Incorporation Number - This field is required'
-})
+@entity_api.doc(params={'corp_num': 'Incorporation Number - This field is required'})
 class EntityApi(Resource):
     def get(self, corp_num):
         try:
@@ -32,5 +27,5 @@ class EntityApi(Resource):
             return make_response(response.json(), response.status_code)
         except Exception as err:
             # For other exceptions, handle as an internal server error
-            current_app.logger.error(f"Unexpected error: {err}")
+            current_app.logger.error(f'Unexpected error: {err}')
             return handle_exception(err, 'Internal Server Error', HTTPStatus.INTERNAL_SERVER_ERROR)

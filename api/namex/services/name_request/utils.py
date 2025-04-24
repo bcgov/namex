@@ -17,8 +17,9 @@ def normalize_nr_num(nr_num_str):
     # If there's a match and the match has a second capturing group (valid NR digits) then proceed
     if len(matches) == 1 and matches[0][1]:
         # Get the first capturing group if it exists, convert to upper case, and remove any spaces
-        nr_type = str(matches[0][0]).upper().replace(' ', '') if matches[0][
-            0] else 'NR'  # Default to NR if not supplied
+        nr_type = (
+            str(matches[0][0]).upper().replace(' ', '') if matches[0][0] else 'NR'
+        )  # Default to NR if not supplied
         # Grab the NR digits from the second capturing group
         digits = matches[0][1]
 
@@ -35,8 +36,9 @@ def is_temp_nr_num(nr_num_str):
     # If there's a match and the match has a second capturing group (valid NR digits) then proceed
     if len(matches) == 1 and matches[0][1]:
         # Get the first capturing group if it exists, convert to upper case, and remove any spaces
-        nr_type = str(matches[0][0]).upper().replace(' ', '') if matches[0][
-            0] else 'NR'  # Default to NR if not supplied
+        nr_type = (
+            str(matches[0][0]).upper().replace(' ', '') if matches[0][0] else 'NR'
+        )  # Default to NR if not supplied
 
         if nr_type in ['NRL', 'L']:
             return True
@@ -57,9 +59,17 @@ def has_complete_payment(nr, payment_id=None):
     if payments and payment_id:
         return len(list(filter(lambda p: p.id == payment_id, payments))) > 0
     elif payments:
-        return len(list(filter(
-            lambda p: p.payment_status_code in [PaymentState.COMPLETED.value, PaymentState.APPROVED.value], payments
-        ))) > 0
+        return (
+            len(
+                list(
+                    filter(
+                        lambda p: p.payment_status_code in [PaymentState.COMPLETED.value, PaymentState.APPROVED.value],
+                        payments,
+                    )
+                )
+            )
+            > 0
+        )
 
 
 def has_completed_or_refunded_payment(nr, payment_id=None):
@@ -67,14 +77,23 @@ def has_completed_or_refunded_payment(nr, payment_id=None):
     if payments and payment_id:
         return len(list(filter(lambda p: p.id == payment_id, payments))) > 0
     elif payments:
-        return len(list(filter(
-            lambda p: p.payment_status_code in [
-                PaymentState.COMPLETED.value,
-                PaymentState.APPROVED.value,
-                PaymentState.REFUND_REQUESTED.value,
-                PaymentState.CANCELLED.value
-            ], payments
-        ))) > 0
+        return (
+            len(
+                list(
+                    filter(
+                        lambda p: p.payment_status_code
+                        in [
+                            PaymentState.COMPLETED.value,
+                            PaymentState.APPROVED.value,
+                            PaymentState.REFUND_REQUESTED.value,
+                            PaymentState.CANCELLED.value,
+                        ],
+                        payments,
+                    )
+                )
+            )
+            > 0
+        )
 
 
 def get_active_payment(nr, payment_id):
@@ -110,7 +129,9 @@ def get_mapped_entity_and_action_code(request_type):
         request_action = output[2]
         return entity_type, request_action
     else:
-        raise MapRequestTypeError(message='Error mapping the requestTypeCd to an entity type and action - no default was found in the request type mappings!')
+        raise MapRequestTypeError(
+            message='Error mapping the requestTypeCd to an entity type and action - no default was found in the request type mappings!'
+        )
 
 
 # TODO: Move these out into auth utils in the main utils module
@@ -127,16 +148,18 @@ def get_or_create_user_by_jwt(jwt_oidc_token):
         current_app.logger.debug('finding user: {}'.format(jwt_oidc_token))
         if not user:
             current_app.logger.debug(
-                'didnt find user, attempting to create new user from the JWT info:{}'.format(jwt_oidc_token))
+                'didnt find user, attempting to create new user from the JWT info:{}'.format(jwt_oidc_token)
+            )
             user = User.create_from_jwtToken(jwt_oidc_token)
 
         return user
     except Exception as err:
         current_app.logger.error(err.with_traceback(None))
-        raise ServicesError('unable_to_get_or_create_user',
-                            '{"code": "unable_to_get_or_create_user",'
-                            '"description": "Unable to get or create user from the JWT, ABORT"}'
-                            )
+        raise ServicesError(
+            'unable_to_get_or_create_user',
+            '{"code": "unable_to_get_or_create_user",'
+            '"description": "Unable to get or create user from the JWT, ABORT"}',
+        )
 
 
 def valid_state_transition(user, nr, new_state):
@@ -149,14 +172,12 @@ def valid_state_transition(user, nr, new_state):
     """
     # when the legacy user just created a new NR from legacy side, the user should be allowed to
     # modify and cancel it from the legacy side (while the NR still in DRAFT state).
-    if (nr.stateCd == State.DRAFT or nr.stateCd == State.APPROVED  or nr.stateCd == State.CANCELLED)   \
-        and (new_state == State.DRAFT or new_state == State.CANCELLED):
+    if (nr.stateCd == State.DRAFT or nr.stateCd == State.APPROVED or nr.stateCd == State.CANCELLED) and (
+        new_state == State.DRAFT or new_state == State.CANCELLED
+    ):
         return True
 
-    if (new_state in (State.APPROVED,
-                      State.REJECTED,
-                      State.CONDITIONAL)) \
-            and not jwt.validate_roles([User.APPROVER]):
+    if (new_state in (State.APPROVED, State.REJECTED, State.CONDITIONAL)) and not jwt.validate_roles([User.APPROVER]):
         return False
 
     # allow any type of user to CANCEL an NR

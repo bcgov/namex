@@ -1,5 +1,5 @@
-"""Name hold a name choice for a Request
-"""
+"""Name hold a name choice for a Request"""
+
 # from . import db, ma
 from marshmallow import fields
 from sqlalchemy import event
@@ -34,7 +34,7 @@ class Name(db.Model):
     commentId = db.Column('comment_id', db.Integer, db.ForeignKey('comments.id'))
     # nameRequest = db.relationship('Request')
 
-    comment = db.relationship("Comment", backref=backref("related_name", uselist=False), foreign_keys=[commentId])
+    comment = db.relationship('Comment', backref=backref('related_name', uselist=False), foreign_keys=[commentId])
 
     # Required for name request name analysis
     _name_type_cd = db.Column('name_type_cd', db.String(10))
@@ -74,7 +74,7 @@ class Name(db.Model):
             'decision_text': self.decision_text,
             'consumptionDate': self.consumptionDate.isoformat() if self.consumptionDate else None,
             'corpNum': self.corpNum,
-            'comment': None if self.comment is None else self.comment.as_dict()
+            'comment': None if self.comment is None else self.comment.as_dict(),
         }
 
     @classmethod
@@ -94,6 +94,7 @@ class Name(db.Model):
     def delete_from_db(self):
         db.session.delete(self)
         db.session.commit()
+
 
 @event.listens_for(Name, 'after_insert')
 @event.listens_for(Name, 'after_update')
@@ -127,8 +128,9 @@ def update_nr_name_search(mapper, connection, target):
             SET name_search=%s
             WHERE id=%s
             """,
-            ('(' + name_search + ')', nr.id)
+            ('(' + name_search + ')', nr.id),
         )
+
 
 class NameSchema(ma.SQLAlchemySchema):
     class Meta:
@@ -149,7 +151,7 @@ class NameSchema(ma.SQLAlchemySchema):
             'id',
             'name_type_cd',
             'name',
-            'state'
+            'state',
         )
 
     conflict1 = fields.String(required=False, allow_none=True)
@@ -163,8 +165,5 @@ class NameSchema(ma.SQLAlchemySchema):
     consumptionDate = fields.DateTime(required=False, allow_none=True)
     corpNum = fields.String(required=False, allow_none=True)
     designation = fields.String(required=False, allow_none=True)
-    name = fields.String(
-        required=True,
-        error_messages={'required': {'message': 'name is a required field'}}
-    )
+    name = fields.String(required=True, error_messages={'required': {'message': 'name is a required field'}})
     name_type_cd = fields.String(required=False, allow_none=True)

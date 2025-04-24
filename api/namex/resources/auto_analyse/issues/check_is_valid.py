@@ -7,7 +7,7 @@ from ..response_objects import NameAnalysisIssue
 
 class CheckIsValid(AnalysisResponseIssue):
     issue_type = AnalysisIssueCodes.CHECK_IS_VALID
-    status_text = "Approved"
+    status_text = 'Approved'
     issue = None
 
     def create_issue(self):
@@ -21,7 +21,7 @@ class CheckIsValid(AnalysisResponseIssue):
             show_examination_button=None,
             conflicts=None,
             setup=None,
-            name_actions=None
+            name_actions=None,
         )
 
         return issue

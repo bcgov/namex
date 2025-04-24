@@ -1,39 +1,43 @@
 from ... import QueueNameConflictIssue
 from ...analysis_response import AnalysisResponse
 
-from .issues import \
-    BcCheckIsValidIssue as CheckIsValidIssue, \
-    BcAddDistinctiveWordIssue as AddDistinctiveWordIssue, \
-    BcAddDescriptiveWordIssue as AddDescriptiveWordIssue, \
-    BcContainsWordsToAvoidIssue as ContainsWordsToAvoidIssue, \
-    BcDesignationMismatchIssue as DesignationMismatchIssue, \
-    BcTooManyWordsIssue as TooManyWordsIssue, \
-    BcNameRequiresConsentIssue as NameRequiresConsentIssue, \
-    BcContainsUnclassifiableWordIssue as ContainsUnclassifiableWordIssue, \
-    BcCorporateNameConflictIssue as CorporateNameConflictIssue, \
-    BcIncorrectCategoryIssue as IncorrectCategoryIssue, \
-    BcWordSpecialUseIssue as WordSpecialUseIssue, \
-    BcEndDesignationMoreThanOnceIssue as EndDesignationMoreThanOnceIssue, \
-    BcDesignationMisplacedIssue as DesignationMisplacedIssue, \
-    BcDesignationNonExistentIssue as DesignationNonExistentIssue, \
-    BcIncorrectYearIssue as IncorrectYearIssue
+from .issues import (
+    BcCheckIsValidIssue as CheckIsValidIssue,
+    BcAddDistinctiveWordIssue as AddDistinctiveWordIssue,
+    BcAddDescriptiveWordIssue as AddDescriptiveWordIssue,
+    BcContainsWordsToAvoidIssue as ContainsWordsToAvoidIssue,
+    BcDesignationMismatchIssue as DesignationMismatchIssue,
+    BcTooManyWordsIssue as TooManyWordsIssue,
+    BcNameRequiresConsentIssue as NameRequiresConsentIssue,
+    BcContainsUnclassifiableWordIssue as ContainsUnclassifiableWordIssue,
+    BcCorporateNameConflictIssue as CorporateNameConflictIssue,
+    BcIncorrectCategoryIssue as IncorrectCategoryIssue,
+    BcWordSpecialUseIssue as WordSpecialUseIssue,
+    BcEndDesignationMoreThanOnceIssue as EndDesignationMoreThanOnceIssue,
+    BcDesignationMisplacedIssue as DesignationMisplacedIssue,
+    BcDesignationNonExistentIssue as DesignationNonExistentIssue,
+    BcIncorrectYearIssue as IncorrectYearIssue,
+)
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
-from ...analysis_options import \
-    add_distinctive_setup, \
-    add_descriptive_setup, \
-    too_many_words_setup, \
-    remove_setup, \
-    remove_or_replace_setup, \
-    resolve_conflict_setup, \
-    send_to_examiner_setup, \
-    obtain_consent_setup, \
-    conflict_self_consent_setup, \
-    replace_designation_setup, \
-    change_entity_type_setup, \
-    change_designation_order_setup, \
-    add_designation_setup, two_designations_order_setup, remove_designation_setup
+from ...analysis_options import (
+    add_distinctive_setup,
+    add_descriptive_setup,
+    too_many_words_setup,
+    remove_setup,
+    remove_or_replace_setup,
+    resolve_conflict_setup,
+    send_to_examiner_setup,
+    obtain_consent_setup,
+    conflict_self_consent_setup,
+    replace_designation_setup,
+    change_entity_type_setup,
+    change_designation_order_setup,
+    add_designation_setup,
+    two_designations_order_setup,
+    remove_designation_setup,
+)
 
 
 # Execute analysis returns a response strategy code
@@ -58,7 +62,7 @@ def response_issues(issue_code):
         AnalysisIssueCodes.DESIGNATION_MISPLACED: DesignationMisplacedIssue,
         AnalysisIssueCodes.CORPORATE_CONFLICT: CorporateNameConflictIssue,
         AnalysisIssueCodes.QUEUE_CONFLICT: QueueNameConflictIssue,
-        AnalysisIssueCodes.WORD_SPECIAL_USE: WordSpecialUseIssue
+        AnalysisIssueCodes.WORD_SPECIAL_USE: WordSpecialUseIssue,
     }
 
     return issue_types.get(issue_code, CheckIsValidIssue)
@@ -77,10 +81,7 @@ class BcAnalysisResponse(AnalysisResponse):
 
             option2 = send_to_examiner_setup()
 
-            issue = response_issues(procedure_result.result_code)(self, [
-                option1,
-                option2
-            ])
+            issue = response_issues(procedure_result.result_code)(self, [option1, option2])
 
             issue.show_examination_button = True
         elif has_next_issue:
@@ -88,19 +89,13 @@ class BcAnalysisResponse(AnalysisResponse):
 
             option2 = send_to_examiner_setup()
 
-            issue = response_issues(procedure_result.result_code)(self, [
-                option1,
-                option2
-            ])
+            issue = response_issues(procedure_result.result_code)(self, [option1, option2])
         elif not is_only_issue and has_next_issue is False:
             option1 = remove_or_replace_setup()
 
             option2 = send_to_examiner_setup()
 
-            issue = response_issues(procedure_result.result_code)(self, [
-                option1,
-                option2
-            ])
+            issue = response_issues(procedure_result.result_code)(self, [option1, option2])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -112,10 +107,7 @@ class BcAnalysisResponse(AnalysisResponse):
 
         option2 = send_to_examiner_setup()
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1,
-            option2
-        ])
+        issue = response_issues(procedure_result.result_code)(self, [option1, option2])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -127,10 +119,7 @@ class BcAnalysisResponse(AnalysisResponse):
 
         option2 = send_to_examiner_setup()
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1,
-            option2
-        ])
+        issue = response_issues(procedure_result.result_code)(self, [option1, option2])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -140,7 +129,7 @@ class BcAnalysisResponse(AnalysisResponse):
     def build_too_many_words_issue(self, procedure_result, issue_count, issue_idx):
         option1 = too_many_words_setup()
         # Tweak the header
-        option1.header = "Required Action"
+        option1.header = 'Required Action'
 
         issue = response_issues(procedure_result.result_code)(self, [])
 
@@ -152,9 +141,12 @@ class BcAnalysisResponse(AnalysisResponse):
     def build_incorrect_year_issue(self, procedure_result, issue_count, issue_idx):
         option1 = send_to_examiner_setup()
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1,
-        ])
+        issue = response_issues(procedure_result.result_code)(
+            self,
+            [
+                option1,
+            ],
+        )
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -163,11 +155,9 @@ class BcAnalysisResponse(AnalysisResponse):
 
     def build_words_to_avoid_issue(self, procedure_result, issue_count, issue_idx):
         option1 = remove_setup()
-        option1.header = "Required Action"
+        option1.header = 'Required Action'
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1
-        ])
+        issue = response_issues(procedure_result.result_code)(self, [option1])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -181,11 +171,7 @@ class BcAnalysisResponse(AnalysisResponse):
 
         option3 = obtain_consent_setup()
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1,
-            option2,
-            option3
-        ])
+        issue = response_issues(procedure_result.result_code)(self, [option1, option2, option3])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -199,13 +185,9 @@ class BcAnalysisResponse(AnalysisResponse):
 
         option3 = conflict_self_consent_setup()
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1,
-            option2,
-            option3
-        ])
+        issue = response_issues(procedure_result.result_code)(self, [option1, option2, option3])
 
-        '''
+        """
         # Quick tests for overriding button behavior
         if issue_count > 1:
             issue.show_reserve_button = True
@@ -213,7 +195,7 @@ class BcAnalysisResponse(AnalysisResponse):
         else:
             issue.show_reserve_button = True
             issue.show_examination_button = False
-        '''
+        """
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -225,12 +207,15 @@ class BcAnalysisResponse(AnalysisResponse):
 
         option2 = conflict_self_consent_setup()
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1,
-            option2,
-        ])
+        issue = response_issues(procedure_result.result_code)(
+            self,
+            [
+                option1,
+                option2,
+            ],
+        )
 
-        '''
+        """
         # Quick tests for overriding button behavior
         if issue_count > 1:
             issue.show_reserve_button = True
@@ -238,7 +223,7 @@ class BcAnalysisResponse(AnalysisResponse):
         else:
             issue.show_reserve_button = True
             issue.show_examination_button = False
-        '''
+        """
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -247,11 +232,9 @@ class BcAnalysisResponse(AnalysisResponse):
 
     def build_non_existent_designation_issue(self, procedure_result, issue_count, issue_idx):
         option1 = add_designation_setup()
-        option1.header = "Required Action"
+        option1.header = 'Required Action'
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1
-        ])
+        issue = response_issues(procedure_result.result_code)(self, [option1])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -263,10 +246,7 @@ class BcAnalysisResponse(AnalysisResponse):
 
         option2 = change_entity_type_setup()
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1,
-            option2
-        ])
+        issue = response_issues(procedure_result.result_code)(self, [option1, option2])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -274,14 +254,11 @@ class BcAnalysisResponse(AnalysisResponse):
         return issue
 
     def build_designation_removal_issue(self, procedure_result, issue_count, issue_idx):
-        option1 = remove_designation_setup(procedure_result.values.get('incorrect_designations',[]))
+        option1 = remove_designation_setup(procedure_result.values.get('incorrect_designations', []))
 
         option2 = change_entity_type_setup()
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1,
-            option2
-        ])
+        issue = response_issues(procedure_result.result_code)(self, [option1, option2])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -291,9 +268,7 @@ class BcAnalysisResponse(AnalysisResponse):
     def build_end_designation_more_than_once_issue(self, procedure_result, issue_count, issue_idx):
         option1 = send_to_examiner_setup()
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1
-        ])
+        issue = response_issues(procedure_result.result_code)(self, [option1])
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
 
@@ -301,11 +276,9 @@ class BcAnalysisResponse(AnalysisResponse):
 
     def build_designation_misplaced_issue(self, procedure_result, issue_count, issue_idx):
         option1 = change_designation_order_setup()
-        option1.header = "Required Action"
+        option1.header = 'Required Action'
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1
-        ])
+        issue = response_issues(procedure_result.result_code)(self, [option1])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -324,10 +297,7 @@ class BcAnalysisResponse(AnalysisResponse):
 
             option2 = send_to_examiner_setup()
 
-            issue = response_issues(procedure_result.result_code)(self, [
-                option1,
-                option2
-            ])
+            issue = response_issues(procedure_result.result_code)(self, [option1, option2])
 
             issue.show_examination_button = True
         elif has_next_issue:
@@ -335,19 +305,13 @@ class BcAnalysisResponse(AnalysisResponse):
 
             option2 = send_to_examiner_setup()
 
-            issue = response_issues(procedure_result.result_code)(self, [
-                option1,
-                option2
-            ])
+            issue = response_issues(procedure_result.result_code)(self, [option1, option2])
         elif not is_only_issue and has_next_issue is False:
             option1 = remove_or_replace_setup()
 
             option2 = send_to_examiner_setup()
 
-            issue = response_issues(procedure_result.result_code)(self, [
-                option1,
-                option2
-            ])
+            issue = response_issues(procedure_result.result_code)(self, [option1, option2])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)

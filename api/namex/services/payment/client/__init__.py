@@ -61,7 +61,9 @@ def with_authentication(func):
         PAYMENT_SVC_AUTH_CLIENT_ID = current_app.config.get('PAYMENT_SVC_AUTH_CLIENT_ID')
         PAYMENT_SVC_CLIENT_SECRET = current_app.config.get('PAYMENT_SVC_CLIENT_SECRET')
 
-        authenticated, token = self.get_client_credentials(PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
+        authenticated, token = self.get_client_credentials(
+            PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET
+        )
         if not authenticated:
             raise ApiAuthError(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
         self.set_api_client_auth_header(token)
@@ -133,11 +135,16 @@ class ClientConfig:
 
 class BaseClient:
     def __init__(self, **kwargs):
-        self.configuration = kwargs.get('configuration', ClientConfig({
-            'host': current_app.config.get('PAYMENT_SVC_URL'),
-            'prefix': current_app.config.get('PAYMENT_SVC_VERSION', '/api/v1'),
-            'temp_path': None
-        }))
+        self.configuration = kwargs.get(
+            'configuration',
+            ClientConfig(
+                {
+                    'host': current_app.config.get('PAYMENT_SVC_URL'),
+                    'prefix': current_app.config.get('PAYMENT_SVC_VERSION', '/api/v1'),
+                    'temp_path': None,
+                }
+            ),
+        )
         self.headers = {}
 
     @staticmethod
@@ -145,14 +152,8 @@ class BaseClient:
         auth = requests.post(
             auth_url,
             auth=(client_id, secret),
-            headers={
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            data={
-                'grant_type': 'client_credentials',
-                'client_id': client_id,
-                'client_secret': secret
-            }
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            data={'grant_type': 'client_credentials', 'client_id': client_id, 'client_secret': secret},
         )
 
         # Return the auth response if an error occurs
@@ -198,13 +199,12 @@ class BaseClient:
                 PAYMENT_SVC_AUTH_URL = current_app.config.get('PAYMENT_SVC_AUTH_URL')
                 PAYMENT_SVC_AUTH_CLIENT_ID = current_app.config.get('PAYMENT_SVC_AUTH_CLIENT_ID')
                 PAYMENT_SVC_CLIENT_SECRET = current_app.config.get('PAYMENT_SVC_CLIENT_SECRET')
-                authenticated, token = self.get_client_credentials(PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET)
+                authenticated, token = self.get_client_credentials(
+                    PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET
+                )
                 if not authenticated:
                     raise ApiAuthError(token, message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
-                headers = {
-                    'Authorization': f'Bearer {token}',
-                    'Content-Type': 'application/json'
-                }
+                headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
 
             if type(headers.get('Account-Id', '')) != str:
                 headers['Account-Id'] = str(headers['Account-Id'])
@@ -217,15 +217,10 @@ class BaseClient:
                     params=params,
                     # Dump and load to serialize dates
                     json=json.loads(json.dumps(data, default=str)) if data else None,
-                    headers=headers
+                    headers=headers,
                 )
             else:
-                response = requests.request(
-                    method.value,
-                    url,
-                    params=params,
-                    headers=headers
-                )
+                response = requests.request(method.value, url, params=params, headers=headers)
 
             if not response or not response.ok:
                 raise ApiRequestError(response)
@@ -259,20 +254,9 @@ class BaseClient:
 
 
 class SBCPaymentClient(BaseClient):
-    def calculate_fees(
-        self,
-        corp_type,
-        filing_type_code,
-        jurisdiction=None,
-        date=None,
-        priority=None,
-        headers=None
-    ):
+    def calculate_fees(self, corp_type, filing_type_code, jurisdiction=None, date=None, priority=None, headers=None):
         request_url = 'fees/{corp_type}/{filing_type_code}'
-        request_url = request_url.format(
-            corp_type=corp_type,
-            filing_type_code=filing_type_code
-        )
+        request_url = request_url.format(corp_type=corp_type, filing_type_code=filing_type_code)
 
         params = {}
         if jurisdiction:
@@ -299,7 +283,7 @@ class SBCPaymentClient(BaseClient):
         response = None
         try:
             response = self.call_api(HttpVerbs.POST, request_url, data=data)
-        except (ApiRequestError) as err: # ROUTING_SLIP_REFUND and NO_FEE_REFUND return http 400.
+        except ApiRequestError as err:  # ROUTING_SLIP_REFUND and NO_FEE_REFUND return http 400.
             return response
 
         return response

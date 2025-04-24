@@ -1,5 +1,5 @@
-"""Name hold a name choice for a Request
-"""
+"""Name hold a name choice for a Request"""
+
 from . import db, ma
 from sqlalchemy.orm import backref
 from marshmallow import fields
@@ -51,7 +51,7 @@ class Applicant(db.Model):
             'city': self.city,
             'postalCd': self.postalCd,
             'stateProvinceCd': self.stateProvinceCd,
-            'countryTypeCd': self.countryTypeCd
+            'countryTypeCd': self.countryTypeCd,
         }
 
     # @classmethod
@@ -88,8 +88,9 @@ class ApplicantSchema(ma.SQLAlchemySchema):
             'partyId',
             'postalCd',
             'stateProvinceCd',
-            'countryTypeCd'
+            'countryTypeCd',
         )
+
     firstName = fields.String(allow_none=True)
     lastName = fields.String(allow_none=True)
     middleName = fields.String(allow_none=True)

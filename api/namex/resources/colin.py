@@ -21,11 +21,10 @@ MSG_COULD_NOT_FIND_CORP = 'Error: Could not find corporation details'
 # Register a local namespace for the NR reserve
 colin_api = Namespace('colin', description='COLIN API')
 
+
 @cors_preflight('GET')
 @colin_api.route('/<string:corp_num>', strict_slashes=False, methods=['GET', 'OPTIONS'])
-@colin_api.doc(params={
-    'corp_num': 'Incorporation Number - This field is required'
-})
+@colin_api.doc(params={'corp_num': 'Incorporation Number - This field is required'})
 class ColinApi(Resource):
     def get(self, corp_num):
         """
@@ -44,7 +43,7 @@ class ColinApi(Resource):
             response = EntityUtils.make_authenticated_request(colin_url)
 
             if response.status_code != HTTPStatus.OK:
-                error_message = f"Error retrieving {corp_num}: "
+                error_message = f'Error retrieving {corp_num}: '
 
                 # If response is JSON, modify the JSON object
                 response_body = response.json()
@@ -54,7 +53,7 @@ class ColinApi(Resource):
                     # Handle cases where the JSON response is not a dictionary
                     response_body = {'error': error_message + str(response_body)}
                 return make_response(jsonify(response_body), response.status_code)
-            
+
             business_info = response.json().get('business', {})
             legal_type = business_info.get('legalType')
 
@@ -87,13 +86,12 @@ class ColinApi(Resource):
             return make_response(jsonify(response_dict), 200)
 
         except ValueError as ve:
-            current_app.logger.error(f"ValueError: {ve}")
+            current_app.logger.error(f'ValueError: {ve}')
             return handle_exception(ve, 'Invalid Request', 400)
 
         except Exception as err:
-            current_app.logger.error(f"Unexpected error: {err}")
+            current_app.logger.error(f'Unexpected error: {err}')
             return handle_exception(err, 'Internal Server Error', 500)
-
 
     def _get_office_data(self, corp_num, legal_type):
         """
@@ -121,26 +119,30 @@ class ColinApi(Resource):
 
             # Helper function to extract and format address
             def extract_address(office_type):
-                address = office_data.get(office_type, {}).get("deliveryAddress", {})
-                return [
-                    (address.get("streetAddress") or "").strip(),
-                    (address.get("streetAddressAdditional") or "").strip(),
-                    (address.get("addressCity") or "").strip(),
-                    (address.get("addressRegion") or "").strip(),
-                    (address.get("postalCode") or "").strip(),
-                    (address.get("addressCountry") or "").strip()
-                ] if address else []
+                address = office_data.get(office_type, {}).get('deliveryAddress', {})
+                return (
+                    [
+                        (address.get('streetAddress') or '').strip(),
+                        (address.get('streetAddressAdditional') or '').strip(),
+                        (address.get('addressCity') or '').strip(),
+                        (address.get('addressRegion') or '').strip(),
+                        (address.get('postalCode') or '').strip(),
+                        (address.get('addressCountry') or '').strip(),
+                    ]
+                    if address
+                    else []
+                )
 
             # Return formatted addresses
             return {
-                'registeredOffice': extract_address("registeredOffice"),
-                'recordsOffice': extract_address("recordsOffice"),
-                'headOffice': extract_address('headOffice') # head office for xpro companies
+                'registeredOffice': extract_address('registeredOffice'),
+                'recordsOffice': extract_address('recordsOffice'),
+                'headOffice': extract_address('headOffice'),  # head office for xpro companies
             }
 
         except Exception as e:
-            current_app.logger.error(f"Error while processing office data for {corp_num}: {e}")
-            raise ValueError(f"Failed to retrieve or process office data for {corp_num}: {e}")
+            current_app.logger.error(f'Error while processing office data for {corp_num}: {e}')
+            raise ValueError(f'Failed to retrieve or process office data for {corp_num}: {e}')
 
     def _get_parties_data(self, corp_num, legal_type):
         """
@@ -156,7 +158,7 @@ class ColinApi(Resource):
         try:
             # Build the Colin service endpoint
             colin_service_url = f'{current_app.config.get("COLIN_SVC_URL")}'
-            parties_endpoint = f"{colin_service_url}/businesses/{legal_type}/{corp_num}/parties/all"
+            parties_endpoint = f'{colin_service_url}/businesses/{legal_type}/{corp_num}/parties/all'
 
             # Make the authenticated request
             response = EntityUtils.make_authenticated_request(parties_endpoint)
@@ -165,7 +167,7 @@ class ColinApi(Resource):
                 parties_data = response.json()
 
             # Log the received data for debugging
-            current_app.logger.debug(f"Processing parties data for corporation number {corp_num}: {parties_data}")
+            current_app.logger.debug(f'Processing parties data for corporation number {corp_num}: {parties_data}')
 
             # Helper function to extract names for a specific role
             def extract_names(party_list, role_type):
@@ -175,16 +177,16 @@ class ColinApi(Resource):
 
                 names = []
                 for party in party_list:
-                    roles = party.get("roles", [])
-                    if any(role.get("roleType") == role_type for role in roles):
-                        officer = party.get("officer") or {}
-                        first_name = (officer.get("firstName") or "").strip()
-                        middle_initial = (officer.get("middleInitial") or "").strip()
-                        last_name = (officer.get("lastName") or "").strip()
-                        full_name = f"{first_name} {middle_initial} {last_name}".strip()
+                    roles = party.get('roles', [])
+                    if any(role.get('roleType') == role_type for role in roles):
+                        officer = party.get('officer') or {}
+                        first_name = (officer.get('firstName') or '').strip()
+                        middle_initial = (officer.get('middleInitial') or '').strip()
+                        last_name = (officer.get('lastName') or '').strip()
+                        full_name = f'{first_name} {middle_initial} {last_name}'.strip()
                         names.append(full_name)
                 return names
-        
+
             # Extract names for the directoires, if it is a BC company
             role = 'Director'
             party_list = parties_data.get('parties', [])
@@ -196,9 +198,8 @@ class ColinApi(Resource):
 
             return {'directorNames': director_names, 'attorneyNames': attorney_names}
         except Exception as e:
-            current_app.logger.error(f"Error while processing parties data for {corp_num}: {e}")
-            raise ValueError(f"Failed to retrieve or process parties data for {corp_num}: {e}")
+            current_app.logger.error(f'Error while processing parties data for {corp_num}: {e}')
+            raise ValueError(f'Failed to retrieve or process parties data for {corp_num}: {e}')
 
     def _get_nature_of_business(self, corp_num):
         return Request.get_nature_business_info(corp_num)
-

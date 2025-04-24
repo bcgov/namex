@@ -1,16 +1,15 @@
 """
 Integration tests for Name Request reponses.
 """
+
 import datetime
 import json
 
 import pytest
 
-from tests.python.common.test_name_request_utils import \
-    assert_field_is_mapped, assert_list_contains_exactly
+from tests.python.common.test_name_request_utils import assert_field_is_mapped, assert_list_contains_exactly
 
-from .test_setup_utils.test_helpers import \
-    create_test_nr, get_nr
+from .test_setup_utils.test_helpers import create_test_nr, get_nr
 
 from namex.models import State
 from namex.constants import NameRequestActions
@@ -46,17 +45,13 @@ def build_test_input_fields():
         # 'submittedDate': None,
         'submitter_userid': 'name_request_service_account',
         'userId': 'name_request_service_account',
-        'xproJurisdiction': ''
+        'xproJurisdiction': '',
     }
 
 
 @pytest.mark.parametrize(
     'priorityCd, queue_time_returned, status_cd',
-    [
-        ('Y', True, State.DRAFT),
-        ('N', True, State.DRAFT),
-        ('N', False, State.INPROGRESS)
-    ]
+    [('Y', True, State.DRAFT), ('N', True, State.DRAFT), ('N', False, State.INPROGRESS)],
 )
 def test_draft_response(priorityCd, queue_time_returned, status_cd, client, jwt, app):
     """

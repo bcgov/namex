@@ -13,26 +13,27 @@ from namex import jwt
 # Register a local namespace for the requests
 api = Namespace('wordClassification', description='API for Word Classifications')
 
-word_request = api.model('word_classification_request', {
-    'classification': fields.String,
-    'examiner': fields.String,
-    'name': fields.String,
-    'word': fields.String
-})
+word_request = api.model(
+    'word_classification_request',
+    {'classification': fields.String, 'examiner': fields.String, 'name': fields.String, 'word': fields.String},
+)
 
-word_classification = api.model('word_classification', {
-    'id': fields.Integer,
-    'word': fields.String,
-    'classification': fields.String,
-    'lastNameUsed': fields.String,
-    'lastPrepName': fields.String,
-    'frequency': fields.Integer,
-    'approvedBy': fields.Integer,
-    'approvedDate': fields.DateTime,
-    'startDate': fields.DateTime,
-    'lastUpdatedBy': fields.Integer,
-    'lastUpdatedDate': fields.DateTime
-})
+word_classification = api.model(
+    'word_classification',
+    {
+        'id': fields.Integer,
+        'word': fields.String,
+        'classification': fields.String,
+        'lastNameUsed': fields.String,
+        'lastPrepName': fields.String,
+        'frequency': fields.Integer,
+        'approvedBy': fields.Integer,
+        'approvedDate': fields.DateTime,
+        'startDate': fields.DateTime,
+        'lastUpdatedBy': fields.Integer,
+        'lastUpdatedDate': fields.DateTime,
+    },
+)
 
 
 @api.errorhandler(AuthError)

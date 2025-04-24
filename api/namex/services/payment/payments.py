@@ -28,7 +28,7 @@ def create_payment(model, headers):
     except Exception as err:
         if err.status_code == HTTPStatus.BAD_REQUEST:
             raise SBCPaymentException(err, err.detail, HTTPStatus.PAYMENT_REQUIRED)
-        
+
         raise SBCPaymentException(err)
 
 

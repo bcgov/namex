@@ -9,6 +9,7 @@ from namex.services import EventRecorder
 
 from tests.python.end_points.util import create_header
 
+
 def create_base_nr():
     nr = RequestDAO()
     nr.nrNum = 'NR 0000002'
@@ -24,6 +25,7 @@ def create_base_nr():
     nr.request_action_cd = 'NEW'
     nr.save_to_db()
     return nr
+
 
 ### NR flow through name request:
 # 1.  post (create NRL)
@@ -44,11 +46,11 @@ def create_base_nr():
 # 16. reopen (optional)
 # 17. undo decision (requires reopen first)
 
+
 # TODO: fill out tests for above based on this
 def test_event_create_nrl(client, jwt, app):
-
-    #add a user for the comment
-    user = User('test-user','','','43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc','url', '123', 'IDIR')
+    # add a user for the comment
+    user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc', 'url', '123', 'IDIR')
     user.save_to_db()
 
     # create JWT & setup header with a Bearer Token using the JWT
@@ -88,7 +90,7 @@ def test_event_create_nrl(client, jwt, app):
             'id': 1,
             'name': 'TEST NAME ONE',
             'name_type_cd': None,
-            'state': 'NE'
+            'state': 'NE',
         }
     ]
     assert response['transactions'][0]['priorityCd'] == None
@@ -100,7 +102,6 @@ def test_event_create_nrl(client, jwt, app):
 
 
 def test_get_inprogress_event_history(client, jwt, app):
-
     # add a user for the comment
     user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc', 'url', '123', 'IDIR')
     user.save_to_db()
@@ -115,20 +116,28 @@ def test_get_inprogress_event_history(client, jwt, app):
 
     nr.stateCd = State.INPROGRESS
     nr.save_to_db()
-    EventRecorder.record(user, Event.PATCH, nr, { 'state': 'INPROGRESS' })
+    EventRecorder.record(user, Event.PATCH, nr, {'state': 'INPROGRESS'})
     # get the resource (this is the test)
     rv = client.get('/api/v1/events/NR%200000002', headers=headers)
     assert rv.status_code == 200
 
     assert b'"user_action": "Load NR"' in rv.data
 
+
 def test_get_next_event_history(client, jwt, app):
     from namex.models import Request as RequestDAO, State, Name as NameDAO, User, Event
     from namex.services import EventRecorder
 
     # add a user for the comment
-    user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
-                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
+    user = User(
+        'test-user',
+        '',
+        '',
+        '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
+        'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc',
+        '123',
+        'IDIR',
+    )
     user.save_to_db()
 
     # create JWT & setup header with a Bearer Token using the JWT
@@ -138,7 +147,6 @@ def test_get_next_event_history(client, jwt, app):
     nr.stateCd = State.DRAFT
     nr.save_to_db()
     EventRecorder.record(user, Event.POST + ' [payment completed] CREATE', nr, nr.json())
-
 
     nr.stateCd = State.INPROGRESS
     nr.save_to_db()
@@ -150,13 +158,21 @@ def test_get_next_event_history(client, jwt, app):
 
     assert b'"user_action": "Get Next NR"' in rv.data
 
+
 def test_on_hold_event_history(client, jwt, app):
     from namex.models import Request as RequestDAO, State, Name as NameDAO, User, Event
     from namex.services import EventRecorder
 
     # add a user for the comment
-    user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
-                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
+    user = User(
+        'test-user',
+        '',
+        '',
+        '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
+        'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc',
+        '123',
+        'IDIR',
+    )
     user.save_to_db()
 
     headers = create_header(jwt, [User.EDITOR])
@@ -165,7 +181,7 @@ def test_on_hold_event_history(client, jwt, app):
     nr.stateCd = State.HOLD
     nr.save_to_db()
 
-    EventRecorder.record(user, Event.PATCH, nr, { 'state': 'HOLD' })
+    EventRecorder.record(user, Event.PATCH, nr, {'state': 'HOLD'})
 
     # get the resource (this is the test)
     rv = client.get('/api/v1/events/NR%200000002', headers=headers)
@@ -173,13 +189,21 @@ def test_on_hold_event_history(client, jwt, app):
 
     assert b'"user_action": "Hold Request"' in rv.data
 
+
 def test_expired_event_history(client, jwt, app):
     from namex.models import Request as RequestDAO, State, Name as NameDAO, User, Event
     from namex.services import EventRecorder
 
     # add a user for the comment
-    user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
-                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
+    user = User(
+        'test-user',
+        '',
+        '',
+        '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
+        'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc',
+        '123',
+        'IDIR',
+    )
     user.save_to_db()
 
     headers = create_header(jwt, [User.EDITOR])
@@ -197,13 +221,21 @@ def test_expired_event_history(client, jwt, app):
 
     assert b'"user_action": "Expired by NRO"' in rv.data
 
+
 def test_cancelled_in_nro_event_history(client, jwt, app):
     from namex.models import Request as RequestDAO, State, Name as NameDAO, User, Event
     from namex.services import EventRecorder
 
     # add a user for the comment
-    user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
-                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
+    user = User(
+        'test-user',
+        '',
+        '',
+        '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
+        'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc',
+        '123',
+        'IDIR',
+    )
     user.save_to_db()
 
     headers = create_header(jwt, [User.EDITOR])
@@ -220,13 +252,21 @@ def test_cancelled_in_nro_event_history(client, jwt, app):
 
     assert b'"user_action": "Cancelled in NRO"' in rv.data
 
+
 def test_cancelled_in_namex_event_history(client, jwt, app):
     from namex.models import Request as RequestDAO, State, Name as NameDAO, User, Event
     from namex.services import EventRecorder
 
     # add a user for the comment
-    user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
-                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
+    user = User(
+        'test-user',
+        '',
+        '',
+        '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
+        'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc',
+        '123',
+        'IDIR',
+    )
     user.save_to_db()
 
     headers = create_header(jwt, [User.EDITOR])
@@ -235,7 +275,7 @@ def test_cancelled_in_namex_event_history(client, jwt, app):
     nr.stateCd = State.CANCELLED
     nr.save_to_db()
 
-    EventRecorder.record(user, Event.PATCH, nr, { 'state': 'CANCELLED' })
+    EventRecorder.record(user, Event.PATCH, nr, {'state': 'CANCELLED'})
 
     # get the resource (this is the test)
     rv = client.get('/api/v1/events/NR%200000002', headers=headers)
@@ -243,28 +283,36 @@ def test_cancelled_in_namex_event_history(client, jwt, app):
 
     assert b'"user_action": "Cancelled in Namex"' in rv.data
 
+
 def test_decision_event_history(client, jwt, app):
-        from namex.models import Request as RequestDAO, State, Name as NameDAO, User, Event
-        from namex.services import EventRecorder
+    from namex.models import Request as RequestDAO, State, Name as NameDAO, User, Event
+    from namex.services import EventRecorder
 
-        # add a user for the comment
-        user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
-                    'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
-        user.save_to_db()
+    # add a user for the comment
+    user = User(
+        'test-user',
+        '',
+        '',
+        '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
+        'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc',
+        '123',
+        'IDIR',
+    )
+    user.save_to_db()
 
-        headers = create_header(jwt, [User.EDITOR])
+    headers = create_header(jwt, [User.EDITOR])
 
-        nr = create_base_nr()
-        nr.stateCd = State.REJECTED
-        nr.save_to_db()
+    nr = create_base_nr()
+    nr.stateCd = State.REJECTED
+    nr.save_to_db()
 
-        EventRecorder.record(user, Event.PATCH, nr, { 'state': 'REJECTED' })
+    EventRecorder.record(user, Event.PATCH, nr, {'state': 'REJECTED'})
 
-        # get the resource (this is the test)
-        rv = client.get('/api/v1/events/NR%200000002', headers=headers)
-        assert rv.status_code == 200
+    # get the resource (this is the test)
+    rv = client.get('/api/v1/events/NR%200000002', headers=headers)
+    assert rv.status_code == 200
 
-        assert b'"user_action": "Decision"' in rv.data
+    assert b'"user_action": "Decision"' in rv.data
 
 
 def test_edit_event_history(client, jwt, app):
@@ -272,8 +320,15 @@ def test_edit_event_history(client, jwt, app):
     from namex.services import EventRecorder
 
     # add a user for the comment
-    user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
-                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
+    user = User(
+        'test-user',
+        '',
+        '',
+        '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
+        'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc',
+        '123',
+        'IDIR',
+    )
     user.save_to_db()
 
     headers = create_header(jwt, [User.EDITOR])
@@ -291,13 +346,21 @@ def test_edit_event_history(client, jwt, app):
 
     assert b'"user_action": "Edit NR Details (NameX)"' in rv.data
 
+
 def test_reopen_event_history(client, jwt, app):
     from namex.models import Request as RequestDAO, State, Name as NameDAO, User, Event
     from namex.services import EventRecorder
 
     # add a user for the comment
-    user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
-                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
+    user = User(
+        'test-user',
+        '',
+        '',
+        '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
+        'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc',
+        '123',
+        'IDIR',
+    )
     user.save_to_db()
 
     headers = create_header(jwt, [User.EDITOR])
@@ -316,7 +379,7 @@ def test_reopen_event_history(client, jwt, app):
     EventRecorder.record(user, Event.PATCH, nr, {})
 
     nr.stateCd = State.INPROGRESS
-    EventRecorder.record(user, Event.PUT, nr, {"additional": "additional","furnished": "N"})
+    EventRecorder.record(user, Event.PUT, nr, {'additional': 'additional', 'furnished': 'N'})
 
     # get the resource (this is the test)
     rv = client.get('/api/v1/events/NR%200000002', headers=headers)
@@ -324,13 +387,21 @@ def test_reopen_event_history(client, jwt, app):
 
     assert b'"user_action": "Re-Open"' in rv.data
 
+
 def test_edit_inprogress_event_history(client, jwt, app):
     from namex.models import Request as RequestDAO, State, Name as NameDAO, User, Event
     from namex.services import EventRecorder
 
     # add a user for the comment
-    user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
-                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
+    user = User(
+        'test-user',
+        '',
+        '',
+        '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
+        'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc',
+        '123',
+        'IDIR',
+    )
     user.save_to_db()
 
     headers = create_header(jwt, [User.EDITOR])
@@ -350,7 +421,7 @@ def test_edit_inprogress_event_history(client, jwt, app):
 
     nr.stateCd = State.INPROGRESS
     nr.save_to_db()
-    EventRecorder.record(user, Event.PUT, nr, {"additional": "additional","furnished": "N"})
+    EventRecorder.record(user, Event.PUT, nr, {'additional': 'additional', 'furnished': 'N'})
 
     # get the resource (this is the test)
     rv = client.get('/api/v1/events/NR%200000002', headers=headers)
@@ -365,8 +436,15 @@ def test_get_staff_comment_event_history(client, jwt, app):
     from namex.utils.common import convert_to_ascii
 
     # add a user for the comment
-    user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
-                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
+    user = User(
+        'test-user',
+        '',
+        '',
+        '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
+        'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc',
+        '123',
+        'IDIR',
+    )
     user.save_to_db()
 
     headers = create_header(jwt, [User.EDITOR])
@@ -382,7 +460,7 @@ def test_get_staff_comment_event_history(client, jwt, app):
     comment_instance.comment = convert_to_ascii('test staff comment')
     comment_instance.save_to_db()
 
-    EventRecorder.record(user, Event.POST, nr, { 'comment': 'test staff comment' })
+    EventRecorder.record(user, Event.POST, nr, {'comment': 'test staff comment'})
 
     # get the resource (this is the test)
     rv = client.get('/api/v1/events/NR%200000002', headers=headers)
@@ -397,8 +475,15 @@ def test_consumed_event_history(client, jwt, app):
     from namex.services import EventRecorder
 
     # add a user for the comment
-    user = User('nro_service_account', '', '', '8ca7d47a-024e-4c85-a367-57c9c93de1cd',
-                'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc', '123', 'IDIR')
+    user = User(
+        'nro_service_account',
+        '',
+        '',
+        '8ca7d47a-024e-4c85-a367-57c9c93de1cd',
+        'https://sso-dev.pathfinder.gov.bc.ca/auth/realms/sbc',
+        '123',
+        'IDIR',
+    )
     user.save_to_db()
 
     headers = create_header(jwt, [User.EDITOR])

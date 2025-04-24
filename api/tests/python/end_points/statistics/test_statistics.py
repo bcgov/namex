@@ -28,17 +28,18 @@ def test_get_statistics(client, jwt, app):
     assert isinstance(payload.get('regular_wait_time'), int) is True
 
 
-
-
-@pytest.mark.parametrize('oldest_draft_nr_date, todays_date, expected_wait_days', [
-    ('2021-07-03', '2021-07-04', 1)
-    ,('2021-07-02', '2021-07-05', 2)
-    ,('2021-05-30', '2021-07-10', 30)
-    ,('2021-06-28', '2021-07-02', 5)
-    ,('2021-07-01', '2021-07-08', 6)
-    ,('2021-05-02', '2021-05-23', 15)
-    ,('2020-01-01', '2021-07-10', 398)
-])
+@pytest.mark.parametrize(
+    'oldest_draft_nr_date, todays_date, expected_wait_days',
+    [
+        ('2021-07-03', '2021-07-04', 1),
+        ('2021-07-02', '2021-07-05', 2),
+        ('2021-05-30', '2021-07-10', 30),
+        ('2021-06-28', '2021-07-02', 5),
+        ('2021-07-01', '2021-07-08', 6),
+        ('2021-05-02', '2021-05-23', 15),
+        ('2020-01-01', '2021-07-10', 398),
+    ],
+)
 def test_get_statistics_wait_time(client, jwt, app, oldest_draft_nr_date, todays_date, expected_wait_days):
     """Assert that wait time statistics are being generated correctly."""
     request_uri = API_BASE_URI

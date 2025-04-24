@@ -1,46 +1,54 @@
 """
 Unit tests for Name Request mapping methods.
 """
+
 import pytest
 
 from namex.models import db, State, Request, Name
 from namex.services.name_request import NameRequestService
+
 # from namex.services.name_request.name_request_state import get_nr_state_actions
 # Use the static methods in the NameRequest(s) class
 from namex.resources.name_requests import NameRequestResource
 
 from .test_setup_utils import build_nr
-from tests.python.common.test_name_request_utils import pick_name_from_list, assert_name_has_name, assert_name_has_id, assert_field_is_mapped
+from tests.python.common.test_name_request_utils import (
+    pick_name_from_list,
+    assert_name_has_name,
+    assert_name_has_id,
+    assert_field_is_mapped,
+)
 
 test_names_no_id = [
     {
-        "name": "BLUE HERON TOURS LTD.",
-        "choice": 1,
-        "designation": "LTD.",
-        "name_type_cd": "CO",
-        "consent_words": "",
-        "conflict1": "BLUE HERON TOURS LTD.",
-        "conflict1_num": "0515211"
+        'name': 'BLUE HERON TOURS LTD.',
+        'choice': 1,
+        'designation': 'LTD.',
+        'name_type_cd': 'CO',
+        'consent_words': '',
+        'conflict1': 'BLUE HERON TOURS LTD.',
+        'conflict1_num': '0515211',
     },
     {
-        "name": "BLUE HERON ADVENTURE TOURS LTD.",
-        "choice": 2,
-        "designation": "LTD.",
-        "name_type_cd": "CO",
-        "consent_words": "",
-        "conflict1": "BLUE HERON TOURS LTD.",
-        "conflict1_num": "0515211"
+        'name': 'BLUE HERON ADVENTURE TOURS LTD.',
+        'choice': 2,
+        'designation': 'LTD.',
+        'name_type_cd': 'CO',
+        'consent_words': '',
+        'conflict1': 'BLUE HERON TOURS LTD.',
+        'conflict1_num': '0515211',
     },
     {
-        "name": "BLUE HERON ISLAND TOURS LTD.",
-        "choice": 3,
-        "designation": "LTD.",
-        "name_type_cd": "CO",
-        "consent_words": "",
-        "conflict1": "BLUE HERON TOURS LTD.",
-        "conflict1_num": "0515211"
-    }
+        'name': 'BLUE HERON ISLAND TOURS LTD.',
+        'choice': 3,
+        'designation': 'LTD.',
+        'name_type_cd': 'CO',
+        'consent_words': '',
+        'conflict1': 'BLUE HERON TOURS LTD.',
+        'conflict1_num': '0515211',
+    },
 ]
+
 
 @pytest.mark.skip
 def assert_names_are_mapped_correctly(req_names, res_names):
@@ -152,7 +160,7 @@ def test_add_request_names(client, jwt, app):
         'names': [
             # Same as test name 1
             test_names_no_id[1],
-            test_names_no_id[2]
+            test_names_no_id[2],
         ]
     }
 
@@ -211,7 +219,7 @@ def test_update_request_names(client, jwt, app):
             # Same as test name 1
             added_name_0,  # Map this over
             added_name_1,  # Map this over
-            test_names_no_id[2]
+            test_names_no_id[2],
         ]
     }
 

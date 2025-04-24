@@ -11,13 +11,13 @@ from ..response_objects import NameAction, NameActions, Conflict
 
 class CorporateNameConflictIssue(AnalysisResponseIssue):
     issue_type = AnalysisIssueCodes.CORPORATE_CONFLICT
-    status_text = "Further Action Required"
+    status_text = 'Further Action Required'
     issue = None
 
     def create_issue(self):
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="",
+            line1='',
             line2=None,
             consenting_body=None,
             designations=None,
@@ -25,7 +25,7 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
             show_examination_button=False,
             conflicts=[],
             setup=None,
-            name_actions=[]
+            name_actions=[],
         )
 
         return issue
@@ -55,26 +55,27 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
 
         issue = self.create_issue()
         if issue.issue_type == AnalysisIssueCodes.CORPORATE_CONFLICT:
-            issue.line1 = "Too similar to an existing name."
+            issue.line1 = 'Too similar to an existing name.'
         else:
-            issue.line1 = "Too similar to a name currently being reviewed."
+            issue.line1 = 'Too similar to a name currently being reviewed.'
 
-        '''
+        """
         eg:
         list_name: <class 'list'>: ['mountain', 'view', 'growers']
         list_dist: <class 'list'>: [['mountain'], ['mountain', 'view']]
         list_desc: <class 'list'>: [['view', 'growers'], ['growers']]
         list_conflicts: <class 'dict'>: {'MOUNTAIN VIEW GROWERS INC.': {'mountain': ['mountain'], 'view': ['view'], 'growers': ['growers']}}
-        '''
+        """
 
         # Grab the first conflict
         current_conflict_name = list(list_conflicts.keys())[0]  # eg: 'MOUNTAIN VIEW GROWERS INC.'
         current_conflict = list_conflicts[
-            current_conflict_name]  # eg: {'mountain': ['mountain'], 'view': ['view'], 'growers': ['growers']}
+            current_conflict_name
+        ]  # eg: {'mountain': ['mountain'], 'view': ['view'], 'growers': ['growers']}
 
         current_conflict_keys = list(current_conflict.keys()) if current_conflict else []
 
-        is_exact_match = (list_name == current_conflict_keys)
+        is_exact_match = list_name == current_conflict_keys
 
         list_dist_words = list(set([item for sublist in list_dist for item in sublist]))
         list_desc_words = list(set([item for sublist in list_desc for item in sublist]))
@@ -90,39 +91,27 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
             # Loop over the token words, we need to decide to do with each word
             for token_idx, word in enumerate(list_tokens):
                 offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
-                    name_as_submitted,
-                    list_original,
-                    list_tokens,
-                    token_idx
+                    name_as_submitted, list_original, list_tokens, token_idx
                 )
 
                 # Highlight the conflict words
                 if list_tokens.index(word) != list_tokens.index(list_tokens[-1]):
-                    issue.name_actions.append(NameAction(
-                        word=word,
-                        index=offset_idx,
-                        endIndex=offset_idx,
-                        type=NameActions.HIGHLIGHT
-                    ))
+                    issue.name_actions.append(
+                        NameAction(word=word, index=offset_idx, endIndex=offset_idx, type=NameActions.HIGHLIGHT)
+                    )
 
                 # Strike out the last matching word
                 if list_tokens.index(word) == list_tokens.index(list_tokens[-1]):
                     list_remove.append(word)
-                    issue.name_actions.append(NameAction(
-                        word=word,
-                        index=offset_idx,
-                        endIndex=offset_idx,
-                        type=NameActions.STRIKE
-                    ))
+                    issue.name_actions.append(
+                        NameAction(word=word, index=offset_idx, endIndex=offset_idx, type=NameActions.STRIKE)
+                    )
 
         if not is_exact_match:
             # Loop over the list_name words, we need to decide to do with each word
             for token_idx, word in enumerate(list_tokens):
                 offset_idx, word_idx, word_idx_offset, composite_token_offset = self.adjust_word_index(
-                    name_as_submitted,
-                    list_original,
-                    list_tokens,
-                    token_idx
+                    name_as_submitted, list_original, list_tokens, token_idx
                 )
 
                 # This code has duplicate blocks because it allows us to tweak the response for composite token matches separately from normal words if necessary
@@ -130,49 +119,33 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
                     # <class 'list'>: ['mountain', 'view']
                     # Highlight the conflict words
                     if word in current_conflict_keys and current_conflict_keys.index(
-                            word) != current_conflict_keys.index(current_conflict_keys[-1]):
-                        issue.name_actions.append(NameAction(
-                            word=word,
-                            index=offset_idx,
-                            type=NameActions.HIGHLIGHT
-                        ))
+                        word
+                    ) != current_conflict_keys.index(current_conflict_keys[-1]):
+                        issue.name_actions.append(NameAction(word=word, index=offset_idx, type=NameActions.HIGHLIGHT))
 
                     # Strike out the last matching word
                     if word in current_conflict_keys and current_conflict_keys.index(
-                            word) == current_conflict_keys.index(current_conflict_keys[-1]):
-                        issue.name_actions.append(NameAction(
-                            word=word,
-                            index=offset_idx,
-                            type=NameActions.STRIKE
-                        ))
+                        word
+                    ) == current_conflict_keys.index(current_conflict_keys[-1]):
+                        issue.name_actions.append(NameAction(word=word, index=offset_idx, type=NameActions.STRIKE))
                 else:
                     # Highlight the conflict words
                     if word in current_conflict_keys and current_conflict_keys.index(
-                            word) != current_conflict_keys.index(current_conflict_keys[-1]):
-                        issue.name_actions.append(NameAction(
-                            word=word,
-                            index=offset_idx,
-                            type=NameActions.HIGHLIGHT
-                        ))
+                        word
+                    ) != current_conflict_keys.index(current_conflict_keys[-1]):
+                        issue.name_actions.append(NameAction(word=word, index=offset_idx, type=NameActions.HIGHLIGHT))
 
                     # Strike out the last matching word
                     if word in current_conflict_keys and current_conflict_keys.index(
-                            word) == current_conflict_keys.index(current_conflict_keys[-1]):
-                        issue.name_actions.append(NameAction(
-                            word=word,
-                            index=offset_idx,
-                            type=NameActions.STRIKE
-                        ))
+                        word
+                    ) == current_conflict_keys.index(current_conflict_keys[-1]):
+                        issue.name_actions.append(NameAction(word=word, index=offset_idx, type=NameActions.STRIKE))
 
         issue.conflicts = []
 
         conflict = Conflict(
-                name=current_conflict_name,
-                date=date.today(),
-                start_date=start_date,
-                id=id_num,
-                source=source
-             )
+            name=current_conflict_name, date=date.today(), start_date=start_date, id=id_num, source=source
+        )
 
         issue.conflicts.append(conflict)
 
@@ -184,11 +157,17 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
             for prop in vars(setup_item):
                 if isinstance(setup_item.__dict__[prop], Template):
                     # Render the Template string, replacing placeholder vars
-                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute({
-                        'list_name': self._join_list_words(list_name),
-                        'list_remove': self._join_list_words(list_remove),
-                        'list_dist': self._join_list_words(list_dist_words),
-                        'list_desc': self._join_list_words(list_desc_words)
-                    }))
+                    setattr(
+                        setup_item,
+                        prop,
+                        setup_item.__dict__[prop].safe_substitute(
+                            {
+                                'list_name': self._join_list_words(list_name),
+                                'list_remove': self._join_list_words(list_remove),
+                                'list_dist': self._join_list_words(list_dist_words),
+                                'list_desc': self._join_list_words(list_desc_words),
+                            }
+                        ),
+                    )
 
         return issue

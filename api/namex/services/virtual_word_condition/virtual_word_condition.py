@@ -23,10 +23,7 @@ class VirtualWordConditionService:
             model.rc_allow_use == false(),
         ]
 
-        criteria = VirtualWordConditionCriteria(
-            fields=[model.rc_words],
-            filters=filters
-        )
+        criteria = VirtualWordConditionCriteria(fields=[model.rc_words], filters=filters)
 
         results = model.find_by_criteria(criteria)
         flattened = list(map(str.strip, (list(filter(None, flatten_tuple_results(results))))))
@@ -40,10 +37,7 @@ class VirtualWordConditionService:
             model.rc_consent_required == true(),
         ]
 
-        criteria = VirtualWordConditionCriteria(
-            fields=[model.rc_words],
-            filters=filters
-        )
+        criteria = VirtualWordConditionCriteria(fields=[model.rc_words], filters=filters)
 
         results = model.find_by_criteria(criteria)
         flattened = list(map(str.strip, (list(filter(None, flatten_tuple_results(results))))))
@@ -57,10 +51,7 @@ class VirtualWordConditionService:
             model.rc_allow_use == true(),
         ]
 
-        criteria = VirtualWordConditionCriteria(
-            fields=[model.rc_words],
-            filters=filters
-        )
+        criteria = VirtualWordConditionCriteria(fields=[model.rc_words], filters=filters)
 
         results = model.find_by_criteria(criteria)
         flattened = list(map(str.strip, (list(filter(None, flatten_tuple_results(results))))))
@@ -69,14 +60,9 @@ class VirtualWordConditionService:
     def get_word(self, word):
         model = self.get_model()
 
-        filters = [
-            func.lower(model.rc_words).op('~')(r'\y{}\y'.format(word.lower()))
-        ]
+        filters = [func.lower(model.rc_words).op('~')(r'\y{}\y'.format(word.lower()))]
 
-        criteria = VirtualWordConditionCriteria(
-            fields=[model.rc_words],
-            filters=filters
-        )
+        criteria = VirtualWordConditionCriteria(fields=[model.rc_words], filters=filters)
 
         if model.find_by_criteria(criteria):
             return word
@@ -89,12 +75,9 @@ class VirtualWordConditionService:
         filters = [
             func.lower(model.rc_words).op('~')(r'\y{}\y'.format(consent_word.lower())),
             model.rc_allow_use == true(),
-            model.rc_consent_required == true()
+            model.rc_consent_required == true(),
         ]
-        criteria = VirtualWordConditionCriteria(
-            fields=[model.rc_instructions],
-            filters=filters
-        )
+        criteria = VirtualWordConditionCriteria(fields=[model.rc_instructions], filters=filters)
 
         results = model.find_by_criteria(criteria)
         flattened = list(map(str.strip, (list(filter(None, flatten_tuple_results(results))))))

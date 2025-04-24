@@ -10,6 +10,7 @@ class UnitTime(AbstractEnum):
     HR = 'hours'
     MIN = 'minutes'
 
+
 # this is a separate function to make it easier to mock datetime.utcnow() for testing purposes
 def get_utc_now():
     return datetime.utcnow()

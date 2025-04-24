@@ -9,15 +9,15 @@ from ...response_objects import NameAnalysisIssue
 
 
 class AnalysisResponseIssue:
-    issue_type = "Issue"  # Maybe get rid of this guy
-    header = "Further Action Required"
-    status_text = ""
-    status = "fa"  # This is a CODE [AV | FA | RC]
+    issue_type = 'Issue'  # Maybe get rid of this guy
+    header = 'Further Action Required'
+    status_text = ''
+    status = 'fa'  # This is a CODE [AV | FA | RC]
     issue = None
 
-    '''
+    """
     @:param setup_config Setup[]
-    '''
+    """
 
     def __init__(self, analysis_response, setup_config):
         self.analysis_response = analysis_response
@@ -33,8 +33,11 @@ class AnalysisResponseIssue:
             return []  # This method should always return a list
 
         try:
-            converted_list = list(map(lambda d: d.upper() if isinstance(d, str) else '', str_list)) \
-                if convert else list(map(lambda d: d.upper(), str_list))
+            converted_list = (
+                list(map(lambda d: d.upper() if isinstance(d, str) else '', str_list))
+                if convert
+                else list(map(lambda d: d.upper(), str_list))
+            )
         except Exception as err:
             current_app.logger.error('List is not a list of strings ' + repr(err))
 
@@ -44,8 +47,8 @@ class AnalysisResponseIssue:
     def create_issue(self):
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="",
-            line2="",
+            line1='',
+            line2='',
             consenting_body=None,
             designations=None,
             show_next_button=False,
@@ -53,7 +56,7 @@ class AnalysisResponseIssue:
             show_examination_button=False,
             conflicts=None,
             setup=None,
-            name_actions=[]
+            name_actions=[],
         )
 
         return issue
@@ -62,16 +65,16 @@ class AnalysisResponseIssue:
     def configure_issue(self, procedure_result):
         return self.issue
 
-    '''
+    """
     @:param setup_config Setup[]
-    '''
+    """
 
     def set_issue_setups(self, setup_config):
         self.setup_config = setup_config
 
     @classmethod
-    def _join_list_words(cls, list_words, separator=", "):
-        return "<b>" + separator.join(list_words) + "</b>"
+    def _join_list_words(cls, list_words, separator=', '):
+        return '<b>' + separator.join(list_words) + '</b>'
 
     # Johnson & Johnson Engineering will return original tokens:
     # [Johnson, &, Johnson, Engineering]
@@ -141,7 +144,7 @@ class AnalysisResponseIssue:
             token_substr_idx = current_processed_token.find(current_original_token)
             token_is_next_chunk = token_substr_idx == 0
             if token_is_next_chunk:
-                current_processed_token = current_processed_token[len(current_original_token):]
+                current_processed_token = current_processed_token[len(current_original_token) :]
                 token_string += current_original_token
 
             next_char = False
@@ -163,8 +166,9 @@ class AnalysisResponseIssue:
 
         return False, 0, 0, current_processed_token
 
-    def adjust_word_index(self, original_name_str, name_original_tokens, name_tokens, word_idx,
-                          offset_designations=True):
+    def adjust_word_index(
+        self, original_name_str, name_original_tokens, name_tokens, word_idx, offset_designations=True
+    ):
         # remove punctuations
         name_original_tokens = [re.sub(r'(?<=[a-zA-Z\.])\'[Ss]', '', x) for x in name_original_tokens]
         name_original_tokens = [re.sub(r'[^A-Za-z0-9.]+', ' ', x) for x in name_original_tokens]
@@ -193,13 +197,15 @@ class AnalysisResponseIssue:
 
         while len(original_tokens) > 0:
             # Check to see if we're dealing with a composite, if so, get the offset amount
-            composite_token, composite_tokens_processed, composite_idx_offset, processed_name_string = \
+            composite_token, composite_tokens_processed, composite_idx_offset, processed_name_string = (
                 self.get_next_token_if_composite(unprocessed_name_string, original_tokens, processed_tokens)
+            )
 
             if processed_name_string:
                 # Only replace the first match!
-                unprocessed_name_string = re.sub(r'{0}(\'[Ss])?'.format(processed_name_string), '',
-                                                 unprocessed_name_string, 1).strip()
+                unprocessed_name_string = re.sub(
+                    r'{0}(\'[Ss])?'.format(processed_name_string), '', unprocessed_name_string, 1
+                ).strip()
 
             # Handle composite tokens
             if composite_token:
@@ -224,8 +230,11 @@ class AnalysisResponseIssue:
                         if offset_designations:
                             # Does the current word have any punctuation associated with?
                             next_char = ''
-                            if len(unprocessed_name_string) > 0 and len(original_tokens) > 0 and \
-                                    unprocessed_name_string[0] == original_tokens[0]:
+                            if (
+                                len(unprocessed_name_string) > 0
+                                and len(original_tokens) > 0
+                                and unprocessed_name_string[0] == original_tokens[0]
+                            ):
                                 next_char = original_tokens[0]
 
                             token_is_designation = (current_original_token + next_char) in all_designations
@@ -260,7 +269,14 @@ class AnalysisResponseIssue:
 
         offset_idx = word_idx + word_idx_offset + composite_token_offset
 
-        current_app.logger.debug('Adjusted word index for word [' + target_word + '] from [' + str(word_idx) + '] -> [' + str(
-            offset_idx) + ']')
+        current_app.logger.debug(
+            'Adjusted word index for word ['
+            + target_word
+            + '] from ['
+            + str(word_idx)
+            + '] -> ['
+            + str(offset_idx)
+            + ']'
+        )
 
         return offset_idx, word_idx, word_idx_offset, composite_token_offset

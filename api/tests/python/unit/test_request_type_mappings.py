@@ -5,8 +5,7 @@ from tests.python.conftest import app
 
 @pytest.mark.skip
 def test_request_type_mapping(request_type_code):
-    output = [item for item in request_type_mapping
-              if item[0] == request_type_code]
+    output = [item for item in request_type_mapping if item[0] == request_type_code]
 
     if request_type_code == 'CR':
         assert output[0][0] == 'CR'

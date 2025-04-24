@@ -23,9 +23,10 @@ from .mixins.get_synonyms_lists import GetSynonymsListsMixin
 from .mixins.get_word_classification_lists import GetWordClassificationListsMixin
 
 
-'''
+"""
 This is the director for AutoAnalyseService.
-'''
+"""
+
 
 class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, GetWordClassificationListsMixin):
     @property
@@ -126,10 +127,11 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
     @property
     def word_classification_tokens(self):
-        return \
-            self.token_classifier.distinctive_word_tokens, \
-            self.token_classifier.descriptive_word_tokens, \
-            self.token_classifier.unclassified_word_tokens
+        return (
+            self.token_classifier.distinctive_word_tokens,
+            self.token_classifier.descriptive_word_tokens,
+            self.token_classifier.unclassified_word_tokens,
+        )
 
     @property
     def processed_name(self):
@@ -141,19 +143,19 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
         np_svc = self.name_processing_service
         return self.name_processing_service.name_as_submitted if np_svc else ''
 
-    '''
+    """
     name_as_submitted_tokenized tokenize the original name and when there is a compound designation made of more than one
     word, the term is counted as token. For instance, designations such as limited liability company is counted as one token.
-    '''
+    """
 
     @property
     def name_as_submitted_tokenized(self):
         np_svc = self.name_processing_service
         return self.name_processing_service.name_as_submitted_tokenized if np_svc else ''
 
-    '''
+    """
     Just an alias for name_as_submitted
-    '''
+    """
 
     @property
     def original_name(self):
@@ -295,12 +297,14 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                         self._list_desc_words,
                         self.compound_descriptive_name_tokens,
                         self.processed_name,
-                        self.name_original_tokens
+                        self.name_original_tokens,
                     )
-                    if check_name_is_well_formed.result_code in (
-                            AnalysisIssueCodes.ADD_DISTINCTIVE_WORD, AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD) and \
-                            self.entity_type not in (BCUnprotectedNameEntityTypes.list()) and \
-                            not check_name_is_well_formed.is_valid:
+                    if (
+                        check_name_is_well_formed.result_code
+                        in (AnalysisIssueCodes.ADD_DISTINCTIVE_WORD, AnalysisIssueCodes.ADD_DESCRIPTIVE_WORD)
+                        and self.entity_type not in (BCUnprotectedNameEntityTypes.list())
+                        and not check_name_is_well_formed.is_valid
+                    ):
                         analysis.append(check_name_is_well_formed)
                     elif check_name_is_well_formed.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
                         self.set_skip_search_conflicts(True)
@@ -384,7 +388,7 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
                 AnalysisIssueCodes.END_DESIGNATION_MORE_THAN_ONCE,
                 AnalysisIssueCodes.DESIGNATION_MISPLACED,
                 AnalysisIssueCodes.DESIGNATION_MISMATCH,
-                AnalysisIssueCodes.DESIGNATION_REMOVAL
+                AnalysisIssueCodes.DESIGNATION_REMOVAL,
             ]
             analysis = self.sort_analysis_issues(analysis, analysis_issues_sort_order)
 
@@ -428,17 +432,15 @@ class NameAnalysisDirector(GetSynonymsListsMixin, GetDesignationsListsMixin, Get
 
     @classmethod
     def _get_analysis_issue_type_issues(cls, analysis, issue_code):
-        issues = list(
-            filter(lambda i: i.result_code == issue_code, analysis)
-        )
+        issues = list(filter(lambda i: i.result_code == issue_code, analysis))
 
         return issues
 
-    '''
+    """
     This is the main execution call for running name analysis checks.
     do_analysis is an abstract method and must be implemented in extending classes.
     @:return ProcedureResult[]
-    '''
+    """
 
     def do_analysis(self):
         raise NotImplementedError('do_analysis must be implemented in extending classes')

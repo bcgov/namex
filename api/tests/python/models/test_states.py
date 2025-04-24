@@ -14,10 +14,9 @@ def test_state_draft(session):
 
 
 def test_all_valid_states_in_db(session):
-
     states = State.query.all()
 
-    state_cnt=0
+    state_cnt = 0
     for state in states:
         state_cnt += 1
         if state.cd not in State.ALL_STATES:

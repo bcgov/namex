@@ -1,4 +1,5 @@
 """Descriptive issue classes."""
+
 from namex.resources.auto_analyse.issues import AddDescriptiveWordIssue
 
 from ....response_objects import NameAnalysisIssue
@@ -26,7 +27,7 @@ class XproAddDescriptiveWordIssue(AddDescriptiveWordIssue):
             show_examination_button=False,
             conflicts=None,
             setup=None,
-            name_actions=[]
+            name_actions=[],
         )
 
         return issue

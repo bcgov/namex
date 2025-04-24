@@ -28,9 +28,7 @@ def handle_auth_error(ex):
 
 @cors_preflight('GET, PUT')
 @payment_api.route('/sbc-pay/<string:payment_identifier>', strict_slashes=False, methods=['GET', 'PUT', 'OPTIONS'])
-@payment_api.doc(params={
-    'payment_identifier': ''
-})
+@payment_api.doc(params={'payment_identifier': ''})
 class SBCPayment(Resource):
     @staticmethod
     # @jwt.requires_auth
@@ -67,8 +65,6 @@ class SBCPaymentExtra(Resource):
     # @payment_api.expect()
     @payment_api.response(200, 'Success', '')
     # @marshal_with()
-    @payment_api.doc(params={
-        '': ''
-    })
+    @payment_api.doc(params={'': ''})
     def delete():
         pass

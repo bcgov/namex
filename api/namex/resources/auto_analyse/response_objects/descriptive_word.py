@@ -1,8 +1,8 @@
 from .abstract import Serializable
 
-'''
+"""
 @:deprecated
-'''
+"""
 
 
 class DescriptiveWord(Serializable):
