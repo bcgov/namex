@@ -64,7 +64,7 @@ class AbstractNameRequestResource(AbstractSolrResource):
     """
     These Event callback 'actions' are fired off when Name Request state change is triggered.
     Generally, these just invoke the @static methods post_nr, put_nr, patch_nr, and approve_nr.
-    This makes testing those easier as we can call them statically from our tests without having to 
+    This makes testing those easier as we can call them statically from our tests without having to
     instantiate a NameRequestResource.
     """
 

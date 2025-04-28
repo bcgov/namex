@@ -49,7 +49,7 @@ class NRNumberService:
             span = current_app.config.get('NR_NUM_LIFESPAN')
 
             while count < attempts:
-                random_num = random.randint(floor, ceiling)
+                random_num = random.randint(floor, ceiling)  # noqa: S311
                 nr_num = f'NR {str(random_num).zfill(7)}'
                 count += 1
 

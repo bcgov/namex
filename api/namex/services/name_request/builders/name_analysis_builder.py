@@ -49,7 +49,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     def check_name_is_well_formed(self, name_dict, list_dist, list_desc, list_name, processed_name, list_original_name):
         result = ProcedureResult()
         result.is_valid = True
-        self.name_processing_service
+        self.name_processing_service  # noqa: B018
 
         first_classification = None
         if name_dict:
@@ -108,7 +108,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         result.is_valid = True
         if list_none.__len__() > 0:
             unclassified_words_list_response = []
-            for idx, token in enumerate(list_name):
+            for _idx, token in enumerate(list_name):
                 if not token.isdigit() and any(token in word for word in list_none):
                     unclassified_words_list_response.append(token)
 
@@ -170,8 +170,8 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         queue=False,
     ):
         list_conflicts, most_similar_names = [], []
-        dict_highest_counter, response = {}, {}
-        self._list_processed_names = list()
+        dict_highest_counter, response = {}, {}  # noqa: F841
+        self._list_processed_names = []
         for w_dist, w_desc_criteria, w_desc in zip(list_dist_words, list_desc_criteria, list_desc_words):
             if w_dist and w_desc_criteria:
                 list_details, forced = self.get_conflicts(
@@ -208,7 +208,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         check_name_is_well_formed,
         queue,
     ):
-        dist_substitution_dict, desc_synonym_dict, dist_substitution_compound_dict, desc_synonym_compound_dict = (
+        dist_substitution_dict, desc_synonym_dict, dist_substitution_compound_dict, desc_synonym_compound_dict = (  # noqa: F841
             {},
             {},
             {},
@@ -232,7 +232,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             w_dist, list_name, dist_substitution_dict
         )
 
-        list_conflict_details = list()
+        list_conflict_details = []
 
         change_filter = True if self.director.skip_search_conflicts else False
         list_details, forced = self.get_conflicts_db(
@@ -438,7 +438,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     list_name: original name tokenized by designation. For instance, designation composed of many words is tokenized as one.
     entity_type_user: Entity type typed by user. 'CR' by default
     all_designations: All Designations found in name (either misplaced or not)
-    all_designations_user: All designations for the entity type typed by the user. 
+    all_designations_user: All designations for the entity type typed by the user.
     @return ProcedureResult
     """
 
@@ -456,7 +456,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 'correct_designations': all_designations_user,
             }
         else:
-            for idx, token in enumerate(list_name):
+            for _idx, token in enumerate(list_name):
                 if token in all_designations and token not in all_designations_user:
                     mismatch_entity_designation_list.append(token)
 
@@ -577,7 +577,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
             }
             conflict_response = requests.post(url=''.join([auto_analyze_url]), json=json_analyze)
             if not conflict_response:
-                warnings.warn('Quart Service did not return a result', Warning)
+                warnings.warn('Quart Service did not return a result', Warning, stacklevel=2)
             conflicts = conflict_response.json()
             dict_matches_counter = dict(ChainMap(*conflicts.get('result')))
 
@@ -587,12 +587,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
                 all_subs_dict = get_all_dict_substitutions(dist_substitution_dict, desc_synonym_dict, list_name)
                 # Get  N highest score (values) and shortest names (key)
                 dict_highest_counter.update(
-                    {
-                        k: v
-                        for k, v in sorted(dict_matches_counter.items(), key=lambda item: (-item[1], item[0]))[
-                            0:MAX_MATCHES_LIMIT
-                        ]
-                    }
+                    dict(sorted(dict_matches_counter.items(), key=lambda item: (-item[1], item[0]))[:MAX_MATCHES_LIMIT])
                 )
                 list_details = self.get_details_higher_score(dict_highest_counter, selected_matches, all_subs_dict)
                 forced = True if any(value == EXACT_MATCH for value in dict_highest_counter.values()) else False
@@ -721,7 +716,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
 
     def check_descriptive(self, name_dict):
         valid = False
-        for i, value in enumerate(name_dict.values()):
+        for _i, value in enumerate(name_dict.values()):
             if value == DataFrameFields.DESCRIPTIVE.value:
                 valid = True
                 break
@@ -753,14 +748,14 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
     dict_dist: Dictionary of distinctive tokens with its corresponding substitutions (if they exist) included in a list.
     dict_desc: Dictionary of descriptive tokens with its corresponding substitutions (if they exist) included in a list.
     list_name: List of words which form a clean name
-    @return dict_compound_dist: dictionary of compound distinctive items (made of two words) with its corresponding 
+    @return dict_compound_dist: dictionary of compound distinctive items (made of two words) with its corresponding
     substitutions (if they exist) included as list
     """
 
     def get_compound_distinctives(self, dict_dist):
         list_dict = list(dict_dist.keys())
 
-        list_dist_compound = list()
+        list_dist_compound = []
         for i in range(2, len(list_dict) + 1):
             list_dist_compound.extend(subsequences(list_dict, i))
 
@@ -774,11 +769,11 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         return dct
 
     def add_substitutions(self, list_dist_compound, dict_dist):
-        dict_compound_dist = dict()
+        dict_compound_dist = {}
         for dist_compound in list_dist_compound:
             dist = dist_compound.split()
             dist_values = [dict_dist[x] for x in dist]
-            compound = list()
+            compound = []
             for item in itertools.product(*dist_values):
                 compound.append(remove_double_letters(''.join(item)))
             dist_compound = dist_compound.replace(' ', '')
@@ -852,7 +847,7 @@ class NameAnalysisBuilder(AbstractNameAnalysisBuilder):
         return desc_synonym_criteria_dict
 
     def get_different_key(self, desc_synonym_dict_delta, desc_synonym_dict):
-        diff_key = list()
+        diff_key = []
         for key in desc_synonym_dict.keys():
             if key not in desc_synonym_dict_delta:
                 diff_key.append(key)

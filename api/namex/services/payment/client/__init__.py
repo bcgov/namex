@@ -206,7 +206,7 @@ class BaseClient:
                     raise ApiAuthError(token, message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
                 headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
 
-            if type(headers.get('Account-Id', '')) != str:
+            if not isinstance(headers.get('Account-Id', ''), str):
                 headers['Account-Id'] = str(headers['Account-Id'])
 
             url = self.build_url(url)

@@ -9,13 +9,13 @@ from flask import jsonify, make_response
 from flask.globals import current_app
 from flask_restx import Namespace, Resource
 
-from namex.constants import (  # noqa: I001
-    BCProtectedNameEntityTypes,  # noqa: I001
-    BCUnprotectedNameEntityTypes,  # noqa: I001
-    ValidLocations,  # noqa: I001
-    XproUnprotectedNameEntityTypes,  # noqa: I001
-)  # noqa: I001
-from namex.services.name_request.auto_analyse import AnalysisIssueCodes, AnalysisRequestActions  # noqa: I005
+from namex.constants import (
+    BCProtectedNameEntityTypes,
+    BCUnprotectedNameEntityTypes,
+    ValidLocations,
+    XproUnprotectedNameEntityTypes,
+)
+from namex.services.name_request.auto_analyse import AnalysisIssueCodes, AnalysisRequestActions
 from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 from namex.services.name_request.builders.name_analysis_builder import NameAnalysisBuilder
 from namex.utils.api_resource import get_query_param_str

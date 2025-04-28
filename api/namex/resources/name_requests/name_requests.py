@@ -96,7 +96,7 @@ class NameRequestsResource(BaseNameRequestResource):
 
         except InvalidInputError as err:
             return handle_exception(err, err.message, 400)
-        except Exception as err:  # pylint: disable=broad-except
+        except Exception as err:
             return handle_exception(err, 'Error retrieving the NR from the db.', 500)
 
         if nr_num and len(results) == 1:
@@ -124,7 +124,7 @@ class NameRequestsResource(BaseNameRequestResource):
             # We won't add the list of valid Name Request actions for the given state to the response if we're sending back a list
             # If the user / client accessing this data needs the Name Request actions, GET the individual record using NameRequest.get
             # This method, NameRequests.get is for Existing NR Search
-            return make_response(jsonify(list(map(lambda result: result.json(), results))), 200)
+            return make_response(jsonify([result.json() for result in results]), 200)
 
         # We won't add the list of valid Name Request actions for the given state to the response if we're sending back a list
         # If the user / client accessing this data needs the Name Request actions, GET the individual record using NameRequest.get
@@ -143,7 +143,7 @@ class NameRequestsResource(BaseNameRequestResource):
             user_email = ''
             # user id
             submitter = nr_svc.request_data.get('applicants')
-            for item, index in zip(submitter, range(len(submitter))):
+            for item, _index in zip(submitter, range(len(submitter))):
                 user_email = item.get('emailAddress')
 
             # collect submitted user data names choices
@@ -201,6 +201,6 @@ class NameRequestsResource(BaseNameRequestResource):
         except NameRequestException as err:
             current_app.logger.error('NameRequestException occurred: %s', traceback.format_exc())
             return handle_exception(err, err.message, 500)
-        except Exception as err:  # pylint: disable=broad-except
+        except Exception as err:
             current_app.logger.error('NameRequestException occurred: %s', traceback.format_exc())
             return handle_exception(err, repr(err), 500)

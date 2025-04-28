@@ -68,7 +68,7 @@ class PaymentModelMixin:
         Exception to this rule, payment_completion_date requires the filing to be locked.
         """
         insp = inspect(self)
-        attr_state = insp.attrs._payment_token  # pylint: disable=protected-access;
+        attr_state = insp.attrs._payment_token
 
         # Inspect requires the member, and the hybrid decorator doesn't help us here
         if self._payment_token and not attr_state.history.added:

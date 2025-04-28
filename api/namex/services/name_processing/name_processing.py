@@ -16,7 +16,7 @@ from .mixins.get_synonym_lists import GetSynonymListsMixin
 Service for pre-processing of a user submitted name request name string.
 Setting the name using NameProcessingService.set_name will clean the name and set the following properties:
 @:prop name_as_submitted The original name string
-@:prop name_as_submitted_tokenized The original name tokenized handling designations as one token. 
+@:prop name_as_submitted_tokenized The original name tokenized handling designations as one token.
                                     For instance, if original name has limited liability company, this compound designation is made a token.
 @:prop name_original_tokens The original name tokenized without any special handling.
 @:prop processed_name The cleaned name
@@ -148,9 +148,14 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
         regex = re.compile(r'(?<!\w)({}|[a-z-A-Z0-9]+)(?!\w)'.format(designation_alternators))
         self.name_as_submitted_tokenized = regex.findall(name.lower())
 
-    def _clean_name_words(self, name, stop_words=[], designation_all=[], prefix_list=[], number_list=[]):
+    def _clean_name_words(self, name, stop_words=None, designation_all=None, prefix_list=None, number_list=None):
+        stop_words = stop_words or []
+        designation_all = designation_all or []
+        prefix_list = prefix_list or []
+        number_list = number_list or []
+
         if not name or not stop_words or not designation_all or not prefix_list or not number_list:
-            warnings.warn('Parameters in clean_name_words function are not set.', Warning)
+            warnings.warn('Parameters in clean_name_words function are not set.', Warning, stacklevel=2)
 
         syn_svc = self.synonym_service
         # vwc_svc = self.virtual_word_condition_service
@@ -191,7 +196,7 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
 
     def exception_virtual_word_condition(self, text, vwc_svc):
         exceptions_ws = []
-        for word in re.sub(r'[^a-zA-Z0-9 -\']+', ' ', text, 0, re.IGNORECASE).split():
+        for word in re.sub(r'[^a-zA-Z0-9 -\']+', ' ', text, count=0, flags=re.IGNORECASE).split():
             if vwc_svc.get_word(word) and bool(re.search(r'\d', word)):
                 exceptions_ws.append(word)
 

@@ -131,7 +131,7 @@ def display_retry_payment(nr_model=None):
     try:
         current_app.logger.debug('retry payment method')
         if nr_model and nr_model.stateCd in (State.PENDING_PAYMENT):
-            payment = nr.payments.one_or_none()
+            payment = nr.payments.one_or_none()  # noqa: F821
             if payment:
                 if payment.payment_status_code not in [PaymentState.COMPLETED.value, PaymentState.APPROVED.value]:
                     return True

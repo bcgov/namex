@@ -681,7 +681,7 @@ class SolrQueries:
         return re.sub('[^a-z]', '', name)
 
     @classmethod
-    def _tokenize(cls, line: str, categories: List[str] = []) -> List[str]:
+    def _tokenize(cls, line: str, categories: List[str] = None) -> List[str]:
         """
         Builds a list of tokens based upon the categories defined
         The tokens are in the same order as the original input
@@ -703,6 +703,8 @@ class SolrQueries:
         :return: List[str]: a list of string tokens that can be parsed left-> as order is preserved
         """
         tokens = []  # yep, lazy format
+        if categories is None:
+            categories = []
         start_token: int = 0
         idx: int
         category: List[str] = None
@@ -854,7 +856,7 @@ class SolrQueries:
 
     # Look up each token in name, and if it is in the synonyms then we need to search for it separately.
     @classmethod
-    def _get_synonyms_clause(cls, name, stemmed_name, name_tokens={'full_words': [], 'stemmed_words': []}):
+    def _get_synonyms_clause(cls, name, stemmed_name, name_tokens={'full_words': [], 'stemmed_words': []}):  # noqa: B006
         # name = re.sub(' +', ' ', name)
         current_app.logger.debug('getting synonyms for: {}'.format(name))
         clause = ''

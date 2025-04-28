@@ -605,7 +605,7 @@ def test_namex_search_submitted_start_and_end_date_invalid_date_format(
         ('Empty Search', [], 0),
     ],
 )
-def test_namex_search_direct_nrs(client, jwt, app, test_name, identifiers, total_results):  # pylint: disable=unused-argument
+def test_namex_search_direct_nrs(client, jwt, app, test_name, identifiers, total_results):
     """Test searching directly using name requests."""
     base_names = [
         [{'name': 'test1', 'state': 'NE', 'choice': 1}],

@@ -17,10 +17,10 @@ Provides end points to submit, retrieve and cancel a name analysis request.
 
 from http import HTTPStatus
 
-import requests  # noqa: I001; grouping out of order to make both pylint & isort happy
+import requests
 from flask import current_app, request
 from flask_restx import Resource, fields
-from requests import exceptions  # noqa: I001; grouping out of order to make both pylint & isort happy
+from requests import exceptions
 
 from namex.constants import (
     BCProtectedNameEntityTypes,

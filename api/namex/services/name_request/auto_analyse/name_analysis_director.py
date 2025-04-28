@@ -1,4 +1,3 @@
-
 from flask import current_app
 from swagger_client import SynonymsApi as SynonymService
 

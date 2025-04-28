@@ -12,14 +12,14 @@ import os
 from flask import Flask
 from flask_jwt_oidc import JwtManager
 
-from .VERSION import __version__  # noqa: F401; imported from here
+from .VERSION import __version__
 
 jwt = JwtManager()
 
-import sentry_sdk  # noqa: I001; pylint: disable=ungrouped-imports,wrong-import-order; conflicts with Flake8
+import sentry_sdk
 from flask_cors import CORS
 from flask_migrate import Migrate
-from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001
+from sentry_sdk.integrations.flask import FlaskIntegration
 from structured_logging import StructuredLogging
 
 from namex.services.cache import cache
@@ -32,12 +32,11 @@ from namex.resources import api
 from namex.utils.run_version import get_run_version
 from namex.services import flags
 
-# noqa: I003; dont know what flake8 wants here
 
 run_version = get_run_version()
 
 
-def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
+def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):  # noqa: B008
     """Create app."""
     app = Flask(__name__)
     CORS(app)
