@@ -1,4 +1,5 @@
 """Designation removal issue classes."""
+
 from namex.resources.auto_analyse.issues import DesignationRemovalIssue
 
 

@@ -54,7 +54,17 @@ def assert_field_is_mapped(req_obj, res_obj, prop_name):
     """
     req_obj_val = req_obj.get(prop_name)
     res_obj_val = res_obj.get(prop_name)
-    print('Response Field [' + prop_name + ': ' + str(res_obj_val) + '] equals Request Field [' + prop_name + ': ' + str(req_obj_val) + ']')
+    print(
+        'Response Field ['
+        + prop_name
+        + ': '
+        + str(res_obj_val)
+        + '] equals Request Field ['
+        + prop_name
+        + ': '
+        + str(req_obj_val)
+        + ']'
+    )
     assert res_obj_val == req_obj_val
     print('OK')
     print('...')
@@ -71,7 +81,17 @@ def assert_field_is_gt(req_obj, res_obj, prop_name):
     """
     req_obj_val = req_obj.get(prop_name)
     res_obj_val = res_obj.get(prop_name)
-    print('Response Field [' + prop_name + ': ' + str(res_obj_val) + '] is greater than Request Field [' + prop_name + ': ' + str(req_obj_val) + ']')
+    print(
+        'Response Field ['
+        + prop_name
+        + ': '
+        + str(res_obj_val)
+        + '] is greater than Request Field ['
+        + prop_name
+        + ': '
+        + str(req_obj_val)
+        + ']'
+    )
     assert res_obj_val > req_obj_val
     print('OK')
     print('...')
@@ -88,7 +108,17 @@ def assert_field_is_lt(req_obj, res_obj, prop_name):
     """
     req_obj_val = req_obj.get(prop_name)
     res_obj_val = res_obj.get(prop_name)
-    print('Response Field [' + prop_name + ': ' + str(res_obj_val) + '] is less than Request Field [' + prop_name + ': ' + str(req_obj_val) + ']')
+    print(
+        'Response Field ['
+        + prop_name
+        + ': '
+        + str(res_obj_val)
+        + '] is less than Request Field ['
+        + prop_name
+        + ': '
+        + str(req_obj_val)
+        + ']'
+    )
     assert res_obj_val < req_obj_val
     print('OK')
     print('...')

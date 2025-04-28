@@ -1,18 +1,15 @@
-"""Events keep an audit trail of all changes submitted to the datastore
+"""Events keep an audit trail of all changes submitted to the datastore"""
 
-"""
-from sqlalchemy import and_, func
-
-from . import db
-from namex.exceptions import BusinessException
-from marshmallow import Schema, fields, post_load
 from datetime import datetime
-from sqlalchemy.orm import backref
-from sqlalchemy import cast, Date
-from sqlalchemy.dialects.postgresql import JSONB
-from datetime import datetime, timedelta
 
-from ..constants import EventAction, EventUserId, EventState, RequestState, RequestPriority
+from sqlalchemy import func
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import backref
+
+from namex.exceptions import BusinessException
+
+from ..constants import EventUserId
+from . import db
 
 
 class Event(db.Model):
@@ -46,9 +43,15 @@ class Event(db.Model):
     VALID_ACTIONS = [GET, PUT, PATCH, POST, DELETE]
 
     def json(self):
-        return {"id": self.id, "eventDate": self.eventDate, "action": self.action, "stateCd": self.stateCd,
-                "jsonData": self.eventJson,
-                "requestId": self.nrId, "userId": self.userId}
+        return {
+            'id': self.id,
+            'eventDate': self.eventDate,
+            'action': self.action,
+            'stateCd': self.stateCd,
+            'jsonData': self.eventJson,
+            'requestId': self.nrId,
+            'userId': self.userId,
+        }
 
     def save_to_db(self):
         db.session.add(self)
@@ -62,11 +65,12 @@ class Event(db.Model):
 
     @classmethod
     def get_approved_names_counter(cls):
-        auto_approved_names_counter = db.session.query(
-            func.count(Event.id).label('approvedNamesCounter'))\
-            .filter(Event.action == Event.PATCH + 'Payment Completed')\
-            .filter(Event.userId == EventUserId.SERVICE_ACCOUNT.value)\
-            .filter(Event.stateCd.in_(('APPROVED','CONDITIONAL')))\
-            .filter(func.date_trunc('day', Event.eventDate) == func.date_trunc('day', func.now()))\
+        auto_approved_names_counter = (
+            db.session.query(func.count(Event.id).label('approvedNamesCounter'))
+            .filter(Event.action == Event.PATCH + 'Payment Completed')
+            .filter(Event.userId == EventUserId.SERVICE_ACCOUNT.value)
+            .filter(Event.stateCd.in_(('APPROVED', 'CONDITIONAL')))
+            .filter(func.date_trunc('day', Event.eventDate) == func.date_trunc('day', func.now()))
             .all()
+        )
         return auto_approved_names_counter.pop()

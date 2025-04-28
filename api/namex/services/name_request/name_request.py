@@ -1,25 +1,28 @@
 from datetime import datetime
-from pytz import timezone
 
-from namex.constants import NameState, RequestAction, ExpiryDays
-
-from namex.models import Request, Name, State, Applicant
+from namex.constants import ExpiryDays, NameState, RequestAction
+from namex.models import Applicant, Name, Request, State
 
 from .abstract_name_request import AbstractNameRequestMixin
-from .name_request_state import apply_nr_state_change, get_nr_state_actions
+from .exceptions import (
+    CreateNameRequestError,
+    ExtendExpiryDateError,
+    MapRequestApplicantError,
+    MapRequestDataError,
+    MapRequestNamesError,
+    SaveNameRequestError,
+    UpdateSubmitCountError,
+)
+from .mappers.request_applicants import map_request_applicant
+from .mappers.request_attrs import map_request_attrs
+from .mappers.request_comments import map_request_comments
+from .mappers.request_draft_attrs import map_draft_attrs
 
 # Mapping utils used to map HTTP request data to a Request model
 from .mappers.request_header_attrs import map_request_header_attrs
-from .mappers.request_draft_attrs import map_draft_attrs
-from .mappers.request_attrs import map_request_attrs
-from .mappers.request_applicants import map_request_applicant
-from .mappers.request_comments import map_request_comments
 from .mappers.request_names import map_submitted_name
-
+from .name_request_state import apply_nr_state_change, get_nr_state_actions
 from .utils import get_item_from_list
-from .exceptions import CreateNameRequestError, SaveNameRequestError, MapRequestDataError, \
-    MapRequestApplicantError, MapRequestNamesError, UpdateSubmitCountError, ExtendExpiryDateError
-
 
 
 class NameRequestService(AbstractNameRequestMixin):
@@ -71,6 +74,7 @@ class NameRequestService(AbstractNameRequestMixin):
     # 5. Run apply_state_change to execute the update
     nr_model = nr_svc.apply_state_change(nr_model, new_state, on_update)
     """
+
     _virtual_wc_service = None
 
     @property
@@ -162,10 +166,7 @@ class NameRequestService(AbstractNameRequestMixin):
         try:
             expiry_days = cls.get_expiry_days(name_request.request_action_cd, name_request.requestTypeCd)
 
-            name_request.expirationDate = cls.create_expiry_date(
-                start=start_datetime,
-                expires_in_days=expiry_days
-            )
+            name_request.expirationDate = cls.create_expiry_date(start=start_datetime, expires_in_days=expiry_days)
         except Exception as err:
             raise ExtendExpiryDateError(err)
 
@@ -188,7 +189,7 @@ class NameRequestService(AbstractNameRequestMixin):
             request_entity=self.request_entity,
             request_action=self.request_action,
             request_type=self.request_type,
-            conversion_type=self.conversion_type
+            conversion_type=self.conversion_type,
         )
 
         # If this is a DRAFT, set draft attributes
@@ -196,18 +197,11 @@ class NameRequestService(AbstractNameRequestMixin):
             name_request = map_draft_attrs(name_request, user_id=self.user_id)
 
         # Map request header attributes
-        name_request = map_request_header_attrs(
-            name_request,
-            request_data=self.request_data,
-            user_id=self.user_id
-        )
+        name_request = map_request_header_attrs(name_request, request_data=self.request_data, user_id=self.user_id)
 
         # Map request comments
         name_request = map_request_comments(
-            name_request,
-            request_data=self.request_data,
-            user_id=self.user_id,
-            nr_id=self.nr_id
+            name_request, request_data=self.request_data, user_id=self.user_id, nr_id=self.nr_id
         )
 
         try:
@@ -217,8 +211,7 @@ class NameRequestService(AbstractNameRequestMixin):
             if self.new_state_code in [State.RESERVED, State.COND_RESERVE]:
                 expiry_days = self.get_expiry_days(name_request.request_action_cd, name_request.requestTypeCd)
                 name_request.expirationDate = self.create_expiry_date(
-                    start=name_request.submittedDate,
-                    expires_in_days=expiry_days
+                    start=name_request.submittedDate, expires_in_days=expiry_days
                 )
         except Exception as err:
             raise MapRequestDataError(err)
@@ -304,7 +297,7 @@ class NameRequestService(AbstractNameRequestMixin):
                             nr_id=self.nr_id,
                             new_state_code=self.new_state_code,
                             request_entity=self.request_entity,
-                            request_action=self.request_action
+                            request_action=self.request_action,
                         )
 
                         name_request.names.append(updated_name)
@@ -316,7 +309,7 @@ class NameRequestService(AbstractNameRequestMixin):
                         nr_id=self.nr_id,
                         new_state_code=self.new_state_code,
                         request_entity=self.request_entity,
-                        request_action=self.request_action
+                        request_action=self.request_action,
                     )
 
                     name_request.names.append(submitted_name)
@@ -335,6 +328,7 @@ class NameRequestService(AbstractNameRequestMixin):
         :param on_success:
         :return:
         """
+
         def on_success_cb(nr, resource):
             new_state = next_state
 

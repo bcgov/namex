@@ -26,7 +26,7 @@ def calculate_fees(req):
             jurisdiction=req.jurisdiction,
             date=req.date,
             priority=req.priority,
-            headers=req.headers
+            headers=req.headers,
         )
 
         current_app.logger.debug(api_response)

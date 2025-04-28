@@ -1,38 +1,36 @@
-from flask import jsonify, make_response, request
-from flask_restx import Namespace, Resource, cors, fields
-from flask_jwt_oidc import AuthError
-
 from http import HTTPStatus
 
-from namex.utils.auth import cors_preflight
+from flask import jsonify, make_response, request
+from flask_jwt_oidc import AuthError
+from flask_restx import Namespace, Resource, cors, fields
 
 from namex.services.word_classification.word_classification import WordClassificationService
-from namex.models import User
-from namex import jwt
+from namex.utils.auth import cors_preflight
 
 # Register a local namespace for the requests
 api = Namespace('wordClassification', description='API for Word Classifications')
 
-word_request = api.model('word_classification_request', {
-    'classification': fields.String,
-    'examiner': fields.String,
-    'name': fields.String,
-    'word': fields.String
-})
+word_request = api.model(
+    'word_classification_request',
+    {'classification': fields.String, 'examiner': fields.String, 'name': fields.String, 'word': fields.String},
+)
 
-word_classification = api.model('word_classification', {
-    'id': fields.Integer,
-    'word': fields.String,
-    'classification': fields.String,
-    'lastNameUsed': fields.String,
-    'lastPrepName': fields.String,
-    'frequency': fields.Integer,
-    'approvedBy': fields.Integer,
-    'approvedDate': fields.DateTime,
-    'startDate': fields.DateTime,
-    'lastUpdatedBy': fields.Integer,
-    'lastUpdatedDate': fields.DateTime
-})
+word_classification = api.model(
+    'word_classification',
+    {
+        'id': fields.Integer,
+        'word': fields.String,
+        'classification': fields.String,
+        'lastNameUsed': fields.String,
+        'lastPrepName': fields.String,
+        'frequency': fields.Integer,
+        'approvedBy': fields.Integer,
+        'approvedDate': fields.DateTime,
+        'startDate': fields.DateTime,
+        'lastUpdatedBy': fields.Integer,
+        'lastUpdatedDate': fields.DateTime,
+    },
+)
 
 
 @api.errorhandler(AuthError)

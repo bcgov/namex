@@ -17,6 +17,7 @@ from flask import Flask
 
 from namex.services.lookup import nr_filing_actions
 
+
 def test_nr_filing_actions(caplog):
     """Assert that the nr_filing_actions is created and cached."""
     app = Flask(__name__)
@@ -29,10 +30,9 @@ def test_nr_filing_actions(caplog):
 
     with app.app_context():
         with caplog.at_level(logging.DEBUG):
-
             nr_filing_actions.get_actions(nr_type_cd, entity_type_cd, request_action_cd)
-            assert  nr_filing_actions_debug_msg in [rec.message for rec in caplog.records]
+            assert nr_filing_actions_debug_msg in [rec.message for rec in caplog.records]
 
             caplog.clear()
             nr_filing_actions.get_actions(nr_type_cd, entity_type_cd, request_action_cd)
-            assert  nr_filing_actions_debug_msg not in [rec.message for rec in caplog.records]
+            assert nr_filing_actions_debug_msg not in [rec.message for rec in caplog.records]

@@ -1,7 +1,8 @@
 import re
-import inflect
+from datetime import datetime, time
 from itertools import product
-from datetime import  datetime, time
+
+import inflect
 from dateutil import tz
 
 from namex.constants import DATE_FORMAT_NAMEX_SEARCH
@@ -84,7 +85,7 @@ def get_plural_singular_name(name):
         if plural:
             val.append(plural.lower())
         val.append(word.lower())
-        d[word] = (list(set(val)))
+        d[word] = list(set(val))
 
     name_list = []
     for combination in product(*d.values()):
@@ -95,10 +96,9 @@ def get_plural_singular_name(name):
 
 def convert_to_ascii(value):
     try:
-        return value.encode("ascii", "ignore").decode('ascii')
-    except Exception as err:
+        return value.encode('ascii', 'ignore').decode('ascii')
+    except Exception:
         return value
-
 
 
 def convert_to_utc_min_date_time(date_str: str):

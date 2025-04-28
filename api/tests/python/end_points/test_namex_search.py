@@ -1,21 +1,22 @@
 from __future__ import annotations
 
 import json
-import pytest
 from contextlib import suppress
 from datetime import datetime, timedelta
 from http import HTTPStatus
 from typing import List
-from namex.analytics.solr import SolrQueries
 
+import pytest
+
+from namex.analytics.solr import SolrQueries
 from namex.models import Applicant, Name, Request, State, User
-from tests.python.end_points.util import create_header
 from tests.python.end_points.common.utils import (
-    get_utc_server_now_with_delta,
     get_server_now_str,
     get_server_now_with_delta_str,
-    get_utc_server_now
+    get_utc_server_now,
+    get_utc_server_now_with_delta,
 )
+from tests.python.end_points.util import create_header
 
 # TODO: import these helper functions from somewhere shared by the tests
 
@@ -23,10 +24,7 @@ from tests.python.end_points.common.utils import (
 def create_applicant(first_name: str, last_name: str, email_address: str = None, phone_number: str = None) -> Applicant:
     """Create new applicant."""
     applicant = Applicant(
-        firstName=first_name,
-        lastName=last_name,
-        emailAddress=email_address,
-        phoneNumber=phone_number
+        firstName=first_name, lastName=last_name, emailAddress=email_address, phoneNumber=phone_number
     )
     applicant.save_to_db()
     return applicant
@@ -34,11 +32,7 @@ def create_applicant(first_name: str, last_name: str, email_address: str = None,
 
 def create_name(name: str, state: str, choice: int) -> Name:
     """Create new name."""
-    name = Name(
-        name=name,
-        state=state,
-        choice=choice
-    )
+    name = Name(name=name, state=state, choice=choice)
     name.save_to_db()
     return name
 
@@ -65,7 +59,7 @@ def generate_nrs(num: int, nr_nums: List[str], names: list, submitted: List[date
         State.CANCELLED,
         State.REJECTED,
         State.HOLD,
-        State.PENDING_PAYMENT
+        State.PENDING_PAYMENT,
     ]
     nrs = []
     for i in range(num):
@@ -79,6 +73,7 @@ def generate_nrs(num: int, nr_nums: List[str], names: list, submitted: List[date
         nrs.append(nr)
     return nrs
 
+
 # TODO: add tests for searching by last modified by, etc. and combined searches
 
 
@@ -87,7 +82,7 @@ def test_namex_search_default(client, jwt, app):
     generate_nrs(14, [], [], [])
 
     # get the resource (this is what we are testing)
-    rv = client.get(f'api/v1/requests', headers=create_header(jwt, [User.EDITOR]))
+    rv = client.get('api/v1/requests', headers=create_header(jwt, [User.EDITOR]))
     data = rv.data
     assert data
     resp = json.loads(data.decode('utf-8'))
@@ -102,14 +97,9 @@ def test_namex_search_default(client, jwt, app):
         date = nr['submittedDate']
 
 
-@pytest.mark.parametrize('state_cd', [
-    State.APPROVED,
-    State.CANCELLED,
-    State.CONDITIONAL,
-    State.DRAFT,
-    State.HOLD,
-    State.REJECTED
-])
+@pytest.mark.parametrize(
+    'state_cd', [State.APPROVED, State.CANCELLED, State.CONDITIONAL, State.DRAFT, State.HOLD, State.REJECTED]
+)
 def test_namex_search_state(client, jwt, app, state_cd):
     """Test searching by state."""
     generate_nrs(14, [], [], [])
@@ -128,17 +118,20 @@ def test_namex_search_state(client, jwt, app, state_cd):
         assert nr['stateCd'] == state_cd
 
 
-@pytest.mark.parametrize('search_nr, nrs', [
-    ('NR', ['NR 0000001', 'NR 0000011', 'NR 1000011', 'NR 0100011', 'NR 0101010', 'NR 01', 'NR 1234']),
-    ('NR 00', ['NR 0000001', 'NR 0000011', 'NR 1000011', 'NR 0100011', 'NR 0101010', 'NR 01', 'NR 1234']),
-    ('00', ['NR 0000001', 'NR 0000011', 'NR 1000011', 'NR 0100011', 'NR 0101010', 'NR 01', 'NR 1234']),
-    ('001', ['NR 0000001', 'NR 0000011', 'NR 1000011', 'NR 0100011', 'NR 0101010', 'NR 01', 'NR 1234']),
-    ('NR 01', ['NR 0000001', 'NR 0000011', 'NR 1000011', 'NR 0100011', 'NR 0101010', 'NR 01', 'NR 1234']),
-    ('NR 23', ['NR 0000001', 'NR 0000011', 'NR 1000011', 'NR 0100011', 'NR 0101010', 'NR 01', 'NR 1234']),
-    ('23', ['NR 0000001', 'NR 0000011', 'NR 1000011', 'NR 0100011', 'NR 0101010', 'NR 01', 'NR 1234']),
-    ('NR 123', ['NR 0000001', 'NR 0000011', 'NR 1000011', 'NR 0100011', 'NR 0101010', 'NR 01', 'NR 1234']),
-    ('NR 123', ['NR 0000001', 'NR 0000011', 'NR 1000011', 'NR 0100011', 'NR 0101010', 'NR 01', 'NR 1234'])
-])
+@pytest.mark.parametrize(
+    'search_nr, nrs',
+    [
+        ('NR', ['NR 0000001', 'NR 0000011', 'NR 1000011', 'NR 0100011', 'NR 0101010', 'NR 01', 'NR 1234']),
+        ('NR 00', ['NR 0000001', 'NR 0000011', 'NR 1000011', 'NR 0100011', 'NR 0101010', 'NR 01', 'NR 1234']),
+        ('00', ['NR 0000001', 'NR 0000011', 'NR 1000011', 'NR 0100011', 'NR 0101010', 'NR 01', 'NR 1234']),
+        ('001', ['NR 0000001', 'NR 0000011', 'NR 1000011', 'NR 0100011', 'NR 0101010', 'NR 01', 'NR 1234']),
+        ('NR 01', ['NR 0000001', 'NR 0000011', 'NR 1000011', 'NR 0100011', 'NR 0101010', 'NR 01', 'NR 1234']),
+        ('NR 23', ['NR 0000001', 'NR 0000011', 'NR 1000011', 'NR 0100011', 'NR 0101010', 'NR 01', 'NR 1234']),
+        ('23', ['NR 0000001', 'NR 0000011', 'NR 1000011', 'NR 0100011', 'NR 0101010', 'NR 01', 'NR 1234']),
+        ('NR 123', ['NR 0000001', 'NR 0000011', 'NR 1000011', 'NR 0100011', 'NR 0101010', 'NR 01', 'NR 1234']),
+        ('NR 123', ['NR 0000001', 'NR 0000011', 'NR 1000011', 'NR 0100011', 'NR 0101010', 'NR 01', 'NR 1234']),
+    ],
+)
 def test_namex_search_nr_num(client, jwt, app, search_nr, nrs):
     """Test searching by NR number."""
     generate_nrs(len(nrs), nrs, [], [])
@@ -157,24 +150,27 @@ def test_namex_search_nr_num(client, jwt, app, search_nr, nrs):
         assert search_nr in nr['nrNum']
 
 
-@pytest.mark.parametrize('order, submitted_interval, last_date', [
-    ('desc', 'All', None),
-    ('asc', 'All', None),
-    ('desc', 'Today', datetime.utcnow() - timedelta(days=1)),
-    ('asc', 'Today', datetime.utcnow() - timedelta(days=1)),
-    ('desc', '7 days', datetime.utcnow() - timedelta(days=7)),
-    ('asc', '7 days', datetime.utcnow() - timedelta(days=7)),
-    ('desc', '30 days', datetime.utcnow() - timedelta(days=30)),
-    ('asc', '30 days', datetime.utcnow() - timedelta(days=30)),
-    ('desc', '90 days', datetime.utcnow() - timedelta(days=90)),
-    ('asc', '90 days', datetime.utcnow() - timedelta(days=90)),
-    ('desc', '1 year', datetime.utcnow() - timedelta(days=1 * (365))),
-    ('asc', '1 year', datetime.utcnow() - timedelta(days=1 * (365))),
-    ('desc', '3 years', datetime.utcnow() - timedelta(days=3 * (365))),
-    ('asc', '3 years', datetime.utcnow() - timedelta(days=3 * (365))),
-    ('desc', '5 years', datetime.utcnow() - timedelta(days=5 * (365))),
-    ('asc', '5 years', datetime.utcnow() - timedelta(days=5 * (365))),
-])
+@pytest.mark.parametrize(
+    'order, submitted_interval, last_date',
+    [
+        ('desc', 'All', None),
+        ('asc', 'All', None),
+        ('desc', 'Today', datetime.utcnow() - timedelta(days=1)),
+        ('asc', 'Today', datetime.utcnow() - timedelta(days=1)),
+        ('desc', '7 days', datetime.utcnow() - timedelta(days=7)),
+        ('asc', '7 days', datetime.utcnow() - timedelta(days=7)),
+        ('desc', '30 days', datetime.utcnow() - timedelta(days=30)),
+        ('asc', '30 days', datetime.utcnow() - timedelta(days=30)),
+        ('desc', '90 days', datetime.utcnow() - timedelta(days=90)),
+        ('asc', '90 days', datetime.utcnow() - timedelta(days=90)),
+        ('desc', '1 year', datetime.utcnow() - timedelta(days=1 * (365))),
+        ('asc', '1 year', datetime.utcnow() - timedelta(days=1 * (365))),
+        ('desc', '3 years', datetime.utcnow() - timedelta(days=3 * (365))),
+        ('asc', '3 years', datetime.utcnow() - timedelta(days=3 * (365))),
+        ('desc', '5 years', datetime.utcnow() - timedelta(days=5 * (365))),
+        ('asc', '5 years', datetime.utcnow() - timedelta(days=5 * (365))),
+    ],
+)
 def test_namex_search_submitted(client, jwt, app, order, submitted_interval, last_date):
     """Test searching by submitted date."""
     submitted = [
@@ -195,7 +191,7 @@ def test_namex_search_submitted(client, jwt, app, order, submitted_interval, las
     # get the resource (this is what we are testing)
     rv = client.get(
         f'api/v1/requests?order=submittedDate:{order}&submittedInterval={submitted_interval}',
-        headers=create_header(jwt, [User.EDITOR])
+        headers=create_header(jwt, [User.EDITOR]),
     )
     data = rv.data
     assert data
@@ -216,14 +212,7 @@ def test_namex_search_submitted(client, jwt, app, order, submitted_interval, las
         date = nr['submittedDate']
 
 
-@pytest.mark.parametrize('search_name', [
-    't',
-    'test 1',
-    '0 matches',
-    'tester',
-    'testing',
-    'testing tester'
-])
+@pytest.mark.parametrize('search_name', ['t', 'test 1', '0 matches', 'tester', 'testing', 'testing tester'])
 def test_namex_search_compname(client, jwt, app, search_name):
     """Test searching by NR names."""
     names = [
@@ -232,7 +221,7 @@ def test_namex_search_compname(client, jwt, app, search_name):
         [{'name': 'test tester 1', 'state': 'NE', 'choice': 1}],
         [{'name': 'testing tester 1', 'state': 'NE', 'choice': 1}],
         [{'name': 'test tester 1', 'state': 'NE', 'choice': 1}],
-        [{'name': 'tes', 'state': 'NE', 'choice': 1}, {'name': 'ting', 'state': 'NE', 'choice': 2}]
+        [{'name': 'tes', 'state': 'NE', 'choice': 1}, {'name': 'ting', 'state': 'NE', 'choice': 2}],
     ]
     generate_nrs(len(names), [], names, [])
 
@@ -262,12 +251,7 @@ def test_namex_search_compname(client, jwt, app, search_name):
         assert matching_name
 
 
-@pytest.mark.parametrize('consent_option', [
-    'All',
-    'Received',
-    'Yes',
-    'No'
-])
+@pytest.mark.parametrize('consent_option', ['All', 'Received', 'Yes', 'No'])
 def test_namex_search_consent(client, jwt, app, consent_option):
     """Test searching by consent."""
     base_nrs = generate_nrs(4, [], [], [])
@@ -301,12 +285,7 @@ def test_namex_search_consent(client, jwt, app, consent_option):
                 assert nr['consentFlag'] in ['N', None]
 
 
-@pytest.mark.parametrize('search_name', [
-    '1',
-    '2',
-    '3',
-    'no matches'
-])
+@pytest.mark.parametrize('search_name', ['1', '2', '3', 'no matches'])
 def test_namex_search_first_name(client, jwt, app, search_name):
     """Test search by applicant first name."""
     generate_nrs(5, [], [], [])
@@ -328,12 +307,7 @@ def test_namex_search_first_name(client, jwt, app, search_name):
         assert search_name in nr['applicants'][0]['firstName']
 
 
-@pytest.mark.parametrize('search_name', [
-    '1',
-    '2',
-    '3',
-    'no matches'
-])
+@pytest.mark.parametrize('search_name', ['1', '2', '3', 'no matches'])
 def test_namex_search_last_name(client, jwt, app, search_name):
     """Test search by applicant last name."""
     generate_nrs(5, [], [], [])
@@ -355,16 +329,19 @@ def test_namex_search_last_name(client, jwt, app, search_name):
         assert search_name in nr['applicants'][0]['lastName']
 
 
-@pytest.mark.parametrize('submitted_start_date, expected_result_count', [
-    (get_server_now_with_delta_str(timedelta(days=-1)), 9),
-    (get_server_now_with_delta_str(timedelta(days=-2)), 9),
-    (get_server_now_with_delta_str(timedelta(-5 * (365) + 1)), 11),
-    (get_server_now_with_delta_str(timedelta(-5 * (365))), 12),
-    (get_server_now_str(), 6),
-    (get_server_now_with_delta_str(timedelta(days=1)), 4),
-    (get_server_now_with_delta_str(timedelta(days=5 * (365))), 1),
-    (get_server_now_with_delta_str(timedelta(days=5 * (365) + 1)), 0),
-])
+@pytest.mark.parametrize(
+    'submitted_start_date, expected_result_count',
+    [
+        (get_server_now_with_delta_str(timedelta(days=-1)), 9),
+        (get_server_now_with_delta_str(timedelta(days=-2)), 9),
+        (get_server_now_with_delta_str(timedelta(-5 * (365) + 1)), 11),
+        (get_server_now_with_delta_str(timedelta(-5 * (365))), 12),
+        (get_server_now_str(), 6),
+        (get_server_now_with_delta_str(timedelta(days=1)), 4),
+        (get_server_now_with_delta_str(timedelta(days=5 * (365))), 1),
+        (get_server_now_with_delta_str(timedelta(days=5 * (365) + 1)), 0),
+    ],
+)
 def test_namex_search_submitted_start_date(client, jwt, app, submitted_start_date, expected_result_count):
     """Test searching by submitted start date."""
 
@@ -387,7 +364,7 @@ def test_namex_search_submitted_start_date(client, jwt, app, submitted_start_dat
     # get the resource (this is what we are testing)
     rv = client.get(
         f'api/v1/requests?submittedStartDate={submitted_start_date}&rows=1000',
-        headers=create_header(jwt, [User.VIEWONLY])
+        headers=create_header(jwt, [User.VIEWONLY]),
     )
     data = rv.data
     assert data
@@ -399,18 +376,21 @@ def test_namex_search_submitted_start_date(client, jwt, app, submitted_start_dat
     assert response_count == expected_result_count
 
 
-@pytest.mark.parametrize('submitted_end_date, expected_result_count', [
-    (get_server_now_with_delta_str(timedelta(-5 * (365) - 1)), 0),
-    (get_server_now_with_delta_str(timedelta(-5 * (365))), 1),
-    (get_server_now_with_delta_str(timedelta(days=-105)), 2),
-    (get_server_now_with_delta_str(timedelta(days=-1)), 6),
-    (get_server_now_str(), 8),
-    (get_server_now_with_delta_str(timedelta(days=1)), 9),
-    (get_server_now_with_delta_str(timedelta(days=1 * (365))), 11),
-    (get_server_now_with_delta_str(timedelta(days=5 * (365) - 1)), 11),
-    (get_server_now_with_delta_str(timedelta(days=5 * (365))), 12),
-    (get_server_now_with_delta_str(timedelta(days=6 * (365))), 12),
-])
+@pytest.mark.parametrize(
+    'submitted_end_date, expected_result_count',
+    [
+        (get_server_now_with_delta_str(timedelta(-5 * (365) - 1)), 0),
+        (get_server_now_with_delta_str(timedelta(-5 * (365))), 1),
+        (get_server_now_with_delta_str(timedelta(days=-105)), 2),
+        (get_server_now_with_delta_str(timedelta(days=-1)), 6),
+        (get_server_now_str(), 8),
+        (get_server_now_with_delta_str(timedelta(days=1)), 9),
+        (get_server_now_with_delta_str(timedelta(days=1 * (365))), 11),
+        (get_server_now_with_delta_str(timedelta(days=5 * (365) - 1)), 11),
+        (get_server_now_with_delta_str(timedelta(days=5 * (365))), 12),
+        (get_server_now_with_delta_str(timedelta(days=6 * (365))), 12),
+    ],
+)
 def test_namex_search_submitted_end_date(client, jwt, app, submitted_end_date, expected_result_count):
     """Test searching by submitted end date."""
 
@@ -432,8 +412,7 @@ def test_namex_search_submitted_end_date(client, jwt, app, submitted_end_date, e
 
     # get the resource (this is what we are testing)
     rv = client.get(
-        f'api/v1/requests?submittedEndDate={submitted_end_date}&rows=1000',
-        headers=create_header(jwt, [User.VIEWONLY])
+        f'api/v1/requests?submittedEndDate={submitted_end_date}&rows=1000', headers=create_header(jwt, [User.VIEWONLY])
     )
     data = rv.data
     assert data
@@ -445,18 +424,47 @@ def test_namex_search_submitted_end_date(client, jwt, app, submitted_end_date, e
     assert response_count == expected_result_count
 
 
-@pytest.mark.parametrize('submitted_start_date, submitted_end_date, expected_result_count', [
-    (get_server_now_with_delta_str(timedelta(days=-5 * (365) - 2)), get_server_now_with_delta_str(timedelta(days=-5 * (365) - 1)), 0),
-    (get_server_now_with_delta_str(timedelta(days=-5 * (365) - 2)), get_server_now_with_delta_str(timedelta(days=-5 * (365))), 1),
-    (get_server_now_with_delta_str(timedelta(days=-5 * (365))), get_server_now_with_delta_str(timedelta(days=-100)), 3),
-    (get_server_now_with_delta_str(timedelta(days=-5 * (365))), get_server_now_str(), 8),
-    (get_server_now_with_delta_str(timedelta(days=-5 * (365))), get_server_now_with_delta_str(timedelta(days=1 * (365))), 11),
-    (get_server_now_with_delta_str(timedelta(days=-5 * (365))), get_server_now_with_delta_str(timedelta(days=5 * (365))), 12),
-    (get_server_now_with_delta_str(timedelta(days=-5 * (365))), get_server_now_with_delta_str(timedelta(days=6 * (365))), 12),
-    (get_server_now_with_delta_str(timedelta(days=-1)), get_server_now_with_delta_str(timedelta(days=100)), 7),
-    (get_server_now_str(), get_server_now_str(), 2),
-])
-def test_namex_search_submitted_start_and_end_date(client, jwt, app, submitted_start_date, submitted_end_date, expected_result_count):
+@pytest.mark.parametrize(
+    'submitted_start_date, submitted_end_date, expected_result_count',
+    [
+        (
+            get_server_now_with_delta_str(timedelta(days=-5 * (365) - 2)),
+            get_server_now_with_delta_str(timedelta(days=-5 * (365) - 1)),
+            0,
+        ),
+        (
+            get_server_now_with_delta_str(timedelta(days=-5 * (365) - 2)),
+            get_server_now_with_delta_str(timedelta(days=-5 * (365))),
+            1,
+        ),
+        (
+            get_server_now_with_delta_str(timedelta(days=-5 * (365))),
+            get_server_now_with_delta_str(timedelta(days=-100)),
+            3,
+        ),
+        (get_server_now_with_delta_str(timedelta(days=-5 * (365))), get_server_now_str(), 8),
+        (
+            get_server_now_with_delta_str(timedelta(days=-5 * (365))),
+            get_server_now_with_delta_str(timedelta(days=1 * (365))),
+            11,
+        ),
+        (
+            get_server_now_with_delta_str(timedelta(days=-5 * (365))),
+            get_server_now_with_delta_str(timedelta(days=5 * (365))),
+            12,
+        ),
+        (
+            get_server_now_with_delta_str(timedelta(days=-5 * (365))),
+            get_server_now_with_delta_str(timedelta(days=6 * (365))),
+            12,
+        ),
+        (get_server_now_with_delta_str(timedelta(days=-1)), get_server_now_with_delta_str(timedelta(days=100)), 7),
+        (get_server_now_str(), get_server_now_str(), 2),
+    ],
+)
+def test_namex_search_submitted_start_and_end_date(
+    client, jwt, app, submitted_start_date, submitted_end_date, expected_result_count
+):
     """Test searching by submitted start date and submitted end date."""
 
     submitted = [
@@ -478,7 +486,7 @@ def test_namex_search_submitted_start_and_end_date(client, jwt, app, submitted_s
     # get the resource (this is what we are testing)
     rv = client.get(
         f'api/v1/requests?submittedStartDate={submitted_start_date}&submittedEndDate={submitted_end_date}&rows=1000',
-        headers=create_header(jwt, [User.VIEWONLY])
+        headers=create_header(jwt, [User.VIEWONLY]),
     )
     data = rv.data
     assert data
@@ -490,22 +498,23 @@ def test_namex_search_submitted_start_and_end_date(client, jwt, app, submitted_s
     assert response_count == expected_result_count
 
 
-@pytest.mark.parametrize('submitted_start_date, submitted_end_date', [
-    ('2021-03-11', '2021-03-01'),
-    ('2021-03-11', '2021-03-10'),
-    ('2020-03-11', '2000-01-25'),
-])
-def test_namex_search_submitted_end_date_before_submitted_start_date(client,
-                                                                     jwt,
-                                                                     app,
-                                                                     submitted_start_date,
-                                                                     submitted_end_date):
+@pytest.mark.parametrize(
+    'submitted_start_date, submitted_end_date',
+    [
+        ('2021-03-11', '2021-03-01'),
+        ('2021-03-11', '2021-03-10'),
+        ('2020-03-11', '2000-01-25'),
+    ],
+)
+def test_namex_search_submitted_end_date_before_submitted_start_date(
+    client, jwt, app, submitted_start_date, submitted_end_date
+):
     """Test searching by submitted end date before submitted start date."""
 
     # get the resource (this is what we are testing)
     rv = client.get(
         f'api/v1/requests?submittedStartDate={submitted_start_date}&submittedEndDate={submitted_end_date}&submittedEndDate={submitted_end_date}&rows=100000',
-        headers=create_header(jwt, [User.VIEWONLY])
+        headers=create_header(jwt, [User.VIEWONLY]),
     )
 
     assert rv
@@ -517,24 +526,24 @@ def test_namex_search_submitted_end_date_before_submitted_start_date(client,
     assert resp.get('message') == 'submittedEndDate must be after submittedStartDate'
 
 
-@pytest.mark.parametrize('submitted_interval, submitted_start_date, submitted_end_date', [
-    ('Today', '2021-05-01', '2021-05-13'),
-    ('7 days', '2021-05-01', '2021-05-13'),
-    ('90 days', '2021-05-01', ''),
-    ('1 year', '', '2021-05-01'),
-])
-def test_namex_search_submitted_interval_with_submitted_start_and_end_date(client,
-                                                                           jwt,
-                                                                           app,
-                                                                           submitted_interval,
-                                                                           submitted_start_date,
-                                                                           submitted_end_date):
+@pytest.mark.parametrize(
+    'submitted_interval, submitted_start_date, submitted_end_date',
+    [
+        ('Today', '2021-05-01', '2021-05-13'),
+        ('7 days', '2021-05-01', '2021-05-13'),
+        ('90 days', '2021-05-01', ''),
+        ('1 year', '', '2021-05-01'),
+    ],
+)
+def test_namex_search_submitted_interval_with_submitted_start_and_end_date(
+    client, jwt, app, submitted_interval, submitted_start_date, submitted_end_date
+):
     """Test searching by submitted interval with submitted start and end date."""
 
     # get the resource (this is what we are testing)
     rv = client.get(
         f'api/v1/requests?submittedInterval={submitted_interval}&submittedStartDate={submitted_start_date}&submittedEndDate={submitted_end_date}',
-        headers=create_header(jwt, [User.VIEWONLY])
+        headers=create_header(jwt, [User.VIEWONLY]),
     )
 
     assert rv
@@ -543,33 +552,34 @@ def test_namex_search_submitted_interval_with_submitted_start_and_end_date(clien
     assert rv.data
     resp = json.loads(rv.data.decode('utf-8'))
     assert resp.get('message')
-    assert 'submittedInterval cannot be used in conjuction with submittedStartDate and submittedEndDate' in resp.get('message')
+    assert 'submittedInterval cannot be used in conjuction with submittedStartDate and submittedEndDate' in resp.get(
+        'message'
+    )
 
 
-@pytest.mark.parametrize('submitted_start_date, submitted_end_date, valid_start_date, valid_end_date', [
-    ('11-05-2021', '2021-02-03', False, True),
-    ('2021-12-01a', '2001-08-22', False, True),
-    ('asdfdsf0sadfsf', '2001-07-11', False, True),
-    ('2005-01-12', '05-01-2021', True, False),
-    ('2005-01-12', 'asdfsdf', True, False),
-    ('2005-01-12', '2005-01-15asd', True, False),
-    ('asdfsdf', 'badfasdfsdf', False, False),
-    ('02-23-2005', '07-11-2006', False, False),
-    ('2005-02-232', '2006-07-113', False, False),
-])
-def test_namex_search_submitted_start_and_end_date_invalid_date_format(client,
-                                                                       jwt,
-                                                                       app,
-                                                                       submitted_start_date,
-                                                                       submitted_end_date,
-                                                                       valid_start_date,
-                                                                       valid_end_date):
+@pytest.mark.parametrize(
+    'submitted_start_date, submitted_end_date, valid_start_date, valid_end_date',
+    [
+        ('11-05-2021', '2021-02-03', False, True),
+        ('2021-12-01a', '2001-08-22', False, True),
+        ('asdfdsf0sadfsf', '2001-07-11', False, True),
+        ('2005-01-12', '05-01-2021', True, False),
+        ('2005-01-12', 'asdfsdf', True, False),
+        ('2005-01-12', '2005-01-15asd', True, False),
+        ('asdfsdf', 'badfasdfsdf', False, False),
+        ('02-23-2005', '07-11-2006', False, False),
+        ('2005-02-232', '2006-07-113', False, False),
+    ],
+)
+def test_namex_search_submitted_start_and_end_date_invalid_date_format(
+    client, jwt, app, submitted_start_date, submitted_end_date, valid_start_date, valid_end_date
+):
     """Test searching by submitted start and end date with incorrect date formats."""
 
     # get the resource (this is what we are testing)
     rv = client.get(
         f'api/v1/requests?submittedStartDate={submitted_start_date}&submittedEndDate={submitted_end_date}',
-        headers=create_header(jwt, [User.VIEWONLY])
+        headers=create_header(jwt, [User.VIEWONLY]),
     )
 
     assert rv
@@ -583,33 +593,32 @@ def test_namex_search_submitted_start_and_end_date_invalid_date_format(client,
     if not valid_start_date:
         assert 'Invalid submittedStartDate: ' in msg
         assert 'Must be of date format %Y-%m-%d' in msg
-    elif (valid_start_date and not valid_end_date):
+    elif valid_start_date and not valid_end_date:
         assert 'Invalid submittedEndDate: ' in msg
         assert 'Must be of date format %Y-%m-%d' in msg
 
 
-@pytest.mark.parametrize('test_name, identifiers, total_results', [
-    ('Search for NRs by identifier', ['NR 0', 'NR 1', 'NR 2', 'NR 3'], 4),
-    ('Empty Search', [], 0),
-])
-def test_namex_search_direct_nrs(
-    client, jwt, app, test_name, identifiers, total_results
-):  # pylint: disable=unused-argument
+@pytest.mark.parametrize(
+    'test_name, identifiers, total_results',
+    [
+        ('Search for NRs by identifier', ['NR 0', 'NR 1', 'NR 2', 'NR 3'], 4),
+        ('Empty Search', [], 0),
+    ],
+)
+def test_namex_search_direct_nrs(client, jwt, app, test_name, identifiers, total_results):  # pylint: disable=unused-argument
     """Test searching directly using name requests."""
     base_names = [
         [{'name': 'test1', 'state': 'NE', 'choice': 1}],
         [{'name': 'test 1', 'state': 'NE', 'choice': 1}],
         [{'name': 'test tester 1', 'state': 'NE', 'choice': 1}],
         [{'name': 'testing tester 1', 'state': 'NE', 'choice': 1}],
-        [{'name': 'test tester 1', 'state': 'NE', 'choice': 1}]
+        [{'name': 'test tester 1', 'state': 'NE', 'choice': 1}],
     ]
     generate_nrs(5, [], base_names, [])
     rv = client.post(
         'api/v1/requests/search',
         headers={**create_header(jwt, [User.SYSTEM]), **{'content-type': 'application/json'}},
-        data=json.dumps({
-            'identifiers': identifiers
-        })
+        data=json.dumps({'identifiers': identifiers}),
     )
 
     assert rv.status_code == HTTPStatus.OK
@@ -630,9 +639,11 @@ def test_request_search_system_only(client, jwt, app):
 
     # flask-restx / flask-jwt-oidc AttributeError on auth error response (this is a low impact bug in prod)
     with suppress(AttributeError):
-        rv = client.post('api/v1/requests/search',
-                         headers=create_header(jwt, [User.APPROVER, User.EDITOR, User.VIEWONLY, User.STAFF]),
-                         json={'identifiers': []})
+        rv = client.post(
+            'api/v1/requests/search',
+            headers=create_header(jwt, [User.APPROVER, User.EDITOR, User.VIEWONLY, User.STAFF]),
+            json={'identifiers': []},
+        )
 
         # commented out because unauthorized status code not getting passed by auth error
         # assert rv.status_code == HTTPStatus.UNAUTHORIZED
@@ -641,21 +652,23 @@ def test_request_search_system_only(client, jwt, app):
         # assert rv.json['description'] == 'Missing a role required to access this endpoint'
 
 
-@pytest.mark.parametrize('search_name, expected_len', [
-    ('test name one', 1),
-    ('name test one', 1),
-    ('one test name', 1),
-    ('1234567', 1),
-    ('nr1234567', 1),
-    ('nr 1234567', 1),
-    ('NR1234567', 1),
-    ('NR 1234567', 1),
-    ('NR123 test one', 1),
-    ('12345678', 0),
-    ('test 1234567 name one', 0)
-])
+@pytest.mark.parametrize(
+    'search_name, expected_len',
+    [
+        ('test name one', 1),
+        ('name test one', 1),
+        ('one test name', 1),
+        ('1234567', 1),
+        ('nr1234567', 1),
+        ('nr 1234567', 1),
+        ('NR1234567', 1),
+        ('NR 1234567', 1),
+        ('NR123 test one', 1),
+        ('12345678', 0),
+        ('test 1234567 name one', 0),
+    ],
+)
 def test_search_get(client, jwt, app, monkeypatch, search_name, expected_len):
-
     nr_no_return = Request()
     nr_no_return.nrNum = 'NR 7654321'
     nr_no_return.stateCd = State.DRAFT
@@ -676,6 +689,7 @@ def test_search_get(client, jwt, app, monkeypatch, search_name, expected_len):
 
     def mock_get_name_nr_search_results(solr_query, start=0, rows=10):
         return ({'names': []}, '', None)
+
     monkeypatch.setattr(SolrQueries, 'get_name_nr_search_results', mock_get_name_nr_search_results)
 
     # create JWT & setup header with a Bearer Token using the JWT

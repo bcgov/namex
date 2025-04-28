@@ -1,4 +1,5 @@
 """Validation issue classes."""
+
 from namex.resources.auto_analyse.issues import CheckIsValidIssue
 
 from ....response_objects import NameAnalysisIssue
@@ -26,7 +27,7 @@ class XproCheckIsValidIssue(CheckIsValidIssue):
             show_examination_button=None,
             conflicts=None,
             setup=None,
-            name_actions=None
+            name_actions=None,
         )
 
         return issue

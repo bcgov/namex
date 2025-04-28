@@ -1,4 +1,5 @@
 """Too Many Words Issue classes."""
+
 from namex.resources.auto_analyse.issues import TooManyWordsIssue
 
 from ....response_objects import NameAnalysisIssue
@@ -26,7 +27,7 @@ class XproTooManyWordsIssue(TooManyWordsIssue):
             show_examination_button=True,
             conflicts=None,
             setup=None,
-            name_actions=None
+            name_actions=None,
         )
 
         return issue

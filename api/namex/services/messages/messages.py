@@ -3,13 +3,13 @@ from flask import g
 
 class MessageServices(object):
     """Provides services to change the legacy NRO Database
-       For ease of use, following the style of a Flask Extension
+    For ease of use, following the style of a Flask Extension
     """
 
     CTX_NAMEX_MESSAGES = 'namex_messages'
 
-    ERROR='error'
-    WARN='warn'
+    ERROR = 'error'
+    WARN = 'warn'
     VALID_MSG_TYPES = [ERROR, WARN]
 
     def __init__(self, app=None):
@@ -28,10 +28,9 @@ class MessageServices(object):
     def _teardown(self, exception):
         g.pop('namex_messages')
 
-
     @staticmethod
     def _get_msg_stack():
-        return g.setdefault("namex_messages", [])
+        return g.setdefault('namex_messages', [])
 
     @staticmethod
     def add_message(msg_type, code, msg):
@@ -49,9 +48,7 @@ class MessageServices(object):
             return False
 
         msgs = MessageServices._get_msg_stack()
-        msgs.append({'code':code
-                    ,'type': msg_type
-                    ,'message': msg})
+        msgs.append({'code': code, 'type': msg_type, 'message': msg})
 
     @staticmethod
     def get_all_messages():

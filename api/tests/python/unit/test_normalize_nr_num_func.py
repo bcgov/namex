@@ -1,4 +1,5 @@
 import re
+
 from namex.services.name_request.utils import normalize_nr_num, nr_regex
 
 

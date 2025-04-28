@@ -1,43 +1,44 @@
-"""Request is the main business class that is the real top level object in the system
-"""
-import sqlalchemy
-from sqlalchemy.sql.schema import Index
-from sqlalchemy.event import listen
-from sqlalchemy.orm.attributes import get_history
-# TODO: Only trace if LOCAL_DEV_MODE / DEBUG conf exists
-# import traceback
+"""Request is the main business class that is the real top level object in the system"""
 
-from . import db, ma
+import re
+from datetime import datetime, timedelta
+
+import sqlalchemy
 from flask import current_app
+from marshmallow import fields, post_dump
+from sqlalchemy import Date, and_, event, func
+from sqlalchemy.orm import backref
+from sqlalchemy.orm.attributes import get_history
+
+from namex.constants import (
+    EntityTypes,
+    EventAction,
+    EventState,
+    EventUserId,
+    LegacyEntityTypes,
+    NameState,
+    RequestPriority,
+)
+from namex.exceptions import BusinessException
+
 # TODO: Only trace if LOCAL_DEV_MODE / DEBUG conf exists
 # from flask_sqlalchemy import get_debug_queries
 from namex.services.lookup import nr_filing_actions
-from namex.exceptions import BusinessException
 from namex.utils import queue_util
-from sqlalchemy import event
-from sqlalchemy.orm import backref
-from sqlalchemy.orm.attributes import set_committed_value
-from sqlalchemy.dialects import postgresql
-from sqlalchemy import and_, func, Date
-from marshmallow import Schema, fields, post_load, post_dump
-from .nwpta import PartnerNameSystem
-from .user import User, UserSchema
-from .comment import Comment, CommentSchema
-from .applicant import Applicant, ApplicantSchema
-from .name import Name, NameSchema
-from .payment import Payment
-from .event import Event
-from .state import State, StateSchema
-from datetime import datetime, timedelta
-import re
-
-from namex.constants import ValidSources, NameState, \
-    EntityTypes, LegacyEntityTypes, \
-    request_type_mapping, RequestPriority, EventAction, EventState, EventUserId, DesignationPositionCodes
 
 # noinspection PyPep8Naming
 from ..criteria.request.query_criteria import RequestConditionCriteria
 from ..services.statistics import UnitTime
+
+# TODO: Only trace if LOCAL_DEV_MODE / DEBUG conf exists
+# import traceback
+from . import db, ma
+from .applicant import Applicant, ApplicantSchema
+from .comment import CommentSchema
+from .event import Event
+from .name import Name, NameSchema
+from .state import State
+from .user import UserSchema
 
 
 class Request(db.Model):
@@ -94,7 +95,7 @@ class Request(db.Model):
     # Relationships - Applicants
     applicants = db.relationship('Applicant', lazy='select')
     # Relationships - Examiner Comments
-    comments = db.relationship('Comment', lazy='dynamic', order_by="Comment.timestamp")
+    comments = db.relationship('Comment', lazy='dynamic', order_by='Comment.timestamp')
     # Relationships - Examiner Comments
     partnerNS = db.relationship('PartnerNameSystem', lazy='dynamic')
 
@@ -110,8 +111,8 @@ class Request(db.Model):
 
     # Check-In / Check-Out (for INPROGRESS)
     # A UUID granted to the user that checks out the Name Request
-    checkedOutBy = db.Column('checked_out_by', db.String(64),index=True)
-    checkedOutDt = db.Column('checked_out_dt', db.DateTime(timezone=True),index=True)
+    checkedOutBy = db.Column('checked_out_by', db.String(64), index=True)
+    checkedOutDt = db.Column('checked_out_dt', db.DateTime(timezone=True), index=True)
 
     # MRAS fields
     homeJurisNum = db.Column('home_juris_num', db.String(150))
@@ -140,8 +141,8 @@ class Request(db.Model):
         """Property containing the source app."""
         return self._source
 
-    #@property
-    #def requestTypeCd(self):
+    # @property
+    # def requestTypeCd(self):
     #    return self.requestTypeCd
 
     @property
@@ -214,7 +215,7 @@ class Request(db.Model):
             'checkedOutBy': self.checkedOutBy,
             'checkedOutDt': self.checkedOutDt.isoformat() if self.checkedOutDt else None,
             'notifiedBeforeExpiry': self.notifiedBeforeExpiry,
-            'notifiedExpiry': self.notifiedExpiry
+            'notifiedExpiry': self.notifiedExpiry,
         }
         if nr_actions := nr_filing_actions.get_actions(self.requestTypeCd, self.entity_type_cd, self.request_action_cd):
             nr_json['legalType'] = nr_actions.get('legalType')
@@ -247,11 +248,9 @@ class Request(db.Model):
 
     def delete_from_db(self):
         # TODO: Add listener onto the SQLALchemy event to block deletes
-        raise BusinessException({
-            "code": "cannot_delete_nr",
-            "description":
-                "NRs cannot be deleted, maybe try cancelling instead"
-        }, 403)
+        raise BusinessException(
+            {'code': 'cannot_delete_nr', 'description': 'NRs cannot be deleted, maybe try cancelling instead'}, 403
+        )
 
     @classmethod
     def get_queued_oldest(cls, userObj, priority_queue):
@@ -270,19 +269,21 @@ class Request(db.Model):
         # this will error if there's nothing in the queue - likelihood ~ 0
         result = None
         if priority_queue:
-            result = db.session.query(Request). \
-                filter(
-                    Request.stateCd.in_([State.DRAFT]),
-                    Request.nrNum.notlike('NR L%')). \
-                order_by(Request.priorityCd.desc(), Request.submittedDate.asc()). \
-                with_for_update().first()
+            result = (
+                db.session.query(Request)
+                .filter(Request.stateCd.in_([State.DRAFT]), Request.nrNum.notlike('NR L%'))
+                .order_by(Request.priorityCd.desc(), Request.submittedDate.asc())
+                .with_for_update()
+                .first()
+            )
         else:
-            result = db.session.query(Request). \
-                filter(
-                    Request.stateCd.in_([State.DRAFT]),
-                    Request.nrNum.notlike('NR L%')). \
-                order_by(Request.submittedDate.asc()). \
-                with_for_update().first()
+            result = (
+                db.session.query(Request)
+                .filter(Request.stateCd.in_([State.DRAFT]), Request.nrNum.notlike('NR L%'))
+                .order_by(Request.submittedDate.asc())
+                .with_for_update()
+                .first()
+            )
 
         if result is None:
             raise BusinessException(None, 404)
@@ -298,12 +299,12 @@ class Request(db.Model):
     @classmethod
     def get_oldest_draft(cls):
         """Get the oldest NR in DRAFT state."""
-        return db.session.query(Request). \
-            filter(
-                Request.stateCd.in_([State.DRAFT]),
-                Request.nrNum.notlike('NR L%')). \
-            order_by(Request.submittedDate.asc()). \
-            first()
+        return (
+            db.session.query(Request)
+            .filter(Request.stateCd.in_([State.DRAFT]), Request.nrNum.notlike('NR L%'))
+            .order_by(Request.submittedDate.asc())
+            .first()
+        )
 
     @classmethod
     def get_inprogress(cls, userObj):
@@ -311,12 +312,11 @@ class Request(db.Model):
         Gets the Next NR# from the database where the STATUS == INPROGRESS and assigned to the user
         this assumes that a user can ONLY EVER have 1 Request in progress at a time.
         """
-        existing_nr = db.session.query(Request). \
-            filter(
-                Request.userId == userObj.id,
-                Request.stateCd == State.INPROGRESS,
-                Request.nrNum.notlike('NR L%')). \
-            one_or_none()
+        existing_nr = (
+            db.session.query(Request)
+            .filter(Request.userId == userObj.id, Request.stateCd == State.INPROGRESS, Request.nrNum.notlike('NR L%'))
+            .one_or_none()
+        )
 
         return existing_nr
 
@@ -328,25 +328,29 @@ class Request(db.Model):
 
     @classmethod
     def find_existing_name_by_user(cls, user_name_search_string, email):
-        """	
+        """
         Gets requests submited by user with given name choice in state draft
         """
         current_time = datetime.utcnow()
-        existing_nr = db.session.query(Request). \
-            join(Applicant, and_(Applicant.nrId == Request.id)). \
-            filter(
+        existing_nr = (
+            db.session.query(Request)
+            .join(Applicant, and_(Applicant.nrId == Request.id))
+            .filter(
                 Applicant.emailAddress == email,
-                #Check if status of request is in pending payment state (payment failed/stuck) within 5 mins
-                #check if status of request is in draft (payment successful/request in for name examination) 
+                # Check if status of request is in pending payment state (payment failed/stuck) within 5 mins
+                # check if status of request is in draft (payment successful/request in for name examination)
                 (Request.stateCd == 'DRAFT') | (Request.stateCd == 'PENDING_PAYMENT'),
                 (Request.submittedDate >= current_time - timedelta(minutes=2)),
-                (Request.nameSearch == ('('+user_name_search_string+')')) | ( Request.nameSearch == user_name_search_string )). \
-            one_or_none()
-        
-        if(existing_nr):
+                (Request.nameSearch == ('(' + user_name_search_string + ')'))
+                | (Request.nameSearch == user_name_search_string),
+            )
+            .one_or_none()
+        )
+
+        if existing_nr:
             return True
         return False
-        
+
     @classmethod
     def validNRFormat(cls, nr):
         """NR should be of the format 'NR 1234567'"""
@@ -366,139 +370,171 @@ class Request(db.Model):
         criteria = []
         basic_filter = [
             cls.id == Name.nrId,
-            cls.requestTypeCd.in_([
-                                      EntityTypes.PRIVATE_ACT.value,
-                                      EntityTypes.CORPORATION.value,
-                                      LegacyEntityTypes.CORPORATION.CCR.value,
-                                      LegacyEntityTypes.CORPORATION.CT.value,
-                                      LegacyEntityTypes.CORPORATION.RCR.value,
-                                      EntityTypes.COOPERATIVE.value,
-                                      LegacyEntityTypes.COOPERATIVE.CCP.value,
-                                      LegacyEntityTypes.COOPERATIVE.CTC.value,
-                                      LegacyEntityTypes.COOPERATIVE.RCP.value,
-                                      EntityTypes.FINANCIAL_INSTITUTION.value,
-                                      LegacyEntityTypes.FINANCIAL_INSTITUTION.CFI.value,
-                                      LegacyEntityTypes.FINANCIAL_INSTITUTION.RFI.value,
-                                      EntityTypes.SOCIETY.value,
-                                      LegacyEntityTypes.SOCIETY.ASO.value,
-                                      LegacyEntityTypes.SOCIETY.CSO.value,
-                                      LegacyEntityTypes.SOCIETY.CSSO.value,
-                                      LegacyEntityTypes.SOCIETY.CTSO.value,
-                                      LegacyEntityTypes.SOCIETY.RSO.value,
-                                      EntityTypes.UNLIMITED_LIABILITY_COMPANY.value,
-                                      LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.UC.value,
-                                      LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.CUL.value,
-                                      LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.ULCT.value,
-                                      LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.RUL.value,
-                                      EntityTypes.XPRO_SOCIETY.value,
-                                      LegacyEntityTypes.XPRO_SOCIETY.XASO.value,
-                                      LegacyEntityTypes.XPRO_SOCIETY.XCASO.value,
-                                      LegacyEntityTypes.XPRO_SOCIETY.XCSO.value,
-                                      LegacyEntityTypes.XPRO_SOCIETY.XRSO.value,
-                                      EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value,
-                                      LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CC.value,
-                                      LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CCV.value,
-                                      LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CCCT.value,
-                                      LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.RCC.value,
-                                      EntityTypes.PARISH.value,
-                                      EntityTypes.XPRO_CORPORATION.value,
-                                      LegacyEntityTypes.XPRO_CORPORATION.XCCR.value,
-                                      LegacyEntityTypes.XPRO_CORPORATION.XRCR.value,
-                                      LegacyEntityTypes.XPRO_CORPORATION.AS.value,
-                                      EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.value,
-                                      LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.UA.value,
-                                      LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.XCUL.value,
-                                      LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.XRUL.value,
-                                      EntityTypes.XPRO_COOPERATIVE.value,
-                                      LegacyEntityTypes.XPRO_COOPERATIVE.XCCP.value,
-                                      LegacyEntityTypes.XPRO_COOPERATIVE.XRCP.value,
-                                      EntityTypes.BENEFIT_COMPANY.value
-                                  ] if not change_filter else [
-                EntityTypes.PRIVATE_ACT.value,
-                EntityTypes.CORPORATION.value,
-                LegacyEntityTypes.CORPORATION.CCR.value,
-                LegacyEntityTypes.CORPORATION.RCR.value,
-                EntityTypes.COOPERATIVE.value,
-                LegacyEntityTypes.COOPERATIVE.CCP.value,
-                LegacyEntityTypes.COOPERATIVE.RCP.value,
-                EntityTypes.FINANCIAL_INSTITUTION.value,
-                LegacyEntityTypes.FINANCIAL_INSTITUTION.CFI.value,
-                LegacyEntityTypes.FINANCIAL_INSTITUTION.RFI.value,
-                LegacyEntityTypes.SOCIETY.ASO.value,
-                LegacyEntityTypes.SOCIETY.CSO.value,
-                LegacyEntityTypes.SOCIETY.RSO.value,
-                EntityTypes.UNLIMITED_LIABILITY_COMPANY.value,
-                LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.UC.value,
-                LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.CUL.value,
-                LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.RUL.value,
-                EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value,
-                LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CC.value,
-                LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.RCC.value,
-                EntityTypes.PARISH.value,
-                EntityTypes.BENEFIT_COMPANY.value
-            ]),
+            cls.requestTypeCd.in_(
+                [
+                    EntityTypes.PRIVATE_ACT.value,
+                    EntityTypes.CORPORATION.value,
+                    LegacyEntityTypes.CORPORATION.CCR.value,
+                    LegacyEntityTypes.CORPORATION.CT.value,
+                    LegacyEntityTypes.CORPORATION.RCR.value,
+                    EntityTypes.COOPERATIVE.value,
+                    LegacyEntityTypes.COOPERATIVE.CCP.value,
+                    LegacyEntityTypes.COOPERATIVE.CTC.value,
+                    LegacyEntityTypes.COOPERATIVE.RCP.value,
+                    EntityTypes.FINANCIAL_INSTITUTION.value,
+                    LegacyEntityTypes.FINANCIAL_INSTITUTION.CFI.value,
+                    LegacyEntityTypes.FINANCIAL_INSTITUTION.RFI.value,
+                    EntityTypes.SOCIETY.value,
+                    LegacyEntityTypes.SOCIETY.ASO.value,
+                    LegacyEntityTypes.SOCIETY.CSO.value,
+                    LegacyEntityTypes.SOCIETY.CSSO.value,
+                    LegacyEntityTypes.SOCIETY.CTSO.value,
+                    LegacyEntityTypes.SOCIETY.RSO.value,
+                    EntityTypes.UNLIMITED_LIABILITY_COMPANY.value,
+                    LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.UC.value,
+                    LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.CUL.value,
+                    LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.ULCT.value,
+                    LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.RUL.value,
+                    EntityTypes.XPRO_SOCIETY.value,
+                    LegacyEntityTypes.XPRO_SOCIETY.XASO.value,
+                    LegacyEntityTypes.XPRO_SOCIETY.XCASO.value,
+                    LegacyEntityTypes.XPRO_SOCIETY.XCSO.value,
+                    LegacyEntityTypes.XPRO_SOCIETY.XRSO.value,
+                    EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value,
+                    LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CC.value,
+                    LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CCV.value,
+                    LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CCCT.value,
+                    LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.RCC.value,
+                    EntityTypes.PARISH.value,
+                    EntityTypes.XPRO_CORPORATION.value,
+                    LegacyEntityTypes.XPRO_CORPORATION.XCCR.value,
+                    LegacyEntityTypes.XPRO_CORPORATION.XRCR.value,
+                    LegacyEntityTypes.XPRO_CORPORATION.AS.value,
+                    EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.value,
+                    LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.UA.value,
+                    LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.XCUL.value,
+                    LegacyEntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY.XRUL.value,
+                    EntityTypes.XPRO_COOPERATIVE.value,
+                    LegacyEntityTypes.XPRO_COOPERATIVE.XCCP.value,
+                    LegacyEntityTypes.XPRO_COOPERATIVE.XRCP.value,
+                    EntityTypes.BENEFIT_COMPANY.value,
+                ]
+                if not change_filter
+                else [
+                    EntityTypes.PRIVATE_ACT.value,
+                    EntityTypes.CORPORATION.value,
+                    LegacyEntityTypes.CORPORATION.CCR.value,
+                    LegacyEntityTypes.CORPORATION.RCR.value,
+                    EntityTypes.COOPERATIVE.value,
+                    LegacyEntityTypes.COOPERATIVE.CCP.value,
+                    LegacyEntityTypes.COOPERATIVE.RCP.value,
+                    EntityTypes.FINANCIAL_INSTITUTION.value,
+                    LegacyEntityTypes.FINANCIAL_INSTITUTION.CFI.value,
+                    LegacyEntityTypes.FINANCIAL_INSTITUTION.RFI.value,
+                    LegacyEntityTypes.SOCIETY.ASO.value,
+                    LegacyEntityTypes.SOCIETY.CSO.value,
+                    LegacyEntityTypes.SOCIETY.RSO.value,
+                    EntityTypes.UNLIMITED_LIABILITY_COMPANY.value,
+                    LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.UC.value,
+                    LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.CUL.value,
+                    LegacyEntityTypes.UNLIMITED_LIABILITY_COMPANY.RUL.value,
+                    EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value,
+                    LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.CC.value,
+                    LegacyEntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.RCC.value,
+                    EntityTypes.PARISH.value,
+                    EntityTypes.BENEFIT_COMPANY.value,
+                ]
+            ),
         ]
 
-        queue_request_state_filter = [
-            cls.stateCd.in_(
-                [State.DRAFT, State.HOLD, State.INPROGRESS])
-        ]
+        queue_request_state_filter = [cls.stateCd.in_([State.DRAFT, State.HOLD, State.INPROGRESS])]
 
         corp_request_state_filter = [
-            cls.stateCd.in_(
-                [State.APPROVED, State.CONDITIONAL, State.COND_RESERVE, State.RESERVED]),
+            cls.stateCd.in_([State.APPROVED, State.CONDITIONAL, State.COND_RESERVE, State.RESERVED]),
         ]
 
         name_state_filter = [
             Name.state.in_(
-                [NameState.APPROVED.value, NameState.CONDITION.value, NameState.RESERVED.value,
-                 NameState.COND_RESERVE.value])
+                [
+                    NameState.APPROVED.value,
+                    NameState.CONDITION.value,
+                    NameState.RESERVED.value,
+                    NameState.COND_RESERVE.value,
+                ]
+            )
         ]
 
-        not_consumed_filter = [
-            cls.stateCd.isnot(State.CONSUMED)
-        ]
+        not_consumed_filter = [cls.stateCd.isnot(State.CONSUMED)]
 
-        consumed_filter = [
-            cls.stateCd.is_(State.CONSUMED)
-        ]
+        consumed_filter = [cls.stateCd.is_(State.CONSUMED)]
 
         if queue:
-            criteria.append(RequestConditionCriteria(
-                fields=[Name.name, sqlalchemy.null().label('consumptionDate'), cls.submittedDate,
-                        sqlalchemy.null().label('corpNum'), cls.nrNum],
-                filters=[basic_filter, queue_request_state_filter]
-            ))
+            criteria.append(
+                RequestConditionCriteria(
+                    fields=[
+                        Name.name,
+                        sqlalchemy.null().label('consumptionDate'),
+                        cls.submittedDate,
+                        sqlalchemy.null().label('corpNum'),
+                        cls.nrNum,
+                    ],
+                    filters=[basic_filter, queue_request_state_filter],
+                )
+            )
         else:
-            criteria.append(RequestConditionCriteria(
-                fields=[Name.name, Name.consumptionDate, sqlalchemy.null().label('submittedDate'),
+            criteria.append(
+                RequestConditionCriteria(
+                    fields=[
+                        Name.name,
+                        Name.consumptionDate,
+                        sqlalchemy.null().label('submittedDate'),
                         Name.corpNum,
-                        sqlalchemy.null().label('nrNum')],
-                filters=[basic_filter, corp_request_state_filter, name_state_filter, consumed_filter]
-            ))
-            criteria.append(RequestConditionCriteria(
-                fields=[Name.name, sqlalchemy.null().label('consumptionDate'), cls.submittedDate,
-                        sqlalchemy.null().label('corpNum'), cls.nrNum],
-                filters=[basic_filter, corp_request_state_filter, name_state_filter, not_consumed_filter]
-            ))
+                        sqlalchemy.null().label('nrNum'),
+                    ],
+                    filters=[basic_filter, corp_request_state_filter, name_state_filter, consumed_filter],
+                )
+            )
+            criteria.append(
+                RequestConditionCriteria(
+                    fields=[
+                        Name.name,
+                        sqlalchemy.null().label('consumptionDate'),
+                        cls.submittedDate,
+                        sqlalchemy.null().label('corpNum'),
+                        cls.nrNum,
+                    ],
+                    filters=[basic_filter, corp_request_state_filter, name_state_filter, not_consumed_filter],
+                )
+            )
 
         return criteria
 
     @classmethod
     def get_waiting_time(cls, unit):
         unit_time = 86400 if unit == UnitTime.DAY.value else 60 * 60 if unit == UnitTime.HR.value else 60
-        median_waiting_time = db.session.query(
-            func.percentile_cont(0.5).within_group((func.extract('epoch', Event.eventDate) -
-                                                    func.extract('epoch', Request.submittedDate)) / unit_time).label(
-                'examinationTime')). \
-            join(Request, and_(Event.nrId == Request.id)). \
-            filter(Event.action == EventAction.PATCH.value,
-                   Event.stateCd.in_(
-                       [EventState.APPROVED.value, EventState.REJECTED.value,
-                        EventState.CONDITIONAL.value, EventState.CANCELLED.value]),
-                   Event.userId != EventUserId.SERVICE_ACCOUNT.value,
-                   Event.eventDate.cast(Date) >= (func.now() - timedelta(days=1)).cast(Date)
-                   )
+        median_waiting_time = (
+            db.session.query(
+                func.percentile_cont(0.5)
+                .within_group(
+                    (func.extract('epoch', Event.eventDate) - func.extract('epoch', Request.submittedDate)) / unit_time
+                )
+                .label('examinationTime')
+            )
+            .join(Request, and_(Event.nrId == Request.id))
+            .filter(
+                Event.action == EventAction.PATCH.value,
+                Event.stateCd.in_(
+                    [
+                        EventState.APPROVED.value,
+                        EventState.REJECTED.value,
+                        EventState.CONDITIONAL.value,
+                        EventState.CANCELLED.value,
+                    ]
+                ),
+                Event.userId != EventUserId.SERVICE_ACCOUNT.value,
+                Event.eventDate.cast(Date) >= (func.now() - timedelta(days=1)).cast(Date),
+            )
+        )
 
         return median_waiting_time
 
@@ -517,8 +553,9 @@ class Request(db.Model):
         return regular_waiting_time.pop()
 
     @classmethod
-    def get_query_exact_match(cls, criteria, list_name, list_dist, list_desc, end_designation_list,
-                              any_designation_list, stop_words):
+    def get_query_exact_match(
+        cls, criteria, list_name, list_dist, list_desc, end_designation_list, any_designation_list, stop_words
+    ):
         name = []
         for word in list_name:
             if word in list_dist:
@@ -526,31 +563,33 @@ class Request(db.Model):
             elif word in list_desc:
                 name.extend(Request.set_special_characters_descriptive([word]))
             else:
-                raise Exception('Invalid classification for the word {0}. Cannot be included in exact match query.'.format(word))
+                raise Exception(
+                    'Invalid classification for the word {0}. Cannot be included in exact match query.'.format(word)
+                )
 
         criteria = cls.get_designations_in_name(criteria, name, any_designation_list, end_designation_list, stop_words)
 
         return criteria
 
     @classmethod
-    def get_designations_in_name(cls, criteria, special_characters_name, any_designation_list, end_designation_list,
-                                 stop_words_list):
-        name_with_designation = cls.include_designations_in_name(special_characters_name, any_designation_list,
-                                                                 end_designation_list,
-                                                                 stop_words_list)
+    def get_designations_in_name(
+        cls, criteria, special_characters_name, any_designation_list, end_designation_list, stop_words_list
+    ):
+        name_with_designation = cls.include_designations_in_name(
+            special_characters_name, any_designation_list, end_designation_list, stop_words_list
+        )
         for e in criteria:
-            e.filters.insert(len(e.filters),
-                             [func.lower(Name.name).op('~')(r'{0}'.format(name_with_designation))])
+            e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(r'{0}'.format(name_with_designation))])
 
         return criteria
 
     @classmethod
     def get_any_designation_in_name(cls, criteria, special_characters_name, any_list_designation, stop_words_list):
-        name_any_designation = cls.include_any_designation_in_name(special_characters_name, any_list_designation,
-                                                                   stop_words_list)
+        name_any_designation = cls.include_any_designation_in_name(
+            special_characters_name, any_list_designation, stop_words_list
+        )
         for e in criteria:
-            e.filters.insert(len(e.filters),
-                             [func.lower(Name.name).op('~')(r'{0}'.format(name_any_designation))])
+            e.filters.insert(len(e.filters), [func.lower(Name.name).op('~')(r'{0}'.format(name_any_designation))])
 
         return criteria
 
@@ -618,7 +657,8 @@ class Request(db.Model):
         list_special_characters = []
         for element in list_d:
             list_special_characters.append(
-                r'\W*'.join(element[i:i + 1] + element[i:i + 1] + '?' for i in range(0, len(element), 1)))
+                r'\W*'.join(element[i : i + 1] + element[i : i + 1] + '?' for i in range(0, len(element), 1))
+            )
 
         return list_special_characters
 
@@ -626,22 +666,27 @@ class Request(db.Model):
     def set_special_characters_descriptive(cls, list_d):
         list_special_characters = []
         for element in list_d:
-            list_special_characters.append(r'\W*'.join(element[i:i + 1] for i in range(0, len(element), 1)))
+            list_special_characters.append(r'\W*'.join(element[i : i + 1] for i in range(0, len(element), 1)))
 
         return list_special_characters
 
     @classmethod
-    def include_designations_in_name(cls, special_characters_name, any_designation_list, end_designation_list,
-                                     stop_words_list):
+    def include_designations_in_name(
+        cls, special_characters_name, any_designation_list, end_designation_list, stop_words_list
+    ):
         any_designation_alternators = '|'.join(map(re.escape, any_designation_list))
         end_designation_alternators = '|'.join(map(re.escape, end_designation_list))
         stop_words_alternators = '|'.join(map(re.escape, stop_words_list))
 
         name = r'\W*({0})?\W*({1})?\W*'.format(any_designation_alternators, stop_words_alternators).join(
-            map(str, special_characters_name))
+            map(str, special_characters_name)
+        )
 
-        full_name = r'^\d*\W*({0})?\W*({1})?\W*'.format(any_designation_alternators, stop_words_alternators) + name + \
-                    r'\W*({0})?\W*({1})?$'.format(any_designation_alternators, end_designation_alternators)
+        full_name = (
+            r'^\d*\W*({0})?\W*({1})?\W*'.format(any_designation_alternators, stop_words_alternators)
+            + name
+            + r'\W*({0})?\W*({1})?$'.format(any_designation_alternators, end_designation_alternators)
+        )
         return full_name
 
     @classmethod
@@ -649,7 +694,12 @@ class Request(db.Model):
         """
         Retrieve the nature_business_info for the given corp_num.
         """
-        subquery = db.session.query(Name.nrId).filter(Name.corpNum == corp_num).order_by(Name.consumptionDate.desc()).subquery()
+        subquery = (
+            db.session.query(Name.nrId)
+            .filter(Name.corpNum == corp_num)
+            .order_by(Name.consumptionDate.desc())
+            .subquery()
+        )
         result = db.session.query(Request.natureBusinessInfo).filter(Request.id.in_(subquery)).first()
         return result[0] if result else None
 
@@ -659,7 +709,7 @@ class Request(db.Model):
 def on_insert_or_update_nr(mapper, connection, request):
     """Send a new cloud event message on changes for stateCd in the Request model.
 
-       Temporary NRs (nrNum starting with 'NR L') are discarded.
+    Temporary NRs (nrNum starting with 'NR L') are discarded.
     """
     if not request.nrNum.startswith('NR L'):
         state_cd_history = get_history(request, 'stateCd')
@@ -669,6 +719,7 @@ def on_insert_or_update_nr(mapper, connection, request):
             if is_reset(request.stateCd, old_state_cd):
                 queue_util.send_name_request_state_msg(request.nrNum, 'RESET', old_state_cd)
             queue_util.send_name_request_state_msg(request.nrNum, request.stateCd, old_state_cd)
+
 
 def is_reset(new_state, previous_state):
     """Determine whether NR state change is a reset based on current and previous state."""
@@ -740,8 +791,9 @@ class RequestsHeaderSchema(ma.SQLAlchemySchema):
             'userId',
             'xproJurisdiction',
             'notifiedBeforeExpiry',
-            'notifiedExpiry'
+            'notifiedExpiry',
         )
+
     additionalInfo = fields.String(allow_none=True)
     applicants = fields.Field(allow_none=True)
     checkedOutBy = fields.String(allow_none=True)
@@ -804,13 +856,14 @@ class RequestsSearchSchema(ma.SQLAlchemySchema):
             'names',
             'nameSearch',
             'activeUser',
-            'applicants'
+            'applicants',
         )
 
     names = ma.Nested(NameSchema, many=True)
     activeUser = ma.Pluck(UserSchema, 'username', many=False)
     comments = ma.Nested(CommentSchema, many=True, only=('comment', 'examiner', 'timestamp'))
     applicants = ma.Nested(ApplicantSchema, many=True, only=('firstName', 'lastName', 'middleName'))
+
 
 class RequestsAuthSearchSchema(ma.SQLAlchemySchema):
     class Meta:
@@ -830,8 +883,9 @@ class RequestsAuthSearchSchema(ma.SQLAlchemySchema):
             'target',
             'actions',
             'expirationDate',
-            'consentFlag'
+            'consentFlag',
         )
+
     expirationDate = ma.DateTime()
     names = ma.Nested(NameSchema, many=True, only=('name', 'state'))
     applicants = ma.Nested(ApplicantSchema, many=True, only=('emailAddress', 'phoneNumber'))

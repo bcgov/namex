@@ -13,6 +13,7 @@ stop_w = 'Stop Words'
 DATE_FORMAT_NAMEX_SEARCH = '%Y-%m-%d'
 DATE_TIME_FORMAT_SQL = '%Y-%m-%d %H:%M:%S%z'
 
+
 class AbstractEnum(Enum):
     @classmethod
     def list(cls):
@@ -69,12 +70,12 @@ class RequestAction(AbstractEnum):
     REST = 'NRO-REST'
 
 
-'''
+"""
 We use the full name in the Enum code KEY so there is always context to what the code type represents,
 so we don't always have to refer to the Enum description, documentation, or this file.
 
 The Enum code VALUE (str) is the actual mapping value for the Enum code type
-'''
+"""
 
 
 class EntityTypes(AbstractEnum):
@@ -104,11 +105,10 @@ class EntityTypes(AbstractEnum):
     # Used for mapping back to legacy oracle codes
     FIRM = 'FIRM'
     # Continued In Types
-    CONTINUE_IN = 'C'             # Continued In BC Limited Company
-    BEN_CONTINUE_IN = 'CBEN'      # Continued In BC Benefit Company 
-    CCC_CONTINUE_IN = 'CCC'       # Continued In BC Community Contribution Company
-    ULC_CONTINUE_IN = 'CUL'       # Continued In BC Unlimited Liability Company
-
+    CONTINUE_IN = 'C'  # Continued In BC Limited Company
+    BEN_CONTINUE_IN = 'CBEN'  # Continued In BC Benefit Company
+    CCC_CONTINUE_IN = 'CCC'  # Continued In BC Community Contribution Company
+    ULC_CONTINUE_IN = 'CUL'  # Continued In BC Unlimited Liability Company
 
 
 EntityTypeDescriptions = {
@@ -127,7 +127,6 @@ EntityTypeDescriptions = {
     EntityTypes.PRIVATE_ACT: 'Private Act',
     EntityTypes.FINANCIAL_INSTITUTION: 'Financial Institution',
     EntityTypes.PARISH: 'Parish',
-
     # XPRO and Foreign Types
     EntityTypes.XPRO_CORPORATION: 'Extraprovincial Corporation',
     EntityTypes.XPRO_UNLIMITED_LIABILITY_COMPANY: 'Extraprovincial Unlimited Liability Company',
@@ -136,10 +135,8 @@ EntityTypeDescriptions = {
     EntityTypes.XPRO_LIMITED_LIABILITY_PARTNERSHIP: 'Extraprovincial Limited Liability Partnership',
     EntityTypes.XPRO_COOPERATIVE: 'Extraprovincial Cooperative',
     EntityTypes.XPRO_SOCIETY: 'Extraprovincial Society',
-
     # Used for mapping back to legacy oracle codes, description not required
     EntityTypes.FIRM: 'FIRM (Legacy Oracle)',
-
     # Continued in Companies
     EntityTypes.CONTINUE_IN: 'Corporation',
     EntityTypes.BEN_CONTINUE_IN: 'Benefit Company',
@@ -147,7 +144,7 @@ EntityTypeDescriptions = {
     EntityTypes.ULC_CONTINUE_IN: 'Unlimited Liability Company',
 }
 
-'''
+"""
 Sole Proprietorship
 Doing Business As
 Corporation
@@ -158,7 +155,7 @@ Limited Partnership
 Limited Liability Partnership
 Co-operative
 Community Contribution Co.
-'''
+"""
 
 
 class BCProtectedNameEntityTypes(AbstractEnum):
@@ -198,8 +195,6 @@ class XproUnprotectedNameEntityTypes(AbstractEnum):
     XPRO_LIMITED_PARTNERSHIP = EntityTypes.XPRO_LIMITED_PARTNERSHIP.value
     XPRO_LIMITED_LIABILITY_PARTNERSHIP = EntityTypes.XPRO_LIMITED_LIABILITY_PARTNERSHIP.value
     XPRO_COOPERATIVE = EntityTypes.XPRO_COOPERATIVE.value
-
-
 
 
 # Request types (legacy) used in search conflicts
@@ -293,11 +288,15 @@ request_type_mapping = [
     ('RCR', EntityTypes.CORPORATION.value, RequestAction.REH.value),
     ('RCR', EntityTypes.CORPORATION.value, RequestAction.REN.value),
     ('RCR', EntityTypes.CORPORATION.value, RequestAction.RESUBMIT.value),
-    ('BECR', EntityTypes.CORPORATION.value, RequestAction.CNV.value, True), # Benefit Company -> BC Limited Company
+    ('BECR', EntityTypes.CORPORATION.value, RequestAction.CNV.value, True),  # Benefit Company -> BC Limited Company
     ('BECR', EntityTypes.CORPORATION.value, RequestAction.RESUBMIT.value),
-    ('ULCB', EntityTypes.CORPORATION.value, RequestAction.CNV.value, True), # Unlimited Liability Company -> BC Limited Company
+    (
+        'ULCB',
+        EntityTypes.CORPORATION.value,
+        RequestAction.CNV.value,
+        True,
+    ),  # Unlimited Liability Company -> BC Limited Company
     ('ULCB', EntityTypes.CORPORATION.value, RequestAction.RESUBMIT.value),
-
     ('XCR', EntityTypes.XPRO_CORPORATION.value, RequestAction.NEW_AML.value, True),
     ('XCR', EntityTypes.XPRO_CORPORATION.value, RequestAction.NEW.value),
     ('XCR', EntityTypes.XPRO_CORPORATION.value, RequestAction.AML.value),
@@ -397,9 +396,19 @@ request_type_mapping = [
     ('CC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.NEW.value),
     ('CC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.AML.value),
     ('CC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.RESUBMIT.value),
-    ('CCV', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.CNV.value, True), # BC Limited Company -> Community Contribution Company
+    (
+        'CCV',
+        EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value,
+        RequestAction.CNV.value,
+        True,
+    ),  # BC Limited Company -> Community Contribution Company
     ('CCV', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.RESUBMIT.value),
-    ('BECC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.CNV.value, True), # Benefit Company -> Community Contribution Company
+    (
+        'BECC',
+        EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value,
+        RequestAction.CNV.value,
+        True,
+    ),  # Benefit Company -> Community Contribution Company
     ('BECC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.RESUBMIT.value),
     ('CCC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.CHG.value, True),
     ('CCC', EntityTypes.COMMUNITY_CONTRIBUTION_COMPANY.value, RequestAction.RESUBMIT.value),
@@ -412,7 +421,12 @@ request_type_mapping = [
     ('UL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.NEW.value, True),
     ('UL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.AML.value),
     ('UL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.RESUBMIT.value),
-    ('UC', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.CNV.value, True), # BC Limited Company -> Unlimited Liability Company
+    (
+        'UC',
+        EntityTypes.UNLIMITED_LIABILITY_COMPANY.value,
+        RequestAction.CNV.value,
+        True,
+    ),  # BC Limited Company -> Unlimited Liability Company
     ('UC', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.RESUBMIT.value),
     ('CUL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.CHG.value, True),
     ('CUL', EntityTypes.UNLIMITED_LIABILITY_COMPANY.value, RequestAction.RESUBMIT.value, True),
@@ -458,51 +472,87 @@ request_type_mapping = [
     ('BERE', EntityTypes.BENEFIT_COMPANY.value, RequestAction.REH.value),
     ('BERE', EntityTypes.BENEFIT_COMPANY.value, RequestAction.REN.value),
     ('BERE', EntityTypes.BENEFIT_COMPANY.value, RequestAction.RESUBMIT.value),
-    ('BECV', EntityTypes.BENEFIT_COMPANY.value, RequestAction.CNV.value, True), # BC Limited Company -> Benefit Company
+    ('BECV', EntityTypes.BENEFIT_COMPANY.value, RequestAction.CNV.value, True),  # BC Limited Company -> Benefit Company
     ('BECV', EntityTypes.BENEFIT_COMPANY.value, RequestAction.RESUBMIT.value),
-    ('ULBE', EntityTypes.BENEFIT_COMPANY.value, RequestAction.CNV.value, True), # Unlimited Liability Company -> Benefit Company
+    (
+        'ULBE',
+        EntityTypes.BENEFIT_COMPANY.value,
+        RequestAction.CNV.value,
+        True,
+    ),  # Unlimited Liability Company -> Benefit Company
     ('ULBE', EntityTypes.BENEFIT_COMPANY.value, RequestAction.RESUBMIT.value),
-    
     ('CCR', EntityTypes.CONTINUE_IN.value, RequestAction.CHG.value, True),
     ('CCR', EntityTypes.CONTINUE_IN.value, RequestAction.RESUBMIT.value),
     ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.REST.value, True),
     ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.REH.value),
     ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.REN.value),
     ('RCR', EntityTypes.CONTINUE_IN.value, RequestAction.RESUBMIT.value),
-    ('BECR', EntityTypes.CONTINUE_IN.value, RequestAction.CNV.value, True), # continued in Benefit Company -> continued in BC Limited Company
+    (
+        'BECR',
+        EntityTypes.CONTINUE_IN.value,
+        RequestAction.CNV.value,
+        True,
+    ),  # continued in Benefit Company -> continued in BC Limited Company
     ('BECR', EntityTypes.CONTINUE_IN.value, RequestAction.RESUBMIT.value),
-    ('ULCB', EntityTypes.CONTINUE_IN.value, RequestAction.CNV.value, True), # continued in Unlimited Liability Company -> continued in BC Limited Company
+    (
+        'ULCB',
+        EntityTypes.CONTINUE_IN.value,
+        RequestAction.CNV.value,
+        True,
+    ),  # continued in Unlimited Liability Company -> continued in BC Limited Company
     ('ULCB', EntityTypes.CONTINUE_IN.value, RequestAction.RESUBMIT.value),
-
     ('CCC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.CHG.value, True),
     ('CCC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
     ('RCC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.REST.value, True),
     ('RCC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.REH.value),
     ('RCC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.REN.value),
     ('RCC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
-    ('CCV', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.CNV.value, True), # continued in BC Limited Company -> continued in Community Contribution Company
+    (
+        'CCV',
+        EntityTypes.CCC_CONTINUE_IN.value,
+        RequestAction.CNV.value,
+        True,
+    ),  # continued in BC Limited Company -> continued in Community Contribution Company
     ('CCV', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
-    ('BECC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.CNV.value, True), # continued in Benefit Company -> continued in Community Contribution Company
+    (
+        'BECC',
+        EntityTypes.CCC_CONTINUE_IN.value,
+        RequestAction.CNV.value,
+        True,
+    ),  # continued in Benefit Company -> continued in Community Contribution Company
     ('BECC', EntityTypes.CCC_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
-
     ('CUL', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.CHG.value, True),
     ('CUL', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.RESUBMIT.value, True),
     ('RUL', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.REST.value, True),
     ('RUL', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.REH.value),
     ('RUL', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.REN.value),
     ('RUL', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
-    ('UC', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.CNV.value, True), # continued in BC Limited Company -> continued in Unlimited Liability Company
+    (
+        'UC',
+        EntityTypes.ULC_CONTINUE_IN.value,
+        RequestAction.CNV.value,
+        True,
+    ),  # continued in BC Limited Company -> continued in Unlimited Liability Company
     ('UC', EntityTypes.ULC_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
-
     ('BEC', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.CHG.value, True),
     ('BEC', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
     ('BERE', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.REST.value, True),
     ('BERE', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.REH.value),
     ('BERE', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.REN.value),
     ('BERE', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
-    ('BECV', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.CNV.value, True), # continued in BC Limited Company -> continued in Benefit Company
+    (
+        'BECV',
+        EntityTypes.BEN_CONTINUE_IN.value,
+        RequestAction.CNV.value,
+        True,
+    ),  # continued in BC Limited Company -> continued in Benefit Company
     ('BECV', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
-    ('ULBE', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.CNV.value, True), # continued in Unlimited Liability Company -> continued in Benefit Company
+    (
+        'ULBE',
+        EntityTypes.BEN_CONTINUE_IN.value,
+        RequestAction.CNV.value,
+        True,
+    ),  # continued in Unlimited Liability Company -> continued in Benefit Company
     ('ULBE', EntityTypes.BEN_CONTINUE_IN.value, RequestAction.RESUBMIT.value),
 ]
 
@@ -529,8 +579,8 @@ class NameRequestActions(AbstractEnum):
     INCORPORATE = 'INCORPORATE'
     # Payment related actions
     UPGRADE = 'UPGRADE'
-    REAPPLY = 'REAPPLY' # FUTURE: replace by 'RENEW' - used when the NR is about to expire
-    RESUBMIT = 'RESUBMIT' # Used when the NR is already expired
+    REAPPLY = 'REAPPLY'  # FUTURE: replace by 'RENEW' - used when the NR is about to expire
+    RESUBMIT = 'RESUBMIT'  # Used when the NR is already expired
     RECEIPT = 'RECEIPT'
     CREATE = 'CREATE'
     REQUEST_REFUND = 'REQUEST_REFUND'
@@ -543,6 +593,7 @@ class NameRequestPatchActions(AbstractEnum):
     This subset of actions is used by the NameRequest PATCH,
     and are NOT payment related.
     """
+
     CHECKOUT = NameRequestActions.CHECKOUT.value
     CHECKIN = NameRequestActions.CHECKIN.value
     EDIT = NameRequestActions.EDIT.value
@@ -556,6 +607,7 @@ class NameRequestPaymentActions(AbstractEnum):
     This subset of actions is used by the NameRequest PATCH,
     and are NOT payment related.
     """
+
     UPGRADE = NameRequestActions.UPGRADE.value
     REAPPLY = NameRequestActions.REAPPLY.value
     RECEIPT = NameRequestActions.RECEIPT.value
@@ -580,7 +632,8 @@ class NameRequestActiveActions(AbstractEnum):
     """
     Actions available when an NR is 'active' eg. in an APPROVED or CONDITIONAL state, NOT expired, and NOT consumed.
     """
-    #EDIT = NameRequestActions.EDIT.value
+
+    # EDIT = NameRequestActions.EDIT.value
     CANCEL = NameRequestActions.CANCEL.value  # TODO: Ensure there is NO refund for this!
     REAPPLY = NameRequestActions.REAPPLY.value
     RESUBMIT = NameRequestActions.RESUBMIT.value
@@ -602,6 +655,7 @@ class NameRequestInProgressActions(AbstractEnum):
     These should mostly be the same as the ones for a draft, but they are used differently.
     Define these separately.
     """
+
     RECEIPT = NameRequestActions.RECEIPT.value
 
 
@@ -609,6 +663,7 @@ class NameRequestExpiredActions(AbstractEnum):
     """
     Actions available when an NR is in an APPROVED or CONDITIONAL state, expired, and NOT consumed.
     """
+
     RECEIPT = NameRequestActions.RECEIPT.value
     RESULT = NameRequestActions.RESULT.value
     RESUBMIT = NameRequestActions.RESUBMIT.value
@@ -617,7 +672,8 @@ class NameRequestExpiredActions(AbstractEnum):
 
 class NameRequestConsumedActions(AbstractEnum):
     """Actions available when an NR is in an CONSUMED state."""
-    #EDIT = NameRequestActions.EDIT.value
+
+    # EDIT = NameRequestActions.EDIT.value
     RECEIPT = NameRequestActions.RECEIPT.value
     RESULT = NameRequestActions.RESULT.value
 
@@ -636,14 +692,14 @@ class NameRequestCompletedActions(AbstractEnum):
 
 
 class NameRequestActiveRejectedActions(AbstractEnum):
-    #EDIT = NameRequestActions.EDIT.value  # TODO: Can only EDIT contact info
+    # EDIT = NameRequestActions.EDIT.value  # TODO: Can only EDIT contact info
     RECEIPT = NameRequestActions.RECEIPT.value
     RESULT = NameRequestActions.RESULT.value
     # RESEND = NameRequestActions.RESEND.value
 
 
 class NameRequestExpiredRejectedActions(AbstractEnum):
-    #EDIT = NameRequestActions.EDIT.value  # TODO: Can only EDIT contact info
+    # EDIT = NameRequestActions.EDIT.value  # TODO: Can only EDIT contact info
     RECEIPT = NameRequestActions.RECEIPT.value
     RESULT = NameRequestActions.RESULT.value
     # RESEND = NameRequestActions.RESEND.value
@@ -690,6 +746,7 @@ class PaymentStatusCode(AbstractEnum):
     There are also certain differences - on our side we track when a refund is requested, which does not mean a refund
     has been issued as on the SBC Pay side, for example (there are other cases too).
     """
+
     APPROVED = 'APPROVED'
     CREATED = 'CREATED'
     COMPLETED = 'COMPLETED'
@@ -704,6 +761,7 @@ class PaymentState(AbstractEnum):
     """
     Internal PaymentState codes for Payment model.
     """
+
     APPROVED = 'APPROVED'
     CREATED = 'CREATED'  # A payment has been created
     PENDING = 'PENDING'  # A newly created Payment
@@ -719,6 +777,7 @@ class PaymentAction(AbstractEnum):
     """
     Payment actions.
     """
+
     COMPLETE_RESERVATION = 'COMPLETE_RESERVATION'
     COMPLETE_UPGRADE = 'COMPLETE_UPGRADE'
 
@@ -735,6 +794,7 @@ class EventUserId(AbstractEnum):
 class RequestPriority(AbstractEnum):
     Y = 'Y'
     N = 'N'
+
 
 class ExpiryDays(str, AbstractEnum):
     NAME_REQUEST_LIFESPAN_DAYS = 56

@@ -1,4 +1,5 @@
 """Corporate Name Conflict Issue classes."""
+
 from namex.resources.auto_analyse.issues import CorporateNameConflictIssue
 
 

@@ -15,6 +15,7 @@
 
 Test-Suite to ensure that the Flag Service is working as expected.
 """
+
 import pytest
 from flask import Flask
 
@@ -115,6 +116,7 @@ def test_flags_bool():
 def test_flags_bool_missing_flag(app):
     """Assert that a boolean (False) is returned when flag doesn't exist, when using the local Flag.json file."""
     from namex import flags
+
     app_env = app.config.get('ENVIRONMENT')
     try:
         with app.app_context():
@@ -131,6 +133,7 @@ def test_flags_bool_missing_flag(app):
 def test_flags_bool_using_current_app():
     """Assert that a boolean (True) is returned, when using the local Flag.json file."""
     from namex import flags
+
     app = Flask(__name__)
     app.config['ENVIRONMENT'] = 'local'
 
@@ -140,15 +143,19 @@ def test_flags_bool_using_current_app():
     assert flag_on
 
 
-@pytest.mark.parametrize('test_name,flag_name,expected', [
-    ('boolean flag', 'bool-flag', True),
-    ('string flag', 'string-flag', 'a string value'),
-    ('integer flag', 'integer-flag', 10),
-    ('boolean flag', 'enable-won-emails', False),
-])
+@pytest.mark.parametrize(
+    'test_name,flag_name,expected',
+    [
+        ('boolean flag', 'bool-flag', True),
+        ('string flag', 'string-flag', 'a string value'),
+        ('integer flag', 'integer-flag', 10),
+        ('boolean flag', 'enable-won-emails', False),
+    ],
+)
 def test_flags_bool_value(test_name, flag_name, expected):
     """Assert that a boolean (True) is returned, when using the local Flag.json file."""
     from namex import flags
+
     app = Flask(__name__)
     app.config['ENVIRONMENT'] = 'local'
 
@@ -164,7 +171,15 @@ def test_flag_bool_unique_user():
     app.config['ENVIRONMENT'] = 'local'
     app.config['NAMEX_LD_SDK_ID'] = 'https://no.flag/avail'
 
-    user = User(username='username', firstname='firstname', lastname='lastname', sub='sub', iss='iss', idp_userid='123', login_source='IDIR')
+    user = User(
+        username='username',
+        firstname='firstname',
+        lastname='lastname',
+        sub='sub',
+        iss='iss',
+        idp_userid='123',
+        login_source='IDIR',
+    )
 
     app_env = app.config['ENVIRONMENT']
     try:

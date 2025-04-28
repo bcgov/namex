@@ -9,9 +9,10 @@ class SynonymQueryCriteria(object):
         self.fields = kwargs.get('fields', [])
         self.filters = kwargs.get('filters', [])
 
-    '''
+    """
     Used to validate criteria instances.
-    '''
+    """
+
     @staticmethod
     def is_valid_criteria(criteria):
         # TODO: Do we want to duck type this instead? We really only care about the shape...

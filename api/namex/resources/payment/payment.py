@@ -1,18 +1,17 @@
 import json
-import requests
-from datetime import datetime, timedelta
+from datetime import datetime
 
+import requests
 from dateutil import parser as dateutil_parser
 from flask import current_app, jsonify, make_response, request
 from flask_jwt_oidc import AuthError
-from flask_restx import cors, fields
+from flask_restx import fields
 
 from namex import jwt
 from namex.constants import NameRequestActions, PaymentState, PaymentStatusCode
-from namex.models import Event
+from namex.models import Event, State, User
 from namex.models import Payment as PaymentDAO
 from namex.models import Request as RequestDAO
-from namex.models import State, User
 from namex.resources.name_requests.abstract_nr_resource import AbstractNameRequestResource
 from namex.services import EventRecorder
 from namex.services.name_request.name_request_state import get_nr_state_actions, is_reapplication_eligible
@@ -26,7 +25,6 @@ from namex.utils.auth import cors_preflight, validate_roles
 from .api_namespace import api as payment_api
 from .utils import build_payment_request, merge_payment_request
 
-
 MSG_BAD_REQUEST_NO_JSON_BODY = 'No JSON data provided'
 MSG_SERVER_ERROR = 'Server Error!'
 
@@ -35,83 +33,88 @@ NAME_REQUEST_EXTENSION_PAD_HOURS = 12  # TODO this should be defined as a lookup
 
 # Define our DTO models
 # Generic model types
-dictionary_list_model = payment_api.model('DictionaryList', {
-    'key': fields.String,
-    'list': fields.List(fields.String)
-})
+dictionary_list_model = payment_api.model('DictionaryList', {'key': fields.String, 'list': fields.List(fields.String)})
 
-dict_list_model = payment_api.model('DictionaryListList', {
-    'data': fields.List(fields.Nested(dictionary_list_model))
-})
+dict_list_model = payment_api.model('DictionaryListList', {'data': fields.List(fields.Nested(dictionary_list_model))})
 
-list_model = payment_api.model('List', {
-    'data': fields.List(fields.String)
-})
+list_model = payment_api.model('List', {'data': fields.List(fields.String)})
 
-string_model = payment_api.model('String', {
-    'data': fields.String
-})
+string_model = payment_api.model('String', {'data': fields.String})
 
 # Custom model types
-payment_info_schema = payment_api.model('PaymentInfo', {
-    'methodOfPayment': fields.String
-})
+payment_info_schema = payment_api.model('PaymentInfo', {'methodOfPayment': fields.String})
 
-filing_type_schema = payment_api.model('FilingType', {
-    'filingTypeCode': fields.String,
-    'priority': fields.Boolean,
-    'filingDescription': fields.String
-})
+filing_type_schema = payment_api.model(
+    'FilingType', {'filingTypeCode': fields.String, 'priority': fields.Boolean, 'filingDescription': fields.String}
+)
 
-filing_info_schema = payment_api.model('FilingInfo', {
-    'corpType': fields.String,
-    'date': fields.String,
-    'filingTypes': fields.List(fields.Nested(filing_type_schema)),
-})
+filing_info_schema = payment_api.model(
+    'FilingInfo',
+    {
+        'corpType': fields.String,
+        'date': fields.String,
+        'filingTypes': fields.List(fields.Nested(filing_type_schema)),
+    },
+)
 
-contact_info_schema = payment_api.model('ContactInfo', {
-    # 'firstName': fields.String,
-    # 'lastName': fields.String,
-    'addressLine1': fields.String,
-    'city': fields.String,
-    'province': fields.String,
-    'country': fields.String,
-    'postalCode': fields.String,
-})
+contact_info_schema = payment_api.model(
+    'ContactInfo',
+    {
+        # 'firstName': fields.String,
+        # 'lastName': fields.String,
+        'addressLine1': fields.String,
+        'city': fields.String,
+        'province': fields.String,
+        'country': fields.String,
+        'postalCode': fields.String,
+    },
+)
 
-business_info_schema = payment_api.model('BusinessInfo', {
-    'businessIdentifier': fields.String,
-    'businessName': fields.String,
-    'contactInfo': fields.Nested(contact_info_schema)
-})
+business_info_schema = payment_api.model(
+    'BusinessInfo',
+    {
+        'businessIdentifier': fields.String,
+        'businessName': fields.String,
+        'contactInfo': fields.Nested(contact_info_schema),
+    },
+)
 
 
-payment_invoice_schema = payment_api.model('PaymentInvoice', {
-    'id': fields.String,
-    'referenceNumber': fields.String,
-    'statusCode': fields.String,
-    'createdBy': fields.String,
-    'createdOn': fields.String
-})
+payment_invoice_schema = payment_api.model(
+    'PaymentInvoice',
+    {
+        'id': fields.String,
+        'referenceNumber': fields.String,
+        'statusCode': fields.String,
+        'createdBy': fields.String,
+        'createdOn': fields.String,
+    },
+)
 
-payment_response_schema = payment_api.model('Payment', {
-    'id': fields.String,
-    'invoices': fields.List(fields.Nested(payment_invoice_schema)),
-    'paymentMethod': fields.String,
-    'statusCode': fields.String,
-    'createdBy': fields.String,
-    'createdOn': fields.String,
-    'updatedBy': fields.String,
-    'updatedOn': fields.String
-})
+payment_response_schema = payment_api.model(
+    'Payment',
+    {
+        'id': fields.String,
+        'invoices': fields.List(fields.Nested(payment_invoice_schema)),
+        'paymentMethod': fields.String,
+        'statusCode': fields.String,
+        'createdBy': fields.String,
+        'createdOn': fields.String,
+        'updatedBy': fields.String,
+        'updatedOn': fields.String,
+    },
+)
 
 # Define our request objects
 # These are POSTED use camelCase
-payment_request_schema = payment_api.model('PaymentRequest', {
-    'paymentInfo': fields.Nested(payment_info_schema),
-    'businessInfo': fields.Nested(business_info_schema),
-    'filingInfo': fields.Nested(filing_info_schema)
-})
+payment_request_schema = payment_api.model(
+    'PaymentRequest',
+    {
+        'paymentInfo': fields.Nested(payment_info_schema),
+        'businessInfo': fields.Nested(business_info_schema),
+        'filingInfo': fields.Nested(filing_info_schema),
+    },
+)
 
 
 @payment_api.errorhandler(AuthError)
@@ -151,7 +154,7 @@ def handle_payment_response(payment_action, payment_response, payment, nr_id, nr
         successful_status_list = [
             PaymentStatusCode.APPROVED.value,
             PaymentStatusCode.CREATED.value,
-            PaymentStatusCode.COMPLETED.value
+            PaymentStatusCode.COMPLETED.value,
         ]
         if payment_response.statusCode in successful_status_list:
             # Update the payment info to Postgres
@@ -188,25 +191,31 @@ def handle_payment_response(payment_action, payment_response, payment, nr_id, nr
 
                 nr_model.save_to_db()
                 payment.save_to_db()
-                EventRecorder.record(nr_svc.user, Event.POST + f' [payment completed { payment_action }]', nr_model, nr_model.json())
+                EventRecorder.record(
+                    nr_svc.user, Event.POST + f' [payment completed {payment_action}]', nr_model, nr_model.json()
+                )
 
             else:
                 # Record the event
-                EventRecorder.record(nr_svc.user, Event.POST + f' [payment created] { payment_action }', nr_model, nr_model.json())
+                EventRecorder.record(
+                    nr_svc.user, Event.POST + f' [payment created] {payment_action}', nr_model, nr_model.json()
+                )
 
             # Wrap the response, providing info from both the SBC Pay response and the payment we created
-            data = jsonify({
-                'id': payment.id,
-                'nrId': payment.nrId,
-                'nrNum': nr_model.nrNum,
-                'token': payment.payment_token,
-                'statusCode': payment.payment_status_code,
-                'action': payment.payment_action,
-                'completionDate': payment.payment_completion_date,
-                'payment': payment.as_dict(),
-                'sbcPayment': payment_response.as_dict(),
-                'isPaymentActionRequired': payment_response.isPaymentActionRequired
-            })
+            data = jsonify(
+                {
+                    'id': payment.id,
+                    'nrId': payment.nrId,
+                    'nrNum': nr_model.nrNum,
+                    'token': payment.payment_token,
+                    'statusCode': payment.payment_status_code,
+                    'action': payment.payment_action,
+                    'completionDate': payment.payment_completion_date,
+                    'payment': payment.as_dict(),
+                    'sbcPayment': payment_response.as_dict(),
+                    'isPaymentActionRequired': payment_response.isPaymentActionRequired,
+                }
+            )
 
             response = make_response(data, 201)
             return response
@@ -214,16 +223,20 @@ def handle_payment_response(payment_action, payment_response, payment, nr_id, nr
         else:
             # log actual status code
             current_app.logger.error('Error with status code. Actual status code: ' + payment_response.statusCode)
-            EventRecorder.record(nr_svc.user, Event.POST + f' [payment failed] { payment_action }', nr_model, nr_model.json())
+            EventRecorder.record(
+                nr_svc.user, Event.POST + f' [payment failed] {payment_action}', nr_model, nr_model.json()
+            )
             # return generic error status to the front end
             return make_response(jsonify(message=f'Name Request {nr_id} encountered an error'), 402)
     except Exception as err:
         current_app.logger.error(err.with_traceback(None))
-        EventRecorder.record(nr_svc.user, Event.POST + f' [payment failed] { payment_action }', nr_model, nr_model.json())
+        EventRecorder.record(nr_svc.user, Event.POST + f' [payment failed] {payment_action}', nr_model, nr_model.json())
         return make_response(jsonify(message=f'Name Request {nr_id} encountered an error'), 500)
+
 
 class PaymentNameRequestResource(AbstractNameRequestResource):
     """Name request payment resoure endpoint."""
+
     @staticmethod
     def approve_nr(nr, svc):
         """
@@ -242,11 +255,10 @@ class PaymentNameRequestResource(AbstractNameRequestResource):
 
 @cors_preflight('GET')
 @payment_api.route('/<int:nr_id>', strict_slashes=False, methods=['GET', 'OPTIONS'])
-@payment_api.doc(params={
-})
-
+@payment_api.doc(params={})
 class FindNameRequestPayments(PaymentNameRequestResource):
     """Find name request payments endpoints."""
+
     def get(self, nr_id):
         """Get endpoint."""
         try:
@@ -256,7 +268,7 @@ class FindNameRequestPayments(PaymentNameRequestResource):
             response_data = []
             # Wrap our payment
             for payment in nr_payments:
-                if (payment.payment_token):
+                if payment.payment_token:
                     payment_response = get_payment(payment.payment_token)
                     receipts = payment_response.receipts
                     if not receipts and payment_response.statusCode == PaymentState.APPROVED.value:
@@ -267,34 +279,38 @@ class FindNameRequestPayments(PaymentNameRequestResource):
                                 'id': payment.payment_token,
                                 'receiptAmount': None,
                                 'receiptDate': None,
-                                'receiptNumber': 'Pending'
+                                'receiptNumber': 'Pending',
                             }
                         ]
                         payment_response.receipts = receipts
-                        response_data.append({
-                            'id': payment.id,
-                            'nrId': payment.nrId,
-                            'token': payment.payment_token,
-                            'statusCode': payment.payment_status_code,
-                            'action': payment.payment_action,
-                            'completionDate': payment.payment_completion_date,
-                            'payment': payment.as_dict(),
-                            'sbcPayment': payment_response.as_dict(),
-                            'receipts': receipts
-                        })
+                        response_data.append(
+                            {
+                                'id': payment.id,
+                                'nrId': payment.nrId,
+                                'token': payment.payment_token,
+                                'statusCode': payment.payment_status_code,
+                                'action': payment.payment_action,
+                                'completionDate': payment.payment_completion_date,
+                                'payment': payment.as_dict(),
+                                'sbcPayment': payment_response.as_dict(),
+                                'receipts': receipts,
+                            }
+                        )
                     else:
                         # Wrap the response, providing info from both the SBC Pay response and the payment we created
-                        response_data.append({
-                            'id': payment.id,
-                            'nrId': payment.nrId,
-                            'token': payment.payment_token,
-                            'statusCode': payment.payment_status_code,
-                            'action': payment.payment_action,
-                            'completionDate': payment.payment_completion_date,
-                            'payment': payment.as_dict(),
-                            'sbcPayment': payment_response.as_dict(),
-                            'receipts': list(map(lambda r: map_receipt(r), receipts))
-                        })
+                        response_data.append(
+                            {
+                                'id': payment.id,
+                                'nrId': payment.nrId,
+                                'token': payment.payment_token,
+                                'statusCode': payment.payment_status_code,
+                                'action': payment.payment_action,
+                                'completionDate': payment.payment_completion_date,
+                                'payment': payment.as_dict(),
+                                'sbcPayment': payment_response.as_dict(),
+                                'receipts': list(map(lambda r: map_receipt(r), receipts)),
+                            }
+                        )
 
             return make_response(jsonify(response_data), 200)
         except PaymentServiceError as err:
@@ -309,11 +325,8 @@ class FindNameRequestPayments(PaymentNameRequestResource):
 
 @cors_preflight('POST')
 @payment_api.route('/<int:nr_id>/<string:payment_action>', strict_slashes=False, methods=['POST', 'OPTIONS'])
-@payment_api.doc(params={
-})
-
+@payment_api.doc(params={})
 class CreateNameRequestPayment(AbstractNameRequestResource):
-
     @staticmethod
     def _is_staff(auth_header):
         """Determine if the user is a staff member."""
@@ -324,19 +337,13 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
         """Affiliate the new NR to the business account."""
         auth_svc_url = current_app.config.get('AUTH_SVC_URL')
         if not auth_svc_url:
-            raise ValueError("AUTH_SVC_URL is not configured in the application.")
+            raise ValueError('AUTH_SVC_URL is not configured in the application.')
 
         nr_num = nr_model.nrNum
         phone_num = nr_model.applicants[0].phoneNumber
         auth_url = f'{auth_svc_url}/orgs/{business_account_id}/affiliations?newBusiness=true'
-        headers = {
-            'Authorization': auth_header,
-            'Content-Type': 'application/json'
-        }
-        payload = {
-            'businessIdentifier': nr_num,
-            'phone': phone_num
-        }
+        headers = {'Authorization': auth_header, 'Content-Type': 'application/json'}
+        payload = {'businessIdentifier': nr_num, 'phone': phone_num}
 
         try:
             response = requests.post(url=auth_url, json=payload, headers=headers)
@@ -344,26 +351,26 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             # Check the response status
             if not response.ok:
                 current_app.logger.error(
-                    f"Failed to affiliate business account {business_account_id} with {nr_num}. "
-                    f"Status Code: {response.status_code}, Response: {response.text}"
+                    f'Failed to affiliate business account {business_account_id} with {nr_num}. '
+                    f'Status Code: {response.status_code}, Response: {response.text}'
                 )
             else:
                 current_app.logger.debug(
-                    f"Successfully affiliated business account {business_account_id} with {nr_num}."
+                    f'Successfully affiliated business account {business_account_id} with {nr_num}.'
                 )
         except requests.exceptions.RequestException as e:
-            current_app.logger.error(
-                f"Error affiliating business account {business_account_id} with {nr_num}: {e}"
-            )
-
+            current_app.logger.error(f'Error affiliating business account {business_account_id} with {nr_num}: {e}')
 
     """Create name request payment endpoints."""
+
     @payment_api.expect(payment_request_schema)
     @payment_api.response(200, 'Success', '')
-    @payment_api.doc(params={
-        'nr_id': 'Name Request number',
-        'payment_action': 'Payment NR Action - One of [CREATE, UPGRADE, REAPPLY, RESUBMIT]'
-    })
+    @payment_api.doc(
+        params={
+            'nr_id': 'Name Request number',
+            'payment_action': 'Payment NR Action - One of [CREATE, UPGRADE, REAPPLY, RESUBMIT]',
+        }
+    )
     def post(self, nr_id, payment_action=NameRequestActions.CREATE.value):
         """
         At this point, the Name Request will still be using a TEMPORARY NR number.
@@ -390,15 +397,21 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 NameRequestActions.CREATE.value,
                 NameRequestActions.UPGRADE.value,
                 NameRequestActions.REAPPLY.value,
-                NameRequestActions.RESUBMIT.value
+                NameRequestActions.RESUBMIT.value,
             ]
 
             if not valid_payment_action:
                 return make_response(jsonify(message=f'Invalid payment action [{payment_action}]'), 400)
 
             # We only handle payments if the NR is in the following states
-            valid_payment_states = [State.DRAFT, State.COND_RESERVE, State.RESERVED, State.CONDITIONAL, State.APPROVED,
-                                    State.PENDING_PAYMENT]
+            valid_payment_states = [
+                State.DRAFT,
+                State.COND_RESERVE,
+                State.RESERVED,
+                State.CONDITIONAL,
+                State.APPROVED,
+                State.PENDING_PAYMENT,
+            ]
             valid_nr_state = nr_model.stateCd in valid_payment_states
             if not valid_nr_state:
                 return make_response(jsonify(message=f'Invalid NR state [{payment_action}]'), 400)
@@ -419,17 +432,16 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             if existing_payment:
                 # if we already have a payment record, we can request existing payment status and return it
                 # get the payment status from Pay API
-                if payment_action == PaymentDAO.PaymentActions.REAPPLY.value and is_reapplication_eligible(nr_model.expirationDate):
+                if payment_action == PaymentDAO.PaymentActions.REAPPLY.value and is_reapplication_eligible(
+                    nr_model.expirationDate
+                ):
                     # skip valid cases of REAPPLY, as these potentially can have more than a single instance
                     pass
                 else:
                     payment_response = get_payment(existing_payment.payment_token)
-                    return handle_payment_response(payment_action,
-                                                payment_response,
-                                                existing_payment,
-                                                nr_id,
-                                                nr_model,
-                                                nr_svc)
+                    return handle_payment_response(
+                        payment_action, payment_response, existing_payment, nr_id, nr_model, nr_svc
+                    )
 
             payment_request = {}
             if not json_input:
@@ -479,7 +491,7 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
                 filingInfo=filing_info,
                 businessInfo=business_info,
                 accountInfo=account_info,
-                details=details
+                details=details,
             )
 
             # Save the payment info to Postgres
@@ -489,20 +501,19 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
             # payment will be saved in handle_payment_response with a payment_token
 
             payment_response = create_payment(req.as_dict(), headers)
-            payment_response_result = handle_payment_response(payment_action,
-                                           payment_response,
-                                           payment,
-                                           nr_id,
-                                           nr_model,
-                                           nr_svc)
+            payment_response_result = handle_payment_response(
+                payment_action, payment_response, payment, nr_id, nr_model, nr_svc
+            )
             # after a new NR saved
             # if logged in user is a staff, affiliate the new NR with the business_account_id
             if is_new_nr and is_staff:
-                business_account_id = json_input.get("businessAccountId")
+                business_account_id = json_input.get('businessAccountId')
                 if business_account_id:
-                    current_app.logger.debug(f"Affiliating to business account ID: {business_account_id} with {nr_model.nrNum}")
+                    current_app.logger.debug(
+                        f'Affiliating to business account ID: {business_account_id} with {nr_model.nrNum}'
+                    )
                     # affiliate the new NR to the account_info
-                    #affiliate_business_account(business_account_id, nr_model.nrNum)
+                    # affiliate_business_account(business_account_id, nr_model.nrNum)
                     self._affiliate_business_account(auth_header, business_account_id, nr_model)
 
             return payment_response_result
@@ -520,15 +531,13 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
 
 
 @cors_preflight('DELETE, GET, PUT')
-@payment_api.route('/<int:nr_id>/payment/<string:payment_id>', strict_slashes=False, methods=['DELETE', 'GET', 'PUT', 'OPTIONS'])
-@payment_api.doc(params={
-    'nr_id': '',
-    'payment_id': ''
-})
-
-
+@payment_api.route(
+    '/<int:nr_id>/payment/<string:payment_id>', strict_slashes=False, methods=['DELETE', 'GET', 'PUT', 'OPTIONS']
+)
+@payment_api.doc(params={'nr_id': '', 'payment_id': ''})
 class NameRequestPayment(AbstractNameRequestResource):
     """Name request payment endpoints."""
+
     @payment_api.response(200, 'Success', '')
     # TODO: Update schema and marshal
     # @marshal_with(payment_response_schema)
@@ -556,34 +565,38 @@ class NameRequestPayment(AbstractNameRequestResource):
                         'id': payment.payment_token,
                         'receiptAmount': None,
                         'receiptDate': None,
-                        'receiptNumber': 'Pending'
+                        'receiptNumber': 'Pending',
                     }
                 ]
                 payment_response.receipts = receipts
-                data.append({
-                    'id': payment.id,
-                    'nrId': payment.nrId,
-                    'token': payment.payment_token,
-                    'statusCode': payment.payment_status_code,
-                    'action': payment.payment_action,
-                    'completionDate': payment.payment_completion_date,
-                    'payment': payment.as_dict(),
-                    'sbcPayment': payment_response.as_dict(),
-                    'receipts': receipts
-                })
+                data.append(
+                    {
+                        'id': payment.id,
+                        'nrId': payment.nrId,
+                        'token': payment.payment_token,
+                        'statusCode': payment.payment_status_code,
+                        'action': payment.payment_action,
+                        'completionDate': payment.payment_completion_date,
+                        'payment': payment.as_dict(),
+                        'sbcPayment': payment_response.as_dict(),
+                        'receipts': receipts,
+                    }
+                )
             else:
                 # Wrap the response, providing info from both the SBC Pay response and the payment we created
-                data.append({
-                    'id': payment.id,
-                    'nrId': payment.nrId,
-                    'token': payment.payment_token,
-                    'statusCode': payment.payment_status_code,
-                    'action': payment.payment_action,
-                    'completionDate': payment.payment_completion_date,
-                    'payment': payment.as_dict(),
-                    'sbcPayment': payment_response.as_dict(),
-                    'receipts': list(map(lambda r: map_receipt(r), receipts))
-                })
+                data.append(
+                    {
+                        'id': payment.id,
+                        'nrId': payment.nrId,
+                        'token': payment.payment_token,
+                        'statusCode': payment.payment_status_code,
+                        'action': payment.payment_action,
+                        'completionDate': payment.payment_completion_date,
+                        'payment': payment.as_dict(),
+                        'sbcPayment': payment_response.as_dict(),
+                        'receipts': list(map(lambda r: map_receipt(r), receipts)),
+                    }
+                )
 
             return make_response(jsonify(data), 200)
 
@@ -612,7 +625,9 @@ class NameRequestPayment(AbstractNameRequestResource):
             # check payment record state is CREATED
             current_payment_state = payment.payment_status_code
             if current_payment_state != PaymentStatusCode.CREATED.value:
-                return make_response(jsonify(message=f'Unable to cancel a payment record in {current_payment_state} state.'), 400)
+                return make_response(
+                    jsonify(message=f'Unable to cancel a payment record in {current_payment_state} state.'), 400
+                )
 
             try:
                 # cancelling may change with refactor
@@ -621,7 +636,12 @@ class NameRequestPayment(AbstractNameRequestResource):
                 payment.payment_status_code = PaymentState.CANCELLED.value
                 payment.save_to_db()
                 nr_svc = self.nr_service
-                EventRecorder.record(nr_svc.user, Event.DELETE + f' [payment cancelled] {payment.payment_action}', nr_model, nr_model.json())
+                EventRecorder.record(
+                    nr_svc.user,
+                    Event.DELETE + f' [payment cancelled] {payment.payment_action}',
+                    nr_model,
+                    nr_model.json(),
+                )
 
                 response_data = nr_model.json()
                 # Add the list of valid Name Request actions for the given state to the response
@@ -636,14 +656,18 @@ class NameRequestPayment(AbstractNameRequestResource):
 
 
 @cors_preflight('PATCH')
-@payment_api.route('/<int:nr_id>/payment/<int:payment_id>/<string:payment_action>', strict_slashes=False, methods=['PATCH', 'OPTIONS'])
-@payment_api.doc(params={
-    'nr_id': 'NR Number - This field is required',
-    'payment_action': 'Payment NR Action - One of [CREATE, UPGRADE, REAPPLY, REFUND]'
-})
-
+@payment_api.route(
+    '/<int:nr_id>/payment/<int:payment_id>/<string:payment_action>', strict_slashes=False, methods=['PATCH', 'OPTIONS']
+)
+@payment_api.doc(
+    params={
+        'nr_id': 'NR Number - This field is required',
+        'payment_action': 'Payment NR Action - One of [CREATE, UPGRADE, REAPPLY, REFUND]',
+    }
+)
 class NameRequestPaymentAction(AbstractNameRequestResource):
     """Name request payment action endpoints."""
+
     # REST Method Handlers
     def patch(self, nr_id, payment_id, payment_action):
         """
@@ -662,9 +686,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
                 # The request payload will be empty when making this call,
                 # but we still want to process names, so we need to add
                 # them to the request, otherwise they won't be processed!
-                _self.request_data = {
-                    'names': [n.as_dict() for n in nr_model.names]
-                }
+                _self.request_data = {'names': [n.as_dict() for n in nr_model.names]}
                 # Set the request data to the service
                 _self.nr_service.request_data = self.request_data
 
@@ -715,7 +737,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             NameRequestActions.UPGRADE.value: self.complete_upgrade_payment,
             NameRequestActions.REAPPLY.value: self.complete_reapply_payment,
             NameRequestActions.REQUEST_REFUND.value: self.request_refund,
-            NameRequestActions.CANCEL.value: self.cancel_payment
+            NameRequestActions.CANCEL.value: self.cancel_payment,
         }.get(action)(model, payment_id)
 
     def complete_reservation_payment(self, nr_model: RequestDAO, payment_id: int):
@@ -848,11 +870,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         :return:
         """
         # Handle the payments
-        valid_states = [
-            PaymentState.APPROVED.value,
-            PaymentState.COMPLETED.value,
-            PaymentState.PARTIAL.value
-        ]
+        valid_states = [PaymentState.APPROVED.value, PaymentState.COMPLETED.value, PaymentState.PARTIAL.value]
         if nr_model.stateCd not in [State.DRAFT]:
             raise PaymentServiceError(message='Invalid NR state for cancel and refund')
         # Cancel any payments associated with the NR
@@ -863,24 +881,35 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
                 payment.payment_status_code = PaymentState.REFUND_REQUESTED.value
                 payment.save_to_db()
                 nr_svc = self.nr_service
-                EventRecorder.record(nr_svc.user, Event.PATCH + f' [payment refunded] {payment.payment_action}', nr_model, nr_model.json())
+                EventRecorder.record(
+                    nr_svc.user,
+                    Event.PATCH + f' [payment refunded] {payment.payment_action}',
+                    nr_model,
+                    nr_model.json(),
+                )
 
         return nr_model
 
     def cancel_payment(self, nr_model: RequestDAO, payment_id: int):
         """Cancel payment with specified id."""
-        valid_states = [
-            PaymentState.CREATED.value
-        ]
+        valid_states = [PaymentState.CREATED.value]
         for payment in nr_model.payments.all():
             if payment.id == payment_id and payment.payment_status_code in valid_states:
                 sbc_payment_response = get_payment(payment.payment_token)
-                if sbc_payment_response.statusCode in [PaymentStatusCode.COMPLETED.value, PaymentStatusCode.APPROVED.value]:
+                if sbc_payment_response.statusCode in [
+                    PaymentStatusCode.COMPLETED.value,
+                    PaymentStatusCode.APPROVED.value,
+                ]:
                     raise PaymentServiceError(message='Error cancelling payment. Payment is in a completed state!')
                 cancel_payment(payment.payment_token)
                 payment.payment_status_code = PaymentState.CANCELLED.value
                 payment.save_to_db()
                 # record the event
                 nr_svc = self.nr_service
-                EventRecorder.record(nr_svc.user, Event.DELETE + f' [payment cancelled] {payment.payment_action}', nr_model, nr_model.json())
+                EventRecorder.record(
+                    nr_svc.user,
+                    Event.DELETE + f' [payment cancelled] {payment.payment_action}',
+                    nr_model,
+                    nr_model.json(),
+                )
         return nr_model

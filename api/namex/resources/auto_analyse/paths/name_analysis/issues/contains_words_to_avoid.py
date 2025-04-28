@@ -1,4 +1,5 @@
 """Contains words to avoid issue classes."""
+
 from namex.resources.auto_analyse.issues import ContainsWordsToAvoidIssue
 
 from ....response_objects import NameAnalysisIssue
@@ -26,7 +27,7 @@ class XproContainsWordsToAvoidIssue(ContainsWordsToAvoidIssue):
             show_examination_button=False,
             conflicts=None,
             setup=None,
-            name_actions=[]
+            name_actions=[],
         )
 
         return issue

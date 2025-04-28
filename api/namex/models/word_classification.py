@@ -2,10 +2,12 @@
 Virtual word classification classifies all words in a name approved by an examiner to be used for auto-approval
 """
 
-from . import db, ma
-from datetime import datetime, date
-from sqlalchemy import func, or_
+from datetime import date, datetime
+
+from sqlalchemy import func
 from sqlalchemy.orm import backref
+
+from . import db, ma
 
 
 class WordClassification(db.Model):
@@ -22,44 +24,61 @@ class WordClassification(db.Model):
     start_dt = db.Column('start_dt', db.DateTime(timezone=True))
     end_dt = db.Column('end_dt', db.DateTime(timezone=True))
     last_updated_by = db.Column('last_updated_by', db.Integer, db.ForeignKey('users.id'))
-    last_updated_dt = db.Column('last_update_dt', db.DateTime(timezone=True), default=datetime.utcnow,
-                                onupdate=datetime.utcnow)
+    last_updated_dt = db.Column(
+        'last_update_dt', db.DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
     # relationships
     approver = db.relationship('User', backref=backref('user_word_approver', uselist=False), foreign_keys=[approved_by])
-    updater = db.relationship('User', backref=backref('user_word_updater', uselist=False),
-                              foreign_keys=[last_updated_by])
+    updater = db.relationship(
+        'User', backref=backref('user_word_updater', uselist=False), foreign_keys=[last_updated_by]
+    )
 
     def json(self):
-        return {"id": self.id, "classification": self.classification, "word": self.word,
-                "lastNameUsed": self.last_name_used, "lastPrepName": self.last_prep_name,
-                "frequency": self.frequency, "approvedDate": self.approved_dt,
-                "approvedBy": self.approved_by, "startDate": self.start_dt,
-                "lastUpdatedBy": self.last_updated_by, "lastUpdatedDate": self.last_updated_dt}
+        return {
+            'id': self.id,
+            'classification': self.classification,
+            'word': self.word,
+            'lastNameUsed': self.last_name_used,
+            'lastPrepName': self.last_prep_name,
+            'frequency': self.frequency,
+            'approvedDate': self.approved_dt,
+            'approvedBy': self.approved_by,
+            'startDate': self.start_dt,
+            'lastUpdatedBy': self.last_updated_by,
+            'lastUpdatedDate': self.last_updated_dt,
+        }
 
     # TODO: Fix this it's not working...
-    '''
+    """
     Note: we convert to lower case as word text in the DB will be in all caps.
-    '''
+    """
 
     @classmethod
     def find_word_classification(cls, word):
-        results = db.session.query(cls.word, cls.classification).distinct(cls.word, cls.classification) \
-            .filter(func.lower(cls.word).op('~')(r"(^{0}(''[a-zA-Z])?\y)".format(word.lower()))) \
-            .filter(cls.end_dt.is_(None)) \
-            .filter(cls.start_dt <= date.today()) \
-            .filter(cls.approved_dt <= date.today()).all()
+        results = (
+            db.session.query(cls.word, cls.classification)
+            .distinct(cls.word, cls.classification)
+            .filter(func.lower(cls.word).op('~')(r"(^{0}(''[a-zA-Z])?\y)".format(word.lower())))
+            .filter(cls.end_dt.is_(None))
+            .filter(cls.start_dt <= date.today())
+            .filter(cls.approved_dt <= date.today())
+            .all()
+        )
         cls.close_session()
         return results
 
     @classmethod
     def find_word_by_classification(cls, word, classification):
-        results = db.session.query(cls) \
-            .filter(func.lower(cls.word).op('~')(r"(\y{0}(''[a-zA-Z])?\y)".format(word.lower()))) \
-            .filter(func.lower(cls.classification) == func.lower(classification)) \
-            .filter(cls.end_dt.is_(None)) \
-            .filter(cls.start_dt <= date.today()) \
-            .filter(cls.approved_dt <= date.today()).all()
+        results = (
+            db.session.query(cls)
+            .filter(func.lower(cls.word).op('~')(r"(\y{0}(''[a-zA-Z])?\y)".format(word.lower())))
+            .filter(func.lower(cls.classification) == func.lower(classification))
+            .filter(cls.end_dt.is_(None))
+            .filter(cls.start_dt <= date.today())
+            .filter(cls.approved_dt <= date.today())
+            .all()
+        )
         cls.close_session()
         return results
 

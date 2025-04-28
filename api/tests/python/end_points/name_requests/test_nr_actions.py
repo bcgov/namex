@@ -1,6 +1,7 @@
 """
 Test HTTP endpoints for Name Requests.
 """
+
 import datetime
 import json
 
@@ -63,7 +64,7 @@ def build_test_input_fields():
         # 'submittedDate': None,
         'submitter_userid': 'name_request_service_account',
         'userId': 'name_request_service_account',
-        'xproJurisdiction': ''
+        'xproJurisdiction': '',
     }
 
 
@@ -175,7 +176,7 @@ def test_draft_patch_edit_data(client, jwt, app, mocker):
         'additionalInfo': 'Testing additional info',
         'natureBusinessInfo': 'Testing nature of business info',
         'priorityCd': 'Y',
-        'requestTypeCd': 'CR'
+        'requestTypeCd': 'CR',
     }
 
     added_names = [
@@ -186,7 +187,7 @@ def test_draft_patch_edit_data(client, jwt, app, mocker):
             'name_type_cd': 'CO',
             'consent_words': '',
             'conflict1': 'BLUE HERON TOURS LTD.',
-            'conflict1_num': '0515211'
+            'conflict1_num': '0515211',
         },
         {
             'name': 'BLUE HERON ISLAND TOURS LTD.',
@@ -195,8 +196,8 @@ def test_draft_patch_edit_data(client, jwt, app, mocker):
             'name_type_cd': 'CO',
             'consent_words': '',
             'conflict1': 'BLUE HERON TOURS LTD.',
-            'conflict1_num': '0515211'
-        }
+            'conflict1_num': '0515211',
+        },
     ]
 
     nr_data['names'].extend(added_names)
@@ -220,7 +221,7 @@ def test_draft_patch_edit_data(client, jwt, app, mocker):
         msg = payload
         return {}
 
-    mocker.patch.object(queue, "publish", mock_publish)
+    mocker.patch.object(queue, 'publish', mock_publish)
 
     patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('id'), nr_data, mocker)
     patched_nr = json.loads(patch_response.data)
@@ -266,7 +267,7 @@ def test_draft_patch_edit_data(client, jwt, app, mocker):
         # 'submittedDate': None,
         'submitter_userid': 'name_request_service_account',
         'userId': 'name_request_service_account',
-        'xproJurisdiction': ''
+        'xproJurisdiction': '',
     }
 
     for key, value in expected_field_values.items():
@@ -302,7 +303,7 @@ def test_draft_patch_edit_request_action_and_entity_type(client, jwt, app, mocke
     nr_data = {
         'request_action_cd': 'CHG',
         'entity_type_cd': 'RLC',  # Limited Liability Co.
-        'requestTypeCd': 'CLC'  # From request_type_mapping in namex.constants
+        'requestTypeCd': 'CLC',  # From request_type_mapping in namex.constants
     }
 
     from namex.services import queue
@@ -317,7 +318,7 @@ def test_draft_patch_edit_request_action_and_entity_type(client, jwt, app, mocke
         msg = payload
         return {}
 
-    mocker.patch.object(queue, "publish", mock_publish)
+    mocker.patch.object(queue, 'publish', mock_publish)
 
     patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('id'), nr_data, mocker)
     patched_nr = json.loads(patch_response.data)
@@ -329,11 +330,7 @@ def test_draft_patch_edit_request_action_and_entity_type(client, jwt, app, mocke
     assert patched_nr.get('stateCd') == 'PENDING_PAYMENT'
 
     # Check data
-    expected_field_values = {
-        'request_action_cd': 'CHG',
-        'entity_type_cd': 'RLC',
-        'requestTypeCd': 'CLC'
-    }
+    expected_field_values = {'request_action_cd': 'CHG', 'entity_type_cd': 'RLC', 'requestTypeCd': 'CLC'}
 
     for key, value in expected_field_values.items():
         assert_field_equals_value(patched_nr, key, value)
@@ -358,10 +355,7 @@ def test_draft_patch_edit_and_repatch(client, jwt, app, mocker):
 
     # Take the response and edit it
     # Add another name to the mix
-    nr_data = {
-        'names': draft_nr.get('names'),
-        'applicants': draft_nr.get('applicants')
-    }
+    nr_data = {'names': draft_nr.get('names'), 'applicants': draft_nr.get('applicants')}
 
     added_names = [
         {
@@ -371,7 +365,7 @@ def test_draft_patch_edit_and_repatch(client, jwt, app, mocker):
             'name_type_cd': 'CO',
             'consent_words': '',
             'conflict1': 'BLUE HERON TOURS LTD.',
-            'conflict1_num': '0515211'
+            'conflict1_num': '0515211',
         },
         {
             'name': 'BLUE HERON ISLAND TOURS LTD.',
@@ -380,8 +374,8 @@ def test_draft_patch_edit_and_repatch(client, jwt, app, mocker):
             'name_type_cd': 'CO',
             'consent_words': '',
             'conflict1': 'BLUE HERON TOURS LTD.',
-            'conflict1_num': '0515211'
-        }
+            'conflict1_num': '0515211',
+        },
     ]
 
     nr_data['names'].extend(added_names)
@@ -401,7 +395,7 @@ def test_draft_patch_edit_and_repatch(client, jwt, app, mocker):
         msg = payload
         return {}
 
-    mocker.patch.object(queue, "publish", mock_publish)
+    mocker.patch.object(queue, 'publish', mock_publish)
 
     patch_response = patch_nr(client, NameRequestActions.EDIT.value, draft_nr.get('id'), nr_data, mocker)
     patched_nr = json.loads(patch_response.data)
@@ -476,12 +470,13 @@ def test_draft_patch_cancel(client, jwt, app, mocker):
         msg = payload
         return {}
 
-    mocker.patch.object(queue, "publish", mock_publish)
+    mocker.patch.object(queue, 'publish', mock_publish)
 
     # Take the response and edit it
     nr_data = {}
 
     from namex.services import queue
+
     patch_response = patch_nr(client, NameRequestActions.CANCEL.value, draft_nr.get('id'), nr_data, mocker)
     patched_nr = json.loads(patch_response.data)
     assert patched_nr is not None
@@ -511,17 +506,19 @@ def test_draft_patch_cancel_with_invalid_states(client, jwt, app, mocker):
     """
     # Define our data
     input_fields = build_test_input_fields()
-    custom_names = [{
-        'name': 'BLUE HERON TOURS LTD.',
-        'choice': 1,
-        'designation': 'LTD.',
-        'name_type_cd': 'CO',
-        'consent_words': '',
-        'conflict1': 'BLUE HERON TOURS LTD.',
-        'conflict1_num': '0515211',
-        # Custom name has a corp num to make it 'consumed'
-        'corpNum': '12345'
-    }]
+    custom_names = [
+        {
+            'name': 'BLUE HERON TOURS LTD.',
+            'choice': 1,
+            'designation': 'LTD.',
+            'name_type_cd': 'CO',
+            'consent_words': '',
+            'conflict1': 'BLUE HERON TOURS LTD.',
+            'conflict1_num': '0515211',
+            # Custom name has a corp num to make it 'consumed'
+            'corpNum': '12345',
+        }
+    ]
 
     input_fields['names'] = custom_names
 
@@ -544,7 +541,7 @@ def test_draft_patch_cancel_with_invalid_states(client, jwt, app, mocker):
         msg = payload
         return {}
 
-    mocker.patch.object(queue, "publish", mock_publish)
+    mocker.patch.object(queue, 'publish', mock_publish)
     patch_response = patch_nr(client, NameRequestActions.CANCEL.value, test_nr.get('id'), nr_data, mocker)
 
     # Ensure the request failed
@@ -580,20 +577,22 @@ def test_draft_patch_cancel_with_consumed_name(client, jwt, app, mocker):
         msg = payload
         return {}
 
-    mocker.patch.object(queue, "publish", mock_publish)
+    mocker.patch.object(queue, 'publish', mock_publish)
     # Define our data
     input_fields = build_test_input_fields()
-    custom_names = [{
-        'name': 'BLUE HERON TOURS LTD.',
-        'choice': 1,
-        'designation': 'LTD.',
-        'name_type_cd': 'CO',
-        'consent_words': '',
-        'conflict1': 'BLUE HERON TOURS LTD.',
-        'conflict1_num': '0515211',
-        # Custom name has a corp num to make it 'consumed'
-        'corpNum': '12345'
-    }]
+    custom_names = [
+        {
+            'name': 'BLUE HERON TOURS LTD.',
+            'choice': 1,
+            'designation': 'LTD.',
+            'name_type_cd': 'CO',
+            'consent_words': '',
+            'conflict1': 'BLUE HERON TOURS LTD.',
+            'conflict1_num': '0515211',
+            # Custom name has a corp num to make it 'consumed'
+            'corpNum': '12345',
+        }
+    ]
 
     input_fields['names'] = custom_names
 
@@ -641,22 +640,24 @@ def test_draft_patch_cancel_with_expired_nr(client, jwt, app, mocker):
         msg = payload
         return {}
 
-    mocker.patch.object(queue, "publish", mock_publish)
+    mocker.patch.object(queue, 'publish', mock_publish)
     # Define our data
     input_fields = build_test_input_fields()
 
     # Set the expirationDate to a previous day
     input_fields['expirationDate'] = datetime.date.today() - datetime.timedelta(days=2)
 
-    custom_names = [{
-        'name': 'BLUE HERON TOURS LTD.',
-        'choice': 1,
-        'designation': 'LTD.',
-        'name_type_cd': 'CO',
-        'consent_words': '',
-        'conflict1': 'BLUE HERON TOURS LTD.',
-        'conflict1_num': '0515211',
-    }]
+    custom_names = [
+        {
+            'name': 'BLUE HERON TOURS LTD.',
+            'choice': 1,
+            'designation': 'LTD.',
+            'name_type_cd': 'CO',
+            'consent_words': '',
+            'conflict1': 'BLUE HERON TOURS LTD.',
+            'conflict1_num': '0515211',
+        }
+    ]
 
     input_fields['names'] = custom_names
 
@@ -702,7 +703,7 @@ def test_draft_patch_refund(client, jwt, app, mocker):
         msg = payload
         return {}
 
-    mocker.patch.object(queue, "publish", mock_publish)
+    mocker.patch.object(queue, 'publish', mock_publish)
 
     input_fields = build_test_input_fields()
     post_response = create_draft_nr(client, input_fields)
@@ -725,14 +726,12 @@ def test_draft_patch_refund(client, jwt, app, mocker):
     # Check NR number is the same because these are PATCH and call change_nr
     assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
 
-
     # Check pubsub messages
     assert len(topics) == 1
-    mailer = app.config.get("EMAILER_TOPIC")
+    mailer = app.config.get('EMAILER_TOPIC')
     assert mailer in topics
 
-
-    email_pub = json.loads(msg.decode("utf-8").replace("'",'"'))
+    email_pub = json.loads(msg.decode('utf-8').replace("'", '"'))
 
     # Verify message that would be sent to the emailer pubsub
     assert email_pub['type'] == QueueMessageTypes.NAMES_MESSAGE_TYPE.value
@@ -761,9 +760,7 @@ def test_draft_patch_reapply_historical(client, jwt, app, mocker):
     assert draft_nr is not None
 
     # Take the response and edit it
-    nr_data = {
-        'request_action_cd': 'REH'
-    }
+    nr_data = {'request_action_cd': 'REH'}
     from namex.services import queue
 
     topics = []
@@ -776,7 +773,7 @@ def test_draft_patch_reapply_historical(client, jwt, app, mocker):
         msg = payload
         return {}
 
-    mocker.patch.object(queue, "publish", mock_publish)
+    mocker.patch.object(queue, 'publish', mock_publish)
 
     patch_response = patch_nr(client, NameRequestActions.REAPPLY.value, draft_nr.get('id'), nr_data, mocker)
     patched_nr = json.loads(patch_response.data)
@@ -794,9 +791,7 @@ def test_draft_patch_reapply_historical(client, jwt, app, mocker):
     # assert_field_equals_value(patched_nr, 'expirationDate', '')
 
     # Take the response and edit it
-    nr_data = {
-        'request_action_cd': 'REST'
-    }
+    nr_data = {'request_action_cd': 'REST'}
 
     patch_response = patch_nr(client, NameRequestActions.REAPPLY.value, draft_nr.get('id'), nr_data, mocker)
     patched_nr = json.loads(patch_response.data)
@@ -842,7 +837,7 @@ def test_draft_patch_resend(client, jwt, app, mocker):
         msg = payload
         return {}
 
-    mocker.patch.object(queue, "publish", mock_publish)
+    mocker.patch.object(queue, 'publish', mock_publish)
     # Take the response and edit it
     nr_data = {}
     from namex.services import queue
@@ -862,59 +857,62 @@ def test_draft_patch_resend(client, jwt, app, mocker):
 
 
 draft_input_fields = {
-	'applicants': [
-		{
-			'addrLine1': '123-1640 Electra Blvd',
-			'addrLine2': None,
-			'addrLine3': None,
-			'city': 'North Saanich',
-			'clientFirstName': None,
-			'clientLastName': None,
-			'contact': '',
-			'countryTypeCd': 'CA',
-			'declineNotificationInd': None,
-			'emailAddress': 'a@a.com',
-			'faxNumber': None,
-			'firstName': 'John',
-			'lastName': 'Doe',
-			'middleName': None,
-			'partyId': '', # must be empty
-			'phoneNumber': '1234567',
-			'postalCd': 'V8L 5V4',
-			'stateProvinceCd': 'BC'
-		}
-	],
-	'names': [
-		{
-			'choice': 1,
-			'consent_words': '',
-			'conflict1': '',
-			'conflict1_num': '',
-			'designation': 'CORP.',
-			'name': 'TESTING CORP.',
-			'name_type_cd': 'CO'
-		}
-	],
-	'additionalInfo': '*** Additional Info here ***',
-	'natureBusinessInfo': 'Tests',
-	'priorityCd': 'N',
-	'entity_type_cd': '',
-	'request_action_cd': '',
-	'stateCd': 'DRAFT',
-	'english': True,
-	'nameFlag': False,
-	'submit_count': 0,
-	'corpNum': '',
-	'homeJurisNum': ''
+    'applicants': [
+        {
+            'addrLine1': '123-1640 Electra Blvd',
+            'addrLine2': None,
+            'addrLine3': None,
+            'city': 'North Saanich',
+            'clientFirstName': None,
+            'clientLastName': None,
+            'contact': '',
+            'countryTypeCd': 'CA',
+            'declineNotificationInd': None,
+            'emailAddress': 'a@a.com',
+            'faxNumber': None,
+            'firstName': 'John',
+            'lastName': 'Doe',
+            'middleName': None,
+            'partyId': '',  # must be empty
+            'phoneNumber': '1234567',
+            'postalCd': 'V8L 5V4',
+            'stateProvinceCd': 'BC',
+        }
+    ],
+    'names': [
+        {
+            'choice': 1,
+            'consent_words': '',
+            'conflict1': '',
+            'conflict1_num': '',
+            'designation': 'CORP.',
+            'name': 'TESTING CORP.',
+            'name_type_cd': 'CO',
+        }
+    ],
+    'additionalInfo': '*** Additional Info here ***',
+    'natureBusinessInfo': 'Tests',
+    'priorityCd': 'N',
+    'entity_type_cd': '',
+    'request_action_cd': '',
+    'stateCd': 'DRAFT',
+    'english': True,
+    'nameFlag': False,
+    'submit_count': 0,
+    'corpNum': '',
+    'homeJurisNum': '',
 }
 
 
-@pytest.mark.parametrize('test_name, request_action_cd, entity_type_cd', [
-    ('New CR', 'NEW', EntityTypes.CORPORATION.value),
-    ('New BC', 'NEW', EntityTypes.BENEFIT_COMPANY.value),
-    ('Resubmit CR', 'RESUBMIT', EntityTypes.CORPORATION.value),
-    ('Resubmit BC', 'RESUBMIT', EntityTypes.BENEFIT_COMPANY.value),
-])
+@pytest.mark.parametrize(
+    'test_name, request_action_cd, entity_type_cd',
+    [
+        ('New CR', 'NEW', EntityTypes.CORPORATION.value),
+        ('New BC', 'NEW', EntityTypes.BENEFIT_COMPANY.value),
+        ('Resubmit CR', 'RESUBMIT', EntityTypes.CORPORATION.value),
+        ('Resubmit BC', 'RESUBMIT', EntityTypes.BENEFIT_COMPANY.value),
+    ],
+)
 def test_temp_nr(client, test_name, request_action_cd, entity_type_cd):
     """
     Test temp NRs

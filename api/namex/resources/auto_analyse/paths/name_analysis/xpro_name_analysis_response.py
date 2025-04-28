@@ -1,38 +1,59 @@
-from namex.constants import EntityTypes
-from ... import QueueNameConflictIssue
-from ...analysis_response import AnalysisResponse
-
-from .issues import \
-    XproCheckIsValidIssue as CheckIsValidIssue, \
-    XproAddDistinctiveWordIssue as AddDistinctiveWordIssue, \
-    XproAddDescriptiveWordIssue as AddDescriptiveWordIssue, \
-    XproContainsWordsToAvoidIssue as ContainsWordsToAvoidIssue, \
-    XproDesignationMismatchIssue as DesignationMismatchIssue, \
-    XproTooManyWordsIssue as TooManyWordsIssue, \
-    XproNameRequiresConsentIssue as NameRequiresConsentIssue, \
-    XproContainsUnclassifiableWordIssue as ContainsUnclassifiableWordIssue, \
-    XproCorporateNameConflictIssue as CorporateNameConflictIssue, \
-    XproIncorrectCategoryIssue as IncorrectCategoryIssue, \
-    XproWordSpecialUseIssue as WordSpecialUseIssue, \
-    XproDesignationMisplacedIssue as DesignationMisplacedIssue, \
-    XproDesignationNonExistentIssue as DesignationNonExistentIssue
-
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
-from ...analysis_options import \
-    add_distinctive_setup, \
-    add_descriptive_setup, \
-    too_many_words_setup, \
-    remove_setup, \
-    remove_or_replace_setup, \
-    assumed_name_setup, \
-    alternative_assumed_name_setup, \
-    send_to_examiner_setup, \
-    obtain_consent_setup, \
-    replace_designation_setup, \
-    change_entity_type_setup, \
-    change_designation_order_setup, \
-    add_designation_setup
+from ... import QueueNameConflictIssue
+from ...analysis_options import (
+    add_descriptive_setup,
+    add_designation_setup,
+    add_distinctive_setup,
+    change_designation_order_setup,
+    change_entity_type_setup,
+    obtain_consent_setup,
+    remove_or_replace_setup,
+    remove_setup,
+    replace_designation_setup,
+    send_to_examiner_setup,
+    too_many_words_setup,
+)
+from ...analysis_response import AnalysisResponse
+from .issues import (
+    XproAddDescriptiveWordIssue as AddDescriptiveWordIssue,
+)
+from .issues import (
+    XproAddDistinctiveWordIssue as AddDistinctiveWordIssue,
+)
+from .issues import (
+    XproCheckIsValidIssue as CheckIsValidIssue,
+)
+from .issues import (
+    XproContainsUnclassifiableWordIssue as ContainsUnclassifiableWordIssue,
+)
+from .issues import (
+    XproContainsWordsToAvoidIssue as ContainsWordsToAvoidIssue,
+)
+from .issues import (
+    XproCorporateNameConflictIssue as CorporateNameConflictIssue,
+)
+from .issues import (
+    XproDesignationMismatchIssue as DesignationMismatchIssue,
+)
+from .issues import (
+    XproDesignationMisplacedIssue as DesignationMisplacedIssue,
+)
+from .issues import (
+    XproDesignationNonExistentIssue as DesignationNonExistentIssue,
+)
+from .issues import (
+    XproIncorrectCategoryIssue as IncorrectCategoryIssue,
+)
+from .issues import (
+    XproNameRequiresConsentIssue as NameRequiresConsentIssue,
+)
+from .issues import (
+    XproTooManyWordsIssue as TooManyWordsIssue,
+)
+from .issues import (
+    XproWordSpecialUseIssue as WordSpecialUseIssue,
+)
 
 
 # Execute analysis returns a response strategy code
@@ -51,7 +72,7 @@ def response_issues(issue_code):
         AnalysisIssueCodes.DESIGNATION_MISPLACED: DesignationMisplacedIssue,
         AnalysisIssueCodes.CORPORATE_CONFLICT: CorporateNameConflictIssue,
         AnalysisIssueCodes.QUEUE_CONFLICT: QueueNameConflictIssue,
-        AnalysisIssueCodes.WORD_SPECIAL_USE: WordSpecialUseIssue
+        AnalysisIssueCodes.WORD_SPECIAL_USE: WordSpecialUseIssue,
     }
 
     return issue_types.get(issue_code, CheckIsValidIssue)
@@ -70,28 +91,19 @@ class XproAnalysisResponse(AnalysisResponse):
 
             option2 = send_to_examiner_setup()
 
-            issue = response_issues(procedure_result.result_code)(self, [
-                option1,
-                option2
-            ])
+            issue = response_issues(procedure_result.result_code)(self, [option1, option2])
         elif has_next_issue:
             option1 = remove_or_replace_setup()
 
             option2 = send_to_examiner_setup()
 
-            issue = response_issues(procedure_result.result_code)(self, [
-                option1,
-                option2
-            ])
+            issue = response_issues(procedure_result.result_code)(self, [option1, option2])
         elif not is_only_issue and has_next_issue is False:
             option1 = remove_or_replace_setup()
 
             option2 = send_to_examiner_setup()
 
-            issue = response_issues(procedure_result.result_code)(self, [
-                option1,
-                option2
-            ])
+            issue = response_issues(procedure_result.result_code)(self, [option1, option2])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -101,9 +113,7 @@ class XproAnalysisResponse(AnalysisResponse):
     def build_add_distinctive_word_issue(self, procedure_result, issue_count, issue_idx):
         option1 = add_distinctive_setup()
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1
-        ])
+        issue = response_issues(procedure_result.result_code)(self, [option1])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -113,9 +123,7 @@ class XproAnalysisResponse(AnalysisResponse):
     def build_add_descriptive_word_issue(self, procedure_result, issue_count, issue_idx):
         option1 = add_descriptive_setup()
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1
-        ])
+        issue = response_issues(procedure_result.result_code)(self, [option1])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -125,7 +133,7 @@ class XproAnalysisResponse(AnalysisResponse):
     def build_too_many_words_issue(self, procedure_result, issue_count, issue_idx):
         option1 = too_many_words_setup()
         # Tweak the header
-        option1.header = "Required Action"
+        option1.header = 'Required Action'
 
         issue = response_issues(procedure_result.result_code)(self, [])
 
@@ -136,11 +144,9 @@ class XproAnalysisResponse(AnalysisResponse):
 
     def build_words_to_avoid_issue(self, procedure_result, issue_count, issue_idx):
         option1 = remove_setup()
-        option1.header = "Required Action"
+        option1.header = 'Required Action'
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1
-        ])
+        issue = response_issues(procedure_result.result_code)(self, [option1])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -154,11 +160,7 @@ class XproAnalysisResponse(AnalysisResponse):
 
         option3 = obtain_consent_setup()
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1,
-            option2,
-            option3
-        ])
+        issue = response_issues(procedure_result.result_code)(self, [option1, option2, option3])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -187,14 +189,16 @@ class XproAnalysisResponse(AnalysisResponse):
 
         option2 = obtain_consent_setup()
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1,
-            option2,
-            #option3
-        ])
+        issue = response_issues(procedure_result.result_code)(
+            self,
+            [
+                option1,
+                option2,
+                # option3
+            ],
+        )
 
-
-        '''
+        """
         # Quick tests for overriding button behavior
         if issue_count > 1:
             issue.show_reserve_button = True
@@ -202,7 +206,7 @@ class XproAnalysisResponse(AnalysisResponse):
         else:
             issue.show_reserve_button = True
             issue.show_examination_button = False
-        '''
+        """
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -219,11 +223,14 @@ class XproAnalysisResponse(AnalysisResponse):
 
         option2 = obtain_consent_setup()
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1,
-            option2,
-            #option3
-        ])
+        issue = response_issues(procedure_result.result_code)(
+            self,
+            [
+                option1,
+                option2,
+                # option3
+            ],
+        )
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -232,11 +239,9 @@ class XproAnalysisResponse(AnalysisResponse):
 
     def build_non_existent_designation_issue(self, procedure_result, issue_count, issue_idx):
         option1 = add_designation_setup()
-        option1.header = "Required Action"
+        option1.header = 'Required Action'
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1
-        ])
+        issue = response_issues(procedure_result.result_code)(self, [option1])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -248,10 +253,7 @@ class XproAnalysisResponse(AnalysisResponse):
 
         option2 = change_entity_type_setup()
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1,
-            option2
-        ])
+        issue = response_issues(procedure_result.result_code)(self, [option1, option2])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -261,11 +263,9 @@ class XproAnalysisResponse(AnalysisResponse):
     def build_designation_misplaced_issue(self, procedure_result, issue_count, issue_idx):
         option1 = change_designation_order_setup()
         # Tweak the header
-        option1.header = "Required Action"
+        option1.header = 'Required Action'
 
-        issue = response_issues(procedure_result.result_code)(self, [
-            option1
-        ])
+        issue = response_issues(procedure_result.result_code)(self, [option1])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)
@@ -284,28 +284,19 @@ class XproAnalysisResponse(AnalysisResponse):
 
             option2 = send_to_examiner_setup()
 
-            issue = response_issues(procedure_result.result_code)(self, [
-                option1,
-                option2
-            ])
+            issue = response_issues(procedure_result.result_code)(self, [option1, option2])
         elif has_next_issue:
             option1 = remove_or_replace_setup()
 
             option2 = send_to_examiner_setup()
 
-            issue = response_issues(procedure_result.result_code)(self, [
-                option1,
-                option2
-            ])
+            issue = response_issues(procedure_result.result_code)(self, [option1, option2])
         elif not is_only_issue and has_next_issue is False:
             option1 = remove_or_replace_setup()
 
             option2 = send_to_examiner_setup()
 
-            issue = response_issues(procedure_result.result_code)(self, [
-                option1,
-                option2
-            ])
+            issue = response_issues(procedure_result.result_code)(self, [option1, option2])
 
         # Add the procedure to the stack of executed_procedures so we know what issues have been set up
         self.executed_procedures.append(procedure_result.result_code)

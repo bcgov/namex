@@ -1,7 +1,9 @@
-from . import db, ma
 from datetime import datetime
+
 from sqlalchemy.orm import backref
-from .user import User, UserSchema
+
+from . import db, ma
+from .user import UserSchema
 
 
 class Comment(db.Model):
@@ -16,7 +18,7 @@ class Comment(db.Model):
     examinerId = db.Column('user_id', db.Integer, db.ForeignKey('users.id'), index=True)
 
     # Relationships - Users
-    examiner = db.relationship("User", backref=backref("examiner_comments"), foreign_keys=[examinerId])
+    examiner = db.relationship('User', backref=backref('examiner_comments'), foreign_keys=[examinerId])
 
     # NRComments = db.relationship('Request', backref=backref("comments", uselist=False), foreign_keys=[nrId])
 
@@ -25,7 +27,7 @@ class Comment(db.Model):
             'id': self.id,
             'examiner': 'unknown' if (self.examiner is None) else self.examiner.username,
             'comment': self.comment,
-            'timestamp': self.timestamp.isoformat()
+            'timestamp': self.timestamp.isoformat(),
         }
 
     def save_to_db(self):

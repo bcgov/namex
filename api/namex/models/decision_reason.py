@@ -1,5 +1,5 @@
-"""List of decision/rejection reasons for front end UI.
-"""
+"""List of decision/rejection reasons for front end UI."""
+
 from . import db, ma
 
 
@@ -11,7 +11,7 @@ class DecisionReason(db.Model):
     reason = db.Column(db.String(1024))
 
     def json(self):
-        return {"id": self.id, "name": self.name, "reason": self.reason}
+        return {'id': self.id, 'name': self.name, 'reason': self.reason}
 
     @classmethod
     def find_by_name(cls, name):

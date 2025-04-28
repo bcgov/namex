@@ -9,7 +9,7 @@ def build_test_query(test_params):
     query = ''
 
     for entry in test_params:
-        query += '&'.join("{!s}={}".format(k, quote_plus(v)) for (k, v) in entry.items())
+        query += '&'.join('{!s}={}'.format(k, quote_plus(v)) for (k, v) in entry.items())
 
     return query
 

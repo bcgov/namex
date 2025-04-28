@@ -1,24 +1,23 @@
 from string import Template
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
-
 from namex.utils.entity_type import get_entity_type_description
+
+from ..response_objects import NameAction, NameActions, NameAnalysisIssue
 
 # Import DTOs
 from .abstract import AnalysisResponseIssue
-from ..response_objects import NameAnalysisIssue
-from ..response_objects import NameAction, NameActions
 
 
 class DesignationMismatchIssue(AnalysisResponseIssue):
     issue_type = AnalysisIssueCodes.DESIGNATION_MISMATCH
-    status_text = "Further Action Required"
+    status_text = 'Further Action Required'
     issue = None
 
     def create_issue(self):
         issue = NameAnalysisIssue(
             issue_type=self.issue_type,
-            line1="",
+            line1='',
             line2=None,
             consenting_body=None,
             designations=None,
@@ -26,7 +25,7 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
             show_examination_button=False,
             conflicts=None,
             setup=None,
-            name_actions=[]
+            name_actions=[],
         )
 
         return issue
@@ -45,7 +44,13 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
         entity_type_description = get_entity_type_description(self.entity_type)
 
         issue = self.create_issue()
-        issue.line1 = "The " + self._join_list_words(incorrect_designations_lc) + " designation cannot be used for a " + entity_type_description + " </b>."
+        issue.line1 = (
+            'The '
+            + self._join_list_words(incorrect_designations_lc)
+            + ' designation cannot be used for a '
+            + entity_type_description
+            + ' </b>.'
+        )
         issue.designations = correct_designations_lc
 
         # Loop over the list_name words, we need to decide to do with each word
@@ -72,7 +77,7 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
                 NameAction(
                     word=phrase,
                     index=0,  # not used
-                    type=NameActions.HIGHLIGHT  # not used
+                    type=NameActions.HIGHLIGHT,  # not used
                 )
             )
 
@@ -84,11 +89,17 @@ class DesignationMismatchIssue(AnalysisResponseIssue):
             for prop in vars(setup_item):
                 if isinstance(setup_item.__dict__[prop], Template):
                     # Render the Template string, replacing placeholder vars
-                    setattr(setup_item, prop, setup_item.__dict__[prop].safe_substitute({
-                        'list_name': self._join_list_words(list_name),
-                        'correct_designations': self._join_list_words(correct_designations_lc),
-                        'incorrect_designations': self._join_list_words(incorrect_designations_lc),
-                        'entity_type_cd': self.entity_type  # TODO: Map this CODE!
-                    }))
+                    setattr(
+                        setup_item,
+                        prop,
+                        setup_item.__dict__[prop].safe_substitute(
+                            {
+                                'list_name': self._join_list_words(list_name),
+                                'correct_designations': self._join_list_words(correct_designations_lc),
+                                'incorrect_designations': self._join_list_words(incorrect_designations_lc),
+                                'entity_type_cd': self.entity_type,  # TODO: Map this CODE!
+                            }
+                        ),
+                    )
 
         return issue

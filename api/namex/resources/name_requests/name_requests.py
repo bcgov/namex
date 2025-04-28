@@ -13,27 +13,27 @@
 # limitations under the License.
 import re
 import traceback
+
+from flask import current_app, jsonify, make_response, request
 from sqlalchemy import func
 
-from flask import request, jsonify, current_app, make_response
-from flask_restx import cors
-
-from namex.utils.auth import cors_preflight, full_access_to_name_request
-from namex.utils.api_resource import handle_exception
-
-from namex.models import Request, Event, State, Applicant
 from namex.criteria.request import RequestQueryCriteria
-
+from namex.models import Applicant, Event, Request, State
 from namex.services import EventRecorder
 from namex.services.audit_trail.hotjar_tracking import HotjarTracking
+from namex.services.name_request.exceptions import (
+    InvalidInputError,
+    NameRequestException,
+    NameRequestIsAlreadySubmittedError,
+)
 from namex.services.name_request.name_request_state import get_nr_state_actions
 from namex.services.name_request.utils import get_mapped_entity_and_action_code
-from namex.services.name_request.exceptions import \
-    NameRequestException, InvalidInputError, NameRequestIsAlreadySubmittedError
 from namex.services.statistics.wait_time_statistics import WaitTimeStatsService
+from namex.utils.api_resource import handle_exception
+from namex.utils.auth import cors_preflight, full_access_to_name_request
 
-from .api_namespace import api
 from .api_models import nr_request
+from .api_namespace import api
 from .base_nr_resource import BaseNameRequestResource
 from .utils import parse_nr_num
 
@@ -42,11 +42,12 @@ from .utils import parse_nr_num
 @api.route('/', strict_slashes=False, methods=['GET', 'POST', 'OPTIONS'])
 class NameRequestsResource(BaseNameRequestResource):
     """Class to handle all name requests."""
+
     def get(self):
         """Name request search."""
         try:
             if not full_access_to_name_request(request):
-                return {"message": "You do not have access to this NameRequest."}, 403
+                return {'message': 'You do not have access to this NameRequest.'}, 403
 
             filters = []
 
@@ -72,25 +73,21 @@ class NameRequestsResource(BaseNameRequestResource):
             if nr_num:
                 filters.append(func.lower(Request.nrNum) == nr_num.lower())
             if phone_number:
-                strip_phone_number_chars_regex = r"[^0-9]"
+                strip_phone_number_chars_regex = r'[^0-9]'
                 filters.append(
                     Request.applicants.any(
-                        func.regexp_replace(Applicant.phoneNumber, strip_phone_number_chars_regex, '', 'g').contains(re.sub(strip_phone_number_chars_regex, '', phone_number))
+                        func.regexp_replace(Applicant.phoneNumber, strip_phone_number_chars_regex, '', 'g').contains(
+                            re.sub(strip_phone_number_chars_regex, '', phone_number)
+                        )
                     )
                 )
 
             if email_address:
                 filters.append(
-                    Request.applicants.any(
-                        func.lower(Applicant.emailAddress).startswith(email_address.lower())
-                    )
+                    Request.applicants.any(func.lower(Applicant.emailAddress).startswith(email_address.lower()))
                 )
 
-
-            criteria = RequestQueryCriteria(
-                nr_num=nr_num,
-                filters=filters
-            )
+            criteria = RequestQueryCriteria(nr_num=nr_num, filters=filters)
 
             results = Request.find_by_criteria(criteria)
 
@@ -99,7 +96,7 @@ class NameRequestsResource(BaseNameRequestResource):
 
         except InvalidInputError as err:
             return handle_exception(err, err.message, 400)
-        except Exception as err: # pylint: disable=broad-except
+        except Exception as err:  # pylint: disable=broad-except
             return handle_exception(err, 'Error retrieving the NR from the db.', 500)
 
         if nr_num and len(results) == 1:
@@ -142,21 +139,21 @@ class NameRequestsResource(BaseNameRequestResource):
             self.initialize()
             nr_svc = self.nr_service
 
-            name_search_string = ""
-            user_email = ""
-            # user id 
-            submitter = nr_svc.request_data.get("applicants")
+            name_search_string = ''
+            user_email = ''
+            # user id
+            submitter = nr_svc.request_data.get('applicants')
             for item, index in zip(submitter, range(len(submitter))):
-                user_email = item.get("emailAddress")
-                
+                user_email = item.get('emailAddress')
+
             # collect submitted user data names choices
             customer_data = nr_svc.request_names
             # loop through the list of choices obtained
             for item, index in zip(customer_data, range(len(customer_data))):
-                #concat them with format saving as namesearch
+                # concat them with format saving as namesearch
                 name_search_string += f'|{index + 1}{item.get("name")}{index + 1}|'
-            #if same user submitted the request of same name choices again raise exception otherwise continue creating nr
-            if(Request().find_existing_name_by_user(name_search_string, user_email)):
+            # if same user submitted the request of same name choices again raise exception otherwise continue creating nr
+            if Request().find_existing_name_by_user(name_search_string, user_email):
                 raise NameRequestIsAlreadySubmittedError()
             # Create a new DRAFT name request
             nr_model = nr_svc.create_name_request()
@@ -178,9 +175,21 @@ class NameRequestsResource(BaseNameRequestResource):
             nr_model.save_to_db()
 
             # Update Solr - note that we don't save DRAFT name requests to Solr for corp entities only
-            if nr_model.stateCd in [State.COND_RESERVE, State.RESERVED] and \
-                    nr_model.entity_type_cd in \
-                    ['CR', 'UL', 'BC', 'CP', 'PA', 'XCR', 'XUL', 'XCP', 'CC', 'FI', 'XCR', 'XUL', 'XCP']:
+            if nr_model.stateCd in [State.COND_RESERVE, State.RESERVED] and nr_model.entity_type_cd in [
+                'CR',
+                'UL',
+                'BC',
+                'CP',
+                'PA',
+                'XCR',
+                'XUL',
+                'XCP',
+                'CC',
+                'FI',
+                'XCR',
+                'XUL',
+                'XCP',
+            ]:
                 SOLR_CORE = 'possible.conflicts'
                 self.create_solr_nr_doc(SOLR_CORE, nr_model)
 
@@ -190,8 +199,8 @@ class NameRequestsResource(BaseNameRequestResource):
             response_data['actions'] = nr_svc.current_state_actions
             return make_response(jsonify(response_data), 201)
         except NameRequestException as err:
-            current_app.logger.error("NameRequestException occurred: %s", traceback.format_exc())
+            current_app.logger.error('NameRequestException occurred: %s', traceback.format_exc())
             return handle_exception(err, err.message, 500)
-        except Exception as err: # pylint: disable=broad-except
-            current_app.logger.error("NameRequestException occurred: %s", traceback.format_exc())
+        except Exception as err:  # pylint: disable=broad-except
+            current_app.logger.error('NameRequestException occurred: %s', traceback.format_exc())
             return handle_exception(err, repr(err), 500)

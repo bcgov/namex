@@ -78,7 +78,9 @@ def _map_request_person_name_comments(name_request, **kwargs):
             if request_data.get('nameFlag') is True:
                 # If the person name comment exists, we don't need to add it again
                 name_comment = build_name_comment(user_id, nr_id)
-                matching_comments = list(filter(lambda x: x.comment == name_comment.comment, list(name_request.comments)))
+                matching_comments = list(
+                    filter(lambda x: x.comment == name_comment.comment, list(name_request.comments))
+                )
                 if len(matching_comments) == 0:
                     name_request.comments.append(name_comment)
     except Exception as err:
