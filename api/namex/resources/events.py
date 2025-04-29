@@ -1,9 +1,14 @@
-import copy, json
+import copy
+import json
+
 from flask import jsonify, make_response, request
-from flask_restx import Resource, Namespace
+from flask_restx import Namespace, Resource
 
 from namex import jwt
-from namex.models import Event as EventDAO, Request as RequestDAO, User, State, Payment
+from namex.models import Event as EventDAO
+from namex.models import Payment
+from namex.models import Request as RequestDAO
+from namex.models import State, User
 from namex.services import EventRecorder
 from namex.utils.auth import cors_preflight
 
@@ -11,7 +16,7 @@ from namex.utils.auth import cors_preflight
 api = Namespace('events', description='Audit trail of events for a Name Request')
 
 
-@cors_preflight("GET, POST")
+@cors_preflight('GET, POST')
 @api.route('/<string:nr>', methods=['GET', 'POST', 'OPTIONS'])
 class Events(Resource):
     @staticmethod
@@ -276,7 +281,7 @@ class Events(Resource):
             # Parse the payload
             payload = request.get_json()
             if not payload:
-                return make_response(jsonify({"message": "No JSON payload provided"}), 400)
+                return make_response(jsonify({'message': 'No JSON payload provided'}), 400)
 
             # Ensure eventJson is serialized
             event_json = payload.get('eventJson', {})
@@ -288,12 +293,12 @@ class Events(Resource):
                 event_json
             )
 
-            return make_response(jsonify({"message": "Event recorded successfully"}), 201)
+            return make_response(jsonify({'message': 'Event recorded successfully'}), 201)
         except Exception as e:
-            return make_response(jsonify({"message": f"Error recording event: {str(e)}"}), 500)
+            return make_response(jsonify({'message': f'Error recording event: {str(e)}'}), 500)
 
 
-@cors_preflight("GET")
+@cors_preflight('GET')
 @api.route('/event/<int:event_id>', methods=['GET', 'OPTIONS'])
 class SingleEvent(Resource):
     @staticmethod
@@ -312,5 +317,5 @@ class SingleEvent(Resource):
 
             return make_response(jsonify(event_data), 200)
         except Exception as e:
-            return make_response(jsonify({"message": f"Error retrieving event: {str(e)}"}), 500)
+            return make_response(jsonify({'message': f'Error retrieving event: {str(e)}'}), 500)
 
