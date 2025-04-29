@@ -44,21 +44,6 @@ def format_as_report_string(date_time: datetime) -> str:
 
 
 @staticmethod
-def query_nr_number(identifier: str):
-    """Return a JSON object with name request information."""
-    namex_url = current_app.config.get('NAMEX_SVC_URL')
-
-    token = get_bearer_token()
-
-    nr_response = requests.get(namex_url + '/requests/' + identifier, headers={
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token
-    })
-
-    return nr_response
-
-
-@staticmethod
 def get_magic_link(nr_data):
     """Return a magic link."""
     BUSINESS_REGISTRY_URL = current_app.config.get("BUSINESS_REGISTRY_URL")
@@ -96,3 +81,57 @@ def get_contact_info(nr_data):
             recipient_phones.append(phone)
 
     return recipient_emails, recipient_phones
+
+
+def get_headers(token: str) -> dict:
+    """Return the standard headers for requests."""
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}'
+    }
+
+
+@staticmethod
+def query_nr_number(identifier: str):
+    """Return a JSON object with name request information."""
+    namex_url = current_app.config.get('NAMEX_SVC_URL')
+
+    token = get_bearer_token()
+
+    nr_response = requests.get(namex_url + '/requests/' + identifier, headers=get_headers(token))
+
+    return nr_response
+
+
+@staticmethod
+def query_notification_event(event_id: str):
+    """Return a JSON object with name request information."""
+    namex_url = current_app.config.get('NAMEX_SVC_URL')
+
+    token = get_bearer_token()
+
+    nr_response = requests.get(namex_url + '/events/event/' + event_id, headers=get_headers(token))
+
+    return nr_response
+
+@staticmethod
+def record_notification_event(nr_num: str, email: str):
+    payload = {
+        "action": "notification",
+        "eventJson": email
+    }
+
+    namex_url = current_app.config.get('NAMEX_SVC_URL')
+    token = get_bearer_token()
+
+    try:
+        nr_response = requests.post(
+            namex_url + '/events/' + nr_num,
+            json=payload,
+            headers=get_headers(token)
+        )
+        nr_response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
+        return nr_response
+    except requests.exceptions.RequestException as e:
+        current_app.logger.error(f"Failed to record notification event for NR {nr_num}: {e}")
+        return None

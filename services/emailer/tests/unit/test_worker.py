@@ -34,17 +34,18 @@
 """The Test Suites to ensure that the worker is operating correctly."""
 import base64
 from http import HTTPStatus
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 import pytest
-from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent, to_queue_message
 
-from namex_emailer.email_processors import name_request
+from sbc_common_components.utils.enums import QueueMessageTypes
 from namex_emailer.resources import worker
+from namex_emailer.email_processors import name_request
 from namex_emailer.services import queue
 from tests import MockResponse
 from . import helper_create_cloud_event_envelope
+
 
 default_legal_name = 'TEST COMP'
 default_names_array = [{'name': default_legal_name, 'state': 'NE'}]
@@ -248,3 +249,98 @@ def test_send_email_with_incomplete_payload(app, client, email_msg, mocker):
 
     # Check
     assert rv.status_code == HTTPStatus.OK
+
+
+def test_resend_email_success(mocker):
+    """Test that resend_email successfully resends an email."""
+    # Setup
+    event_id = 1234
+    email_content = {
+        "recipients": ["test@example.com"],
+        "content": {"subject": "Test Resend", "body": "This is a test email."}
+    }
+    mock_event = Mock()
+    mock_event.eventJson = email_content
+
+    # Mock query_notification_event to return the mock event
+    mocker.patch('namex_emailer.services.helpers.query_notification_event', return_value=mock_event)
+
+    # Mock get_bearer_token to return a token
+    mocker.patch('namex_emailer.services.helpers.get_bearer_token', return_value="mocked_token")
+
+    # Mock send_email to simulate a successful email send
+    mock_response = Mock()
+    mock_response.status_code = HTTPStatus.OK
+    mocker.patch('namex_emailer.resources.worker.send_email', return_value=mock_response)
+
+    # Test
+    response, status = worker.resend_email(event_id)
+
+    # Assertions
+    assert status == HTTPStatus.OK
+    assert response == {"success": True}
+
+
+def test_resend_email_event_not_found(mocker):
+    """Test that resend_email returns an error when the event is not found."""
+    # Setup
+    event_id = 1234
+
+    # Mock query_notification_event to return None
+    mocker.patch('namex_emailer.services.helpers.query_notification_event', return_value=None)
+
+    # Test
+    response, status = worker.resend_email(event_id)
+
+    # Assertions
+    assert status == HTTPStatus.NOT_FOUND
+    assert response == {"error": "Event not found"}
+
+
+def test_resend_email_no_email_content(mocker):
+    """Test that resend_email returns an error when the event has no email content."""
+    # Setup
+    event_id = 1234
+    mock_event = Mock()
+    mock_event.eventJson = None
+
+    # Mock query_notification_event to return the mock event
+    mocker.patch('namex_emailer.services.helpers.query_notification_event', return_value=mock_event)
+
+    # Test
+    response, status = worker.resend_email(event_id)
+
+    # Assertions
+    assert status == HTTPStatus.BAD_REQUEST
+    assert response == {"error": "No email content found"}
+
+
+def test_resend_email_send_failure(mocker):
+    """Test that resend_email returns an error when sending the email fails."""
+    # Setup
+    event_id = 1234
+    email_content = {
+        "recipients": ["test@example.com"],
+        "content": {"subject": "Test Resend", "body": "This is a test email."}
+    }
+    mock_event = Mock()
+    mock_event.eventJson = email_content
+
+    # Mock query_notification_event to return the mock event
+    mocker.patch('namex_emailer.services.helpers.query_notification_event', return_value=mock_event)
+
+    # Mock get_bearer_token to return a token
+    mocker.patch('namex_emailer.services.helpers.get_bearer_token', return_value="mocked_token")
+
+    # Mock send_email to simulate a failed email send
+    mock_response = Mock()
+    mock_response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+    mock_response.text = "Internal Server Error"
+    mocker.patch('namex_emailer.resources.worker.send_email', return_value=mock_response)
+
+    # Test
+    response, status = worker.resend_email(event_id)
+
+    # Assertions
+    assert status == HTTPStatus.INTERNAL_SERVER_ERROR
+    assert response == {"error": "Failed to resend email"}
