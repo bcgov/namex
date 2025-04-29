@@ -23,7 +23,7 @@ import requests
 from .configuration import ENDPOINT_PATH
 
 
-class MockResponse:  # pylint: disable=too-few-public-methods
+class MockResponse:
     """Mock response class"""
 
     def __init__(self, json_data, status_code):

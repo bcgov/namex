@@ -114,7 +114,7 @@ def update_nr_state(mapper, connection, target):
                     UPDATE requests
                     SET state_cd='{State.DRAFT}'
                     WHERE id={nr.id}
-                    """
+                    """  # noqa: S608
                 )
                 queue_util.send_name_request_state_msg(nr.nrNum, State.DRAFT, State.PENDING_PAYMENT)
 

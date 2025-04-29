@@ -28,7 +28,7 @@ class HotjarTracking(object):
             hotjar = HotjarTracking.create(nr_model, hotjar_user)
             hotjar.save_to_db()
             return hotjar
-        except Exception as err:  # pylint: disable=broad-except
+        except Exception as err:
             current_app.logger.error(err.with_traceback(None))
 
     @staticmethod

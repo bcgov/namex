@@ -51,7 +51,7 @@ class Events(Resource):
             'user_name': None,
         }
         # previous event (used for 'user_action' logic)
-        e_dict_previous = dict()
+        e_dict_previous = {}
         # transaction history that will be returned in the payload
         e_txn_history = []
 
@@ -61,7 +61,7 @@ class Events(Resource):
 
             # handle parsing new and older data
             event_json_data = (
-                dict(json.loads(e_dict['jsonData'])) if type(e_dict['jsonData']) == str else e_dict['jsonData']
+                dict(json.loads(e_dict['jsonData'])) if isinstance(e_dict['jsonData'], str) else e_dict['jsonData']
             )
 
             # skip unneeded events for transaction history due to workflow:

@@ -556,13 +556,13 @@ class NameRequestFilingActions:
         for (
             nr_type,
             legalType,
-            legalTypeName,
+            legalTypeName,  # noqa: B007
             filingName,
             target,
             entitiesFilingName,
             URL,
             learTemplate,
-        ) in self.raw_nr_to_action_mapping:  # pylint: disable=W0612
+        ) in self.raw_nr_to_action_mapping:
             if nr_type not in d:
                 d[nr_type] = {'legalType': legalType, 'target': target}
 

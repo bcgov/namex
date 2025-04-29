@@ -792,8 +792,8 @@ class Request(Resource):
             current_app.logger.debug(err.with_traceback(None))
             return make_response(jsonify(message='Internal server error'), 500)
 
-        if 'warnings' in locals() and warnings:
-            return make_response(jsonify(message='Request:{} - patched'.format(nr), warnings=warnings), 206)
+        if 'warnings' in locals() and warnings:  # noqa: F821
+            return make_response(jsonify(message='Request:{} - patched'.format(nr), warnings=warnings), 206)  # noqa: F821
 
         if state in [State.APPROVED, State.CONDITIONAL, State.REJECTED]:
             queue_util.publish_email_notification(nrd.nrNum, state)
@@ -1593,7 +1593,7 @@ class SyncNR(Resource):
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR])
     def get(nr):
         try:
-            user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
+            get_or_create_user_by_jwt(g.jwt_oidc_token_info)
             nrd = RequestDAO.find_by_nr(nr)
         except NoResultFound:
             # not an error we need to track in the log

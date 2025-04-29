@@ -39,8 +39,8 @@ def remove_french(text, all_designations_alternators):
         r'^([^-/]*?\b({0})(?!\w)[^-/\n]*)(?:[-/]\s*(.*))?$'.format(all_designations_alternators),
         r'\1 ',
         text,
-        0,
-        re.IGNORECASE,
+        count=0,
+        flags=re.IGNORECASE,
     )
     return ' '.join(text.lower().split())
 
@@ -72,12 +72,12 @@ def list_distinctive_descriptive(name_list, dist_list, desc_list):
         desc_list_tmp.append([i for i in name_list if i not in dist and i in desc_list])
 
     # Validate generation of list of lists of distinctives and descriptives with the correct combinations:
-    for idx, element in enumerate(dist_list_tmp):
+    for idx, _element in enumerate(dist_list_tmp):
         if dist_list_tmp[idx] + desc_list_tmp[idx] == name_list:
             dist_list_all.append(dist_list_tmp[idx])
             desc_list_all.append(desc_list_tmp[idx])
 
-    for idx, element in enumerate(dist_list_all):
+    for idx, _element in enumerate(dist_list_all):
         if len(dist_list_all) > 1 and (len(dist_list_all[idx]) == 0 or len(desc_list_all[idx]) == 0):
             del dist_list_all[idx]
             del desc_list_all[idx]
@@ -153,7 +153,7 @@ def check_synonyms(syn_svc, stand_alone_words, list_dist_words, list_desc_words,
     list_desc_words_set = frozenset(list_desc_words)
     list_desc = []
     intersection = [x for x in list_dist_words if x in list_desc_words_set]
-    dict_desc = dict()
+    dict_desc = {}
 
     for word in list_name:
         if word in list_desc_words:
@@ -290,7 +290,7 @@ def subsequences(iterable, length):
 
 
 def get_valid_compound_descriptive(syn_svc, list_compound):
-    desc_dist = dict()
+    desc_dist = {}
     for compound in list_compound:
         substitution = syn_svc.get_word_synonyms(word=compound.replace(' ', '')).data
         if substitution:

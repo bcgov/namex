@@ -106,9 +106,14 @@ extend-select = [
   "C",    # comprehensions
   "Q",    # quotes style
   "S",    # security (bandit)
-  # "ANN",  # type annotations: TO_DO: add rule and fix
   "I",    # import ordering
   "W"     # whitespace
+]
+extend-ignore = [
+  "S113",  # no timeout
+  "S310",  # unsafe URL open
+  "B904",  # missing ‘from err’ in raise
+  "C901",  # too complex
 ]
 
 [tool.ruff.format]

@@ -155,7 +155,7 @@ class PaymentInvoice(Serializable):
         self.details = []
         self._links = []
         self.paymentAccount = {}
-        names = set([f.name for f in dataclasses.fields(self)])
+        names = {f.name for f in dataclasses.fields(self)}
         for k, v in kwargs.items():
             if k in names:
                 setattr(self, k, v)

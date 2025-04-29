@@ -36,7 +36,7 @@ def load_xml_response_content(response, xpath_query=None):
     :return:
     """
     # Parse the XML
-    xml_content = etree.fromstring(response.content)
+    xml_content = etree.fromstring(response.content)  # noqa: S320
 
     if xpath_query:
         return xml_content.xpath(xpath_query, namespaces={'mras': 'http://mras.ca/schema/v1'})

@@ -174,7 +174,7 @@ class Request(db.Model):
         try:
             # we just want the NR number, or null if it doesn't exist
             previousNr = previousNr.nrNum
-        except:
+        except AttributeError:
             previousNr = None
 
         nr_json = {
@@ -358,8 +358,8 @@ class Request(db.Model):
             return False
 
         try:
-            num = int(nr[3:])
-        except:
+            int(nr[3:])
+        except ValueError:
             return False
 
         return True

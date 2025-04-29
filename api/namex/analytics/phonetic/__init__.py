@@ -9,7 +9,7 @@ def first_vowels(word, leading_vowel=False):
             value += letter
             first_vowel_found = True
 
-    if leading_vowel == False:
+    if not leading_vowel:
         if value == 'EY':
             value = 'A'
         if value == 'EI':

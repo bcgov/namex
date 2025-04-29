@@ -90,7 +90,7 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
                 issues_that_must_be_fixed = [AnalysisIssueCodes.WORDS_TO_AVOID, AnalysisIssueCodes.TOO_MANY_WORDS]
 
                 issue_must_be_fixed = False
-                result_codes = list(map(lambda r: r.result_code, analysis))
+                result_codes = [r.result_code for r in analysis]
 
                 for code in result_codes:
                     if code in issues_that_must_be_fixed:

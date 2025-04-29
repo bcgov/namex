@@ -111,7 +111,7 @@ def update_nr_name_search(mapper, connection, target):
             SELECT names.name from names
             JOIN requests on requests.id = names.nr_id
             WHERE requests.id={nr.id}
-            """
+            """  # noqa: S608
         )
         # format the names into a string like: |1<name1>|2<name2>|3<name3>
         names = [x[0] for x in names_q.all()]

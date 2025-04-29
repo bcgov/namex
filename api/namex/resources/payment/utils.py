@@ -82,8 +82,8 @@ def merge_payment_request(nr_model, config=None):
 
     # If contact info is supplied use the ENTIRE contactInfo
     if isinstance(config, dict):
-        payment_info_config = config.get('paymentInfo')
         # Comment out to use direct pay
+        # payment_info_config = config.get('paymentInfo')
         # if payment_info_config:
         #     method_of_payment = payment_info_config.get('methodOfPayment', method_of_payment)
 

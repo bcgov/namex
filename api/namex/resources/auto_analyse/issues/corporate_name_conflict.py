@@ -77,8 +77,8 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
 
         is_exact_match = list_name == current_conflict_keys
 
-        list_dist_words = list(set([item for sublist in list_dist for item in sublist]))
-        list_desc_words = list(set([item for sublist in list_desc for item in sublist]))
+        list_dist_words = list({item for sublist in list_dist for item in sublist})
+        list_desc_words = list({item for sublist in list_desc for item in sublist})
 
         # Apply our is_exact_match strategy:
         # - Add brackets after the first distinctive word

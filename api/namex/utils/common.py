@@ -7,7 +7,7 @@ from dateutil import tz
 
 from namex.constants import DATE_FORMAT_NAMEX_SEARCH
 
-_parse_csv_line = lambda x: (x.split(','))
+_parse_csv_line = lambda x: (x.split(','))  # noqa: E731
 
 
 def flatten_tuple_results(results):
@@ -26,7 +26,7 @@ def parse_dict_of_lists(results):
     # running again after pulling out the synonyms service into a self-contained app
     output = {}
     for item in results:
-        output[item.key] = sorted(list(set(item.list)), key=len, reverse=True)
+        output[item.key] = sorted(set(item.list), key=len, reverse=True)
     return output
 
 
@@ -43,7 +43,7 @@ def query_results_to_dict(results):
     SQLAlchemy returns tuples, they need to be converted to dict so we can jsonify
     :return:
     """
-    return list(map(lambda result: query_result_to_dict(result), results))
+    return [query_result_to_dict(result) for result in results]
 
 
 def merge_dicts(dict1, dict2):
@@ -65,7 +65,7 @@ def merge_dicts(dict1, dict2):
 def remove_periods_designation(results):
     designation_list = []
     for item in results:
-        text = re.sub(r'[\.]', '', item, 0, re.IGNORECASE)
+        text = re.sub(r'[\.]', '', item, count=0, flags=re.IGNORECASE)
         designation_list.append(item)
         if text != item:
             designation_list.append(text)

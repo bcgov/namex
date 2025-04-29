@@ -34,9 +34,9 @@ class AnalysisResponseIssue:
 
         try:
             converted_list = (
-                list(map(lambda d: d.upper() if isinstance(d, str) else '', str_list))
+                [d.upper() if isinstance(d, str) else '' for d in str_list]
                 if convert
-                else list(map(lambda d: d.upper(), str_list))
+                else [d.upper() for d in str_list]
             )
         except Exception as err:
             current_app.logger.error('List is not a list of strings ' + repr(err))
@@ -204,7 +204,7 @@ class AnalysisResponseIssue:
             if processed_name_string:
                 # Only replace the first match!
                 unprocessed_name_string = re.sub(
-                    r'{0}(\'[Ss])?'.format(processed_name_string), '', unprocessed_name_string, 1
+                    r'{0}(\'[Ss])?'.format(processed_name_string), '', unprocessed_name_string, count=1
                 ).strip()
 
             # Handle composite tokens
@@ -214,7 +214,7 @@ class AnalysisResponseIssue:
                 if composite_idx_offset > 0:
                     composite_token_offset += composite_idx_offset - 1
 
-                for x in range(0, composite_tokens_processed):
+                for _x in range(0, composite_tokens_processed):
                     if len(original_tokens) > 0:
                         original_tokens.popleft()
 

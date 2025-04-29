@@ -141,7 +141,7 @@ class SetDesignationsListsMixin(object):
             self._designation_end_list_correct = []
 
     """
-    Set designations in <any> and <end> positions regardless the entity type. 
+    Set designations in <any> and <end> positions regardless the entity type.
     designation_any_list: Retrieves all designations properly placed anywhere in the name regardless the entity type.
                            <Entity type>-Valid English Designations_any Stop
                            English Designations_any Stop.

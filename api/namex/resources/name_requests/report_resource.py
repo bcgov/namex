@@ -58,9 +58,7 @@ class ReportResource(Resource):
             State.EXPIRED,
             State.REJECTED,
         ]:
-            return make_response(
-                jsonify(message='Invalid NR state'.format()), HTTPStatus.BAD_REQUEST
-            )
+            return make_response(jsonify(message='Invalid NR state'.format()), HTTPStatus.BAD_REQUEST)
 
         authenticated, token = ReportResource._get_service_client_token()
         if not authenticated:
@@ -490,7 +488,7 @@ class ReportResource(Resource):
         Returns:
             dict[str, bool]: Dictionary of email feature flags.
         """
-        from namex.services import flags  # pylint: disable=import-outside-toplevel
+        from namex.services import flags
 
         return {
             'enable_won_emails': flags.value('enable-won-emails'),

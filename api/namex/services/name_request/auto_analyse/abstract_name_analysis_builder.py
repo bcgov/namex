@@ -82,7 +82,7 @@ class AbstractNameAnalysisBuilder(GetSynonymsListsMixin, GetDesignationsListsMix
 
     """
     This method IS abstract and MUST BE IMPLEMENTED in extending Builder classes
-    
+
     The reason this check is done separately from check_name_is_well_formed is
     because out of province / intl names may not follow the same analysis rules.
     Having this check separate allows us the flexibility of checking for words

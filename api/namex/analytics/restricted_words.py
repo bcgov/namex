@@ -84,15 +84,15 @@ class RestrictedWords(object):
     @staticmethod
     def find_cnd_info(word_id):
         """Get the condition info corresponding to the given word id"""
-        get_cnd_id_sql = text('select cnd_id from restricted_word_condition where word_id = {}'.format(word_id))
-        cnd_id_obj = db.engine.execute(get_cnd_id_sql)
+        get_cnd_id_sql = text('SELECT cnd_id FROM restricted_word_condition WHERE word_id = :word_id')
+        cnd_id_obj = db.engine.execute(get_cnd_id_sql, {'word_id': word_id})
         cnd_ids = cnd_id_obj.fetchall()
 
         cnd_obj_list = []
         for id in cnd_ids:
             cnd_id = id[0]
-            get_cnd_sql = text('select * from restricted_condition where cnd_id = {}'.format(cnd_id))
-            cnd_obj_list.append(db.engine.execute(get_cnd_sql))
+            get_cnd_sql = text('select * from restricted_condition where cnd_id = :cnd_id')
+            cnd_obj_list.append(db.engine.execute(get_cnd_sql, {'cnd_id': cnd_id}))
 
         cnd_info = []
         for obj in cnd_obj_list:

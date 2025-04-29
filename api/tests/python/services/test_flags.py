@@ -123,7 +123,7 @@ def test_flags_bool_missing_flag(app):
             flag_on = flags.is_on('no flag here')
 
         assert not flag_on
-    except:  # pylint: disable=bare-except; # noqa: B901, E722
+    except:
         # for tests we don't care
         assert False
     finally:
@@ -192,7 +192,7 @@ def test_flag_bool_unique_user():
 
         assert val
         assert flag_on
-    except:  # pylint: disable=bare-except; # noqa: B901, E722
+    except:
         # for tests we don't care
         assert False
     finally:

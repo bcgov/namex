@@ -166,7 +166,7 @@ def handle_payment_response(payment_action, payment_response, payment, nr_id, nr
             # happens for PAD. If completed/approved right away queue will have err'd so apply changes here
             # TODO: send email / furnish payment for these
             if payment_response.statusCode in [PaymentStatusCode.APPROVED.value, PaymentStatusCode.COMPLETED.value]:
-                if payment_action in [PaymentDAO.PaymentActions.CREATE.value, PaymentDAO.PaymentActions.RESUBMIT.value]:  # pylint: disable=R1705
+                if payment_action in [PaymentDAO.PaymentActions.CREATE.value, PaymentDAO.PaymentActions.RESUBMIT.value]:
                     if nr_model.stateCd == State.PENDING_PAYMENT:
                         nr_model.stateCd = State.DRAFT
                     payment.payment_completion_date = datetime.utcnow()
@@ -308,7 +308,7 @@ class FindNameRequestPayments(PaymentNameRequestResource):
                                 'completionDate': payment.payment_completion_date,
                                 'payment': payment.as_dict(),
                                 'sbcPayment': payment_response.as_dict(),
-                                'receipts': list(map(lambda r: map_receipt(r), receipts)),
+                                'receipts': [map_receipt(r) for r in receipts],
                             }
                         )
 
@@ -594,7 +594,7 @@ class NameRequestPayment(AbstractNameRequestResource):
                         'completionDate': payment.payment_completion_date,
                         'payment': payment.as_dict(),
                         'sbcPayment': payment_response.as_dict(),
-                        'receipts': list(map(lambda r: map_receipt(r), receipts)),
+                        'receipts': [map_receipt(r) for r in receipts],
                     }
                 )
 
