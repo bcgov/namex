@@ -6,9 +6,8 @@ from flask_restx import Namespace, Resource
 
 from namex import jwt
 from namex.models import Event as EventDAO
-from namex.models import Payment
+from namex.models import Payment, State, User
 from namex.models import Request as RequestDAO
-from namex.models import State, User
 from namex.services import EventRecorder
 from namex.utils.auth import cors_preflight
 
