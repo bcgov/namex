@@ -85,7 +85,6 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
 
     file_name_suffix = option.upper()
     request_action = nr_data["request_action_cd"]
-    template = get_main_template(request_action, f"NR-{file_name_suffix}.html")
     if option == Option.BEFORE_EXPIRY.value:
         if "entity_type_cd" in nr_data:
             legal_type = nr_data["entity_type_cd"]
@@ -96,6 +95,8 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
                 file_name_suffix += instruction_group.upper()
 
         template = get_main_template(request_action, f"NR-{file_name_suffix}.html", status=option)
+    else:
+        template = get_main_template(request_action, f"NR-{file_name_suffix}.html")
     filled_template = substitute_template_parts(template)
 
     # render template with vars
