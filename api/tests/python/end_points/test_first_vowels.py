@@ -1,4 +1,5 @@
 from hamcrest import *
+
 from namex.analytics.phonetic import first_vowels
 
 
@@ -12,4 +13,3 @@ def test_can_extract_ou():
 
 def test_resists_no_vowel():
     assert_that(first_vowels('KCH'), equal_to(''))
-

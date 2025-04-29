@@ -4,7 +4,7 @@ class GetWordClassificationListsMixin(object):
     _list_desc_words = []
     _list_dist_words_search_conflicts = []
     _list_desc_words_search_conflicts = []
-    _dict_desc_words_search_conflicts ={}
+    _dict_desc_words_search_conflicts = {}
     _list_none_words = []
     _list_processed_names = []
     _list_incorrect_classification = []

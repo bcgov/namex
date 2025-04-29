@@ -1,12 +1,13 @@
 import re
-import inflect
+from datetime import datetime, time
 from itertools import product
-from datetime import  datetime, time
+
+import inflect
 from dateutil import tz
 
 from namex.constants import DATE_FORMAT_NAMEX_SEARCH
 
-_parse_csv_line = lambda x: (x.split(','))
+_parse_csv_line = lambda x: (x.split(','))  # noqa: E731
 
 
 def flatten_tuple_results(results):
@@ -25,7 +26,7 @@ def parse_dict_of_lists(results):
     # running again after pulling out the synonyms service into a self-contained app
     output = {}
     for item in results:
-        output[item.key] = sorted(list(set(item.list)), key=len, reverse=True)
+        output[item.key] = sorted(set(item.list), key=len, reverse=True)
     return output
 
 
@@ -42,7 +43,7 @@ def query_results_to_dict(results):
     SQLAlchemy returns tuples, they need to be converted to dict so we can jsonify
     :return:
     """
-    return list(map(lambda result: query_result_to_dict(result), results))
+    return [query_result_to_dict(result) for result in results]
 
 
 def merge_dicts(dict1, dict2):
@@ -64,7 +65,7 @@ def merge_dicts(dict1, dict2):
 def remove_periods_designation(results):
     designation_list = []
     for item in results:
-        text = re.sub(r'[\.]', '', item, 0, re.IGNORECASE)
+        text = re.sub(r'[\.]', '', item, count=0, flags=re.IGNORECASE)
         designation_list.append(item)
         if text != item:
             designation_list.append(text)
@@ -84,7 +85,7 @@ def get_plural_singular_name(name):
         if plural:
             val.append(plural.lower())
         val.append(word.lower())
-        d[word] = (list(set(val)))
+        d[word] = list(set(val))
 
     name_list = []
     for combination in product(*d.values()):
@@ -95,10 +96,9 @@ def get_plural_singular_name(name):
 
 def convert_to_ascii(value):
     try:
-        return value.encode("ascii", "ignore").decode('ascii')
-    except Exception as err:
+        return value.encode('ascii', 'ignore').decode('ascii')
+    except Exception:
         return value
-
 
 
 def convert_to_utc_min_date_time(date_str: str):

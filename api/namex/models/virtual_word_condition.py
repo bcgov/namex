@@ -2,17 +2,11 @@
 Word classification classifies all words in a name approved by an examiner to be used for auto-approval
 """
 
-from . import db, ma
-
-import pandas as pd
-from sqlalchemy import Column
-from sqlalchemy import and_
-
-from namex.services.name_request.auto_analyse import DataFrameFields
-from namex.services.name_request.auto_analyse.name_analysis_utils import get_dataframe_list, get_flat_list
+from sqlalchemy import Column, and_
 
 # TODO: Remove deprecated duplicate from admin_tables.py
 from ..criteria.virtual_word_condition.query_criteria import VirtualWordConditionCriteria
+from . import db, ma
 
 
 class VirtualWordCondition(db.Model):
@@ -31,8 +25,7 @@ class VirtualWordCondition(db.Model):
     def find_by_criteria(cls, criteria=None):
         VirtualWordConditionCriteria.is_valid_criteria(criteria)
 
-        query = cls.query.with_entities(*criteria.fields) \
-            .filter(and_(*criteria.filters))
+        query = cls.query.with_entities(*criteria.fields).filter(and_(*criteria.filters))
 
         results = query.all()
         cls.close_session()

@@ -24,7 +24,7 @@ def build_payment_request(nr_model):
                 {
                     'filingDescription': '',  # 'NM620: ' + nr_name.name,
                     'filingTypeCode': 'NM620',  # TODO: Use an enum
-                    'priority': (nr_model.priorityCd == 'Y')  # TODO: Use an enum
+                    'priority': (nr_model.priorityCd == 'Y'),  # TODO: Use an enum
                 }
             ],
         },
@@ -39,10 +39,10 @@ def build_payment_request(nr_model):
                 'city': nr_applicant.city,
                 'province': nr_applicant.stateProvinceCd,
                 'country': nr_applicant.countryTypeCd,
-                'postalCode': nr_applicant.postalCd
-            }
+                'postalCode': nr_applicant.postalCd,
+            },
         },
-        'details': build_payment_details(nr_model)
+        'details': build_payment_details(nr_model),
     }
 
     return payment_request
@@ -68,7 +68,7 @@ def merge_payment_request(nr_model, config=None):
     filing_date = date.today()
     filing_description = ''
     filing_type_code = ''  # TODO: Use an enum
-    priority_request = (nr_model.priorityCd == 'Y')  # TODO: Use an enum
+    priority_request = nr_model.priorityCd == 'Y'  # TODO: Use an enum
 
     corp_type = 'NRO'
     business_id = nr_model.nrNum
@@ -82,8 +82,8 @@ def merge_payment_request(nr_model, config=None):
 
     # If contact info is supplied use the ENTIRE contactInfo
     if isinstance(config, dict):
-        payment_info_config = config.get('paymentInfo')
         # Comment out to use direct pay
+        # payment_info_config = config.get('paymentInfo')
         # if payment_info_config:
         #     method_of_payment = payment_info_config.get('methodOfPayment', method_of_payment)
 
@@ -93,8 +93,11 @@ def merge_payment_request(nr_model, config=None):
 
             # TODO: To support more than one filing type at once this would need to be updated
             #  Right now, we only use one. so this is fine as is
-            filing_types = filing_info_config.get('filingTypes')[0] \
-                if isinstance(filing_info_config.get('filingTypes'), list) and filing_info_config.get('filingTypes')[0] else None
+            filing_types = (
+                filing_info_config.get('filingTypes')[0]
+                if isinstance(filing_info_config.get('filingTypes'), list) and filing_info_config.get('filingTypes')[0]
+                else None
+            )
             if filing_types and isinstance(filing_types, dict):
                 filing_description = filing_types.get('filingDescription', filing_description)
                 filing_type_code = filing_types.get('filingTypeCode', filing_type_code)
@@ -125,7 +128,7 @@ def merge_payment_request(nr_model, config=None):
                     # Exclude filing description
                     # 'filingDescription': filing_description,
                     'filingTypeCode': filing_type_code,
-                    'priority': priority_request
+                    'priority': priority_request,
                 }
             ],
         },
@@ -138,36 +141,22 @@ def merge_payment_request(nr_model, config=None):
                 'city': city,
                 'province': province,
                 'country': country,
-                'postalCode': postal_code
-            }
+                'postalCode': postal_code,
+            },
         },
-        'details': build_payment_details(nr_model)
+        'details': build_payment_details(nr_model),
     }
 
     return payment_request
 
+
 def build_payment_details(nr_model):
     """Build payment details."""
     details = []
-    details.append(
-        {
-            'label': 'NR Number:',
-            'value': nr_model.nrNum
-        }
-    )
-    details.append(
-        {
-            'label': 'Name Choices:',
-            'value': ''
-        }
-    )
+    details.append({'label': 'NR Number:', 'value': nr_model.nrNum})
+    details.append({'label': 'Name Choices:', 'value': ''})
     name_choices = sorted(nr_model.names, key=lambda x: x.choice)
     for name in name_choices:
-        details.append(
-            {
-                'label': str(name.choice) + '.',
-                'value': name.name
-            }
-        )
+        details.append({'label': str(name.choice) + '.', 'value': name.name})
 
     return details

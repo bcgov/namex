@@ -1,17 +1,32 @@
 from contextlib import suppress
 from http import HTTPStatus
 
-from flask import jsonify
-from flask import json
+from flask import json, jsonify
 
-from namex.models import (Applicant as ApplicantDAO, Comment as CommentDAO, Event as EventDAO, Name as NameDAO,
-                           Request as RequestDAO, State, User)
+from namex.models import (
+    Applicant as ApplicantDAO,
+)
+from namex.models import (
+    Comment as CommentDAO,
+)
+from namex.models import (
+    Event as EventDAO,
+)
+from namex.models import (
+    Name as NameDAO,
+)
+from namex.models import (
+    Request as RequestDAO,
+)
+from namex.models import (
+    State,
+    User,
+)
 from tests.python import integration_oracle_namesdb
 from tests.python.end_points.util import create_header
 
 
 def test_get_next(client, jwt, app):
-
     # add NR to database
     nr = RequestDAO()
     nr.nrNum = 'NR 0000001'
@@ -34,7 +49,6 @@ def test_get_next(client, jwt, app):
 
 
 def test_get_next_no_draft_avail(client, jwt, app):
-
     # add NR to database
     nr = RequestDAO()
     nr.nrNum = 'NR 0000001'
@@ -53,7 +67,6 @@ def test_get_next_no_draft_avail(client, jwt, app):
 
 
 def test_get_next_oldest(client, jwt, app):
-
     # add NR to database
     nr = RequestDAO()
     nr.nrNum = 'NR 0000001'
@@ -83,7 +96,6 @@ def test_get_next_oldest(client, jwt, app):
 
 
 def test_get_next_not_approver(client, jwt, app):
-
     # add NR to database
     nr = RequestDAO()
     nr.nrNum = 'NR 0000001'
@@ -107,7 +119,6 @@ def test_get_next_not_approver(client, jwt, app):
 
 
 def test_get_nr_view_only(client, jwt, app):
-
     # add NR to database
     nr = RequestDAO()
     nr.nrNum = 'NR 0000001'
@@ -134,7 +145,6 @@ def test_get_nr_view_only(client, jwt, app):
 
 
 def test_patch_nr_view_only(client, jwt, app):
-
     # create JWT & setup header with a Bearer Token using the JWT
     headers = create_header(jwt, [User.VIEWONLY])
 
@@ -154,7 +164,6 @@ def test_patch_nr_view_only(client, jwt, app):
 
 
 def test_put_nr_view_only(client, jwt, app):
-
     # create JWT & setup header with a Bearer Token using the JWT
     headers = create_header(jwt, [User.VIEWONLY])
 
@@ -175,7 +184,6 @@ def test_put_nr_view_only(client, jwt, app):
 
 @integration_oracle_namesdb
 def test_add_new_name_to_nr(client, jwt, app):
-
     # add NR to database
     nr = RequestDAO()
     nr.nrNum = 'NR 0000002'
@@ -213,7 +221,6 @@ def test_add_new_name_to_nr(client, jwt, app):
 
 @integration_oracle_namesdb
 def test_add_new_blank_name_to_nr(client, jwt, app):
-
     # add NR to database
     nr = RequestDAO()
     nr.nrNum = 'NR 0000002'
@@ -251,7 +258,6 @@ def test_add_new_blank_name_to_nr(client, jwt, app):
 
 @integration_oracle_namesdb
 def test_remove_name_from_nr(client, jwt, app):
-
     # add NR to database
     nr = RequestDAO()
     nr.nrNum = 'NR 0000002'
@@ -290,10 +296,17 @@ def test_remove_name_from_nr(client, jwt, app):
 
 
 def test_add_new_comment_to_nr(client, jwt, app):
-    from sqlalchemy import desc
 
     # add a user for the comment
-    user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc', 'https://dev.loginproxy.gov.bc.ca/auth/realms/bcregistry', '123', 'IDIR')
+    user = User(
+        'test-user',
+        '',
+        '',
+        '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
+        'https://dev.loginproxy.gov.bc.ca/auth/realms/bcregistry',
+        '123',
+        'IDIR',
+    )
     user.save_to_db()
 
     nr = RequestDAO()
@@ -324,7 +337,7 @@ def test_add_new_comment_to_nr(client, jwt, app):
     data = json.loads(rv.data)
     assert len(data['comments']) == 1
 
-    new_comment = {"comment": "The 13th comment entered by the user."}
+    new_comment = {'comment': 'The 13th comment entered by the user.'}
 
     rv = client.post('/api/v1/requests/NR%200000002/comments', json=new_comment, headers=headers)
 
@@ -338,13 +351,21 @@ def test_add_new_comment_to_nr(client, jwt, app):
 
 def test_comment_where_no_nr(client, jwt, app):
     # add a user for the comment
-    user = User('test-user', '', '', '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc', 'https://dev.loginproxy.gov.bc.ca/auth/realms/bcregistry', '123', 'IDIR')
+    user = User(
+        'test-user',
+        '',
+        '',
+        '43e6a245-0bf7-4ccf-9bd0-e7fb85fd18cc',
+        'https://dev.loginproxy.gov.bc.ca/auth/realms/bcregistry',
+        '123',
+        'IDIR',
+    )
     user.save_to_db()
 
     # create JWT & setup header with a Bearer Token using the JWT
     headers = create_header(jwt, [User.VIEWONLY, User.APPROVER, User.EDITOR])
 
-    new_comment = {"comment": "The 13th comment entered by the user."}
+    new_comment = {'comment': 'The 13th comment entered by the user.'}
 
     rv = client.post('/api/v1/requests/NR%200000002/comments', json=new_comment, headers=headers)
     assert rv.status_code == HTTPStatus.NOT_FOUND
@@ -365,13 +386,12 @@ def test_comment_where_no_user(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
     headers = create_header(jwt, [User.VIEWONLY, User.APPROVER, User.EDITOR])
 
-    new_comment = {"comment": "The 13th comment entered by the user."}
+    new_comment = {'comment': 'The 13th comment entered by the user.'}
     rv = client.post('/api/v1/requests/NR%200000002/comments', json=new_comment, headers=headers)
     assert rv.status_code == HTTPStatus.NOT_FOUND
 
 
 def test_comment_where_no_comment(client, jwt, app):
-
     # create JWT & setup header with a Bearer Token using the JWT
     headers = create_header(jwt, [User.VIEWONLY, User.APPROVER, User.EDITOR])
     new_comment = None

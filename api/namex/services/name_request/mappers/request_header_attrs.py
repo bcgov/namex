@@ -1,6 +1,7 @@
 from datetime import datetime
-from namex.utils.common import convert_to_ascii
+
 from namex.services.name_request.exceptions import MapRequestHeaderAttributesError
+from namex.utils.common import convert_to_ascii
 
 
 def map_request_header_attrs(name_request, **kwargs):

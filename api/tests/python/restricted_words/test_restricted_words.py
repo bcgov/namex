@@ -37,7 +37,6 @@ def test_get_restricted_long(db):
     restricted_info = RestrictedWords.find_restricted_words(content)
     returned_words = []
     for obj in restricted_info:
-
         assert 'phrase' in obj
         assert 'id' in obj
 

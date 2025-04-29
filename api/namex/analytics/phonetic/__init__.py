@@ -1,7 +1,4 @@
-
-
-
-def first_vowels(word, leading_vowel = False):
+def first_vowels(word, leading_vowel=False):
     vowels = ['A', 'E', 'I', 'O', 'U', 'Y']
     value = ''
     first_vowel_found = False
@@ -12,7 +9,7 @@ def first_vowels(word, leading_vowel = False):
             value += letter
             first_vowel_found = True
 
-    if leading_vowel == False:
+    if not leading_vowel:
         if value == 'EY':
             value = 'A'
         if value == 'EI':
@@ -30,7 +27,6 @@ def first_vowels(word, leading_vowel = False):
     else:
         if value == 'OY':
             value = 'OI'
-
 
     if 'AA' in value:
         value = value.replace('AA', 'A')
@@ -156,14 +152,13 @@ def designations():
         'LTEE.',
         'SOCIETY',
         'SOC',
-        'SOC.'
+        'SOC.',
     ]
 
 
 def replace_special_leading_sounds(word):
-
-    for (special_leading_sound, replacement) in [['QU', 'KW'], ['EX', 'X'], ['MAC', 'MC']]:
-        if word[:len(special_leading_sound)] == special_leading_sound:
-            word = replacement + word[len(special_leading_sound):]
+    for special_leading_sound, replacement in [['QU', 'KW'], ['EX', 'X'], ['MAC', 'MC']]:
+        if word[: len(special_leading_sound)] == special_leading_sound:
+            word = replacement + word[len(special_leading_sound) :]
 
     return word

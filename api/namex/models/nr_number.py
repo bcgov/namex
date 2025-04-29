@@ -23,12 +23,10 @@ class NRNumber(db.Model):
 
         next_nr_num = next_nr_header + next_number
 
-        return (next_nr_num)
+        return next_nr_num
 
     def json(self):
-        return {'id': self.id,
-                'nrNum': self.nrNum
-                }
+        return {'id': self.id, 'nrNum': self.nrNum}
 
     def save_to_db(self):
         db.session.add(self)

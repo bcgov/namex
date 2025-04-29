@@ -1,7 +1,8 @@
-from flask import current_app
-from namex.models import NRNumberLifespan, NRNumberExclude, Request
-
 import random
+
+from flask import current_app
+
+from namex.models import NRNumberExclude, NRNumberLifespan, Request
 
 
 def set_nr_num_lifespan(nr_num, span):
@@ -48,7 +49,7 @@ class NRNumberService:
             span = current_app.config.get('NR_NUM_LIFESPAN')
 
             while count < attempts:
-                random_num = random.randint(floor, ceiling)
+                random_num = random.randint(floor, ceiling)  # noqa: S311
                 nr_num = f'NR {str(random_num).zfill(7)}'
                 count += 1
 
@@ -63,9 +64,7 @@ class NRNumberService:
 
                 return nr_num
 
-            raise Exception(
-                f'Unable to generate random number from range {floor} to {ceiling} after {count} attempts.'
-                )
+            raise Exception(f'Unable to generate random number from range {floor} to {ceiling} after {count} attempts.')
         except Exception as e:
             current_app.logger.error(f'Exception in get_new_nr_num; {str(e)}')
             raise

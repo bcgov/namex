@@ -1,5 +1,6 @@
-from . import db, ma
 from marshmallow import fields
+
+from . import db, ma
 
 
 class PartnerNameSystem(db.Model):
@@ -46,6 +47,7 @@ class PartnerNameSystemSchema(ma.SQLAlchemySchema):
             'partnerJurisdictionTypeCd',
             'partnerNameDate',
             'partnerName',
-            'requested'
+            'requested',
         )
+
     partnerName = fields.String(required=False, allow_none=True)

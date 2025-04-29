@@ -8,9 +8,9 @@ class VirtualWordConditionCriteria(object):
         self.fields = kwargs.get('fields', [])
         self.filters = kwargs.get('filters', [])
 
-    '''
+    """
     Used to validate criteria instances.
-    '''
+    """
 
     @staticmethod
     def is_valid_criteria(criteria):

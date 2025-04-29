@@ -1,9 +1,8 @@
-from flask import current_app, jsonify, g, request, make_response
-from flask_restx import cors, Resource, Namespace
-from sqlalchemy import text, exc
+from flask import current_app, g, jsonify, make_response, request
+from flask_restx import Namespace, Resource
 
 from namex import jwt
-from namex.models import User, State, Comment, NameCommentSchema, Event
+from namex.models import User
 from namex.services.name_request.utils import get_or_create_user_by_jwt
 from namex.utils.auth import cors_preflight
 
@@ -13,7 +12,6 @@ api = Namespace('namexUserSettings', description='Namex - get/update user settin
 @cors_preflight('GET, PUT')
 @api.route('', methods=['GET', 'PUT', 'OPTIONS'])
 class UserSettings(Resource):
-
     @staticmethod
     @jwt.requires_auth
     def get(*args, **kwargs):
@@ -21,12 +19,12 @@ class UserSettings(Resource):
             # GET existing or CREATE new user based on the JWT info
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
             search_columns = user.searchColumns.split(',')
-            return make_response(jsonify({ 'searchColumns': search_columns }), 200)
-            
+            return make_response(jsonify({'searchColumns': search_columns}), 200)
+
         except Exception as err:
             current_app.logger.error(f'unable to get user settings: {err.with_traceback(None)}')
             return make_response(jsonify({'message': 'Error getting user settings.'}), 500)
-    
+
     @staticmethod
     @jwt.requires_auth
     def put():
@@ -47,7 +45,7 @@ class UserSettings(Resource):
             user.searchColumns = search_columns
             user.save_to_db()
             return {}, 204
-            
+
         except Exception as err:
             current_app.logger.error(f'unable to update user settings: {err.with_traceback(None)}')
-            return make_response(jsonify({'message': f'Error updating user settings.'}), 500)
+            return make_response(jsonify({'message': 'Error updating user settings.'}), 500)

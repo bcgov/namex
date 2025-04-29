@@ -1,10 +1,9 @@
-"""Name hold a name choice for a Request
-"""
+"""Name hold a name choice for a Request"""
+
 # from . import db, ma
 from marshmallow import fields
 from sqlalchemy import event
 from sqlalchemy.orm import backref
-from sqlalchemy.orm.attributes import get_history
 
 from namex.models import db, ma
 
@@ -34,7 +33,7 @@ class Name(db.Model):
     commentId = db.Column('comment_id', db.Integer, db.ForeignKey('comments.id'))
     # nameRequest = db.relationship('Request')
 
-    comment = db.relationship("Comment", backref=backref("related_name", uselist=False), foreign_keys=[commentId])
+    comment = db.relationship('Comment', backref=backref('related_name', uselist=False), foreign_keys=[commentId])
 
     # Required for name request name analysis
     _name_type_cd = db.Column('name_type_cd', db.String(10))
@@ -74,7 +73,7 @@ class Name(db.Model):
             'decision_text': self.decision_text,
             'consumptionDate': self.consumptionDate.isoformat() if self.consumptionDate else None,
             'corpNum': self.corpNum,
-            'comment': None if self.comment is None else self.comment.as_dict()
+            'comment': None if self.comment is None else self.comment.as_dict(),
         }
 
     @classmethod
@@ -95,14 +94,13 @@ class Name(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+
 @event.listens_for(Name, 'after_insert')
 @event.listens_for(Name, 'after_update')
 def update_nr_name_search(mapper, connection, target):
     """Add any changes to the name to the request.nameSearch column and publish name state changes where applicable."""
-    from flask.globals import current_app
 
-    from namex.models import Event, Request, State
-    from namex.services.audit_trail.event_recorder import EventRecorder
+    from namex.models import Request
 
     name = target
     nr = Request.find_by_id(name.nrId)
@@ -113,7 +111,7 @@ def update_nr_name_search(mapper, connection, target):
             SELECT names.name from names
             JOIN requests on requests.id = names.nr_id
             WHERE requests.id={nr.id}
-            """
+            """  # noqa: S608
         )
         # format the names into a string like: |1<name1>|2<name2>|3<name3>
         names = [x[0] for x in names_q.all()]
@@ -127,8 +125,9 @@ def update_nr_name_search(mapper, connection, target):
             SET name_search=%s
             WHERE id=%s
             """,
-            ('(' + name_search + ')', nr.id)
+            ('(' + name_search + ')', nr.id),
         )
+
 
 class NameSchema(ma.SQLAlchemySchema):
     class Meta:
@@ -149,7 +148,7 @@ class NameSchema(ma.SQLAlchemySchema):
             'id',
             'name_type_cd',
             'name',
-            'state'
+            'state',
         )
 
     conflict1 = fields.String(required=False, allow_none=True)
@@ -163,8 +162,5 @@ class NameSchema(ma.SQLAlchemySchema):
     consumptionDate = fields.DateTime(required=False, allow_none=True)
     corpNum = fields.String(required=False, allow_none=True)
     designation = fields.String(required=False, allow_none=True)
-    name = fields.String(
-        required=True,
-        error_messages={'required': {'message': 'name is a required field'}}
-    )
+    name = fields.String(required=True, error_messages={'required': {'message': 'name is a required field'}})
     name_type_cd = fields.String(required=False, allow_none=True)

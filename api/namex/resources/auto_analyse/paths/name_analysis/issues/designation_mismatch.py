@@ -1,4 +1,5 @@
 """Designation mismatch issue classes."""
+
 from namex.resources.auto_analyse.issues import DesignationMismatchIssue
 
 from ....response_objects import NameAnalysisIssue
@@ -26,7 +27,7 @@ class XproDesignationMismatchIssue(DesignationMismatchIssue):
             show_examination_button=False,
             conflicts=None,
             setup=None,
-            name_actions=[]
+            name_actions=[],
         )
 
         return issue

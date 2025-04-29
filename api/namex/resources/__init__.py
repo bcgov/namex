@@ -24,13 +24,7 @@ from .payment_societies import api as payment_societies_api
 
 # This will add the Authorize button to the swagger docs
 # TODO oauth2 & openid may not yet be supported by restplus <- check on this
-authorizations = {
-    'apikey': {
-        'type': 'apiKey',
-        'in': 'header',
-        'name': 'Authorization'
-    }
-}
+authorizations = {'apikey': {'type': 'apiKey', 'in': 'header', 'name': 'Authorization'}}
 
 api = Api(
     title='Name Request API',
@@ -38,7 +32,8 @@ api = Api(
     description='The Core API for the Names Examination System',
     prefix='/api/v1',
     security=['apikey'],
-    authorizations=authorizations)
+    authorizations=authorizations,
+)
 
 api.add_namespace(nr_api, path='/requests')
 api.add_namespace(nr_ops, path='/nr-ops')

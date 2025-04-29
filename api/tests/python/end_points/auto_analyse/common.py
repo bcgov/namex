@@ -1,5 +1,6 @@
-import pytest
 import datetime
+
+import pytest
 
 from namex.constants import EntityTypes
 
@@ -54,8 +55,11 @@ def assert_has_designations_upper(issue_type, issues):
     has_upper = False
     for issue in issues:
         if issue.get('issue_type') == issue_type.value:
-            has_upper = all(designation.isupper() for designation in issue.get('designations')) if issue.get(
-                'designations') else True
+            has_upper = (
+                all(designation.isupper() for designation in issue.get('designations'))
+                if issue.get('designations')
+                else True
+            )
 
     assert has_upper is True
 
@@ -74,8 +78,10 @@ def assert_has_word_upper(issue_type, issues):
 def assert_correct_conflict(issue_type, issues, expected):
     is_correct = False
     for issue in issues:
-        if issue.get('issue_type') == issue_type.value and " ".join(
-                value['name'] for value in issue.get('conflicts')) == expected:
+        if (
+            issue.get('issue_type') == issue_type.value
+            and ' '.join(value['name'] for value in issue.get('conflicts')) == expected
+        ):
             is_correct = True
 
     assert is_correct is True
@@ -86,7 +92,8 @@ def assert_additional_conflict_parameters(issue_type, issues):
     is_correct = False
     for issue in issues:
         if issue.get('issue_type') == issue_type.value and (
-                value['id'] and value['start_date'] and value['source'] for value in issue.get('conflicts')):
+            value['id'] and value['start_date'] and value['source'] for value in issue.get('conflicts')
+        ):
             is_correct = True
 
     assert is_correct is True
@@ -96,12 +103,14 @@ def assert_conflict_message(issue_type, issues, queue=False):
     is_correct = False
     for issue in issues:
         if queue:
-            if issue.get('issue_type') == issue_type.value and (value['line1'] == QUEUE_CONFLICT_MESSAGE for value in
-                                                                issue.get('conflicts')):
+            if issue.get('issue_type') == issue_type.value and (
+                value['line1'] == QUEUE_CONFLICT_MESSAGE for value in issue.get('conflicts')
+            ):
                 is_correct = True
         else:
-            if issue.get('issue_type') == issue_type.value and (value['line1'] == CORP_CONFLICT_MESSAGE for value in
-                                                                issue.get('conflicts')):
+            if issue.get('issue_type') == issue_type.value and (
+                value['line1'] == CORP_CONFLICT_MESSAGE for value in issue.get('conflicts')
+            ):
                 is_correct = True
     assert is_correct is True
 
@@ -118,6 +127,7 @@ def assert_is_number(issue_type, issues):
 
 def save_words_list_classification(words_list):
     from namex.models import WordClassification as WordClassificationDAO
+
     for record in words_list:
         wc = WordClassificationDAO()
         wc.classification = record['classification']
@@ -129,6 +139,7 @@ def save_words_list_classification(words_list):
 
 def save_words_list_virtual_word_condition(words_list):
     from namex.models import VirtualWordCondition as VirtualWordConditionDAO
+
     for record in words_list:
         vwc = VirtualWordConditionDAO()
         vwc.rc_words = record['words']
@@ -138,7 +149,10 @@ def save_words_list_virtual_word_condition(words_list):
 
 
 def save_words_list_name(words_list, queue=False):
-    from namex.models import Request as RequestDAO, State, Name as NameDAO
+    from namex.models import Name as NameDAO
+    from namex.models import Request as RequestDAO
+    from namex.models import State
+
     num = 0
     req = 1460775
     for record in words_list:

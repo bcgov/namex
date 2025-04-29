@@ -1,12 +1,12 @@
+import requests
 from dateutil import parser
 from flask import current_app
-import requests
+
 from namex.exceptions import EntityServiceException
 from namex.utils.auth import get_client_credentials
 
 
 class DateUtils:
-
     @staticmethod
     def parse_date(date_str):
         return parser.parse(date_str)
@@ -15,6 +15,7 @@ class DateUtils:
     def parse_date_string(date_str, output_date_format):
         parsed_date = parser.parse(date_str)
         return parsed_date.strftime(output_date_format)
+
 
 class EntityUtils:
     @staticmethod
@@ -26,17 +27,14 @@ class EntityUtils:
 
         authenticated, token = get_client_credentials(auth_url, client_id, client_secret)
         if not authenticated:
-            raise EntityServiceException("Client credentials request failed.")
+            raise EntityServiceException('Client credentials request failed.')
         return token
 
     @staticmethod
     def make_authenticated_request(endpoint):
         """Make an authenticated GET request to the given endpoint."""
         token = EntityUtils.get_entity_token()
-        headers = {
-            'Authorization': f'Bearer {token}',
-            'Content-Type': 'application/json'
-        }
+        headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
 
         response = requests.get(endpoint, headers=headers)
         return response

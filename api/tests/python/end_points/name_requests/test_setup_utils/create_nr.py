@@ -15,7 +15,7 @@ def create_nr(nr_state, data=None):
         State.RESERVED: create_reserved,
         State.COND_RESERVE: create_cond_reserved,
         State.CONDITIONAL: create_conditional,
-        State.APPROVED: create_approved
+        State.APPROVED: create_approved,
     }.get(nr_state)(data)
 
 

@@ -1,16 +1,15 @@
-from flask import send_file, make_response, jsonify
-from flask_restx import Resource, cors
+from flask import jsonify, make_response, send_file
 from flask_jwt_oidc import AuthError
+from flask_restx import Resource
 from pytz import timezone
 
-from namex.utils.auth import cors_preflight
-from namex.utils.api_resource import handle_exception
-
-from namex.models import Request as RequestDAO, Payment as PaymentDAO
-
-from namex.services.payment.exceptions import SBCPaymentException, SBCPaymentError, PaymentServiceError
-from namex.services.payment.receipts import get_receipt, generate_receipt
+from namex.models import Payment as PaymentDAO
+from namex.models import Request as RequestDAO
+from namex.services.payment.exceptions import PaymentServiceError, SBCPaymentError, SBCPaymentException
 from namex.services.payment.models import ReceiptRequest
+from namex.services.payment.receipts import generate_receipt, get_receipt
+from namex.utils.api_resource import handle_exception
+from namex.utils.auth import cors_preflight
 
 from .api_namespace import api as payment_api
 
@@ -32,9 +31,7 @@ def handle_auth_error(ex):
 
 @cors_preflight('GET, POST')
 @payment_api.route('/<int:payment_id>/receipt', strict_slashes=False, methods=['GET', 'POST', 'OPTIONS'])
-@payment_api.doc(params={
-    'payment_id': ''
-})
+@payment_api.doc(params={'payment_id': ''})
 class PaymentReceipt(Resource):
     @staticmethod
     @payment_api.response(201, 'Created', '')
@@ -51,13 +48,15 @@ class PaymentReceipt(Resource):
             receipt_info = get_receipt(payment.payment_token)
             name_choice = RequestDAO.find_name_by_choice(nr_model.id, 1)
             if not name_choice:
-                return make_response(jsonify(message='Could not find name choice for {nr_id}'.format(nr_id=nr_model.id)), 400)
+                return make_response(
+                    jsonify(message='Could not find name choice for {nr_id}'.format(nr_id=nr_model.id)), 400
+                )
 
             tz_aware_submission_date = nr_model.submittedDate.replace(tzinfo=timezone('UTC'))
             localized_submission_date = tz_aware_submission_date.astimezone(timezone('US/Pacific'))
             receipt_req = ReceiptRequest(
                 corpName=name_choice.name,
-                filingDateTime=localized_submission_date.strftime('%B %-d, %Y at %-I:%M %P Pacific time')
+                filingDateTime=localized_submission_date.strftime('%B %-d, %Y at %-I:%M %P Pacific time'),
             )
 
             receipt_response = generate_receipt(payment.payment_token, receipt_req)
@@ -68,7 +67,8 @@ class PaymentReceipt(Resource):
             return send_file(
                 receipt_response,
                 as_attachment=True,
-                download_name='payment-receipt-{id}.pdf'.format(id=receipt_info.get('receiptNumber')))
+                download_name='payment-receipt-{id}.pdf'.format(id=receipt_info.get('receiptNumber')),
+            )
 
         except PaymentServiceError as err:
             return handle_exception(err, err.message, 500)

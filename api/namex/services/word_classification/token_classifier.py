@@ -1,7 +1,7 @@
-import pandas as pd
-
-from flask import current_app
 from enum import Enum
+
+import pandas as pd
+from flask import current_app
 
 from ..name_request.auto_analyse.name_analysis_utils import data_frame_to_list
 
@@ -80,11 +80,12 @@ class TokenClassifier:
 
         return list_dist, list_desc, list_none
 
-    '''
+    """
     Utility for adding unclassified words to distinctive and descriptive list
     Override the abstract / base class method
     @return list_dist, list_desc
-    '''
+    """
+
     @staticmethod
     def handle_unclassified_words(list_dist, list_desc, list_none, list_name):
         idx_dist = -1
@@ -116,20 +117,20 @@ class TokenClassifier:
                 new_row = []
                 if not word_classification:
                     current_app.logger.debug('No word classification found for: ' + word)
-                    new_row.append({
-                        'word': word.lower().strip(),
-                        'word_classification': DataFrameFields.UNCLASSIFIED.value
-                    })
+                    new_row.append(
+                        {'word': word.lower().strip(), 'word_classification': DataFrameFields.UNCLASSIFIED.value}
+                    )
                 else:
                     for row in word_classification:
-                        new_row.append({
-                            'word': word.lower().strip(),
-                            'word_classification': row.classification.strip()
-                        })
+                        new_row.append(
+                            {'word': word.lower().strip(), 'word_classification': row.classification.strip()}
+                        )
 
                 cf = cf.append(new_row, ignore_index=True)
 
-            self.distinctive_word_tokens, self.descriptive_word_tokens, self.unclassified_word_tokens = data_frame_to_list(cf)
+            self.distinctive_word_tokens, self.descriptive_word_tokens, self.unclassified_word_tokens = (
+                data_frame_to_list(cf)
+            )
 
         except Exception as error:
             current_app.logger.error('Token classification failed! ' + repr(error))

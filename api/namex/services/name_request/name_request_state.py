@@ -1,22 +1,39 @@
-from datetime import datetime, timedelta, timezone
-from flask_restx.fields import Boolean
+from datetime import datetime, timezone
+
 from flask import current_app
+from flask_restx.fields import Boolean
 
-from namex.constants import \
-    NameRequestActions, \
-    NameRequestDraftActions, NameRequestReservedActions, NameRequestActiveActions, NameRequestCancelledActions, \
-    NameRequestHoldActions, NameRequestInProgressActions, NameRequestExpiredActions, NameRequestConsumedActions, \
-    NameRequestHistoricalActions, NameRequestActiveRejectedActions, NameRequestExpiredRejectedActions, EntityTypes, \
-    NameRequestCompletedActions, NameRequestPendingPaymentActions
-
-from namex.constants import PaymentState
+from namex.constants import (
+    EntityTypes,
+    NameRequestActions,
+    NameRequestActiveActions,
+    NameRequestActiveRejectedActions,
+    NameRequestCancelledActions,
+    NameRequestCompletedActions,
+    NameRequestConsumedActions,
+    NameRequestDraftActions,
+    NameRequestExpiredActions,
+    NameRequestHistoricalActions,
+    NameRequestHoldActions,
+    NameRequestInProgressActions,
+    NameRequestPendingPaymentActions,
+    NameRequestReservedActions,
+    PaymentState,
+)
 from namex.models import State
 
-from .utils import has_active_payment, has_complete_payment, has_completed_or_refunded_payment
-from .exceptions import NameRequestException, InvalidStateError, NameRequestIsConsumedError, NameRequestIsExpiredError, NameRequestActionError
+from .exceptions import (
+    InvalidStateError,
+    NameRequestActionError,
+    NameRequestIsConsumedError,
+    NameRequestIsExpiredError,
+)
+from .utils import has_complete_payment, has_completed_or_refunded_payment
 
 state_transition_error_msg = 'Invalid state transition [{current_state}] -> [{next_state}]'
-invalid_state_transition_msg = 'Invalid state transition [{current_state}] -> [{next_state}], valid states are [{valid_states}]'
+invalid_state_transition_msg = (
+    'Invalid state transition [{current_state}] -> [{next_state}], valid states are [{valid_states}]'
+)
 
 
 def display_edit_action(nr_model=None):
@@ -99,7 +116,7 @@ def display_resubmit_action(nr_model=None) -> Boolean:
     """Logic for displaying the resubmit button."""
     try:
         if nr_model and nr_model.expirationDate and nr_model.is_expired and not nr_model.has_consumed_name:
-                return True
+            return True
         return False
     except Exception as err:
         raise NameRequestActionError(err)
@@ -108,12 +125,13 @@ def display_resubmit_action(nr_model=None) -> Boolean:
 def display_resend_action(nr_model=None):
     return True
 
+
 def display_retry_payment(nr_model=None):
     """Logic for displaying retry payment button."""
     try:
         current_app.logger.debug('retry payment method')
         if nr_model and nr_model.stateCd in (State.PENDING_PAYMENT):
-            payment = nr.payments.one_or_none()
+            payment = nr.payments.one_or_none()  # noqa: F821
             if payment:
                 if payment.payment_status_code not in [PaymentState.COMPLETED.value, PaymentState.APPROVED.value]:
                     return True
@@ -162,6 +180,7 @@ def get_nr_state_actions(next_state, nr_model=None):
     :param nr_model:
     :return:
     """
+
     def build_actions(state_actions_list, nr):
         try:
             return [sa for sa in state_actions_list if action_handlers[sa](nr)]
@@ -185,7 +204,7 @@ def get_nr_state_actions(next_state, nr_model=None):
             State.REFUND_REQUESTED: build_actions(NameRequestCancelledActions.list(), nr_model),
             State.EXPIRED: build_actions(NameRequestExpiredActions.list(), nr_model),
             State.REJECTED: build_actions(NameRequestActiveRejectedActions.list(), nr_model),
-            State.COMPLETED: build_actions(NameRequestCompletedActions.list(), nr_model)
+            State.COMPLETED: build_actions(NameRequestCompletedActions.list(), nr_model),
         }.get(next_state)
     except Exception as err:
         raise NameRequestActionError(err)
@@ -224,11 +243,11 @@ def is_name_request_refundable(nr_state):
 def to_draft(resource, nr, on_success_cb=None):
     valid_states = [State.DRAFT, State.INPROGRESS, State.PENDING_PAYMENT]
     if nr.stateCd not in valid_states:
-        raise InvalidStateError(message=invalid_state_transition_msg.format(
-            current_state=nr.stateCd,
-            next_state=State.DRAFT,
-            valid_states=', '.join(valid_states)
-        ))
+        raise InvalidStateError(
+            message=invalid_state_transition_msg.format(
+                current_state=nr.stateCd, next_state=State.DRAFT, valid_states=', '.join(valid_states)
+            )
+        )
 
     resource.next_state_code = State.DRAFT
     nr.stateCd = State.DRAFT
@@ -241,11 +260,11 @@ def to_draft(resource, nr, on_success_cb=None):
 def to_inprogress(resource, nr, on_success_cb=None):
     valid_states = [State.DRAFT, State.INPROGRESS]
     if nr.stateCd not in valid_states:
-        raise InvalidStateError(message=invalid_state_transition_msg.format(
-            current_state=nr.stateCd,
-            next_state=State.INPROGRESS,
-            valid_states=', '.join(valid_states)
-        ))
+        raise InvalidStateError(
+            message=invalid_state_transition_msg.format(
+                current_state=nr.stateCd, next_state=State.INPROGRESS, valid_states=', '.join(valid_states)
+            )
+        )
 
     resource.next_state_code = State.INPROGRESS
     nr.stateCd = State.INPROGRESS
@@ -258,11 +277,11 @@ def to_inprogress(resource, nr, on_success_cb=None):
 def to_cond_reserved(resource, nr, on_success_cb):
     valid_states = [State.DRAFT, State.COND_RESERVE]
     if nr.stateCd not in valid_states:
-        raise InvalidStateError(message=invalid_state_transition_msg.format(
-            current_state=nr.stateCd,
-            next_state=State.COND_RESERVE,
-            valid_states=', '.join(valid_states)
-        ))
+        raise InvalidStateError(
+            message=invalid_state_transition_msg.format(
+                current_state=nr.stateCd, next_state=State.COND_RESERVE, valid_states=', '.join(valid_states)
+            )
+        )
 
     resource.next_state_code = State.COND_RESERVE
     nr.stateCd = State.COND_RESERVE
@@ -274,11 +293,11 @@ def to_cond_reserved(resource, nr, on_success_cb):
 def to_reserved(resource, nr, on_success_cb):
     valid_states = [State.DRAFT, State.RESERVED]
     if nr.stateCd not in valid_states:
-        raise InvalidStateError(message=invalid_state_transition_msg.format(
-            current_state=nr.stateCd,
-            next_state=State.RESERVED,
-            valid_states=', '.join(valid_states)
-        ))
+        raise InvalidStateError(
+            message=invalid_state_transition_msg.format(
+                current_state=nr.stateCd, next_state=State.RESERVED, valid_states=', '.join(valid_states)
+            )
+        )
 
     resource.next_state_code = State.RESERVED
     nr.stateCd = State.RESERVED
@@ -290,11 +309,11 @@ def to_reserved(resource, nr, on_success_cb):
 def to_conditional(resource, nr, on_success_cb):
     valid_states = [State.DRAFT, State.COND_RESERVE, State.CONDITIONAL, State.INPROGRESS]
     if nr.stateCd not in valid_states:
-        raise InvalidStateError(message=invalid_state_transition_msg.format(
-            current_state=nr.stateCd,
-            next_state=State.CONDITIONAL,
-            valid_states=', '.join(valid_states)
-        ))
+        raise InvalidStateError(
+            message=invalid_state_transition_msg.format(
+                current_state=nr.stateCd, next_state=State.CONDITIONAL, valid_states=', '.join(valid_states)
+            )
+        )
 
     resource.next_state_code = State.CONDITIONAL
     nr.stateCd = State.CONDITIONAL
@@ -306,11 +325,11 @@ def to_conditional(resource, nr, on_success_cb):
 def to_approved(resource, nr, on_success_cb):
     valid_states = [State.RESERVED, State.APPROVED, State.INPROGRESS]
     if nr.stateCd not in valid_states:
-        raise InvalidStateError(message=invalid_state_transition_msg.format(
-            current_state=nr.stateCd,
-            next_state=State.APPROVED,
-            valid_states=', '.join(valid_states)
-        ))
+        raise InvalidStateError(
+            message=invalid_state_transition_msg.format(
+                current_state=nr.stateCd, next_state=State.APPROVED, valid_states=', '.join(valid_states)
+            )
+        )
 
     resource.next_state_code = State.APPROVED
     nr.stateCd = State.APPROVED
@@ -322,11 +341,11 @@ def to_approved(resource, nr, on_success_cb):
 def to_rejected(resource, nr, on_success_cb):
     valid_states = [State.REJECTED]
     if nr.stateCd not in valid_states:
-        raise InvalidStateError(message=invalid_state_transition_msg.format(
-            current_state=nr.stateCd,
-            next_state=State.REJECTED,
-            valid_states=', '.join(valid_states)
-        ))
+        raise InvalidStateError(
+            message=invalid_state_transition_msg.format(
+                current_state=nr.stateCd, next_state=State.REJECTED, valid_states=', '.join(valid_states)
+            )
+        )
 
     resource.next_state_code = State.REJECTED
     nr.stateCd = State.REJECTED
@@ -338,11 +357,11 @@ def to_rejected(resource, nr, on_success_cb):
 def to_consumed(resource, nr, on_success_cb):
     valid_states = [State.CONSUMED]
     if nr.stateCd not in valid_states:
-        raise InvalidStateError(message=invalid_state_transition_msg.format(
-            current_state=nr.stateCd,
-            next_state=State.CONSUMED,
-            valid_states=', '.join(valid_states)
-        ))
+        raise InvalidStateError(
+            message=invalid_state_transition_msg.format(
+                current_state=nr.stateCd, next_state=State.CONSUMED, valid_states=', '.join(valid_states)
+            )
+        )
 
     resource.next_state_code = State.CONSUMED
     if on_success_cb:
@@ -353,11 +372,11 @@ def to_consumed(resource, nr, on_success_cb):
 def to_pending_payment(resource, nr, on_success_cb):
     valid_states = [State.PENDING_PAYMENT]
     if nr.stateCd not in valid_states:
-        raise InvalidStateError(message=invalid_state_transition_msg.format(
-            current_state=nr.stateCd,
-            next_state=State.PENDING_PAYMENT,
-            valid_states=', '.join(valid_states)
-        ))
+        raise InvalidStateError(
+            message=invalid_state_transition_msg.format(
+                current_state=nr.stateCd, next_state=State.PENDING_PAYMENT, valid_states=', '.join(valid_states)
+            )
+        )
 
     resource.next_state_code = State.PENDING_PAYMENT
     nr.stateCd = State.PENDING_PAYMENT
@@ -371,11 +390,11 @@ def to_cancelled(resource, nr, on_success_cb):
     # valid_states = [State.APPROVED, State.CONDITIONAL]
     valid_states = State.CANCELLABLE_STATES
     if nr.stateCd not in valid_states:
-        raise InvalidStateError(message=invalid_state_transition_msg.format(
-            current_state=nr.stateCd,
-            next_state=State.CANCELLED,
-            valid_states=', '.join(valid_states)
-        ))
+        raise InvalidStateError(
+            message=invalid_state_transition_msg.format(
+                current_state=nr.stateCd, next_state=State.CANCELLED, valid_states=', '.join(valid_states)
+            )
+        )
 
     if nr.is_expired is True:
         raise NameRequestIsExpiredError()
@@ -395,11 +414,11 @@ def to_refund_requested(resource, nr, on_success_cb):
     # valid_states = [State.APPROVED, State.CONDITIONAL]
     valid_states = State.CANCELLABLE_STATES
     if nr.stateCd not in valid_states:
-        raise InvalidStateError(message=invalid_state_transition_msg.format(
-            current_state=nr.stateCd,
-            next_state=State.REFUND_REQUESTED,
-            valid_states=', '.join(valid_states)
-        ))
+        raise InvalidStateError(
+            message=invalid_state_transition_msg.format(
+                current_state=nr.stateCd, next_state=State.REFUND_REQUESTED, valid_states=', '.join(valid_states)
+            )
+        )
 
     # TODO: Confirm that we don't need to check for expiry!
     # if nr.is_expired is True:
@@ -436,5 +455,5 @@ def apply_nr_state_change(self, name_request, next_state, on_success=None):
         State.CONSUMED: to_consumed,
         State.CANCELLED: to_cancelled,
         State.REFUND_REQUESTED: to_refund_requested,
-        State.PENDING_PAYMENT: to_pending_payment
+        State.PENDING_PAYMENT: to_pending_payment,
     }.get(next_state)(self, name_request, on_success)

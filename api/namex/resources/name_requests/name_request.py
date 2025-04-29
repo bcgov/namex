@@ -2,16 +2,19 @@ from datetime import datetime
 from uuid import uuid4
 
 import requests
-from flask import current_app, jsonify, request, make_response
+from flask import current_app, jsonify, make_response, request
 
-from namex import jwt, db
+from namex import db, jwt
 from namex.constants import NameRequestPatchActions, NameRequestRollbackActions, PaymentState
 from namex.models import Event, Payment, Request, State, User
 from namex.services import EventRecorder
 from namex.services.name_request.exceptions import InvalidInputError, NameRequestException, NameRequestIsInProgressError
-from namex.services.name_request.name_request_state import get_nr_state_actions
+from namex.services.name_request.name_request_state import (
+    get_nr_state_actions,
+    is_name_request_refundable,
+    is_request_editable,
+)
 from namex.services.name_request.utils import get_mapped_entity_and_action_code
-from namex.services.name_request.name_request_state import is_request_editable, is_name_request_refundable
 from namex.services.payment.payments import get_payment, refund_payment
 from namex.services.statistics.wait_time_statistics import WaitTimeStatsService
 from namex.utils.api_resource import handle_exception
@@ -30,9 +33,7 @@ MSG_NOT_FOUND = 'Resource not found'
 
 @cors_preflight('GET, PUT')
 @api.route('/<int:nr_id>', strict_slashes=False, methods=['GET', 'PUT', 'OPTIONS'])
-@api.doc(params={
-    'nr_id': 'NR ID - This field is required'
-})
+@api.doc(params={'nr_id': 'NR ID - This field is required'})
 class NameRequestResource(BaseNameRequestResource):
     """Name Request endpoint."""
 
@@ -44,10 +45,7 @@ class NameRequestResource(BaseNameRequestResource):
             if nr_model := Request.query.get(nr_id):
                 org_id = request.args.get('org_id', None)
 
-                headers = {
-                    'Authorization': f'Bearer {jwt.get_token_auth_header()}',
-                    'Content-Type': 'application/json'
-                }
+                headers = {'Authorization': f'Bearer {jwt.get_token_auth_header()}', 'Content-Type': 'application/json'}
 
                 auth_svc_url = current_app.config.get('AUTH_SVC_URL')
                 auth_url = f'{auth_svc_url}/orgs/{org_id}/affiliations/{nr_model.nrNum}'
@@ -87,7 +85,7 @@ class NameRequestResource(BaseNameRequestResource):
         """
         try:
             if not full_access_to_name_request(request):
-                return {"message": "You do not have access to this NameRequest."}, 403
+                return {'message': 'You do not have access to this NameRequest.'}, 403
             # Find the existing name request
             nr_model = Request.query.get(nr_id)
 
@@ -134,10 +132,12 @@ class NameRequestResource(BaseNameRequestResource):
 
 @cors_preflight('PATCH')
 @api.route('/<int:nr_id>/<string:nr_action>', strict_slashes=False, methods=['PATCH', 'OPTIONS'])
-@api.doc(params={
-    'nr_id': 'NR ID - This field is required',
-    'nr_action': 'NR Action - One of [CHECKOUT, CHECKIN, EDIT, CANCEL, RESEND, REQUEST_REFUND]'
-})
+@api.doc(
+    params={
+        'nr_id': 'NR ID - This field is required',
+        'nr_action': 'NR Action - One of [CHECKOUT, CHECKIN, EDIT, CANCEL, RESEND, REQUEST_REFUND]',
+    }
+)
 class NameRequestFields(BaseNameRequestResource):
     @api.expect(nr_request)
     def patch(self, nr_id, nr_action: str):
@@ -156,12 +156,16 @@ class NameRequestFields(BaseNameRequestResource):
         """
         try:
             if not full_access_to_name_request(request):
-                return {"message": "You do not have access to this NameRequest."}, 403
+                return {'message': 'You do not have access to this NameRequest.'}, 403
 
-            nr_action = str(nr_action).upper()  # Convert to upper-case, just so we can support lower case action strings
-            nr_action = NameRequestPatchActions[nr_action].value \
-                if NameRequestPatchActions.has_value(nr_action) \
+            nr_action = str(
+                nr_action
+            ).upper()  # Convert to upper-case, just so we can support lower case action strings
+            nr_action = (
+                NameRequestPatchActions[nr_action].value
+                if NameRequestPatchActions.has_value(nr_action)
                 else NameRequestPatchActions.EDIT.value
+            )
 
             # Find the existing name request
             nr_model = Request.query.get(nr_id)
@@ -191,20 +195,18 @@ class NameRequestFields(BaseNameRequestResource):
                     _self.request_data = {
                         # Doesn't have to be a UUID but this is easy and works for a pretty unique token
                         'checkedOutBy': str(uuid4()),
-                        'checkedOutDt': datetime.now()
+                        'checkedOutDt': datetime.now(),
                     }
                     # Set the request data to the service
                     _self.nr_service.request_data = self.request_data
                 elif nr_action is NameRequestPatchActions.CHECKIN.value:
                     # The request payload will be empty when making this call, add them to the request
-                    _self.request_data = {
-                        'checkedOutBy': None,
-                        'checkedOutDt': None
-                    }
+                    _self.request_data = {'checkedOutBy': None, 'checkedOutDt': None}
                     # Set the request data to the service
                     _self.nr_service.request_data = self.request_data
-                elif nr_action is NameRequestPatchActions.REQUEST_REFUND.value \
-                        and not is_name_request_refundable(nr_model.stateCd):
+                elif nr_action is NameRequestPatchActions.REQUEST_REFUND.value and not is_name_request_refundable(
+                    nr_model.stateCd
+                ):
                     # the NR can be cancelled and refund when state_cd = DRAFT
                     raise NameRequestIsInProgressError()
                 else:
@@ -229,12 +231,20 @@ class NameRequestFields(BaseNameRequestResource):
                 elif request_state in contact_editable_states:
                     is_valid = True
                 else:
-                    msg = 'Invalid state change requested - the Name Request state cannot be changed to [' + data.get('stateCd', '') + ']'
+                    msg = (
+                        'Invalid state change requested - the Name Request state cannot be changed to ['
+                        + data.get('stateCd', '')
+                        + ']'
+                    )
 
                 # Check the action, make sure it's valid
                 if not NameRequestPatchActions.has_value(nr_action):
                     is_valid = False
-                    msg = 'Invalid Name Request PATCH action, please use one of [' + ', '.join([action.value for action in NameRequestPatchActions]) + ']'
+                    msg = (
+                        'Invalid Name Request PATCH action, please use one of ['
+                        + ', '.join([action.value for action in NameRequestPatchActions])
+                        + ']'
+                    )
                 return is_valid, msg
 
             is_valid_patch, validation_msg = validate_patch_request(self.request_data)
@@ -250,7 +260,7 @@ class NameRequestFields(BaseNameRequestResource):
                     NameRequestPatchActions.EDIT.value: self.handle_patch_edit,
                     NameRequestPatchActions.CANCEL.value: self.handle_patch_cancel,
                     NameRequestPatchActions.RESEND.value: self.handle_patch_resend,
-                    NameRequestPatchActions.REQUEST_REFUND.value: self.handle_patch_request_refund
+                    NameRequestPatchActions.REQUEST_REFUND.value: self.handle_patch_request_refund,
                 }.get(action)(model)
 
             # This handles updates if the NR state is 'patchable'
@@ -267,7 +277,7 @@ class NameRequestFields(BaseNameRequestResource):
                     'checkedOutDt': response_data.get('checkedOutDt'),
                     'state': response_data.get('state', ''),
                     'stateCd': response_data.get('stateCd', ''),
-                    'actions': nr_svc.current_state_actions
+                    'actions': nr_svc.current_state_actions,
                 }
                 return make_response(jsonify(response_data), 200)
 
@@ -276,7 +286,7 @@ class NameRequestFields(BaseNameRequestResource):
                     'id': nr_id,
                     'state': response_data.get('state', ''),
                     'stateCd': response_data.get('stateCd', ''),
-                    'actions': nr_svc.current_state_actions
+                    'actions': nr_svc.current_state_actions,
                 }
                 return make_response(jsonify(response_data), 200)
 
@@ -370,17 +380,15 @@ class NameRequestFields(BaseNameRequestResource):
         nr_model = self.update_nr(nr_model, State.REFUND_REQUESTED, self.handle_nr_patch)
 
         # Handle the payments
-        valid_states = [
-            PaymentState.APPROVED.value,
-            PaymentState.COMPLETED.value,
-            PaymentState.PARTIAL.value
-        ]
+        valid_states = [PaymentState.APPROVED.value, PaymentState.COMPLETED.value, PaymentState.PARTIAL.value]
 
         refund_value = 0
 
         # Check for NR that has been renewed - do not refund any payments.
         # UI should not order refund for an NR renewed/reapplied it.
-        if not any(payment.payment_action == Payment.PaymentActions.REAPPLY.value for payment in nr_model.payments.all()):
+        if not any(
+            payment.payment_action == Payment.PaymentActions.REAPPLY.value for payment in nr_model.payments.all()
+        ):
             # Try to refund all payments associated with the NR
             for payment in nr_model.payments.all():
                 if payment.payment_status_code in valid_states:
@@ -390,7 +398,9 @@ class NameRequestFields(BaseNameRequestResource):
                     payment_response = get_payment(payment.payment_token)
                     payment.payment_status_code = PaymentState.REFUND_REQUESTED.value
                     payment.save_to_db()
-                    refund_value += payment_response.receipts[0]['receiptAmount'] if len(payment_response.receipts) else 0
+                    refund_value += (
+                        payment_response.receipts[0]['receiptAmount'] if len(payment_response.receipts) else 0
+                    )
 
         publish_email_notification(nr_model.nrNum, 'refund', '{:.2f}'.format(refund_value))
 
@@ -405,9 +415,11 @@ class NameRequestFields(BaseNameRequestResource):
 
 @cors_preflight('PATCH')
 @api.route('/<int:nr_id>/rollback/<string:action>', strict_slashes=False, methods=['PATCH', 'OPTIONS'])
-@api.doc(params={
-    'nr_id': 'NR Number - This field is required',
-})
+@api.doc(
+    params={
+        'nr_id': 'NR Number - This field is required',
+    }
+)
 class NameRequestRollback(BaseNameRequestResource):
     @api.expect(nr_request)
     def patch(self, nr_id, action):
@@ -419,7 +431,7 @@ class NameRequestRollback(BaseNameRequestResource):
         """
         try:
             if not full_access_to_name_request(request):
-                return {"message": "You do not have access to this NameRequest."}, 403
+                return {'message': 'You do not have access to this NameRequest.'}, 403
 
             # Find the existing name request
             nr_model = Request.query.get(nr_id)
@@ -478,7 +490,21 @@ class NameRequestRollback(BaseNameRequestResource):
         nr_model = self.update_nr(nr_model, State.CANCELLED, self.handle_nr_patch)
 
         # Delete in solr for temp or real NR because it is cancelled
-        if nr_model.entity_type_cd in ['CR', 'UL', 'BC', 'CP', 'PA', 'XCR', 'XUL', 'XCP', 'CC', 'FI', 'XCR', 'XUL', 'XCP']:
+        if nr_model.entity_type_cd in [
+            'CR',
+            'UL',
+            'BC',
+            'CP',
+            'PA',
+            'XCR',
+            'XUL',
+            'XCP',
+            'CC',
+            'FI',
+            'XCR',
+            'XUL',
+            'XCP',
+        ]:
             SOLR_CORE = 'possible.conflicts'
             self.delete_solr_doc(SOLR_CORE, nr_model.nrNum)
 

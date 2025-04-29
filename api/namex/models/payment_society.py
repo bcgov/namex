@@ -1,9 +1,11 @@
-"""Payment_societies keep data for society from home legancy app
-"""
-from . import db
+"""Payment_societies keep data for society from home legancy app"""
+
 from datetime import datetime
+
 from sqlalchemy.dialects.postgresql import JSONB
-from datetime import datetime
+
+from . import db
+
 
 class PaymentSociety(db.Model):
     __tablename__ = 'payment_societies'
@@ -20,9 +22,7 @@ class PaymentSociety(db.Model):
     paymentAction = db.Column('payment_action', db.String(30), unique=True)
 
     def json(self):
-        return {"id": self.id, 
-                "nrNum": self.nrNum
-                }
+        return {'id': self.id, 'nrNum': self.nrNum}
 
     def save_to_db(self):
         db.session.add(self)

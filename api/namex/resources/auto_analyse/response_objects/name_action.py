@@ -1,6 +1,6 @@
-from .abstract import Serializable
-
 from enum import Enum
+
+from .abstract import Serializable
 
 
 class NameActions(Enum):
@@ -34,7 +34,7 @@ class WordPositions(Enum):
 class NameAction(Serializable):
     def __init__(self, **kwargs):
         # Required!
-        if not kwargs.get('type').value in NameActions.list():
+        if kwargs.get('type').value not in NameActions.list():
             raise TypeError('Invalid NameAction, please supply a valid NameAction type')
 
         if kwargs.get('position') and kwargs.get('position').value not in WordPositions.list():
@@ -43,7 +43,9 @@ class NameAction(Serializable):
         if kwargs.get('index') and (isinstance(kwargs.get('index'), int) is False or kwargs.get('index', 0) < 0):
             raise TypeError('Invalid index, index must be a positive integer or zero')
 
-        if kwargs.get('endIndex') and (isinstance(kwargs.get('endIndex'), int) is False or kwargs.get('endIndex', 0) < 0):
+        if kwargs.get('endIndex') and (
+            isinstance(kwargs.get('endIndex'), int) is False or kwargs.get('endIndex', 0) < 0
+        ):
             raise TypeError('Invalid endIndex, endIndex must be a positive integer or zero')
 
         self.type = kwargs.get('type').value if kwargs.get('type') else None
