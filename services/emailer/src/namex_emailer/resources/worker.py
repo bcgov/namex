@@ -61,6 +61,12 @@ def worker():
         # so the event is removed from the Queue
         return {}, HTTPStatus.OK
 
+    # Check if it's a resend
+    resend_event_id = ce.data.get("resend_event_id")
+    if resend_event_id:
+        # RESEND PATH
+        return resend_email(resend_event_id)
+
     item =ce_cache.get(ce.id, None)
 
     if item is None:
@@ -93,11 +99,56 @@ def worker():
             )
             return {}, HTTPStatus.NOT_FOUND
         ce_cache[ce.id] = ce
+
+        write_to_events(ce, email)
         structured_log(request, "INFO", f"completed ce: {str(ce)}")
     else:
         structured_log(request, "INFO", f"skipping duplicate ce: {str(ce)}")
 
     return {}, HTTPStatus.OK
+
+
+def write_to_events(ce: SimpleCloudEvent, email: dict):
+    # write_to_events only when it is notification
+    # Extract the Name Request number from the incoming cloud event
+    nr_num = ce.data.get("request", {}).get("header", {}).get("nrNum", "")
+    option = ce.data.get("request", {}).get("option", None)
+
+    if (option in nr_notification.Option) and (nr_num is not None):
+        # Log the event as a system-generated notification in the events table,
+        namex_emailer.services.helpers.record_notification_event(nr_num, email)
+        structured_log(request, "INFO", f"Event recorded: {str(email)}")
+
+def resend_email(event_id: int):
+    """
+    Given an event id, retrieve the saved email and resend it.
+    """
+    # Query the event record
+    event = namex_emailer.services.helpers.query_notification_event(event_id)
+
+    if not event:
+        structured_log(request, "ERROR", f"No event found for ID: {event_id}")
+        return {"error": "Event not found"}, HTTPStatus.NOT_FOUND
+
+    email = event.eventJson
+    if not email:
+        structured_log(request, "ERROR", f"No email content in event: {event_id}")
+        return {"error": "No email content found"}, HTTPStatus.BAD_REQUEST
+
+    token = namex_emailer.services.helpers.get_bearer_token()
+    resp = send_email(email, token)
+
+    if resp.status_code != HTTPStatus.OK:
+        structured_log(
+            request,
+            "ERROR",
+            f"Failed to resend email for event {event_id}: {resp.status_code} - {resp.text}",
+        )
+        return {"error": "Failed to resend email"}, resp.status_code
+
+    structured_log(request, "INFO", f"Successfully resent email for event {event_id}")
+    return {"success": True}, HTTPStatus.OK
+
 
 def process_email(email_msg: SimpleCloudEvent):  # pylint: disable=too-many-branches, too-many-statements
     """Process the email contained in the submission."""

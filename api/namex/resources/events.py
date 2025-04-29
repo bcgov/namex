@@ -1,9 +1,10 @@
 import copy, json
-from flask import jsonify, make_response
+from flask import jsonify, make_response, request
 from flask_restx import Resource, Namespace
 
 from namex import jwt
 from namex.models import Event as EventDAO, Request as RequestDAO, User, State, Payment
+from namex.services import EventRecorder
 from namex.utils.auth import cors_preflight
 
 
@@ -11,8 +12,8 @@ from namex.utils.auth import cors_preflight
 api = Namespace('events', description='Audit trail of events for a Name Request')
 
 
-@cors_preflight("GET")
-@api.route('/<string:nr>', methods=['GET', 'OPTIONS'])
+@cors_preflight("GET, POST")
+@api.route('/<string:nr>', methods=['GET', 'POST', 'OPTIONS'])
 class Events(Resource):
     @staticmethod
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.VIEWONLY])
@@ -224,3 +225,56 @@ class Events(Resource):
         }
 
         return make_response(jsonify(resp), 200)
+
+    @staticmethod
+    def post(nr):
+        """
+        Record a new event for a Name Request.
+        :param nr: Name Request number
+        :return: Response indicating success or failure
+        """
+        try:
+            # Fetch the Name Request
+            nrd = RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404()
+
+            # Parse the payload
+            payload = request.get_json()
+            if not payload:
+                return make_response(jsonify({"message": "No JSON payload provided"}), 400)
+
+            # Ensure eventJson is serialized
+            event_json = payload.get('eventJson', {})
+
+            # Record the event
+            EventRecorder.record_as_system(
+                payload.get('action'),
+                nrd,  # Pass the Name Request ID instead of the request object
+                event_json
+            )
+
+            return make_response(jsonify({"message": "Event recorded successfully"}), 201)
+        except Exception as e:
+            return make_response(jsonify({"message": f"Error recording event: {str(e)}"}), 500)
+
+
+@cors_preflight("GET")
+@api.route('/event/<int:event_id>', methods=['GET', 'OPTIONS'])
+class SingleEvent(Resource):
+    @staticmethod
+    def get(event_id):
+        """
+        Retrieve a single event by its event_id.
+        :param event_id: ID of the event
+        :return: JSON representation of the event or an error message
+        """
+        try:
+            # Fetch the event by ID
+            event = EventDAO.query.get_or_404(event_id)
+
+            # Convert the event to JSON
+            event_data = event.json()
+
+            return make_response(jsonify(event_data), 200)
+        except Exception as e:
+            return make_response(jsonify({"message": f"Error retrieving event: {str(e)}"}), 500)
+
