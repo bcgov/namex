@@ -111,7 +111,7 @@ def worker():
 def write_to_events(ce: SimpleCloudEvent, email: dict):
     # write_to_events only when it is notification
     # Extract the Name Request number from the incoming cloud event
-    nr_num = ce.data.get("request", {}).get("header", {}).get("nrNum", "")
+    nr_num = ce.data.get("request", {}).get("nrNum", None)
     option = ce.data.get("request", {}).get("option", None)
 
     if (option in nr_notification.Option) and (nr_num is not None):
