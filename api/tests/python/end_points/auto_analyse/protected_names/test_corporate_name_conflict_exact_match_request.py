@@ -5,6 +5,7 @@ import pytest
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
+from .... import integration_solr
 from ...common import claims, token_header
 from ..common import (
     assert_additional_conflict_parameters,
@@ -39,6 +40,7 @@ from ..configuration import ENDPOINT_PATH
         ('MARKET CAFE LTD.', 'MARKET CAFE LTD.'),
     ],
 )
+@integration_solr
 @pytest.mark.xfail(raises=ValueError)
 def test_corporate_name_conflict_exact_match_request_response(client, jwt, app, name, expected):
     words_list_classification = [

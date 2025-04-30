@@ -3,12 +3,14 @@ from urllib.parse import quote_plus
 import jsonpickle
 import pytest
 
+from .... import integration_synonym_api
 from ...common import claims, token_header
 from ..common import save_words_list_classification
 from ..configuration import ENDPOINT_PATH
 
 
 # 5.- Successful well formed name:
+@integration_synonym_api
 @pytest.mark.xfail(raises=ValueError)
 def test_successful_well_formed_request_response(client, jwt, app):
     words_list_classification = [
@@ -37,4 +39,4 @@ def test_successful_well_formed_request_response(client, jwt, app):
         response = client.get(path, headers=headers)
         payload = jsonpickle.decode(response.data)
         print('Assert that the payload status is Available')
-        assert ('Available', payload.get('status'))
+        assert payload.get('status') == 'Available'

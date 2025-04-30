@@ -5,8 +5,8 @@ import pytest
 
 from namex.services.cache import cache
 from namex.services.statistics import wait_time_statistics
-from tests.python.end_points.common.utils import create_utc_date_time, create_utc_min_date_time
 
+from ...end_points.common.utils import create_utc_date_time, create_utc_min_date_time
 from ..common.logging import log_request_path
 from .common import API_BASE_URI, save_approved_names_by_examiner, save_auto_approved_names, save_name, save_names_queue
 

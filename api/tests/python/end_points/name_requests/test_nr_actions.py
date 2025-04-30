@@ -10,18 +10,19 @@ from sbc_common_components.utils.enums import QueueMessageTypes
 
 from namex.constants import EntityTypes, NameRequestActions
 from namex.models import State
-from tests.python.common.test_name_request_utils import (
+
+from ... import integration_solr
+from ...common.test_name_request_utils import (
     assert_field_equals_value,
     assert_field_is_lt_value,
     assert_field_is_mapped,
 )
-from tests.python.end_points.common.http import get_test_headers
-from tests.python.end_points.name_requests.test_setup_utils.test_helpers import add_test_user_to_db
 
 # Import token and claims if you need it
 # from ..common import token_header, claims
-from ..common.http import build_request_uri, build_test_query
+from ..common.http import build_request_uri, build_test_query, get_test_headers
 from ..common.logging import log_request_path
+from ..name_requests.test_setup_utils.test_helpers import add_test_user_to_db
 from .configuration import API_BASE_URI
 from .test_setup_utils.test_helpers import (
     assert_applicant_is_mapped_correctly,
@@ -440,6 +441,7 @@ def test_draft_patch_edit_and_repatch(client, jwt, app, mocker):
     assert_field_is_mapped(draft_nr, patched_nr, 'nrNum')
 
 
+@integration_solr
 def test_draft_patch_cancel(client, jwt, app, mocker):
     """
     Setup:
@@ -605,7 +607,7 @@ def test_draft_patch_cancel_with_consumed_name(client, jwt, app, mocker):
     # Expect this to fail as we
     nr_data = {}
 
-    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, test_nr.get('id'), nr_data, mocker)
+    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, test_nr.id, nr_data, mocker)
 
     # Ensure the request failed
     assert patch_response.status_code == 500
@@ -668,7 +670,7 @@ def test_draft_patch_cancel_with_expired_nr(client, jwt, app, mocker):
     # Expect this to fail as we
     nr_data = {}
 
-    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, test_nr.get('id'), nr_data, mocker)
+    patch_response = patch_nr(client, NameRequestActions.CANCEL.value, test_nr.id, nr_data, mocker)
 
     # Ensure the request failed
     assert patch_response.status_code == 500

@@ -5,12 +5,14 @@ import pytest
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
+from .... import integration_synonym_api
 from ...common import claims, token_header
 from ..common import assert_is_number, assert_issues_count_is_gt, save_words_list_classification
 from ..configuration import ENDPOINT_PATH
 
 
 # 2.- Unique word classified as distinctive
+@integration_synonym_api
 @pytest.mark.xfail(raises=ValueError)
 def test_incorrect_year_request_response(client, jwt, app):
     words_list_classification = [

@@ -1,6 +1,7 @@
 """Config for initializing the namex-api."""
 
 import os
+import textwrap
 
 from dotenv import find_dotenv, load_dotenv
 
@@ -181,7 +182,7 @@ class TestConfig(Config):
         ]
     }
 
-    JWT_OIDC_TEST_PRIVATE_KEY_PEM = """
+    JWT_OIDC_TEST_PRIVATE_KEY_PEM = textwrap.dedent("""
     -----BEGIN RSA PRIVATE KEY-----
     MIICXQIBAAKBgQDfn1nKQshOSj8xw44oC2klFWSNLmK3BnHONCJ1bZfq0EQ5gIfg
     tlvB+Px8Ya+VS3OnK7Cdi4iU1fxO9ktN6c6TjmmmFevk8wIwqLthmCSF3r+3+h4e
@@ -196,4 +197,4 @@ class TestConfig(Config):
     W0mOp436T6ZaELBfbFNulNLOzLLi5YzNRPLppfG1SRNZjbIrvTIKVL4N/YxLvQbT
     NrQw+2OdQACBJiEHsdZzAkBcsTk7frTH4yGx0VfHxXDPjfTj4wmD6gZIlcIr9lZg
     4H8UZcVFN95vEKxJiLRjAmj6g273pu9kK4ymXNEjWWJn
-    -----END RSA PRIVATE KEY-----"""
+    -----END RSA PRIVATE KEY-----""")

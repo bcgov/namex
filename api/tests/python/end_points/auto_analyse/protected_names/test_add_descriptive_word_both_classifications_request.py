@@ -5,6 +5,7 @@ import pytest
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
+from .... import integration_synonym_api
 from ...common import claims, token_header
 from ..common import (
     assert_has_word_upper,
@@ -16,6 +17,7 @@ from ..configuration import ENDPOINT_PATH
 
 
 # 4.- Unique word classified as distinctive and descriptive
+@integration_synonym_api
 @pytest.mark.xfail(raises=ValueError)
 def test_add_descriptive_word_both_classifications_request_response(client, jwt, app):
     words_list_classification = [

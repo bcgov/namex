@@ -10,13 +10,14 @@ import pytest
 
 from namex.analytics.solr import SolrQueries
 from namex.models import Applicant, Name, Request, State, User
-from tests.python.end_points.common.utils import (
+
+from ..end_points.common.utils import (
     get_server_now_str,
     get_server_now_with_delta_str,
     get_utc_server_now,
     get_utc_server_now_with_delta,
 )
-from tests.python.end_points.util import create_header
+from ..end_points.util import create_header
 
 # TODO: import these helper functions from somewhere shared by the tests
 

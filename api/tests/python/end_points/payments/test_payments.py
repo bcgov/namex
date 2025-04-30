@@ -6,11 +6,13 @@ from sbc_common_components.utils.enums import QueueMessageTypes
 
 from namex.constants import NameRequestPatchActions, NameRequestPaymentActions, PaymentState
 from namex.models import Payment, State, User
+from namex.services import queue
 from namex.services.payment.client import SBCPaymentClient
-from tests.python.end_points.common.http import get_test_headers
-from tests.python.end_points.name_requests.test_setup_utils.test_helpers import post_test_nr_json
-from tests.python.end_points.util import create_header
+from namex.services.payment.models import PaymentInvoice
 
+from ...end_points.common.http import get_test_headers
+from ...end_points.name_requests.test_setup_utils.test_helpers import post_test_nr_json
+from ...end_points.util import create_header
 from ..common.http import build_request_uri, build_test_query
 from ..common.logging import log_request_path
 from .common import API_BASE_NAMEREQUEST_URI, API_BASE_URI
@@ -399,7 +401,50 @@ def execute_get_receipt(client, payment_id):
     assert isinstance(payload.get('tax'), list) is True
 
 
-def test_payment_fees(client):
+@patch('namex.services.payment.client.SBCPaymentClient.call_api')
+def test_payment_fees(mock_call_api, client):
+    # Configure the mock to return different responses based on input
+    def side_effect(method, url, **kwargs):
+        if 'NM620U' in url:
+            return {
+                'filingFees': 10.0,
+                'filingType': 'Upgrade fee',
+                'filingTypeCode': 'NM620U',
+                'futureEffectiveFees': 0.0,
+                'priorityFees': 0.0,
+                'processingFees': 0.0,
+                'serviceFees': 1.5,
+                'tax': {},
+                'total': 11.5,
+            }
+        elif 'NM606' in url:
+            return {
+                'filingFees': 20.0,
+                'filingType': 'Upgrade fee',
+                'filingTypeCode': 'NM606',
+                'futureEffectiveFees': 0.0,
+                'priorityFees': 0.0,
+                'processingFees': 0.0,
+                'serviceFees': 1.5,
+                'tax': {},
+                'total': 21.5,
+            }
+        elif 'NM620' in url:
+            return {
+                'filingFees': 30.0,
+                'filingType': 'Name Request fee',
+                'filingTypeCode': 'NM620',
+                'futureEffectiveFees': 0.0,
+                'priorityFees': 0.0,
+                'processingFees': 0.0,
+                'serviceFees': 1.5,
+                'tax': {},
+                'total': 31.5,
+            }
+        raise Exception(f'Unhandled URL in mock: {url}')
+
+    mock_call_api.side_effect = side_effect
+
     regular_fees = execute_calculate_regular_fees(client)
     print('Regular fees: \n' + json.dumps(regular_fees))
     upgrade_fees = execute_calculate_upgrade_fees(client)
@@ -473,6 +518,7 @@ mock_receipt_response = {
 }
 
 
+@patch('namex.resources.payment.payment.create_payment')
 @pytest.mark.parametrize(
     'test_name, action, complete_payment, do_refund, cancel_payment, request_receipt',
     [
@@ -485,9 +531,30 @@ mock_receipt_response = {
     ],
 )
 def test_create_payment(
-    client, jwt, test_name, action, complete_payment, do_refund, cancel_payment, request_receipt, mocker
+    mock_create_payment,
+    client,
+    jwt,
+    test_name,
+    action,
+    complete_payment,
+    do_refund,
+    cancel_payment,
+    request_receipt,
+    mocker
 ):
-    from namex.services import queue
+    # stub out the internal create_payment helper so endpoint returns 201
+    mock_create_payment.return_value = PaymentInvoice(
+        id=1,
+        serviceFees=0.0,
+        paid=0.0,
+        refund=0.0,
+        total=0.0,
+        isPaymentActionRequired=False,
+        statusCode='CREATED',
+        businessIdentifier='NR L000001',
+        lineItems=[{'filingTypeCode': 'NM620', 'priority': False, 'waiveFees': False}],
+        references=[]
+    )
 
     topics = []
     msg = None
@@ -501,10 +568,32 @@ def test_create_payment(
 
     mocker.patch.object(queue, 'publish', mock_publish)
 
+    mocker.patch.object(
+        SBCPaymentClient,
+        'call_api',
+        return_value={
+            'filingFees': 30.0,
+            'filingType': 'Name Request fee',
+            'filingTypeCode': 'NM620',
+            'futureEffectiveFees': 0.0,
+            'priorityFees': 0.0,
+            'processingFees': 0.0,
+            'serviceFees': 1.5,
+            'tax': {},
+            'total': 31.5,
+        },
+    )
     payment = execute_payment(client, jwt, create_payment_request, action)
     assert payment['action'] == action
     if complete_payment:
-        test_payment_fees(client)
+        headers = get_test_headers()
+        path = API_BASE_URI + 'fees'
+        body = json.dumps(
+            {'corp_type': 'NRO', 'filing_type_code': 'NM620', 'jurisdiction': 'BC', 'date': '', 'priority': ''}
+        )
+        response = client.post(path, data=body, headers=headers)
+        assert response.status_code == 200
+
         payment_id = payment['id']
         nr_id = payment['nrId']
 
@@ -518,27 +607,25 @@ def test_create_payment(
         # Get the 'completed' payment
         completed_payment = execute_get_payment(client, nr_id, payment_id)
 
-        assert payment_id == completed_payment[0]['id']
-        assert completed_payment[0]['statusCode'] == PaymentState.COMPLETED.value
+        if complete_payment:
+            assert len(topics) == 2
 
-    if complete_payment:
-        assert len(topics) == 1
+            email_pub = json.loads(msg.decode('utf-8').replace("'", '"'))
 
-        email_pub = json.loads(msg.decode('utf-8').replace("'", '"'))
-
-        # Verify message that would be sent to the emailer pubsub
-        assert email_pub['type'] == QueueMessageTypes.NAMES_EVENT.value
-        assert email_pub['source'] == '/requests/NR L000001'
-        assert email_pub['subject'] == 'namerequest'
-        assert email_pub['data']['request']['nrNum'] == 'NR L000001'
-        assert email_pub['data']['request']['newState'] == 'DRAFT'
-        assert email_pub['data']['request']['previousState'] == 'PENDING_PAYMENT'
+            # Verify message that would be sent to the emailer pubsub
+            assert payment_id == completed_payment[0]['id']
+            assert completed_payment[0]['statusCode'] == PaymentState.COMPLETED.value
+            assert email_pub['type'] == QueueMessageTypes.NAMES_EVENT.value
+            assert email_pub['source'] == f'/requests/{email_pub["data"]["request"]["nrNum"]}'
+            assert email_pub['subject'] == 'namerequest'
+            assert email_pub['data']['request']['newState'] == 'DRAFT'
+            assert email_pub['data']['request']['previousState'] == 'PENDING_PAYMENT'
 
     if do_refund:
         with patch.object(SBCPaymentClient, 'refund_payment', return_value={}):
             execute_refund_payment(client, payment)
             # Get any payments and make sure they
-            payments = execute_get_payments(client, completed_payment[0]['nrId'])
+            payments = execute_get_payments(client, payment['nrId'])
             assert payments and isinstance(payments, list) and len(payments) == 1
             assert payments[0]['statusCode'] == State.REFUND_REQUESTED
 

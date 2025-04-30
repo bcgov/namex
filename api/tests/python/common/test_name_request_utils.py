@@ -52,7 +52,7 @@ def assert_field_is_mapped(req_obj, res_obj, prop_name):
     :param prop_name:
     :return:
     """
-    req_obj_val = req_obj.get(prop_name)
+    req_obj_val = req_obj.get(prop_name) if isinstance(req_obj, dict) else getattr(req_obj, prop_name)
     res_obj_val = res_obj.get(prop_name)
     print(
         'Response Field ['

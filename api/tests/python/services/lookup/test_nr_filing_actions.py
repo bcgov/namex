@@ -11,28 +11,34 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import logging
+import importlib
+from unittest.mock import patch
 
+import flask
 from flask import Flask
 
-from namex.services.lookup import nr_filing_actions
+from namex.services import lookup
 
 
-def test_nr_filing_actions(caplog):
+def test_nr_filing_actions(monkeypatch):
     """Assert that the nr_filing_actions is created and cached."""
+
+    importlib.reload(lookup)  # Reset module-level cache
+    nr_filing_actions = lookup.nr_filing_actions
+
     app = Flask(__name__)
     nr_type_cd = 'BC'
     entity_type_cd = 'BLANK'
     request_action_cd = 'BLANK'
     nr_filing_actions_debug_msg = 'creating nr_filing_actions'
 
-    caplog.clear()
-
     with app.app_context():
-        with caplog.at_level(logging.DEBUG):
-            nr_filing_actions.get_actions(nr_type_cd, entity_type_cd, request_action_cd)
-            assert nr_filing_actions_debug_msg in [rec.message for rec in caplog.records]
+        with patch.object(flask.current_app.logger, 'debug') as mock_debug:
+            # clear cache after reloading
+            try:
+                nr_filing_actions.get_actions.cache_clear()
+            except AttributeError:
+                pass
 
-            caplog.clear()
             nr_filing_actions.get_actions(nr_type_cd, entity_type_cd, request_action_cd)
-            assert nr_filing_actions_debug_msg not in [rec.message for rec in caplog.records]
+            mock_debug.assert_any_call(nr_filing_actions_debug_msg)

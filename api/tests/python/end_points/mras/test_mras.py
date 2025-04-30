@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 import pytest
 
-from tests.python import integration_mras
+from ... import integration_mras
 
 # Import token and claims if you need it
 # from ..common import token_header, claims

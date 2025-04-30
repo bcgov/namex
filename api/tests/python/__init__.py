@@ -9,7 +9,7 @@ set :
     NRO_EXTRACTOR_TESTS to run integration_nro_extractor
 """
 
-import datetime
+from datetime import datetime, timezone
 
 from .util import (
     integration_oracle_local_namesdb,
@@ -22,5 +22,5 @@ from .util import (
     integration_nro_extractor,
 )
 
-EPOCH_DATETIME = datetime.datetime.utcfromtimestamp(0)
-FROZEN_DATETIME = datetime.datetime(2001, 8, 5, 7, 7, 58, 272362)
+EPOCH_DATETIME = datetime.fromtimestamp(0, tz=timezone.utc)
+FROZEN_DATETIME = datetime(2001, 8, 5, 7, 7, 58, 272362)

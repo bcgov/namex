@@ -5,6 +5,7 @@ import pytest
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
+from .... import integration_solr
 from ...common import claims, token_header
 from ..common import (
     assert_additional_conflict_parameters,
@@ -38,6 +39,7 @@ from ..configuration import ENDPOINT_PATH
         # ("EQTEC ENGINEERING & SOLUTIONS LTD.", "EQTEC ENGINEERING LTD.") # To be fixed with 4844:FixesFromUATRejectionTesting
     ],
 )
+@integration_solr
 @pytest.mark.xfail(raises=ValueError)
 def test_corporate_name_conflict_strip_out_numbers_request_response(client, jwt, app, name, expected):
     words_list_classification = [
