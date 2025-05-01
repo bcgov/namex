@@ -30,6 +30,31 @@ def publish_email_notification(nr_num: str, option: str, refund_value=None):
     queue.publish(topic=email_topic, payload=payload)
 
 
+def publish_resend_email_notification(nr_num: str, option: str, resend_event_id: int):
+    """Send resend notification info to the mail queue."""
+    event_data = {
+        'request': {
+            'nrNum': nr_num,
+            'option': option,
+            'resendEventId': resend_event_id  # Include the resend event ID
+        }
+    }
+
+    ce = SimpleCloudEvent(
+        id=str(uuid.uuid4()),
+        source=f'/requests/{nr_num}',
+        subject='namerequest',
+        type=QueueMessageTypes.NAMES_MESSAGE_TYPE.value,
+        time=datetime.now(tz=timezone.utc).isoformat(),
+        data=event_data,
+    )
+
+    email_topic = current_app.config.get('EMAILER_TOPIC', 'mailer')
+    payload = queue.to_queue_message(ce)
+    current_app.logger.debug('About to publish resend email for %s nrNum=%s, resendEventId=%s', option, nr_num, resend_event_id)
+    queue.publish(topic=email_topic, payload=payload)
+
+
 def create_name_request_state_msg(nr_num, state_cd, old_state_cd):
     """Builds a name request state message."""
 
@@ -80,4 +105,4 @@ def create_name_state_msg(nr_num, name_id, state_cd, old_state_cd):
 def send_name_state_msg(nr_num, name_id, state_cd, old_state_cd):
     """Publish name state message to pubsub nr state subject."""
     email_topic = current_app.config.get('NAMEX_NR_STATE_TOPIC', 'mailer')
-    queue.publish(topic=email_topic, payload=create_name_state_msg(nr_num, state_cd, old_state_cd))
+    queue.publish(topic=email_topic, payload=create_name_state_msg(nr_num, name_id, state_cd, old_state_cd))

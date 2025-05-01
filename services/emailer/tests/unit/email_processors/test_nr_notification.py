@@ -12,14 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The Unit Tests for the name request expiry email processor."""
-import base64
 from datetime import datetime
-from unittest.mock import patch
 
 import pytest
 from sbc_common_components.utils.enums import QueueMessageTypes
-from simple_cloudevent import SimpleCloudEvent
 
+from namex_emailer.constants.notification_options import Option
 from namex_emailer.email_processors import nr_notification
 from namex_emailer.services.helpers import as_legislation_timezone, format_as_report_string
 from tests import MockResponse
@@ -97,11 +95,11 @@ def test_nr_notification(
 
         assert "test@test.com" in email["recipients"]
         assert email["content"]["body"]
-        if option == nr_notification.Option.REFUND.value:
+        if option == Option.REFUND.value:
             assert f"${refund_value} CAD" in email["content"]["body"]
         assert email["content"]["attachments"] == []
 
-        if option == nr_notification.Option.BEFORE_EXPIRY.value:
+        if option == Option.BEFORE_EXPIRY.value:
             assert nr_number in email["content"]["body"]
             assert expected_legal_name in email["content"]["body"]
             exp_date = datetime.fromisoformat(expiration_date)
@@ -109,6 +107,6 @@ def test_nr_notification(
             assert_expiration_date = format_as_report_string(exp_date_tz)
             assert assert_expiration_date in email["content"]["body"]
 
-        if option == nr_notification.Option.EXPIRED.value:
+        if option == Option.EXPIRED.value:
             assert nr_number in email["content"]["body"]
             assert expected_legal_name in email["content"]["body"]
