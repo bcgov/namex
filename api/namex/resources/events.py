@@ -10,6 +10,7 @@ from namex.models import Payment, State, User
 from namex.models import Request as RequestDAO
 from namex.services import EventRecorder
 from namex.utils.auth import cors_preflight
+from namex.utils.queue_util import publish_resend_email_notification
 
 # Register a local namespace for the event history
 api = Namespace('events', description='Audit trail of events for a Name Request')
@@ -297,8 +298,8 @@ class Events(Resource):
             return make_response(jsonify({'message': f'Error recording event: {str(e)}'}), 500)
 
 
-@cors_preflight('GET')
-@api.route('/event/<int:event_id>', methods=['GET', 'OPTIONS'])
+@cors_preflight('GET, POST')
+@api.route('/event/<int:event_id>', methods=['GET', 'POST', 'OPTIONS'])
 class SingleEvent(Resource):
     @staticmethod
     def get(event_id):
@@ -317,4 +318,31 @@ class SingleEvent(Resource):
             return make_response(jsonify(event_data), 200)
         except Exception as e:
             return make_response(jsonify({'message': f'Error retrieving event: {str(e)}'}), 500)
+
+    @staticmethod
+    def post(event_id):
+        """
+        Resend a notification for a specific event by its event_id.
+        :param event_id: ID of the event
+        :return: Response indicating success or failure
+        """
+        try:
+            # Fetch the event by ID
+            event = EventDAO.query.get_or_404(event_id)
+
+            # Extract necessary data from the event
+            event_data = event.json()
+            nr_id = event_data.get('requestId')
+            nr_num = RequestDAO.find_by_id(nr_id).nrNum if nr_id else None  # Corrected syntax
+            option = 'RESEND'
+
+            if not nr_num:
+                return make_response(jsonify({'message': 'nrNum not found in event data'}), 400)
+
+            # Publish the resend notification to the queue
+            publish_resend_email_notification(nr_num, option, event_id)
+
+            return make_response(jsonify({'message': 'Resend notification published successfully'}), 200)
+        except Exception as e:
+            return make_response(jsonify({'message': f'Error publishing resend notification: {str(e)}'}), 500)
 
