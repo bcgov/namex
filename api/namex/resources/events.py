@@ -334,10 +334,18 @@ class SingleEvent(Resource):
             event_data = event.json()
             nr_id = event_data.get('requestId')
             nr_num = RequestDAO.find_by_id(nr_id).nrNum if nr_id else None  # Corrected syntax
-            option = 'RESEND'
+
+            # Parse jsonData to a JSON object and extract 'option'
+            json_data = event_data.get('jsonData')
+            if isinstance(json_data, str):
+                json_data = json.loads(json_data)  # Parse if it's a string
+            option = json_data.get('option') if json_data else None
 
             if not nr_num:
                 return make_response(jsonify({'message': 'nrNum not found in event data'}), 400)
+
+            if not option:
+                return make_response(jsonify({'message': 'option not found in event data'}), 400)
 
             # Publish the resend notification to the queue
             publish_resend_email_notification(nr_num, option, event_id)
