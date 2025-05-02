@@ -27,7 +27,7 @@ from namex.models import Applicant, Name, NameSchema, PartnerNameSystemSchema
 from namex.models import User, State, Comment, NameCommentSchema, Event
 from namex.models import ApplicantSchema
 from namex.models import DecisionReason
-
+from namex.models.request import AffiliationInvitationSearchDetails
 from namex.services.lookup import nr_filing_actions
 from namex.services import ServicesError, MessageServices, EventRecorder
 from namex.services.name_request import NameRequestService
@@ -485,32 +485,28 @@ class RequestSearch(Resource):
     def post():
         search = request.get_json()
         identifiers = search.get('identifiers', [])
-        nr_name = search.get('name', None)
-        state = search.get('state', [])
-        type = search.get('type', [])
-        page = search.get('page', 1)
-        limit = search.get('limit', 100)
-
-        try:
-            page = int(page)
-            limit = int(limit)
-            if page < 1 or limit < 1:
-                raise ValueError
-        except ValueError:
-            return jsonify({'error': 'Invalid pagination parameters'}), 400
+        search_details = AffiliationInvitationSearchDetails.from_request_args(search)
+        
         # Only names and applicants are needed for this query, we want this query to be lighting fast
         # to prevent putting a load on namex-api.
         # Base query with the common identifier filter
         q = RequestDAO.query.filter(RequestDAO.nrNum.in_(identifiers))
 
+        if search_details.identifier:
+            q = q.filter(func.replace(RequestDAO.nrNum, " ", "").ilike(f'%{search_details.identifier.replace(" ", "")}%'))
         # Add the state filter if 'state' is provided
-        if state:
-            q = q.filter(RequestDAO.stateCd.in_(state))
+        if search_details.status:
+            q = q.filter(RequestDAO.stateCd.in_(search_details.status))
 
         # Add the nr_name filter if 'nr_name' is provided
-        if nr_name:
-            q = q.filter(RequestDAO.nameSearch.ilike(f'%{nr_name}%'))
-            
+        if search_details.name:
+            q = q.filter(RequestDAO.nameSearch.ilike(f'%{search_details.name}%'))
+        
+        if search_details.type:
+            request_typecd = nr_filing_actions.get_request_type_array(search_details.type)
+            flattened_request_types = [item for sublist in request_typecd.values() for item in sublist]
+            q = q.filter(RequestDAO.requestTypeCd.in_(flattened_request_types))
+
         q = q.options(
                 lazyload('*'),
                 eagerload(RequestDAO.names).load_only(Name.state, Name.name),
@@ -528,15 +524,13 @@ class RequestSearch(Resource):
                     RequestDAO.consentFlag,
                     RequestDAO._request_action_cd
                 ))
-        q = q.offset((page - 1) * limit).limit(limit)
+        q = q.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit)
         requests = request_auth_search_schemas.dump(q.all())
         actions_array = [nr_filing_actions.get_actions(r['requestTypeCd'], r['entity_type_cd'], r['request_action_cd']) for r in requests]
         for r, additional_fields in zip(requests, actions_array):
             if additional_fields:
                 r.update(additional_fields)
                 
-        if type:
-            requests = [ r for r in requests if r['legalType'] in type ]
         return jsonify(requests)
 
 
