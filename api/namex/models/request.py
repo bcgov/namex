@@ -902,7 +902,7 @@ class AffiliationInvitationSearchDetails:  # pylint: disable=too-many-instance-a
     name: Optional[str] = None
     type: Optional[List[str]] = None
     page: int = 1
-    limit: int = 100
+    limit: int = 100000
 
     @classmethod
     def from_request_args(cls, req: Request) -> Self:
@@ -912,5 +912,5 @@ class AffiliationInvitationSearchDetails:  # pylint: disable=too-many-instance-a
             name=req.get('name', None),
             type=req.get('type', []),
             page=int(req.get('page',1)),
-            limit=int(req.get('limit',100))
+            limit=int(req.get('limit',100000))
         )

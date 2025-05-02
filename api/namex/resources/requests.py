@@ -623,6 +623,10 @@ class RequestSearch(Resource):
                     RequestDAO.consentFlag,
                     RequestDAO._request_action_cd
                 ))
+        if ( search_details.page is not None and search_details.page > 1 and
+            search_details.limit is not None and search_details.limit > 0 ):
+            q = q.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit)
+
         q = q.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit)
 
         requests = request_auth_search_schemas.dump(q.all())
