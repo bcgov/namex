@@ -1,3 +1,6 @@
+
+from dataclasses import dataclass
+from typing import List, Optional, Self
 """Request is the main business class that is the real top level object in the system"""
 
 import re
@@ -889,3 +892,25 @@ class RequestsAuthSearchSchema(ma.SQLAlchemySchema):
     expirationDate = ma.DateTime()
     names = ma.Nested(NameSchema, many=True, only=('name', 'state'))
     applicants = ma.Nested(ApplicantSchema, many=True, only=('emailAddress', 'phoneNumber'))
+
+@dataclass
+class AffiliationInvitationSearchDetails:  # pylint: disable=too-many-instance-attributes
+    """Used for filtering NRs Invitations based on filters passed."""
+
+    identifier: Optional[str] = None
+    status: Optional[List[str]] = None
+    name: Optional[str] = None
+    type: Optional[List[str]] = None
+    page: int = 1
+    limit: int = 100000
+
+    @classmethod
+    def from_request_args(cls, req: Request) -> Self:
+        return cls(
+            identifier=req.get('identifier', None),
+            status=req.get('status', []),
+            name=req.get('name', None),
+            type=req.get('type', []),
+            page=int(req.get('page',1)),
+            limit=int(req.get('limit',100000))
+        )

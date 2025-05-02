@@ -20,6 +20,13 @@ from namex.analytics import VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 from namex.analytics import RestrictedWords, SolrQueries
 from namex.constants import DATE_TIME_FORMAT_SQL
 from namex.exceptions import BusinessException
+from namex.models import db
+from namex.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema, RequestsSearchSchema
+from namex.models import Applicant, Name, NameSchema, PartnerNameSystemSchema
+from namex.models import User, State, Comment, NameCommentSchema, Event
+from namex.models import ApplicantSchema
+from namex.models import DecisionReason
+from namex.models.request import AffiliationInvitationSearchDetails
 from namex.models import (
     Applicant,
     ApplicantSchema,
@@ -577,38 +584,50 @@ class RequestSearch(Resource):
     def post():
         search = request.get_json()
         identifiers = search.get('identifiers', [])
-        nr_name = search.get('name', None)
-        state = search.get('state', [])
-
+        search_details = AffiliationInvitationSearchDetails.from_request_args(search)
+        
         # Only names and applicants are needed for this query, we want this query to be lighting fast
         # to prevent putting a load on namex-api.
         # Base query with the common identifier filter
         q = RequestDAO.query.filter(RequestDAO.nrNum.in_(identifiers))
 
+        if search_details.identifier:
+            q = q.filter(func.replace(RequestDAO.nrNum, " ", "").ilike(f'%{search_details.identifier.replace(" ", "")}%'))
         # Add the state filter if 'state' is provided
-        if state:
-            q = q.filter(RequestDAO.stateCd.in_(state))
+        if search_details.status:
+            q = q.filter(RequestDAO.stateCd.in_(search_details.status))
 
         # Add the nr_name filter if 'nr_name' is provided
-        if nr_name:
-            q = q.filter(RequestDAO.nameSearch.ilike(f'%{nr_name}%'))
+        if search_details.name:
+            q = q.filter(RequestDAO.nameSearch.ilike(f'%{search_details.name}%'))
+        
+        if search_details.type:
+            request_typecd = nr_filing_actions.get_request_type_array(search_details.type)
+            flattened_request_types = [item for sublist in request_typecd.values() for item in sublist]
+            q = q.filter(RequestDAO.requestTypeCd.in_(flattened_request_types))
 
         q = q.options(
-            lazyload('*'),
-            eagerload(RequestDAO.names).load_only(Name.state, Name.name),
-            eagerload(RequestDAO.applicants).load_only(Applicant.emailAddress, Applicant.phoneNumber),
-            load_only(
-                RequestDAO.id,
-                RequestDAO.nrNum,
-                RequestDAO.stateCd,
-                RequestDAO.requestTypeCd,
-                RequestDAO.natureBusinessInfo,
-                RequestDAO._entity_type_cd,
-                RequestDAO.expirationDate,
-                RequestDAO.consentFlag,
-                RequestDAO._request_action_cd,
-            ),
-        )
+                lazyload('*'),
+                eagerload(RequestDAO.names).load_only(Name.state, Name.name),
+                eagerload(RequestDAO.applicants).load_only(
+                    Applicant.emailAddress, Applicant.phoneNumber
+                ),
+                load_only(
+                    RequestDAO.id,
+                    RequestDAO.nrNum,
+                    RequestDAO.stateCd,
+                    RequestDAO.requestTypeCd,
+                    RequestDAO.natureBusinessInfo,
+                    RequestDAO._entity_type_cd,
+                    RequestDAO.expirationDate,
+                    RequestDAO.consentFlag,
+                    RequestDAO._request_action_cd
+                ))
+        if ( search_details.page is not None and search_details.page > 1 and
+            search_details.limit is not None and search_details.limit > 0 ):
+            q = q.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit)
+
+        q = q.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit)
 
         requests = request_auth_search_schemas.dump(q.all())
         actions_array = [
@@ -618,6 +637,7 @@ class RequestSearch(Resource):
         for r, additional_fields in zip(requests, actions_array):
             if additional_fields:
                 r.update(additional_fields)
+                
         return jsonify(requests)
 
 

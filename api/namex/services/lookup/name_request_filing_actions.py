@@ -156,6 +156,7 @@ class NameRequestFilingActions:
         ('CFR_FR', 'SP', 'Sole Proprietorship', 'Change of Name', 'lear', None, None, None),
         ('FR_DBA', 'SP', 'Sole Proprietorship (DBA)', 'Registration', 'lear', None, None, None),
         ('CFR_DBA', 'SP', 'Sole Proprietorship (DBA)', 'Change of Name', 'lear', None, None, None),
+
         ('FR_GP', 'GP', 'General Partnership', 'Registration', 'lear', None, None, None),
         ('CFR_GP', 'GP', 'General Partnership', 'Change of Name', 'lear', None, None, None),
         (
@@ -546,6 +547,32 @@ class NameRequestFilingActions:
         ),
     ]
 
+    #reverse mapping Legaltype : requestTypeCd
+    requestTypecd = {
+        'BC':['CR','CCR','RCR','BECR','ULCB'],
+        'XCR': ['XCR','XCCR','XRCR','AS'],
+        'LLC':['LC','CLC','RLC','AL'],
+        'SP':['FR','CFR'],
+        'GP':['FR','CFR'],
+        'LL':['LL','CLL'],
+        'XP':['XLL','XCLL'],
+        'LP':['LP','CLP'],
+        'XL':['XLP','XCLP'],
+        'CP':[ 'CP','CCP','CTC','RCP'],
+        'XCP':['XCP','XCP','XCCP','XRCP'],
+        'CC':[ 'CC','CCC','RCC','CCV','BECC'],
+        'ULC':['UL','CUL','RUL','UC'],
+        'A':['UA','XUL','XCUL','XRUL'],
+        'FI':['FI','CFI','RFI'],
+        'PA':['PA'],
+        'PAR': ['PAR'],
+        'BEN':['BC','BEAM','BEC','BERE','BECV','ULBE'],
+        'C':['CT','CCR','RCR','BECR','ULCB'],
+        'CBEN':['BECT','BEC','BERE','BECV','ULBE'],
+        'CCC':['CCCT','CCC','RCC','CCV','BECC'],
+        'CUL':['ULCT','CUL','RUL','UC']
+    }
+
     @cached_property
     def get_dict(self) -> dict:
         """Return a dict of nr types to the target and filing actions.
@@ -605,3 +632,9 @@ class NameRequestFilingActions:
             request_type_cd = request_type_cd + '_' + entity_type_cd
 
         return self.get_dict.get(request_type_cd)
+
+    def get_request_type_array(self, request_type):
+        if isinstance(request_type, list):
+            return { request_type: self.requestTypecd.get(request_type, "Key not found") for request_type in request_type }
+        else:
+            return { self.requestTypecd.get(request_type, "Key not found") }
