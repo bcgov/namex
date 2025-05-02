@@ -1,6 +1,6 @@
 
 from dataclasses import dataclass
-from typing import Optional, Self
+from typing import List, Optional, Self
 """Request is the main business class that is the real top level object in the system"""
 
 import re
@@ -898,9 +898,9 @@ class AffiliationInvitationSearchDetails:  # pylint: disable=too-many-instance-a
     """Used for filtering NRs Invitations based on filters passed."""
 
     identifier: Optional[str] = None
-    status: Optional[str] = None
+    status: Optional[List[str]] = None
     name: Optional[str] = None
-    type: Optional[str] = None
+    type: Optional[List[str]] = None
     page: int = 1
     limit: int = 100
 

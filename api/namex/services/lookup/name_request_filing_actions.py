@@ -635,6 +635,6 @@ class NameRequestFilingActions:
 
     def get_request_type_array(self, request_type):
         if isinstance(request_type, list):
-            return {request_type: self.requestTypecd.get(request_type, "Key not found") for request_type in request_type}
+            return { request_type: self.requestTypecd.get(request_type, "Key not found") for request_type in request_type }
         else:
-            return self.requestTypecd.get(request_type, "Key not found")
+            return { self.requestTypecd.get(request_type, "Key not found") }
