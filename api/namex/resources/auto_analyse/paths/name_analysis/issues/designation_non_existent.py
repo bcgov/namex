@@ -1,4 +1,5 @@
 """Designation non existent issue classes."""
+
 from namex.resources.auto_analyse.issues import DesignationNonExistentIssue
 
 from ....response_objects import NameAnalysisIssue
@@ -26,7 +27,7 @@ class XproDesignationNonExistentIssue(DesignationNonExistentIssue):
             show_examination_button=False,
             conflicts=None,
             setup=None,
-            name_actions=[]
+            name_actions=[],
         )
 
         return issue

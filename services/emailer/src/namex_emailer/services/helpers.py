@@ -1,10 +1,14 @@
+from copy import deepcopy
 from datetime import datetime
 
 import pytz
 import requests
-from flask import current_app
 from cachetools import cached, TTLCache
+from flask import current_app, request
+from gcp_queue.logging import structured_log
 from urllib.parse import urlencode
+
+from namex_emailer.constants.notification_options import DECISION_OPTIONS, Option
 
 @staticmethod
 @cached(cache=TTLCache(maxsize=1, ttl=180)) 
@@ -41,21 +45,6 @@ def format_as_report_string(date_time: datetime) -> str:
     am_pm = date_time.strftime('%p').lower()
     date_time_str = date_time.strftime(f'%B %-d, %Y at {hour}:%M {am_pm} Pacific time')
     return date_time_str
-
-
-@staticmethod
-def query_nr_number(identifier: str):
-    """Return a JSON object with name request information."""
-    namex_url = current_app.config.get('NAMEX_SVC_URL')
-
-    token = get_bearer_token()
-
-    nr_response = requests.get(namex_url + '/requests/' + identifier, headers={
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token
-    })
-
-    return nr_response
 
 
 @staticmethod
@@ -96,3 +85,154 @@ def get_contact_info(nr_data):
             recipient_phones.append(phone)
 
     return recipient_emails, recipient_phones
+
+
+def get_headers(token: str) -> dict:
+    """Return the standard headers for requests."""
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}'
+    }
+
+
+@staticmethod
+def query_nr_number(identifier: str):
+    """Return a JSON object with name request information."""
+    namex_url = current_app.config.get('NAMEX_SVC_URL')
+
+    token = get_bearer_token()
+
+    nr_response = requests.get(namex_url + '/requests/' + identifier, headers=get_headers(token))
+
+    return nr_response
+
+
+@staticmethod
+def query_notification_event(event_id: str):
+    """Return a JSON object with name request information."""
+    namex_url = current_app.config.get('NAMEX_SVC_URL')
+
+    token = get_bearer_token()
+
+    nr_response = requests.get(namex_url + '/events/event/' + event_id, headers=get_headers(token))
+
+    return nr_response
+
+
+@staticmethod
+def send_email(email: dict, token: str):
+    """Send the email"""
+    structured_log(request, "INFO", f"Send Email: {email}")
+    return requests.post(
+        f'{current_app.config.get("NOTIFY_API_URL", "")}',
+        json=email,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {token}",
+        },
+    )
+
+def record_notification_event(nr_num: str, email: dict):
+    payload = {
+        "action": "notification",
+        "eventJson": email
+    }
+
+    namex_url = current_app.config.get('NAMEX_SVC_URL')
+    token = get_bearer_token()
+
+    try:
+        nr_response = requests.post(
+            namex_url + '/events/' + nr_num,
+            json=payload,
+            headers=get_headers(token)
+        )
+        nr_response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
+        return nr_response
+    except requests.exceptions.RequestException as e:
+        current_app.logger.error(f"Failed to record notification event for NR {nr_num}: {e}")
+        return None
+    
+@staticmethod
+def write_to_events(ce, email):
+    """
+    Log the event as a system-generated notification in the events table.
+    """
+    # Extract and validate data
+    nr_num, option = _extract_event_data(ce)
+    if not nr_num or not option:
+        return False
+
+    # Prepare event JSON
+    event_json = _prepare_event_json(nr_num, option, email)
+
+    # Record the notification event
+    return _record_event(nr_num, event_json)
+
+
+@staticmethod
+def _extract_event_data(ce):
+    """
+    Extract and validate the NR number and option from the cloud event.
+    """
+    nr_num = ce.data.get("request", {}).get("nrNum", None)
+    option = ce.data.get("request", {}).get("option", None)
+
+    if not nr_num or option not in {opt.value for opt in Option}:
+        current_app.logger.error(f"Invalid NR number or option: nrNum={nr_num}, option={option}")
+        return None, None
+
+    return nr_num, option
+
+
+@staticmethod
+def _prepare_event_json(nr_num, option, email):
+    """
+    Prepare the event JSON object, including processing attachments if needed.
+    """
+    event_json = {"option": option}
+    email_for_event = deepcopy(email) if email.get('content', {}).get('attachments') else email
+
+    # Process attachments if the option is in DECISION
+    if option and Option(option) in DECISION_OPTIONS:
+        for attachment in email_for_event['content'].get('attachments', []):
+            attachment['fileBytes'] = '<placeholder-for-pdf-report-bytes>'
+        try:
+            nr_model = query_nr_number(nr_num)
+            if nr_model.status_code != 200:
+                current_app.logger.error(f"Failed to query NR number {nr_num}: {nr_model.status_code}")
+                return None
+            nr_model = nr_model.json()
+            event_json['nr_model'] = nr_model
+        except Exception as e:
+            current_app.logger.error(f"Failed to query NR number {nr_num}: {e}")
+            return None
+
+    event_json['email'] = email_for_event
+    return event_json
+
+
+@staticmethod
+def _record_event(nr_num, event_json):
+    """
+    Record the notification event in the events table.
+    """
+    payload = {
+        "action": "notification",
+        "eventJson": event_json
+    }
+    namex_url = current_app.config.get('NAMEX_SVC_URL')
+    token = get_bearer_token()
+
+    try:
+        nr_response = requests.post(
+            f"{namex_url}/events/{nr_num}",
+            json=payload,
+            headers=get_headers(token)
+        )
+        nr_response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
+        current_app.logger.info(f"Successfully recorded notification event for NR {nr_num}")
+        return True
+    except requests.exceptions.RequestException as e:
+        current_app.logger.error(f"Failed to record notification event for NR {nr_num}: {e}")
+        return False

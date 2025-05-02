@@ -5,14 +5,19 @@ either reside here, or be imported and exported from here.
 
 # TODO: Implement a true shared lib for stuff like this!
 #  Most, if not all of these methods are shared with the namex api project!
-from namex.constants import \
-    BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes, \
-    EntityTypes, EntityTypeDescriptions, DesignationPositionCodes
+from namex.constants import (
+    BCProtectedNameEntityTypes,
+    BCUnprotectedNameEntityTypes,
+    DesignationPositionCodes,
+    EntityTypeDescriptions,
+    EntityTypes,
+    XproUnprotectedNameEntityTypes,
+)
 
-'''
+"""
 A temporary fallback for getting an EntityType code using its string value.
 This method will be removed in a future iteration. Please use get_entity_type_code.
-'''
+"""
 
 
 def get_entity_type_code_DEPRECATED(entity_type_str):
@@ -51,10 +56,10 @@ def get_entity_type_code_description(entity_type_code):
     return entity_type_code_description
 
 
-'''
+"""
 A wrapper for get_entity_type_code_description that provides the ability to get an
 EntityType code description using its text / string value, as opposed to the code itself.
-'''
+"""
 
 
 def get_entity_type_description(entity_type_str):

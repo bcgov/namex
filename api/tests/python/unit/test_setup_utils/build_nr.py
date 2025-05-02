@@ -1,24 +1,26 @@
-from namex.models import db, State, Request as RequestDAO, Name as NameDAO
+from namex.models import Name as NameDAO
+from namex.models import Request as RequestDAO
+from namex.models import State, db
 
 default_test_names = [
     {
         'name': 'ABC ENGINEERING',
-        "choice": 1,
-        "designation": "LTD.",
-        "name_type_cd": "CO",
-        "consent_words": "",
-        "conflict1": "ABC ENGINEERING LTD.",
-        "conflict1_num": "0515211"
+        'choice': 1,
+        'designation': 'LTD.',
+        'name_type_cd': 'CO',
+        'consent_words': '',
+        'conflict1': 'ABC ENGINEERING LTD.',
+        'conflict1_num': '0515211',
     },
     {
         'name': 'ABC PLUMBING',
-        "choice": 1,
-        "designation": "LTD.",
-        "name_type_cd": "CO",
-        "consent_words": "",
-        "conflict1": "ABC PLUMBING LTD.",
-        "conflict1_num": "0515211"
-    }
+        'choice': 1,
+        'designation': 'LTD.',
+        'name_type_cd': 'CO',
+        'consent_words': '',
+        'conflict1': 'ABC PLUMBING LTD.',
+        'conflict1_num': '0515211',
+    },
 ]
 
 

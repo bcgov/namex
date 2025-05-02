@@ -12,5 +12,5 @@ class Setup(Serializable, object):
             self.line1 = kwargs.get('line1', '')
             self.line2 = kwargs.get('line2', '')
             self.label = kwargs.get('label', '')
-        except Exception as error:
+        except Exception:
             raise

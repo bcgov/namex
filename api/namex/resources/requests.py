@@ -4,22 +4,21 @@ TODO: Fill in a larger description once the API is defined for V1
 """
 
 from datetime import datetime
-from pytz import timezone, UTC
 
-from flask import request, jsonify, g, current_app, make_response
-from flask_restx import Namespace, Resource, fields, cors
+from flask import current_app, g, jsonify, make_response, request
 from flask_jwt_oidc import AuthError
+from flask_restx import Namespace, Resource, cors, fields
 from marshmallow import ValidationError
-
-from namex.constants import DATE_TIME_FORMAT_SQL
-from namex.models.request import RequestsAuthSearchSchema
-
-from sqlalchemy.orm import load_only, lazyload, eagerload
-from sqlalchemy.orm.exc import NoResultFound
+from pytz import timezone
 from sqlalchemy import func, or_, text
 from sqlalchemy.inspection import inspect
+from sqlalchemy.orm import eagerload, lazyload, load_only
+from sqlalchemy.orm.exc import NoResultFound
 
 from namex import jwt
+from namex.analytics import VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
+from namex.analytics import RestrictedWords, SolrQueries
+from namex.constants import DATE_TIME_FORMAT_SQL
 from namex.exceptions import BusinessException
 from namex.models import db
 from namex.models import Request as RequestDAO, RequestsSchema, RequestsHeaderSchema, RequestsSearchSchema
@@ -28,19 +27,34 @@ from namex.models import User, State, Comment, NameCommentSchema, Event
 from namex.models import ApplicantSchema
 from namex.models import DecisionReason
 from namex.models.request import AffiliationInvitationSearchDetails
+from namex.models import (
+    Applicant,
+    ApplicantSchema,
+    Comment,
+    DecisionReason,
+    Event,
+    Name,
+    NameCommentSchema,
+    NameSchema,
+    PartnerNameSystemSchema,
+    RequestsHeaderSchema,
+    RequestsSchema,
+    RequestsSearchSchema,
+    State,
+    User,
+    db,
+)
+from namex.models import Request as RequestDAO
+from namex.models.request import RequestsAuthSearchSchema
+from namex.services import EventRecorder, MessageServices, ServicesError
 from namex.services.lookup import nr_filing_actions
-from namex.services import ServicesError, MessageServices, EventRecorder
 from namex.services.name_request import NameRequestService
 from namex.services.name_request.utils import check_ownership, get_or_create_user_by_jwt, valid_state_transition
-
-from namex.utils.common import (convert_to_ascii,
-                                convert_to_utc_min_date_time,
-                                convert_to_utc_max_date_time)
-from namex.utils.auth import cors_preflight
-from namex.analytics import SolrQueries, RestrictedWords, VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 from namex.utils import queue_util
-from .utils import DateUtils
+from namex.utils.auth import cors_preflight
+from namex.utils.common import convert_to_ascii, convert_to_utc_max_date_time, convert_to_utc_min_date_time
 
+from .utils import DateUtils
 
 # Register a local namespace for the requests
 api = Namespace('namexRequests', description='Namex - Requests API')
@@ -68,31 +82,32 @@ def handle_auth_error(ex):
 
 
 # noinspection PyUnresolvedReferences
-@cors_preflight("GET")
+@cors_preflight('GET')
 @api.route('/echo', methods=['GET', 'OPTIONS'])
 class Echo(Resource):
-    """Helper method to echo back all your JWT token info
-    """
+    """Helper method to echo back all your JWT token info"""
+
     @staticmethod
     @jwt.requires_auth
     def get(*args, **kwargs):
         try:
             return make_response(jsonify(g.jwt_oidc_token_info), 200)
         except Exception as err:
-            return {"error": "{}".format(err)}, 500
+            return {'error': '{}'.format(err)}, 500
 
 
 #################### QUEUES #######################
-@cors_preflight("GET")
+@cors_preflight('GET')
 @api.route('/queues/@me/oldest', methods=['GET', 'OPTIONS'])
 class RequestsQueue(Resource):
     """Acting like a QUEUE this gets the next NR (just the NR number)
     and assigns it to your auth id, and marks it as INPROGRESS
     """
+
     @staticmethod
     @jwt.requires_roles([User.APPROVER])
     def get():
-        """ Gets the oldest nr num, that is in DRAFT status
+        """Gets the oldest nr num, that is in DRAFT status
         It then marks the NR as INPROGRESS, and assigns it to the User as found in the JWT
         It also moves control of the Request from NRO so that NameX fully owns it
 
@@ -135,10 +150,14 @@ class RequestsQueue(Resource):
 @cors_preflight('GET, POST')
 @api.route('', methods=['GET', 'POST', 'OPTIONS'])
 class Requests(Resource):
-    a_request = api.model('Request', {'submitter': fields.String('The submitter name'),
-                                      'corpType': fields.String('The corporation type'),
-                                      'reqType': fields.String('The name request type')
-                                      })
+    a_request = api.model(
+        'Request',
+        {
+            'submitter': fields.String('The submitter name'),
+            'corpType': fields.String('The corporation type'),
+            'reqType': fields.String('The name request type'),
+        },
+    )
 
     START = 0
     ROWS = 10
@@ -164,7 +183,7 @@ class Requests(Resource):
             queue = queue.upper().split(',')
             for q in queue:
                 if q not in State.VALID_STATES:
-                    return make_response(jsonify({'message': '\'{}\' is not a valid queue'.format(queue)}), 406)
+                    return make_response(jsonify({'message': "'{}' is not a valid queue".format(queue)}), 406)
 
         # order must be a string of 'column:asc,column:desc'
         order = request.args.get('order', 'submittedDate:desc,stateCd:desc')
@@ -176,7 +195,7 @@ class Requests(Resource):
         col_keys = cols.keys()
         sort_by = ''
         order_list = ''
-        for k, v in ((x.split(":")) for x in order.split(',')):
+        for k, v in ((x.split(':')) for x in order.split(',')):
             vl = v.lower()
             if (k in col_keys) and (vl == 'asc' or vl == 'desc'):
                 if len(sort_by) > 0:
@@ -224,11 +243,13 @@ class Requests(Resource):
             compName1 = '%|1%' + compName + '%1|%'
             compName2 = '%|2%' + compName + '%2|%'
             compName3 = '%|3%' + compName + '%3|%'
-            q = q.filter(or_(
-                RequestDAO.nameSearch.ilike(compName1),
-                RequestDAO.nameSearch.ilike(compName2),
-                RequestDAO.nameSearch.ilike(compName3)
-            ))
+            q = q.filter(
+                or_(
+                    RequestDAO.nameSearch.ilike(compName1),
+                    RequestDAO.nameSearch.ilike(compName2),
+                    RequestDAO.nameSearch.ilike(compName3),
+                )
+            )
 
         if firstName:
             firstName = firstName.strip().replace(' ', '%')
@@ -258,46 +279,87 @@ class Requests(Resource):
             q = q.filter(RequestDAO.furnished != 'Y')
 
         if submittedInterval == 'Today':
-            q = q.filter(RequestDAO.submittedDate > text(
-                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour)))
+            q = q.filter(
+                RequestDAO.submittedDate
+                > text("NOW() - INTERVAL '{hour_offset} HOURS'".format(hour_offset=current_hour))
+            )
         elif submittedInterval == '7 days':
-            q = q.filter(RequestDAO.submittedDate > text(
-                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24 * 6)))
+            q = q.filter(
+                RequestDAO.submittedDate
+                > text("NOW() - INTERVAL '{hour_offset} HOURS'".format(hour_offset=current_hour + 24 * 6))
+            )
         elif submittedInterval == '30 days':
-            q = q.filter(RequestDAO.submittedDate > text(
-                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24 * 29)))
+            q = q.filter(
+                RequestDAO.submittedDate
+                > text("NOW() - INTERVAL '{hour_offset} HOURS'".format(hour_offset=current_hour + 24 * 29))
+            )
         elif submittedInterval == '90 days':
-            q = q.filter(RequestDAO.submittedDate > text(
-                'NOW() - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24 * 89)))
+            q = q.filter(
+                RequestDAO.submittedDate
+                > text("NOW() - INTERVAL '{hour_offset} HOURS'".format(hour_offset=current_hour + 24 * 89))
+            )
         elif submittedInterval == '1 year':
-            q = q.filter(RequestDAO.submittedDate > text('NOW() - INTERVAL \'1 YEARS\''))
+            q = q.filter(RequestDAO.submittedDate > text("NOW() - INTERVAL '1 YEARS'"))
         elif submittedInterval == '3 years':
-            q = q.filter(RequestDAO.submittedDate > text('NOW() - INTERVAL \'3 YEARS\''))
+            q = q.filter(RequestDAO.submittedDate > text("NOW() - INTERVAL '3 YEARS'"))
         elif submittedInterval == '5 years':
-            q = q.filter(RequestDAO.submittedDate > text('NOW() - INTERVAL \'5 YEARS\''))
+            q = q.filter(RequestDAO.submittedDate > text("NOW() - INTERVAL '5 YEARS'"))
 
         if lastUpdateInterval == 'Today':
-            q = q.filter(RequestDAO.lastUpdate > text(
-                '(now() at time zone \'utc\') - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour)))
+            q = q.filter(
+                RequestDAO.lastUpdate
+                > text("(now() at time zone 'utc') - INTERVAL '{hour_offset} HOURS'".format(hour_offset=current_hour))
+            )
         if lastUpdateInterval == 'Yesterday':
             today_offset = current_hour
             yesterday_offset = today_offset + 24
-            q = q.filter(RequestDAO.lastUpdate < text(
-                '(now() at time zone \'utc\') - INTERVAL \'{today_offset} HOURS\''.format(today_offset=today_offset)))
-            q = q.filter(RequestDAO.lastUpdate > text(
-                '(now() at time zone \'utc\') - INTERVAL \'{yesterday_offset} HOURS\''.format(yesterday_offset=yesterday_offset)))
+            q = q.filter(
+                RequestDAO.lastUpdate
+                < text("(now() at time zone 'utc') - INTERVAL '{today_offset} HOURS'".format(today_offset=today_offset))
+            )
+            q = q.filter(
+                RequestDAO.lastUpdate
+                > text(
+                    "(now() at time zone 'utc') - INTERVAL '{yesterday_offset} HOURS'".format(
+                        yesterday_offset=yesterday_offset
+                    )
+                )
+            )
         elif lastUpdateInterval == '2 days':
-            q = q.filter(RequestDAO.lastUpdate > text(
-                '(now() at time zone \'utc\') - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24)))
+            q = q.filter(
+                RequestDAO.lastUpdate
+                > text(
+                    "(now() at time zone 'utc') - INTERVAL '{hour_offset} HOURS'".format(hour_offset=current_hour + 24)
+                )
+            )
         elif lastUpdateInterval == '7 days':
-            q = q.filter(RequestDAO.lastUpdate > text(
-                '(now() at time zone \'utc\') - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24 * 6)))
+            q = q.filter(
+                RequestDAO.lastUpdate
+                > text(
+                    "(now() at time zone 'utc') - INTERVAL '{hour_offset} HOURS'".format(
+                        hour_offset=current_hour + 24 * 6
+                    )
+                )
+            )
         elif lastUpdateInterval == '30 days':
-            q = q.filter(RequestDAO.lastUpdate > text(
-                '(now() at time zone \'utc\') - INTERVAL \'{hour_offset} HOURS\''.format(hour_offset=current_hour + 24 * 29)))
+            q = q.filter(
+                RequestDAO.lastUpdate
+                > text(
+                    "(now() at time zone 'utc') - INTERVAL '{hour_offset} HOURS'".format(
+                        hour_offset=current_hour + 24 * 29
+                    )
+                )
+            )
 
         if submittedInterval and (submittedStartDate or submittedEndDate):
-            return make_response(jsonify({"message": "submittedInterval cannot be used in conjuction with submittedStartDate and submittedEndDate"}), 400)
+            return make_response(
+                jsonify(
+                    {
+                        'message': 'submittedInterval cannot be used in conjuction with submittedStartDate and submittedEndDate'
+                    }
+                ),
+                400,
+            )
 
         submittedStartDateTimeUtcObj = None
         submittedEndDateTimeUtcObj = None
@@ -307,28 +369,47 @@ class Requests(Resource):
                 submittedStartDateTimeUtcObj = convert_to_utc_min_date_time(submittedStartDate)
                 # convert date to format db expects
                 submittedStartDateTimeUtc = submittedStartDateTimeUtcObj.strftime(DATE_TIME_FORMAT_SQL)
-                q = q.filter(RequestDAO.submittedDate >=
-                             text('\'{submittedStartDateTimeUtc}\''
-                                  .format(submittedStartDateTimeUtc=submittedStartDateTimeUtc)))
-            except ValueError as ve:
-                return make_response(jsonify({"message": "Invalid submittedStartDate: {}.  Must be of date format %Y-%m-%d"
-                               .format(submittedStartDate)}), 400)
+                q = q.filter(
+                    RequestDAO.submittedDate
+                    >= text("'{submittedStartDateTimeUtc}'".format(submittedStartDateTimeUtc=submittedStartDateTimeUtc))
+                )
+            except ValueError:
+                return make_response(
+                    jsonify(
+                        {
+                            'message': 'Invalid submittedStartDate: {}.  Must be of date format %Y-%m-%d'.format(
+                                submittedStartDate
+                            )
+                        }
+                    ),
+                    400,
+                )
 
         if submittedEndDate:
             try:
                 submittedEndDateTimeUtcObj = convert_to_utc_max_date_time(submittedEndDate)
                 # convert date to format db expects
                 submittedEndDateTimeUtc = submittedEndDateTimeUtcObj.strftime(DATE_TIME_FORMAT_SQL)
-                q = q.filter(RequestDAO.submittedDate <=
-                             text('\'{submittedEndDateTimeUtc}\''
-                                  .format(submittedEndDateTimeUtc=submittedEndDateTimeUtc)))
-            except ValueError as ve:
-                return make_response(jsonify({"message": "Invalid submittedEndDate: {}.  Must be of date format %Y-%m-%d"
-                               .format(submittedEndDate)}), 400)
+                q = q.filter(
+                    RequestDAO.submittedDate
+                    <= text("'{submittedEndDateTimeUtc}'".format(submittedEndDateTimeUtc=submittedEndDateTimeUtc))
+                )
+            except ValueError:
+                return make_response(
+                    jsonify(
+                        {
+                            'message': 'Invalid submittedEndDate: {}.  Must be of date format %Y-%m-%d'.format(
+                                submittedEndDate
+                            )
+                        }
+                    ),
+                    400,
+                )
 
-        if (submittedStartDateTimeUtcObj and submittedEndDateTimeUtcObj)\
-                and submittedEndDateTimeUtcObj < submittedStartDateTimeUtcObj:
-            return make_response(jsonify({"message": "submittedEndDate must be after submittedStartDate"}), 400)
+        if (
+            submittedStartDateTimeUtcObj and submittedEndDateTimeUtcObj
+        ) and submittedEndDateTimeUtcObj < submittedStartDateTimeUtcObj:
+            return make_response(jsonify({'message': 'submittedEndDate must be after submittedStartDate'}), 400)
 
         q = q.order_by(text(sort_by))
 
@@ -341,16 +422,18 @@ class Requests(Resource):
         q = q.limit(rows)
 
         # create the response
-        rep = {'response': {'start': start,
-                            'rows': rows,
-                            'numFound': count,
-                            'numPriorities': 0,
-                            'numUpdatedToday': 0,
-                            'queue': queue,
-                            'order': order_list
-                            },
-               'nameRequests': [request_search_schemas.dump(q.all()), {}]
-               }
+        rep = {
+            'response': {
+                'start': start,
+                'rows': rows,
+                'numFound': count,
+                'numPriorities': 0,
+                'numUpdatedToday': 0,
+                'queue': queue,
+                'order': order_list,
+            },
+            'nameRequests': [request_search_schemas.dump(q.all()), {}],
+        }
 
         return make_response(jsonify(rep), 200)
 
@@ -358,8 +441,8 @@ class Requests(Resource):
     # def handle_auth_error(ex):
     #     response = jsonify(ex.error)
     #     response.status_code = ex.status_code
-        # return response, 401
-        # return {}, 401
+    # return response, 401
+    # return {}, 401
 
     # noinspection PyUnusedLocal,PyUnusedLocal
     @api.expect(a_request)
@@ -368,10 +451,11 @@ class Requests(Resource):
         current_app.logger.info('Someone is trying to post a new request')
         return make_response(jsonify({'message': 'Not Implemented'}), 501)
 
+
 # For sbc-auth - My Business Registry page.
 
 
-@cors_preflight("GET, POST")
+@cors_preflight('GET, POST')
 @api.route('/search', methods=['GET', 'POST', 'OPTIONS'])
 class RequestSearch(Resource):
     """Search for NR's by NR number or associated name."""
@@ -406,23 +490,31 @@ class RequestSearch(Resource):
 
                 condition += f'({name_condition})'
 
-            results = RequestDAO.query.filter(
-                RequestDAO.stateCd.in_([State.DRAFT, State.INPROGRESS, State.REFUND_REQUESTED]),
-                text(f'({condition})')
-            ).options(
-                lazyload('*'),
-                eagerload(RequestDAO.names).load_only(Name.name),
-                load_only(
-                    RequestDAO.id,
-                    RequestDAO.nrNum
+            results = (
+                RequestDAO.query.filter(
+                    RequestDAO.stateCd.in_([State.DRAFT, State.INPROGRESS, State.REFUND_REQUESTED]),
+                    text(f'({condition})'),
                 )
-            ).order_by(RequestDAO.submittedDate.desc()).limit(rows).all()
+                .options(
+                    lazyload('*'),
+                    eagerload(RequestDAO.names).load_only(Name.name),
+                    load_only(RequestDAO.id, RequestDAO.nrNum),
+                )
+                .order_by(RequestDAO.submittedDate.desc())
+                .limit(rows)
+                .all()
+            )
 
-            data.extend([{
-                # 'id': nr.id,
-                'nrNum': nr.nrNum,
-                'names': [n.name for n in nr.names]
-            } for nr in results])
+            data.extend(
+                [
+                    {
+                        # 'id': nr.id,
+                        'nrNum': nr.nrNum,
+                        'names': [n.name for n in nr.names],
+                    }
+                    for nr in results
+                ]
+            )
 
             while len(data) < rows:
                 if start < rows:
@@ -432,19 +524,24 @@ class RequestSearch(Resource):
                     # So the less of search length, the bigger of rows will be.
                     temp_rows = str(rows)
                     if nr_number and len(nr_number) < 7:
-                        temp_rows = str(rows).ljust(9-len(nr_number), '0')
+                        temp_rows = str(rows).ljust(9 - len(nr_number), '0')
                     if nr_name and len(nr_name) < 7:
-                        temp_rows = str(rows).ljust(9-len(nr_name), '0')
+                        temp_rows = str(rows).ljust(9 - len(nr_name), '0')
 
                     rows = int(temp_rows)
 
                 nr_data, have_more_data = RequestSearch._get_next_set_from_solr(solr_query, start, rows)
-                nr_data = nr_data[:(rows - len(data))]
-                data.extend([{
-                    # 'id': nr.id,
-                    'nrNum': nr.nrNum,
-                    'names': [n.name for n in nr.names]
-                } for nr in nr_data])
+                nr_data = nr_data[: (rows - len(data))]
+                data.extend(
+                    [
+                        {
+                            # 'id': nr.id,
+                            'nrNum': nr.nrNum,
+                            'names': [n.name for n in nr.names],
+                        }
+                        for nr in nr_data
+                    ]
+                )
 
                 if not have_more_data:
                     break  # no more data in solr
@@ -452,7 +549,7 @@ class RequestSearch(Resource):
 
             return make_response(jsonify(data), 200)
         except Exception as e:
-            current_app.logger.error(f"Error in /search, {e}")
+            current_app.logger.error(f'Error in /search, {e}')
             return make_response(jsonify({'message': 'Internal server error'}), 500)
 
     @staticmethod
@@ -464,17 +561,19 @@ class RequestSearch(Resource):
             have_more_data = results['response']['numFound'] > (start + rows)
             identifiers = [name['nr_num'] for name in results['names']]
             return RequestDAO.query.filter(
-                RequestDAO.nrNum.in_(identifiers), RequestDAO.stateCd != State.CANCELLED,
-                or_(RequestDAO.stateCd != State.EXPIRED,
-                    text(f"(requests.state_cd = '{State.EXPIRED}' AND CAST(requests.expiration_date AS DATE) + "
-                         "interval '60 day' >= CAST(now() AS DATE))"))
+                RequestDAO.nrNum.in_(identifiers),
+                RequestDAO.stateCd != State.CANCELLED,
+                or_(
+                    RequestDAO.stateCd != State.EXPIRED,
+                    text(
+                        f"(requests.state_cd = '{State.EXPIRED}' AND CAST(requests.expiration_date AS DATE) + "
+                        "interval '60 day' >= CAST(now() AS DATE))"
+                    ),
+                ),
             ).options(
                 lazyload('*'),
                 eagerload(RequestDAO.names).load_only(Name.name),
-                load_only(
-                    RequestDAO.id,
-                    RequestDAO.nrNum
-                )
+                load_only(RequestDAO.id, RequestDAO.nrNum),
             ).all(), have_more_data
 
         return [], False
@@ -525,8 +624,12 @@ class RequestSearch(Resource):
                     RequestDAO._request_action_cd
                 ))
         q = q.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit)
+
         requests = request_auth_search_schemas.dump(q.all())
-        actions_array = [nr_filing_actions.get_actions(r['requestTypeCd'], r['entity_type_cd'], r['request_action_cd']) for r in requests]
+        actions_array = [
+            nr_filing_actions.get_actions(r['requestTypeCd'], r['entity_type_cd'], r['request_action_cd'])
+            for r in requests
+        ]
         for r, additional_fields in zip(requests, actions_array):
             if additional_fields:
                 r.update(additional_fields)
@@ -535,15 +638,13 @@ class RequestSearch(Resource):
 
 
 # noinspection PyUnresolvedReferences
-@cors_preflight("GET, PATCH, PUT, DELETE")
+@cors_preflight('GET, PATCH, PUT, DELETE')
 @api.route('/<string:nr>', methods=['GET', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'])
 class Request(Resource):
-
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.VIEWONLY])
     def get(nr):
-
         # return make_response(jsonify(request_schema.dump(RequestDAO.query.filter_by(nr=nr.upper()).first_or_404()))
         return jsonify(RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404().json())
 
@@ -551,7 +652,6 @@ class Request(Resource):
     # @cors.crossdomain(origin='*')
     @jwt.requires_roles([User.APPROVER, User.EDITOR])
     def delete(nr):
-
         return '', 501  # not implemented
         # nrd = RequestDAO.find_by_nr(nr)
         # even if not found we still return a 204, which is expected spec behaviour
@@ -565,7 +665,7 @@ class Request(Resource):
     @cors.crossdomain(origin='*')
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.SYSTEM])
     def patch(nr, *args, **kwargs):
-        """  Patches the NR. Currently only handles STATE (with optional comment) and Previous State.
+        """Patches the NR. Currently only handles STATE (with optional comment) and Previous State.
 
         :param nr (str): NameRequest Number in the format of 'NR 000000000'
         :param args:  __futures__
@@ -582,9 +682,9 @@ class Request(Resource):
         # do the cheap check first before the more expensive ones
         # check states
         # some nr requested from Legancy application includes %20 after NR. e.g. 'NR%209288253', which should be 'NR 9288253'
-        nr = nr.replace("%20", " ")
-        current_app.logger.debug("NR: {0}".format(nr))
-        
+        nr = nr.replace('%20', ' ')
+        current_app.logger.debug('NR: {0}'.format(nr))
+
         json_input = request.get_json()
         if not json_input:
             return make_response(jsonify({'message': 'No input data provided'}), 400)
@@ -594,28 +694,26 @@ class Request(Resource):
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
             nrd = RequestDAO.find_by_nr(nr)
             if not nrd:
-                return make_response(jsonify({"message": "Request:{} not found".format(nr)}), 404)
+                return make_response(jsonify({'message': 'Request:{} not found'.format(nr)}), 404)
             start_state = nrd.stateCd
-        except NoResultFound as nrf:
+        except NoResultFound:
             # not an error we need to track in the log
-            return make_response(jsonify({"message": "Request:{} not found".format(nr)}), 404)
+            return make_response(jsonify({'message': 'Request:{} not found'.format(nr)}), 404)
         except Exception as err:
-            current_app.logger.error("Error when patching NR:{0} Err:{1}".format(nr, err))
-            return make_response(jsonify({"message": "NR had an internal error"}), 404)
+            current_app.logger.error('Error when patching NR:{0} Err:{1}'.format(nr, err))
+            return make_response(jsonify({'message': 'NR had an internal error'}), 404)
 
         try:
-
             ### STATE ###
 
             # all these checks to get removed to marshmallow
             state = json_input.get('state', None)
             if state:
-
                 if state not in State.VALID_STATES:
-                    return make_response(jsonify({"message": "not a valid state"}), 406)
+                    return make_response(jsonify({'message': 'not a valid state'}), 406)
 
                 if not nrd:
-                    return make_response(jsonify({"message": "Request:{} not found".format(nr)}), 404)
+                    return make_response(jsonify({'message': 'Request:{} not found'.format(nr)}), 404)
 
                 if not valid_state_transition(user, nrd, state):
                     return make_response(jsonify(message='Name Request state transition validation failed.'), 401)
@@ -634,9 +732,7 @@ class Request(Resource):
                 nrd.userId = user.id
 
                 # if our state wasn't INPROGRESS and it is now, ensure the furnished flag is N
-                if (start_state in locals()
-                        and start_state != State.INPROGRESS
-                        and nrd.stateCd == State.INPROGRESS):
+                if start_state in locals() and start_state != State.INPROGRESS and nrd.stateCd == State.INPROGRESS:
                     # set / reset the furnished flag to N
                     nrd.furnished = 'N'
 
@@ -651,7 +747,6 @@ class Request(Resource):
                 # - we can find new comments in json as those with no ID
 
                 if json_input.get('comments', None):
-
                     for in_comment in json_input['comments']:
                         is_new_comment = False
                         try:
@@ -671,7 +766,7 @@ class Request(Resource):
             # - None (null) is a valid value for Previous State
             if 'previousStateCd' in json_input.keys():
                 nrd.previousStateCd = json_input.get('previousStateCd', None)
-            
+
             # calculate and update expiration date
             if (
                 nrd.stateCd in (State.APPROVED, State.REJECTED, State.CONDITIONAL)
@@ -680,7 +775,7 @@ class Request(Resource):
             ):
                 expiry_days = NameRequestService.get_expiry_days(nrd.request_action_cd, nrd.requestTypeCd)
                 nrd.expirationDate = NameRequestService.create_expiry_date(datetime.utcnow(), expiry_days)
-                json_input["expirationDate"] = nrd.expirationDate.isoformat()
+                json_input['expirationDate'] = nrd.expirationDate.isoformat()
 
                 nrd.furnished = 'Y'
 
@@ -696,7 +791,7 @@ class Request(Resource):
                         consumed = True
 
                 if not consumed:
-                    return False, f"Cannot find an Approved or Condition name to be consumed."
+                    return False, 'Cannot find an Approved or Condition name to be consumed.'
 
                 return True, None  # Return success and no error message
 
@@ -713,20 +808,18 @@ class Request(Resource):
             current_app.logger.debug(err.with_traceback(None))
             return make_response(jsonify(message='Internal server error'), 500)
 
-        if 'warnings' in locals() and warnings:
-            return make_response(jsonify(message='Request:{} - patched'.format(nr), warnings=warnings), 206)
+        if 'warnings' in locals() and warnings:  # noqa: F821
+            return make_response(jsonify(message='Request:{} - patched'.format(nr), warnings=warnings), 206)  # noqa: F821
 
         if state in [State.APPROVED, State.CONDITIONAL, State.REJECTED]:
             queue_util.publish_email_notification(nrd.nrNum, state)
 
         return make_response(jsonify(message='Request:{} - patched'.format(nr)), 200)
 
-
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR])
     def put(nr, *args, **kwargs):
-        
         # do the cheap check first before the more expensive ones
         json_input = request.get_json()
         if not json_input:
@@ -739,23 +832,23 @@ class Request(Resource):
 
         state = json_input.get('state', None)
         if not state:
-            return make_response(jsonify({"message": "state not set"}), 406)
+            return make_response(jsonify({'message': 'state not set'}), 406)
 
         if state not in State.VALID_STATES:
-            return make_response(jsonify({"message": "not a valid state"}), 406)
+            return make_response(jsonify({'message': 'not a valid state'}), 406)
 
         try:
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
             nrd = RequestDAO.find_by_nr(nr)
             if not nrd:
-                return make_response(jsonify({"message": "Request:{} not found".format(nr)}), 404)
+                return make_response(jsonify({'message': 'Request:{} not found'.format(nr)}), 404)
             orig_nrd = nrd.json()
-        except NoResultFound as nrf:
+        except NoResultFound:
             # not an error we need to track in the log
-            return make_response(jsonify({"message": "Request:{} not found".format(nr)}), 404)
+            return make_response(jsonify({'message': 'Request:{} not found'.format(nr)}), 404)
         except Exception as err:
-            current_app.logger.error("Error when patching NR:{0} Err:{1}".format(nr, err))
-            return make_response(jsonify({"message": "NR had an internal error"}), 404)
+            current_app.logger.error('Error when patching NR:{0} Err:{1}'.format(nr, err))
+            return make_response(jsonify({'message': 'NR had an internal error'}), 404)
 
         if not valid_state_transition(user, nrd, state):
             return make_response(jsonify(message='you are not authorized to make these changes'), 401)
@@ -794,7 +887,7 @@ class Request(Resource):
                     end_of_day_pacific = pacific_time.replace(hour=23, minute=59, second=0, microsecond=0)
                     json_input['expirationDate'] = end_of_day_pacific.strftime('%Y-%m-%d %H:%M:%S%z')
                 except Exception as e:
-                    current_app.logger.debug(f"Error parsing expirationDate: {str(e)}")
+                    current_app.logger.debug(f'Error parsing expirationDate: {str(e)}')
                     pass
 
             # convert NWPTA dates to correct format
@@ -983,13 +1076,10 @@ class Request(Resource):
                 nrd.names.append(new_name_choice)
 
             for nrd_name in nrd.names:
-
                 orig_name = nrd_name.as_dict()
 
                 for in_name in json_input.get('names', []):
-
                     if len(nrd.names) < in_name['choice']:
-
                         errors = names_schema.validate(in_name, partial=False)
                         if errors:
                             MessageServices.add_message(MessageServices.ERROR, 'names_validation', errors)
@@ -1046,7 +1136,6 @@ class Request(Resource):
 
                         # set comments (existing or cleared)
                         if in_name.get('comment', None) is not None:
-
                             # if there is a comment ID in data, just set it
                             if in_name['comment'].get('id', None) is not None:
                                 nrd_name.commentId = in_name['comment'].get('id')
@@ -1062,7 +1151,7 @@ class Request(Resource):
                         # convert data to ascii, removing data that won't save to Oracle
                         # - also force uppercase
                         nrd_name.name = convert_to_ascii(nrd_name.name)
-                        if (nrd_name.name is not None):
+                        if nrd_name.name is not None:
                             nrd_name.name = nrd_name.name.upper()
 
                         # check if any of the Oracle db fields have changed, so we can send them back
@@ -1070,20 +1159,35 @@ class Request(Resource):
                         if nrd_name.name != orig_name['name']:
                             if nrd_name.choice == 1:
                                 is_changed__name1 = True
-                                json_input['comments'].append({'comment': 'Name choice 1 changed from {0} to {1}'
-                                                               .format(orig_name['name'], nrd_name.name)})
+                                json_input['comments'].append(
+                                    {
+                                        'comment': 'Name choice 1 changed from {0} to {1}'.format(
+                                            orig_name['name'], nrd_name.name
+                                        )
+                                    }
+                                )
                             if nrd_name.choice == 2:
                                 is_changed__name2 = True
                                 if not nrd_name.name:
                                     deleted_names[nrd_name.choice - 1] = True
-                                json_input['comments'].append({'comment': 'Name choice 2 changed from {0} to {1}'
-                                                               .format(orig_name['name'], nrd_name.name)})
+                                json_input['comments'].append(
+                                    {
+                                        'comment': 'Name choice 2 changed from {0} to {1}'.format(
+                                            orig_name['name'], nrd_name.name
+                                        )
+                                    }
+                                )
                             if nrd_name.choice == 3:
                                 is_changed__name3 = True
                                 if not nrd_name.name:
                                     deleted_names[nrd_name.choice - 1] = True
-                                json_input['comments'].append({'comment': 'Name choice 3 changed from {0} to {1}'
-                                                               .format(orig_name['name'], nrd_name.name)})
+                                json_input['comments'].append(
+                                    {
+                                        'comment': 'Name choice 3 changed from {0} to {1}'.format(
+                                            orig_name['name'], nrd_name.name
+                                        )
+                                    }
+                                )
             ### END names ###
 
             ### COMMENTS ###
@@ -1114,12 +1218,10 @@ class Request(Resource):
 
             if nrd.partnerNS.count() > 0:
                 for nrd_nwpta in nrd.partnerNS.all():
-
                     orig_nwpta = nrd_nwpta.as_dict()
 
                     for in_nwpta in json_input['nwpta']:
                         if nrd_nwpta.partnerJurisdictionTypeCd == in_nwpta['partnerJurisdictionTypeCd']:
-
                             errors = nwpta_schema.validate(in_nwpta, partial=False)
                             if errors:
                                 MessageServices.add_message(MessageServices.ERROR, 'nwpta_validation', errors)
@@ -1174,7 +1276,7 @@ class Request(Resource):
                     'is_changed__nwpta_ab': is_changed__nwpta_ab,
                     'is_changed__nwpta_sk': is_changed__nwpta_sk,
                     'is_changed__request_state': is_changed__request_state,
-                    'is_changed_consent': is_changed_consent
+                    'is_changed_consent': is_changed_consent,
                 }
 
                 if any(value is True for value in change_flags.values()):
@@ -1200,12 +1302,12 @@ class Request(Resource):
         except ValidationError as ve:
             return make_response(jsonify(ve.messages), 400)
 
-        except NoResultFound as nrf:
+        except NoResultFound:
             # not an error we need to track in the log
             return make_response(jsonify(message='Request:{} not found'.format(nr)), 404)
 
         except Exception as err:
-            current_app.logger.error("Error when replacing NR:{0} Err:{1}".format(nr, err))
+            current_app.logger.error('Error when replacing NR:{0} Err:{1}'.format(nr, err))
             return make_response(jsonify(message='NR had an internal error'), 500)
 
         # if we're here, messaging only contains warnings
@@ -1218,7 +1320,7 @@ class Request(Resource):
         return make_response(jsonify(nrd.json()), 200)
 
 
-@cors_preflight("GET")
+@cors_preflight('GET')
 @api.route('/<string:nr>/analysis/<int:choice>/<string:analysis_type>', methods=['GET', 'OPTIONS'])
 class RequestsAnalysis(Resource):
     """Acting like a QUEUE this gets the next NR (just the NR number)
@@ -1231,6 +1333,7 @@ class RequestsAnalysis(Resource):
         :param kwargs: __futures__
         :return: 200 - success; 40X for errors
     """
+
     START = 0
     ROWS = 50
 
@@ -1244,8 +1347,14 @@ class RequestsAnalysis(Resource):
         rows = request.args.get('rows', RequestsAnalysis.ROWS)
 
         if analysis_type not in ANALYTICS_VALID_ANALYSIS:
-            return make_response(jsonify(message='{analysis_type} is not a valid analysis type for that name choice'
-                           .format(analysis_type=analysis_type)), 404)
+            return make_response(
+                jsonify(
+                    message='{analysis_type} is not a valid analysis type for that name choice'.format(
+                        analysis_type=analysis_type
+                    )
+                ),
+                404,
+            )
 
         nrd = RequestDAO.find_by_nr(nr)
 
@@ -1255,7 +1364,9 @@ class RequestsAnalysis(Resource):
         nrd_name = next((name for name in nrd.names if name.choice == choice), None)
 
         if not nrd_name:
-            return make_response(jsonify(message='Name choice:{choice} not found for {nr}'.format(nr=nr, choice=choice)), 404)
+            return make_response(
+                jsonify(message='Name choice:{choice} not found for {nr}'.format(nr=nr, choice=choice)), 404
+            )
 
         if analysis_type in RestrictedWords.RESTRICTED_WORDS:
             results, msg, code = RestrictedWords.get_restricted_words_conditions(nrd_name.name)
@@ -1268,7 +1379,7 @@ class RequestsAnalysis(Resource):
         return make_response(jsonify(results), 200)
 
 
-@cors_preflight("GET")
+@cors_preflight('GET')
 @api.route('/synonymbucket/<string:name>/<string:advanced_search>', methods=['GET', 'OPTIONS'])
 class SynonymBucket(Resource):
     START = 0
@@ -1281,13 +1392,15 @@ class SynonymBucket(Resource):
         start = request.args.get('start', SynonymBucket.START)
         rows = request.args.get('rows', SynonymBucket.ROWS)
         exact_phrase = '' if advanced_search == '*' else advanced_search
-        results, msg, code = SolrQueries.get_conflict_results(name.upper(), bucket='synonym', exact_phrase=exact_phrase, start=start, rows=rows)
+        results, msg, code = SolrQueries.get_conflict_results(
+            name.upper(), bucket='synonym', exact_phrase=exact_phrase, start=start, rows=rows
+        )
         if code:
             return make_response(jsonify(message=msg), code)
         return make_response(jsonify(results), 200)
 
 
-@cors_preflight("GET")
+@cors_preflight('GET')
 @api.route('/cobrsphonetics/<string:name>/<string:advanced_search>', methods=['GET', 'OPTIONS'])
 class CobrsPhoneticBucket(Resource):
     START = 0
@@ -1301,13 +1414,15 @@ class CobrsPhoneticBucket(Resource):
         rows = request.args.get('rows', CobrsPhoneticBucket.ROWS)
         name = '' if name == '*' else name
         exact_phrase = '' if advanced_search == '*' else advanced_search
-        results, msg, code = SolrQueries.get_conflict_results(name.upper(), bucket='cobrs_phonetic', exact_phrase=exact_phrase, start=start, rows=rows)
+        results, msg, code = SolrQueries.get_conflict_results(
+            name.upper(), bucket='cobrs_phonetic', exact_phrase=exact_phrase, start=start, rows=rows
+        )
         if code:
             return make_response(jsonify(message=msg), code)
         return make_response(jsonify(results), 200)
 
 
-@cors_preflight("GET")
+@cors_preflight('GET')
 @api.route('/phonetics/<string:name>/<string:advanced_search>', methods=['GET', 'OPTIONS'])
 class PhoneticBucket(Resource):
     START = 0
@@ -1321,30 +1436,35 @@ class PhoneticBucket(Resource):
         rows = request.args.get('rows', PhoneticBucket.ROWS)
         name = '' if name == '*' else name
         exact_phrase = '' if advanced_search == '*' else advanced_search
-        results, msg, code = SolrQueries.get_conflict_results(name.upper(), bucket='phonetic', exact_phrase=exact_phrase, start=start, rows=rows)
+        results, msg, code = SolrQueries.get_conflict_results(
+            name.upper(), bucket='phonetic', exact_phrase=exact_phrase, start=start, rows=rows
+        )
         if code:
             return make_response(jsonify(message=msg), code)
         return make_response(jsonify(results), 200)
 
 
-@cors_preflight("GET, PUT, PATCH")
-@api.route('/<string:nr>/names/<int:choice>', methods=['GET', "PUT", "PATCH", 'OPTIONS'])
+@cors_preflight('GET, PUT, PATCH')
+@api.route('/<string:nr>/names/<int:choice>', methods=['GET', 'PUT', 'PATCH', 'OPTIONS'])
 class NRNames(Resource):
-
     @staticmethod
     def common(nr, choice):
-        """:returns: object, code, msg
-        """
+        """:returns: object, code, msg"""
         if not RequestDAO.validNRFormat(nr):
-            return None, None, jsonify({'message': 'NR is not a valid format \'NR 9999999\''}), 400
+            return None, None, jsonify({'message': "NR is not a valid format 'NR 9999999'"}), 400
 
         nrd = RequestDAO.find_by_nr(nr)
         if not nrd:
-            return None, None, jsonify({"message": "{nr} not found".format(nr=nr)}), 404
+            return None, None, jsonify({'message': '{nr} not found'.format(nr=nr)}), 404
 
         name = next((name for name in nrd.names if name.choice == choice), None)
         if not name:
-            return None, None, jsonify({"message": "Choice {choice} for {nr} not found".format(choice=choice, nr=nr)}), 404
+            return (
+                None,
+                None,
+                jsonify({'message': 'Choice {choice} for {nr} not found'.format(choice=choice, nr=nr)}),
+                404,
+            )
 
         return nrd, name, None, 200
 
@@ -1353,7 +1473,6 @@ class NRNames(Resource):
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
     def get(nr, choice, *args, **kwargs):
-
         nrd, nrd_name, msg, code = NRNames.common(nr, choice)
         if not nrd:
             return msg, code
@@ -1383,7 +1502,7 @@ class NRNames(Resource):
 
         user = User.find_by_jwtToken(g.jwt_oidc_token_info)
         if not check_ownership(nrd, user):
-            return make_response(jsonify({"message": "You must be the active editor and it must be INPROGRESS"}), 403)
+            return make_response(jsonify({'message': 'You must be the active editor and it must be INPROGRESS'}), 403)
 
         nrd_name.choice = json_data.get('choice')
         nrd_name.conflict1 = json_data.get('conflict1')
@@ -1415,18 +1534,22 @@ class NRNames(Resource):
         try:
             nrd_name.save_to_db()
         except Exception as error:
-            current_app.logger.error("Error on nrd_name update, Error:{0}".format(error))
-            return make_response(jsonify({"message": "Error on name update, saving to the db."}), 500)
+            current_app.logger.error('Error on nrd_name update, Error:{0}'.format(error))
+            return make_response(jsonify({'message': 'Error on name update, saving to the db.'}), 500)
 
         EventRecorder.record(user, Event.PUT, nrd, json_data)
 
-        return make_response(jsonify({"message": "Replace {nr} choice:{choice} with {json}".format(nr=nr, choice=choice, json=json_data)}), 200)
+        return make_response(
+            jsonify(
+                {'message': 'Replace {nr} choice:{choice} with {json}'.format(nr=nr, choice=choice, json=json_data)}
+            ),
+            200,
+        )
 
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
     def patch(nr, choice, *args, **kwargs):
-
         json_data = request.get_json()
         if not json_data:
             return make_response(jsonify({'message': 'No input data provided'}), 400)
@@ -1441,7 +1564,7 @@ class NRNames(Resource):
 
         user = User.find_by_jwtToken(g.jwt_oidc_token_info)
         if not check_ownership(nrd, user):
-            return make_response(jsonify({"message": "You must be the active editor and it must be INPROGRESS"}), 403)
+            return make_response(jsonify({'message': 'You must be the active editor and it must be INPROGRESS'}), 403)
 
         nrd_name.choice = json_data.get('choice')
         nrd_name.conflict1 = json_data.get('conflict1')
@@ -1462,11 +1585,11 @@ class NRNames(Resource):
 
         EventRecorder.record(user, Event.PATCH, nrd, json_data)
 
-        return make_response(jsonify({"message": "Patched {nr} - {json}".format(nr=nr, json=json_data)}), 200)
+        return make_response(jsonify({'message': 'Patched {nr} - {json}'.format(nr=nr, json=json_data)}), 200)
 
 
 # TODO: This should be in it's own file, not in the requests
-@cors_preflight("GET")
+@cors_preflight('GET')
 @api.route('/decisionreasons', methods=['GET', 'OPTIONS'])
 class DecisionReasons(Resource):
     @staticmethod
@@ -1478,7 +1601,7 @@ class DecisionReasons(Resource):
         return make_response(jsonify(response), 200)
 
 
-@cors_preflight("GET")
+@cors_preflight('GET')
 @api.route('/<string:nr>/syncnr', methods=['GET', 'OPTIONS'])
 class SyncNR(Resource):
     @staticmethod
@@ -1486,30 +1609,28 @@ class SyncNR(Resource):
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR])
     def get(nr):
         try:
-            user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
+            get_or_create_user_by_jwt(g.jwt_oidc_token_info)
             nrd = RequestDAO.find_by_nr(nr)
-        except NoResultFound as nrf:
+        except NoResultFound:
             # not an error we need to track in the log
-            return make_response(jsonify({"message": "Request:{} not found".format(nr)}), 404)
+            return make_response(jsonify({'message': 'Request:{} not found'.format(nr)}), 404)
         except Exception as err:
-            current_app.logger.error("Error when patching NR:{0} Err:{1}".format(nr, err))
-            return make_response(jsonify({"message": "NR had an internal error"}), 404)
+            current_app.logger.error('Error when patching NR:{0} Err:{1}'.format(nr, err))
+            return make_response(jsonify({'message': 'NR had an internal error'}), 404)
 
         if not nrd:
-            return make_response(jsonify({"message": "Request:{} not found".format(nr)}), 404)
+            return make_response(jsonify({'message': 'Request:{} not found'.format(nr)}), 404)
 
         return jsonify(RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404().json())
 
 
-@cors_preflight("GET")
+@cors_preflight('GET')
 @api.route('/stats', methods=['GET', 'OPTIONS'])
 class Stats(Resource):
-
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
     def get(*args, **kwargs):
-
         user = None
         if bool(request.args.get('myStats', False)):
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
@@ -1528,9 +1649,10 @@ class Stats(Resource):
             current_app.logger.info('start or rows not an int, err: {}'.format(err))
             return make_response(jsonify({'message': 'paging parameters were not integers'}), 406)
 
-        q = RequestDAO.query \
-            .filter(RequestDAO.stateCd.in_(State.COMPLETED_STATE)) \
-            .filter(RequestDAO.lastUpdate >= text('(now() at time zone \'utc\') - INTERVAL \'{delay} HOURS\''.format(delay=timespan)))
+        q = RequestDAO.query.filter(RequestDAO.stateCd.in_(State.COMPLETED_STATE)).filter(
+            RequestDAO.lastUpdate
+            >= text("(now() at time zone 'utc') - INTERVAL '{delay} HOURS'".format(delay=timespan))
+        )
         if user:
             q = q.filter(RequestDAO.userId == user.id)
         q = q.order_by(RequestDAO.lastUpdate.desc())
@@ -1547,27 +1669,22 @@ class Stats(Resource):
         # )
 
         requests = q.all()
-        rep = {
-            'numRecords': count,
-            'nameRequests': request_search_schemas.dump(requests)
-        }
+        rep = {'numRecords': count, 'nameRequests': request_search_schemas.dump(requests)}
         return jsonify(rep)
 
 
-@cors_preflight("POST")
-@api.route('/<string:nr>/comments', methods=["POST", 'OPTIONS'])
+@cors_preflight('POST')
+@api.route('/<string:nr>/comments', methods=['POST', 'OPTIONS'])
 class NRComment(Resource):
-
     @staticmethod
     def common(nr):
-        """:returns: object, code, msg
-        """
+        """:returns: object, code, msg"""
         if not RequestDAO.validNRFormat(nr):
-            return None, jsonify({'message': 'NR is not a valid format \'NR 9999999\''}), 400
+            return None, jsonify({'message': "NR is not a valid format 'NR 9999999'"}), 400
 
         nrd = RequestDAO.find_by_nr(nr)
         if not nrd:
-            return None, jsonify({"message": "{nr} not found".format(nr=nr)}), 404
+            return None, jsonify({'message': '{nr} not found'.format(nr=nr)}), 404
 
         return nrd, None, 200
 
@@ -1593,14 +1710,14 @@ class NRComment(Resource):
         try:
             nrd = RequestDAO.find_by_nr(nr)
             if not nrd:
-                return make_response(jsonify({"message": "Request:{} not found".format(nr)}), 404)
+                return make_response(jsonify({'message': 'Request:{} not found'.format(nr)}), 404)
 
-        except NoResultFound as nrf:
+        except NoResultFound:
             # not an error we need to track in the log
-            return make_response(jsonify({"message": "Request:{} not found".format(nr)}), 404)
+            return make_response(jsonify({'message': 'Request:{} not found'.format(nr)}), 404)
         except Exception as err:
-            current_app.logger.error("Error when trying to post a comment NR:{0} Err:{1}".format(nr, err))
-            return make_response(jsonify({"message": "NR had an internal error"}), 404)
+            current_app.logger.error('Error when trying to post a comment NR:{0} Err:{1}'.format(nr, err))
+            return make_response(jsonify({'message': 'NR had an internal error'}), 404)
 
         nr_id = nrd.id
         user = User.find_by_jwtToken(g.jwt_oidc_token_info)
@@ -1608,7 +1725,7 @@ class NRComment(Resource):
             return make_response(jsonify({'message': 'No User'}), 404)
 
         if json_data.get('comment') is None:
-            return make_response(jsonify({"message": "No comment supplied"}), 400)
+            return make_response(jsonify({'message': 'No comment supplied'}), 400)
 
         comment_instance = Comment()
         comment_instance.examinerId = user.id

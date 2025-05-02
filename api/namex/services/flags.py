@@ -12,16 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Manage the Feature Flags initialization, setup and service."""
+
 from flask import current_app
-from ldclient import get as ldclient_get, set_config as ldclient_set_config  # noqa: I001
-from ldclient.config import Config  # noqa: I005
 from ldclient import Context
+from ldclient import get as ldclient_get
+from ldclient import set_config as ldclient_set_config
+from ldclient.config import Config
 from ldclient.integrations import Files
 
 from namex.models import User
 
 
-class Flags():
+class Flags:
     """Wrapper around the feature flag system.
 
     calls FAIL to FALSE
@@ -48,12 +50,9 @@ class Flags():
         env = app.config.get('ENVIRONMENT')
 
         if self.sdk_key or env == 'local':
-
             if env == 'local':
                 factory = Files.new_data_source(paths=['flags.json'], auto_update=True)
-                config = Config(sdk_key=self.sdk_key,
-                                update_processor_class=factory,
-                                send_events=False)
+                config = Config(sdk_key=self.sdk_key, update_processor_class=factory, send_events=False)
             else:
                 config = Config(sdk_key=self.sdk_key)
 
@@ -70,7 +69,7 @@ class Flags():
                 self.init_app(current_app)
                 client = current_app.extensions['featureflags']
             except KeyError:
-                current_app.logger.warning("Couldn\'t retrieve launch darkly client from extensions.")
+                current_app.logger.warning("Couldn't retrieve launch darkly client from extensions.")
                 client = None
 
         return client
@@ -81,9 +80,7 @@ class Flags():
 
     @staticmethod
     def _user_as_key(user: User):
-        return Context.builder(user.idp_userid)\
-            .set('firstName', user.firstname)\
-            .set('lastName', user.lastname).build()
+        return Context.builder(user.idp_userid).set('firstName', user.firstname).set('lastName', user.lastname).build()
 
     def is_on(self, flag: str, default: bool = False, user: User = None) -> bool:
         """Assert that the flag is set for this user."""

@@ -1,1 +1,1 @@
-from .issues import *
+from .issues import *  # noqa: F403

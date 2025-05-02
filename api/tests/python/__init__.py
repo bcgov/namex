@@ -8,17 +8,19 @@ set :
     SOLR_TESTS to run integration_solr
     NRO_EXTRACTOR_TESTS to run integration_nro_extractor
 """
+
 import datetime
 
-from .util import \
-    integration_oracle_local_namesdb,\
-    integration_oracle_namesdb,\
-    integration_fdw_namex,\
-    integration_solr,\
-    integration_synonym_api, \
-    integration_postgres_solr, \
-    integration_mras, \
-    integration_nro_extractor
+from .util import (
+    integration_oracle_local_namesdb,
+    integration_oracle_namesdb,
+    integration_fdw_namex,
+    integration_solr,
+    integration_synonym_api,
+    integration_postgres_solr,
+    integration_mras,
+    integration_nro_extractor,
+)
 
 EPOCH_DATETIME = datetime.datetime.utcfromtimestamp(0)
 FROZEN_DATETIME = datetime.datetime(2001, 8, 5, 7, 7, 58, 272362)

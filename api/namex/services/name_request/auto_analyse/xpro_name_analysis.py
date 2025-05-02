@@ -1,4 +1,3 @@
-import os
 from datetime import datetime
 
 from flask import current_app
@@ -8,8 +7,7 @@ from .mixins.set_designation_lists import SetDesignationsListsMixin
 from .name_analysis_director import NameAnalysisDirector
 from .name_analysis_utils import get_classification
 
-
-'''
+"""
 The XproNameAnalysisService returns an analysis response using the strategies in analysis_strategies.py
 The response API return cases are as follows:
 
@@ -24,9 +22,10 @@ Notes:
 - The 'algorithm' / process we use to analyse names may change in the future
 - Using the builder pattern allows us delegate and isolate custom / changing business logic to the builder,
   while exposing a consistent API for consumers of the service.
-'''
+"""
 
 d = datetime.now()  # Was just used for perf analysis
+
 
 class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
     _d = d  # Just used for perf
@@ -34,13 +33,13 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
     def __init__(self):
         super(XproNameAnalysisService, self).__init__()
 
-    '''
+    """
     This is the main execution call that wraps name analysis checks.
     - Perform checks to ensure the name is well formed.
     - If the name is well formed, proceed with our analysis by calling do_analysis.
     - If you don't want to check to see if a name is well formed first, override check_name_is_well_formed in the supplied builder.
     @:return ProcedureResult[]
-    '''
+    """
 
     def execute_analysis(self):
         try:
@@ -71,7 +70,7 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
                     self._list_desc_words,
                     self.name_tokens,
                     self.processed_name,
-                    self.name_original_tokens
+                    self.name_original_tokens,
                 )
                 if check_conflict_in_name_is_well_formed.result_code == AnalysisIssueCodes.CORPORATE_CONFLICT:
                     analysis.append(check_conflict_in_name_is_well_formed)
@@ -88,13 +87,10 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
                 # don't return the result yet, the name is well formed, we just have an unclassified
                 # word in the result.
 
-                issues_that_must_be_fixed = [
-                    AnalysisIssueCodes.WORDS_TO_AVOID,
-                    AnalysisIssueCodes.TOO_MANY_WORDS
-                ]
+                issues_that_must_be_fixed = [AnalysisIssueCodes.WORDS_TO_AVOID, AnalysisIssueCodes.TOO_MANY_WORDS]
 
                 issue_must_be_fixed = False
-                result_codes = list(map(lambda r: r.result_code, analysis))
+                result_codes = [r.result_code for r in analysis]
 
                 for code in result_codes:
                     if code in issues_that_must_be_fixed:
@@ -112,8 +108,9 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
 
                 has_words_to_avoid = self._has_analysis_issue_type(analysis, AnalysisIssueCodes.WORDS_TO_AVOID)
                 if has_words_to_avoid:
-                    matched_words_to_avoid = \
-                        self._get_analysis_issue_type_issues(analysis, AnalysisIssueCodes.WORDS_TO_AVOID)
+                    matched_words_to_avoid = self._get_analysis_issue_type_issues(
+                        analysis, AnalysisIssueCodes.WORDS_TO_AVOID
+                    )
 
                     for procedure_result in matched_words_to_avoid:
                         list_avoid = list_avoid + procedure_result.values.get('list_avoid', [])
@@ -145,11 +142,11 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
             current_app.logger.error('Error executing name analysis: ' + repr(error))
             raise
 
-    '''
+    """
     do_analysis is an abstract method inherited from NameAnalysisDirector must be implemented.
     This is the main execution call for running name analysis checks.
     @:return ProcedureResult[]
-    '''
+    """
 
     def do_analysis(self):
         results = []
@@ -164,10 +161,15 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
 
             # Return any combination of these checks
             if not self.skip_search_conflicts and auto_analyze_config in ('EXACT_MATCH', 'SEARCH_CONFLICTS'):
-                check_conflicts = builder.search_exact_match(self.get_list_dist(), self.get_list_desc(),
-                                                             self.compound_descriptive_name_tokens,
-                                                             False, self.get_designation_end_list_all(),
-                                                             self.get_designation_any_list_all(), stop_words_list)
+                check_conflicts = builder.search_exact_match(
+                    self.get_list_dist(),
+                    self.get_list_desc(),
+                    self.compound_descriptive_name_tokens,
+                    False,
+                    self.get_designation_end_list_all(),
+                    self.get_designation_any_list_all(),
+                    stop_words_list,
+                )
 
                 if check_conflicts.is_valid and auto_analyze_config in 'SEARCH_CONFLICTS':
                     check_conflicts = builder.search_conflicts(
@@ -176,7 +178,7 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
                         [self.get_list_desc()],
                         self.name_tokens,
                         self.processed_name,
-                        np_svc.get_stand_alone_words()
+                        np_svc.get_stand_alone_words(),
                     )
 
                 if not check_conflicts.is_valid:
@@ -204,9 +206,7 @@ class XproNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
 
             # TODO: Use the list_name array, don't use a string in the method!
             # check_words_requiring_consent = builder.check_words_requiring_consent(list_name)  # This is correct
-            check_words_requiring_consent = builder.check_words_requiring_consent(
-                self.name_tokens, self.processed_name
-            )
+            check_words_requiring_consent = builder.check_words_requiring_consent(self.name_tokens, self.processed_name)
 
             if not check_words_requiring_consent.is_valid:
                 results.append(check_words_requiring_consent)

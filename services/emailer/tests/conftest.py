@@ -24,6 +24,10 @@ from config import Testing
 
 from . import FROZEN_DATETIME
 
+from dotenv import load_dotenv
+
+# Automatically load the .env file from the root of the project
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 @contextmanager
 def not_raises(exception):

@@ -1,4 +1,5 @@
 from datetime import datetime, time
+
 from dateutil import tz
 
 from namex.constants import DATE_FORMAT_NAMEX_SEARCH

@@ -1,7 +1,8 @@
-from datetime import date, datetime
+from datetime import datetime
+
 # TODO: We may need this import later
 # from http import HTTPStatus
-from sqlalchemy import desc, event, inspect, or_
+from sqlalchemy import inspect
 from sqlalchemy.ext.hybrid import hybrid_property
 
 COMPLETED_VALUE = None
@@ -46,7 +47,6 @@ class PaymentModelMixin:
 
     @payment_completion_date.setter
     def payment_completion_date(self, value: datetime):
-
         if self.locked or self._payment_token:
             self._payment_completion_date = value
 
@@ -68,7 +68,7 @@ class PaymentModelMixin:
         Exception to this rule, payment_completion_date requires the filing to be locked.
         """
         insp = inspect(self)
-        attr_state = insp.attrs._payment_token  # pylint: disable=protected-access;
+        attr_state = insp.attrs._payment_token
 
         # Inspect requires the member, and the hybrid decorator doesn't help us here
         if self._payment_token and not attr_state.history.added:

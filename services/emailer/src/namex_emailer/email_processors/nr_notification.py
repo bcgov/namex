@@ -15,9 +15,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from enum import Enum
 from http import HTTPStatus
-from pathlib import Path
 
 from flask import current_app, request
 from gcp_queue.logging import structured_log
@@ -25,22 +23,9 @@ from jinja2 import Template
 from simple_cloudevent import SimpleCloudEvent
 
 from namex.resources.name_requests import ReportResource
+from namex_emailer.constants.notification_options import Option
 from namex_emailer.email_processors import get_main_template, substitute_template_parts
 from namex_emailer.services.helpers import as_legislation_timezone, format_as_report_string, get_magic_link, query_nr_number
-
-class Option(Enum):
-    """NR notification option."""
-
-    BEFORE_EXPIRY = "before-expiry"
-    EXPIRED = "expired"
-    RENEWAL = "renewal"
-    UPGRADE = "upgrade"
-    REFUND = "refund"
-    APPROVED = "APPROVED"
-    CONDITIONAL = "CONDITIONAL"
-    REJECTED = "REJECTED"
-    CONSENT_RECEIVED = "CONSENT_RECEIVED"
-
 
 
 def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-msg=too-many-locals
@@ -85,17 +70,18 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
 
     file_name_suffix = option.upper()
     request_action = nr_data["request_action_cd"]
-    template = get_main_template(request_action, f"NR-{file_name_suffix}.html")
     if option == Option.BEFORE_EXPIRY.value:
         if "entity_type_cd" in nr_data:
             legal_type = nr_data["entity_type_cd"]
-            corpNum = nr_data["corpNum"]
-            group = ReportResource._get_instruction_group(legal_type, request_action, corpNum)
+            corp_num = nr_data["corpNum"]
+            group = ReportResource._get_instruction_group(legal_type, request_action, corp_num)
             if group:
                 instruction_group = "-" + group
                 file_name_suffix += instruction_group.upper()
 
         template = get_main_template(request_action, f"NR-{file_name_suffix}.html", status=option)
+    else:
+        template = get_main_template(request_action, f"NR-{file_name_suffix}.html")
     filled_template = substitute_template_parts(template)
 
     # render template with vars

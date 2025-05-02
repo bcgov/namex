@@ -32,7 +32,6 @@ def email_consent_letter(email_info: SimpleCloudEvent):
             structured_log(request, "ERROR", f"Failed to get nr info for name request: {nr_number}")
             return {}
         nr_model = nr_response.json()
-        # nr_model = Request(**nr_data)
         nr_model['consentFlag'] = 'R' # invariant: this function is only called when the consent letter has been received
         ReportResource._update_entity_and_action_code(nr_model)
         report_name = nr_number + ' - ' + CONSENT_EMAIL_SUBJECT
@@ -52,8 +51,8 @@ def email_consent_letter(email_info: SimpleCloudEvent):
         file_name = 'consent'
         legal_type = nr_model['entity_type_cd']
         request_action = nr_model["request_action_cd"]
-        corpNum = nr_model["corpNum"]
-        instruction_group = ReportResource._get_instruction_group(legal_type, request_action, corpNum)
+        corp_num = nr_model["corpNum"]
+        instruction_group = ReportResource._get_instruction_group(legal_type, request_action, corp_num)
         if instruction_group:
             file_name = f"{file_name}-{instruction_group}.md"
         email_template = get_main_template(request_action, file_name, 'consent')
@@ -81,7 +80,6 @@ def email_report(email_info: SimpleCloudEvent):
             structured_log(request, "ERROR", f"Failed to get nr info for name request: {nr_number}")
             return {}
         nr_model = nr_response.json()
-        # nr_model = Request(**nr_data)
 
         report, status_code = ReportResource._get_report(nr_model)
         if status_code != HTTPStatus.OK:
@@ -93,8 +91,8 @@ def email_report(email_info: SimpleCloudEvent):
         email_template = get_main_template(request_action, 'rejected.md')
         if nr_model['stateCd'] in [State.APPROVED, State.CONDITIONAL]:
             legal_type = nr_model['entity_type_cd']
-            corpNum = nr_model["corpNum"]
-            instruction_group = ReportResource._get_instruction_group(legal_type, request_action, corpNum)
+            corp_num = nr_model["corpNum"]
+            instruction_group = ReportResource._get_instruction_group(legal_type, request_action, corp_num)
             file_name = ''
             if nr_model['consentFlag'] in ['Y', 'R']:
                 status = 'conditional'

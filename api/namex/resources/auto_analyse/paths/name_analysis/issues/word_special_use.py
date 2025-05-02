@@ -1,4 +1,5 @@
 """Word special use issue classes."""
+
 from namex.resources.auto_analyse.issues import WordSpecialUseIssue
 
 from ....response_objects import NameAnalysisIssue
@@ -26,7 +27,7 @@ class XproWordSpecialUseIssue(WordSpecialUseIssue):
             show_examination_button=False,
             conflicts=None,
             setup=None,
-            name_actions=[]
+            name_actions=[],
         )
 
         return issue

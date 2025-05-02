@@ -1,5 +1,6 @@
-from flask import current_app, request, jsonify, make_response
 from urllib.parse import unquote_plus
+
+from flask import current_app, jsonify, make_response, request
 
 """
 General API resource utils.

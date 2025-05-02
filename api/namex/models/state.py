@@ -24,18 +24,39 @@ class State(db.Model):
     COMPLETED = 'COMPLETED'
     NRO_UPDATING = 'NRO_UPDATING'
     HISTORICAL = 'HISTORICAL'
-    VALID_STATES = [DRAFT, INPROGRESS, CANCELLED, REFUND_REQUESTED, HOLD, APPROVED, REJECTED, CONDITIONAL, CONSUMED, EXPIRED, RESERVED, COND_RESERVE, PENDING_PAYMENT, COMPLETED]
+    VALID_STATES = [
+        DRAFT,
+        INPROGRESS,
+        CANCELLED,
+        REFUND_REQUESTED,
+        HOLD,
+        APPROVED,
+        REJECTED,
+        CONDITIONAL,
+        CONSUMED,
+        EXPIRED,
+        RESERVED,
+        COND_RESERVE,
+        PENDING_PAYMENT,
+        COMPLETED,
+    ]
     RELEASE_STATES = [DRAFT, CANCELLED, HOLD, APPROVED, REJECTED, CONDITIONAL, EXPIRED]
     COMPLETED_STATE = [APPROVED, REJECTED, CONDITIONAL, CONSUMED]
-    CANCELLABLE_STATES = [DRAFT, INPROGRESS, HOLD, APPROVED, REJECTED, CONDITIONAL, RESERVED, COND_RESERVE,
-                          PENDING_PAYMENT]
+    CANCELLABLE_STATES = [
+        DRAFT,
+        INPROGRESS,
+        HOLD,
+        APPROVED,
+        REJECTED,
+        CONDITIONAL,
+        RESERVED,
+        COND_RESERVE,
+        PENDING_PAYMENT,
+    ]
     ALL_STATES = VALID_STATES + RELEASE_STATES + COMPLETED_STATE + [COMPLETED, HISTORICAL, NRO_UPDATING]
 
     def as_dict(self):
-        return {
-            'code': self.cd,
-            'description': self.description
-        }
+        return {'code': self.cd, 'description': self.description}
 
     def save_to_db(self):
         db.session.add(self)

@@ -14,31 +14,38 @@
 """
 Provides end points to submit, retrieve and cancel a name analysis request.
 """
+
 from http import HTTPStatus
 
+import requests
 from flask import current_app, request
-from flask_restx import Resource, cors, fields
-import requests  # noqa: I001; grouping out of order to make both pylint & isort happy
-from requests import exceptions  # noqa: I001; grouping out of order to make both pylint & isort happy
+from flask_restx import Resource, fields
+from requests import exceptions
 
-from namex.constants import (BCProtectedNameEntityTypes,
-                             BCUnprotectedNameEntityTypes, ValidLocations,
-                             XproUnprotectedNameEntityTypes)
+from namex.constants import (
+    BCProtectedNameEntityTypes,
+    BCUnprotectedNameEntityTypes,
+    ValidLocations,
+    XproUnprotectedNameEntityTypes,
+)
 from namex.services.name_request.auto_analyse import AnalysisRequestActions
 from namex.utils.auth import cors_preflight
 
 from .api_namespace import api as name_analysis_api
 
-NAME_ANALYSIS_REQUEST_SCHEMA = name_analysis_api.model('NameAnalysisRequest', {
-    'name': fields.String,
-    'location': fields.String,
-    'entity_type_cd': fields.String,
-    'request_action_cd': fields.String
-})
+NAME_ANALYSIS_REQUEST_SCHEMA = name_analysis_api.model(
+    'NameAnalysisRequest',
+    {
+        'name': fields.String,
+        'location': fields.String,
+        'entity_type_cd': fields.String,
+        'request_action_cd': fields.String,
+    },
+)
 
 
 def validate_name_request(location, entity_type, request_action):
-    """ Validates the name analysis request."""
+    """Validates the name analysis request."""
     # Raise error if location is invalid
     if location not in ValidLocations.list():
         raise ValueError('Invalid location provided')
@@ -58,7 +65,7 @@ def validate_name_request(location, entity_type, request_action):
             valid_request_actions = [
                 AnalysisRequestActions.NEW.value,
                 AnalysisRequestActions.CHG.value,
-                AnalysisRequestActions.MVE.value
+                AnalysisRequestActions.MVE.value,
             ]
         elif entity_type in BCUnprotectedNameEntityTypes.list():
             is_unprotected = True
@@ -81,7 +88,7 @@ def validate_name_request(location, entity_type, request_action):
             AnalysisRequestActions.CHG.value,
             AnalysisRequestActions.ASSUMED.value,
             AnalysisRequestActions.REN.value,
-            AnalysisRequestActions.REH.value
+            AnalysisRequestActions.REH.value,
         ]
 
         if not valid_location:
@@ -101,6 +108,7 @@ def validate_name_request(location, entity_type, request_action):
 @name_analysis_api.route('', methods=['POST', 'OPTIONS'])
 class NameAnalysisResource(Resource):
     """Wrapper service for Name analyzer."""
+
     @staticmethod
     @name_analysis_api.expect(NAME_ANALYSIS_REQUEST_SCHEMA)
     def post():
@@ -117,10 +125,7 @@ class NameAnalysisResource(Resource):
         auto_analyze_svc_url = current_app.config.get('AUTO_ANALYZE_URL')
         try:
             headers = {'Content-Type': 'application/json'}
-            rv = requests.post(url=auto_analyze_svc_url,
-                               json=json_input,
-                               headers=headers,
-                               timeout=20.0)
+            rv = requests.post(url=auto_analyze_svc_url, json=json_input, headers=headers, timeout=20.0)
             return rv.json(), rv.status_code
         except (exceptions.ConnectionError, exceptions.Timeout):
             return {'message': 'Unable to create name analyze request.'}, HTTPStatus.SERVICE_UNAVAILABLE
@@ -138,8 +143,9 @@ class NameAnalysisResource(Resource):
 
         except (exceptions.ConnectionError, exceptions.Timeout) as err:
             current_app.logger.error(f'Auto Analyze connection failure for {identifier}', err)
-            return {'errors': [{'message': f'Unable to get name analysis results for the identifier {identifier}.'}]
-                    }, HTTPStatus.INTERNAL_SERVER_ERROR
+            return {
+                'errors': [{'message': f'Unable to get name analysis results for the identifier {identifier}.'}]
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
 
     @staticmethod
     def delete(identifier):
@@ -155,6 +161,6 @@ class NameAnalysisResource(Resource):
 
         except (exceptions.ConnectionError, exceptions.Timeout) as err:
             current_app.logger.error(f'Auto Analyze connection failure for {identifier}', err)
-            return {'errors':
-                    [{'message': f'Unable to cancel name analysis for the identifier {identifier}.'}]
-                    }, HTTPStatus.INTERNAL_SERVER_ERROR
+            return {
+                'errors': [{'message': f'Unable to cancel name analysis for the identifier {identifier}.'}]
+            }, HTTPStatus.INTERNAL_SERVER_ERROR

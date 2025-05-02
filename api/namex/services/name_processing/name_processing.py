@@ -1,31 +1,27 @@
 import re
 import warnings
 
-from datetime import datetime
-
 from flask.globals import current_app
-
-from . import LanguageCodes
-from ..name_request.auto_analyse.mixins.get_designations_lists import GetDesignationsListsMixin
-from ..name_request.auto_analyse.name_analysis_utils import remove_french, remove_stop_words, check_numbers_beginning
-from namex.services.word_classification.word_classification import WordClassificationService
-
-from .mixins.get_synonym_lists import GetSynonymListsMixin
-
 from swagger_client import SynonymsApi as SynonymService
 
-from ..virtual_word_condition.virtual_word_condition import VirtualWordConditionService
+from namex.services.word_classification.word_classification import WordClassificationService
 
-'''
+from ..name_request.auto_analyse.mixins.get_designations_lists import GetDesignationsListsMixin
+from ..name_request.auto_analyse.name_analysis_utils import remove_french, remove_stop_words
+from ..virtual_word_condition.virtual_word_condition import VirtualWordConditionService
+from . import LanguageCodes
+from .mixins.get_synonym_lists import GetSynonymListsMixin
+
+"""
 Service for pre-processing of a user submitted name request name string.
 Setting the name using NameProcessingService.set_name will clean the name and set the following properties:
 @:prop name_as_submitted The original name string
-@:prop name_as_submitted_tokenized The original name tokenized handling designations as one token. 
+@:prop name_as_submitted_tokenized The original name tokenized handling designations as one token.
                                     For instance, if original name has limited liability company, this compound designation is made a token.
 @:prop name_original_tokens The original name tokenized without any special handling.
 @:prop processed_name The cleaned name
 @:prop name_tokens Word tokens generated from the cleaned name
-'''
+"""
 
 
 class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
@@ -137,9 +133,9 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
         self.descriptive_word_tokens = None
         self.unclassified_word_tokens = None
 
-    '''
+    """
     Set and process a submitted name string using the process_name class method.
-    '''
+    """
 
     def set_name(self, name, np_svc_prep_data):
         self.name_as_submitted = name  # Store the user's submitted name string
@@ -152,9 +148,14 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
         regex = re.compile(r'(?<!\w)({}|[a-z-A-Z0-9]+)(?!\w)'.format(designation_alternators))
         self.name_as_submitted_tokenized = regex.findall(name.lower())
 
-    def _clean_name_words(self, name, stop_words=[], designation_all=[], prefix_list=[], number_list=[]):
+    def _clean_name_words(self, name, stop_words=None, designation_all=None, prefix_list=None, number_list=None):
+        stop_words = stop_words or []
+        designation_all = designation_all or []
+        prefix_list = prefix_list or []
+        number_list = number_list or []
+
         if not name or not stop_words or not designation_all or not prefix_list or not number_list:
-            warnings.warn("Parameters in clean_name_words function are not set.", Warning)
+            warnings.warn('Parameters in clean_name_words function are not set.', Warning, stacklevel=2)
 
         syn_svc = self.synonym_service
         # vwc_svc = self.virtual_word_condition_service
@@ -172,9 +173,7 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
 
         prefixes = '|'.join(prefix_list)
         words = syn_svc.get_regex_prefixes(
-            text=name,
-            prefixes_str=prefixes,
-            exception_designation=exception_designation
+            text=name, prefixes_str=prefixes, exception_designation=exception_designation
         ).data
 
         name = remove_french(words, designation_alternators)
@@ -188,7 +187,7 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
             designation_all=designation_all,
             prefix_list=prefix_list,
             number_list=number_list,
-            exceptions_ws=[]
+            exceptions_ws=[],
         ).data
 
         tokens = tokens.split()
@@ -197,7 +196,7 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
 
     def exception_virtual_word_condition(self, text, vwc_svc):
         exceptions_ws = []
-        for word in re.sub(r'[^a-zA-Z0-9 -\']+', ' ', text, 0, re.IGNORECASE).split():
+        for word in re.sub(r'[^a-zA-Z0-9 -\']+', ' ', text, count=0, flags=re.IGNORECASE).split():
             if vwc_svc.get_word(word) and bool(re.search(r'\d', word)):
                 exceptions_ws.append(word)
 
@@ -219,7 +218,7 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
         return exceptions_designation
 
     def exception_designation_stop_word(self, stop_words, all_designations):
-        exception_stopword_designation= []
+        exception_stopword_designation = []
         for word in stop_words:
             for designation in all_designations:
                 if bool(re.search(r'\b{0}\b'.format(word), designation)):
@@ -268,7 +267,7 @@ class NameProcessingService(GetSynonymListsMixin, GetDesignationsListsMixin):
                 np_svc_prep_data.get_stop_words(),
                 np_svc_prep_data.get_designated_all_words(),
                 np_svc_prep_data.get_prefixes(),
-                np_svc_prep_data.get_number_words()
+                np_svc_prep_data.get_number_words(),
             )
 
             # Store clean, processed name to instance

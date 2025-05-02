@@ -1,4 +1,5 @@
 """Distinctive issue classes."""
+
 from namex.resources.auto_analyse.issues import AddDistinctiveWordIssue
 
 from ....response_objects import NameAnalysisIssue
@@ -26,7 +27,7 @@ class XproAddDistinctiveWordIssue(AddDistinctiveWordIssue):
             show_examination_button=False,
             conflicts=None,
             setup=None,
-            name_actions=[]
+            name_actions=[],
         )
 
         return issue

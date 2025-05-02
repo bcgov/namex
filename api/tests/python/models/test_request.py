@@ -1,19 +1,26 @@
-from flask import jsonify
-from unittest import mock
 import pytest
 
 
 def test_get_queued_oldest(client, app):
-
     # SETUP #####
     # add NR to database
-    from namex.models import Request as RequestDAO, State, User
+    from namex.models import Request as RequestDAO
+    from namex.models import State, User
+
     nr = RequestDAO()
     nr.nrNum = 'NR 0000001'
     nr.stateCd = State.DRAFT
     nr.save_to_db()
 
-    user = User(username='testUser', firstname='first', lastname='last', sub='idir/funcmunk', iss='keycloak', idp_userid='123', login_source='IDIR')
+    user = User(
+        username='testUser',
+        firstname='first',
+        lastname='last',
+        sub='idir/funcmunk',
+        iss='keycloak',
+        idp_userid='123',
+        login_source='IDIR',
+    )
     user.save_to_db()
 
     nr_oldest = RequestDAO.get_queued_oldest(user)
@@ -23,9 +30,10 @@ def test_get_queued_oldest(client, app):
 
 
 def test_get_queued_oldest_multirow(client, app):
-
     # add NR to database
-    from namex.models import Request as RequestDAO, State, User
+    from namex.models import Request as RequestDAO
+    from namex.models import State, User
+
     nr_first = RequestDAO()
     nr_first.nrNum = 'NR 0000001'
     nr_first.stateCd = State.DRAFT
@@ -37,7 +45,15 @@ def test_get_queued_oldest_multirow(client, app):
         nr.stateCd = State.DRAFT
         nr.save_to_db()
 
-    user = User(username='testUser', firstname='first', lastname='last', sub='idir/funcmunk', iss='keycloak', idp_userid='123', login_source='IDIR')
+    user = User(
+        username='testUser',
+        firstname='first',
+        lastname='last',
+        sub='idir/funcmunk',
+        iss='keycloak',
+        idp_userid='123',
+        login_source='IDIR',
+    )
     user.save_to_db()
 
     nr_oldest = RequestDAO.get_queued_oldest(user)
@@ -48,13 +64,21 @@ def test_get_queued_oldest_multirow(client, app):
 
 
 def test_get_queued_empty_queue(client, app):
-
     # SETUP #####
     # add NR to database
-    from namex.models import Request as RequestDAO, User
     from namex.exceptions import BusinessException
+    from namex.models import Request as RequestDAO
+    from namex.models import User
 
-    user = User(username='testUser', firstname='first', lastname='last', sub='idir/funcmunk', iss='keycloak', idp_userid='123', login_source='IDIR')
+    user = User(
+        username='testUser',
+        firstname='first',
+        lastname='last',
+        sub='idir/funcmunk',
+        iss='keycloak',
+        idp_userid='123',
+        login_source='IDIR',
+    )
     user.save_to_db()
 
     with pytest.raises(BusinessException) as e_info:
@@ -63,7 +87,8 @@ def test_get_queued_empty_queue(client, app):
 
 def test_name_search_populated_by_name():
     """Tests changing a name updates the nameSearch column."""
-    from namex.models import Name, Request as RequestDAO, State
+    from namex.models import Name, State
+    from namex.models import Request as RequestDAO
 
     name = Name()
     name.choice = 1
@@ -95,7 +120,9 @@ def test_name_search_populated_by_name():
 
 def test_has_consumed_name():
     """Assert has_consumed_name."""
-    from namex.models import Name, Request as RequestDAO, State
+    from namex.models import Name, State
+    from namex.models import Request as RequestDAO
+
     name = Name()
     name.choice = 1
     name.name = 'TEST'
@@ -112,7 +139,8 @@ def test_has_consumed_name():
 
 def test_is_expired():
     """Assert is_expired."""
-    from namex.models import Name, Request as RequestDAO, State
+    from namex.models import Name, State
+    from namex.models import Request as RequestDAO
 
     name = Name()
     name.choice = 1

@@ -1,4 +1,5 @@
 import os
+
 from namex import __version__
 
 
