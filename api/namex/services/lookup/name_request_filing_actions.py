@@ -555,7 +555,7 @@ class NameRequestFilingActions:
         'SP':['FR','CFR'],
         'GP':['FR','CFR'],
         'LL':['LL','CLL'],
-        'XP':['XLL''XCLL'],
+        'XP':['XLL', 'XCLL'],
         'LP':['LP','CLP'],
         'XL':['XLP','XCLP'],
         'CP':[ 'CP','CCP','CTC','RCP'],
