@@ -2,10 +2,13 @@ import pytest
 
 from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
 
+from ... import integration_synonym_api
+
 service = ProtectedNameAnalysisService()
 np_svc = service.name_processing_service
 
 
+@integration_synonym_api
 @pytest.mark.parametrize(
     'name, expected',
     [
@@ -27,6 +30,7 @@ def test_set_name_remove_french(name, expected):
     assert cleaned_name == expected
 
 
+@integration_synonym_api
 @pytest.mark.parametrize(
     'name, expected',
     [
@@ -44,6 +48,7 @@ def test_set_name_regex_remove_designations(name, expected):
     assert cleaned_name == expected
 
 
+@integration_synonym_api
 @pytest.mark.parametrize(
     'name, expected',
     [
@@ -64,6 +69,7 @@ def test_set_name_regex_prefixes(name, expected):
     assert cleaned_name == expected
 
 
+@integration_synonym_api
 @pytest.mark.parametrize(
     'name, expected',
     [
@@ -87,6 +93,7 @@ def test_set_name_regex_numbers_lot(name, expected):
     assert cleaned_name == expected
 
 
+@integration_synonym_api
 @pytest.mark.parametrize(
     'name, expected',
     [
@@ -125,6 +132,7 @@ def test_set_name_regex_repeated_strings(name, expected):
 #     assert cleaned_name == expected
 
 
+@integration_synonym_api
 @pytest.mark.parametrize(
     'name, expected',
     [
@@ -142,6 +150,7 @@ def test_set_name_regex_keep_together_abv(name, expected):
     assert cleaned_name == expected
 
 
+@integration_synonym_api
 @pytest.mark.parametrize(
     'name, expected',
     [
@@ -166,6 +175,7 @@ def test_set_name_regex_punctuation(name, expected):
     assert cleaned_name == expected
 
 
+@integration_synonym_api
 @pytest.mark.parametrize(
     'name, expected',
     [
@@ -183,6 +193,7 @@ def test_set_name_regex_together_one_letter(name, expected):
     assert cleaned_name == expected
 
 
+@integration_synonym_api
 @pytest.mark.parametrize(
     'name, expected',
     [
@@ -198,6 +209,7 @@ def test_set_name_regex_strip_out_numbers_middle_end(name, expected):
     assert cleaned_name == expected
 
 
+@integration_synonym_api
 @pytest.mark.parametrize(
     'name, expected',
     [

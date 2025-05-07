@@ -5,6 +5,7 @@ Integration tests for Name Request reponses.
 import json
 
 import pytest
+import responses
 
 from namex.models import State
 
@@ -45,11 +46,12 @@ def build_test_input_fields():
     }
 
 
+@responses.activate
 @pytest.mark.parametrize(
     'priorityCd, queue_time_returned, status_cd',
     [('Y', True, State.DRAFT), ('N', True, State.DRAFT), ('N', False, State.INPROGRESS)],
 )
-def test_draft_response(priorityCd, queue_time_returned, status_cd, client, jwt, app):
+def test_draft_response(priorityCd, queue_time_returned, status_cd, client, jwt, app, mock_auth_affiliation):
     """
     Test the Name Request's data fields. Excludes associations 'names' and 'applicant' - we have other tests for those.
     Setup:
@@ -68,7 +70,8 @@ def test_draft_response(priorityCd, queue_time_returned, status_cd, client, jwt,
     assert test_nr is not None
 
     # Grab the record using the API
-    get_response = get_nr(client, test_nr.get('id'))
+    mock_auth_affiliation(nr_num='NR 123456')
+    get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
 

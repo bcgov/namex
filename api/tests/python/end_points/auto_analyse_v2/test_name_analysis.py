@@ -20,6 +20,7 @@ from unittest.mock import patch
 
 import requests
 
+from ... import integration_synonym_api
 from .configuration import ENDPOINT_PATH
 
 
@@ -35,6 +36,7 @@ class MockResponse:
         return self.json_data
 
 
+@integration_synonym_api
 def test_auto_analyze_post(client):
     """Test to ensure that post endpoint works as expected."""
     headers = {'content-type': 'application/json'}
@@ -55,6 +57,7 @@ def test_auto_analyze_post(client):
         assert response_json['analysis']
 
 
+@integration_synonym_api
 def test_auto_analyze_get(client):
     """Test to ensure that get endpoint works as expected."""
     identifier = 'sdf321421344'
@@ -74,6 +77,7 @@ def test_auto_analyze_get(client):
         assert response_json['analysis']
 
 
+@integration_synonym_api
 def test_auto_analyze_delete(client):
     """Test to ensure that delete endpoint works as expected."""
     identifier = 'sdf321421344'

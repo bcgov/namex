@@ -5,6 +5,7 @@ import pytest
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
+from .... import integration_synonym_api
 from ...common import claims, token_header
 from ..common import (
     assert_has_designations_upper,
@@ -17,6 +18,7 @@ from ..configuration import ENDPOINT_PATH
 
 
 # TODO: COOP is also a special word. What if coop is typed in CR entity type. Do we show mismatch designation and special word use?
+@integration_synonym_api
 @pytest.mark.xfail(raises=ValueError)
 def test_designation_mismatch_one_word_request_response(client, jwt, app):
     words_list_classification = [

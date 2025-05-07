@@ -6,7 +6,8 @@ import pytest
 import requests
 
 from namex.models import User
-from tests.python import integration_solr
+
+from .. import integration_solr
 
 token_header = {'alg': 'RS256', 'typ': 'JWT', 'kid': 'flask-jwt-oidc-test-client'}
 claims = {

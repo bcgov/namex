@@ -5,12 +5,14 @@ import pytest
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
+from .... import integration_synonym_api
 from ...common import claims, token_header
 from ..common import assert_has_word_upper, assert_issue_type_is_one_of, assert_issues_count_is_gt
 from ..configuration import ENDPOINT_PATH
 
 
 # 3.- Unique word not classified in word_classification
+@integration_synonym_api
 @pytest.mark.xfail(raises=ValueError)
 def test_add_descriptive_word_not_classified_request_response(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT

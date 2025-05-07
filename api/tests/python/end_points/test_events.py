@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 
 from flask import json
@@ -7,12 +8,13 @@ from namex.models import Event, State, User
 from namex.models import Name as NameDAO
 from namex.models import Request as RequestDAO
 from namex.services import EventRecorder
-from tests.python.end_points.util import create_header
+
+from ..end_points.util import create_header
 
 
 def create_base_nr():
     nr = RequestDAO()
-    nr.nrNum = 'NR 0000002'
+    nr.nrNum = f'NR {str(uuid.uuid4())[:7].upper()}'
     nr.stateCd = State.PENDING_PAYMENT
     nr.requestId = 1460775
     nr._source = ValidSources.NAMEREQUEST.value
@@ -62,7 +64,7 @@ def test_event_create_nrl(client, jwt, app):
     EventRecorder.record(user, Event.POST, nr, nr.json())
 
     # get the resource (this is the test)
-    rv = client.get('/api/v1/events/NR%200000002', headers=headers)
+    rv = client.get(f'/api/v1/events/{nr.nrNum}', headers=headers)
     assert rv.status_code == 200
     assert rv.data
     response = json.loads(rv.data)
@@ -73,26 +75,29 @@ def test_event_create_nrl(client, jwt, app):
     assert response['transactions'][0]['consentFlag'] == None
     assert response['transactions'][0]['eventDate'] > before_record_date.isoformat()
     assert response['transactions'][0]['expirationDate'] == None
-    assert response['transactions'][0]['names'] == [
-        {
-            'choice': 1,
-            'comment': None,
-            'conflict1': '',
-            'conflict1_num': '',
-            'conflict2': '',
-            'conflict2_num': '',
-            'conflict3': '',
-            'conflict3_num': '',
-            'consumptionDate': None,
-            'corpNum': None,
-            'decision_text': '',
-            'designation': None,
-            'id': 1,
-            'name': 'TEST NAME ONE',
-            'name_type_cd': None,
-            'state': 'NE',
-        }
-    ]
+    # Remove the auto-generated ID before asserting
+    names = response['transactions'][0]['names']
+    assert len(names) == 1
+    name = names[0].copy()
+    name.pop('id', None)
+    assert name == {
+        'choice': 1,
+        'comment': None,
+        'conflict1': '',
+        'conflict1_num': '',
+        'conflict2': '',
+        'conflict2_num': '',
+        'conflict3': '',
+        'conflict3_num': '',
+        'consumptionDate': None,
+        'corpNum': None,
+        'decision_text': '',
+        'designation': None,
+        'name': 'TEST NAME ONE',
+        'name_type_cd': None,
+        'state': 'NE',
+    }
+
     assert response['transactions'][0]['priorityCd'] == None
     assert response['transactions'][0]['requestTypeCd'] == 'CR'
     assert response['transactions'][0]['request_action_cd'] == 'NEW'
@@ -118,7 +123,7 @@ def test_get_inprogress_event_history(client, jwt, app):
     nr.save_to_db()
     EventRecorder.record(user, Event.PATCH, nr, {'state': 'INPROGRESS'})
     # get the resource (this is the test)
-    rv = client.get('/api/v1/events/NR%200000002', headers=headers)
+    rv = client.get(f'/api/v1/events/{nr.nrNum}', headers=headers)
     assert rv.status_code == 200
 
     assert b'"user_action": "Load NR"' in rv.data
@@ -153,7 +158,7 @@ def test_get_next_event_history(client, jwt, app):
     EventRecorder.record(user, Event.GET, nr, {})
 
     # get the resource (this is the test)
-    rv = client.get('/api/v1/events/NR%200000002', headers=headers)
+    rv = client.get(f'/api/v1/events/{nr.nrNum}', headers=headers)
     assert rv.status_code == 200
 
     assert b'"user_action": "Get Next NR"' in rv.data
@@ -184,7 +189,7 @@ def test_on_hold_event_history(client, jwt, app):
     EventRecorder.record(user, Event.PATCH, nr, {'state': 'HOLD'})
 
     # get the resource (this is the test)
-    rv = client.get('/api/v1/events/NR%200000002', headers=headers)
+    rv = client.get(f'/api/v1/events/{nr.nrNum}', headers=headers)
     assert rv.status_code == 200
 
     assert b'"user_action": "Hold Request"' in rv.data
@@ -216,7 +221,7 @@ def test_expired_event_history(client, jwt, app):
     EventRecorder.record(user, Event.POST, nr, nr.json())
 
     # get the resource (this is the test)
-    rv = client.get('/api/v1/events/NR%200000002', headers=headers)
+    rv = client.get(f'/api/v1/events/{nr.nrNum}', headers=headers)
     assert rv.status_code == 200
 
     assert b'"user_action": "Expired by NRO"' in rv.data
@@ -247,7 +252,7 @@ def test_cancelled_in_nro_event_history(client, jwt, app):
     EventRecorder.record(user, Event.POST, nr, {})
 
     # get the resource (this is the test)
-    rv = client.get('/api/v1/events/NR%200000002', headers=headers)
+    rv = client.get(f'/api/v1/events/{nr.nrNum}', headers=headers)
     assert rv.status_code == 200
 
     assert b'"user_action": "Cancelled in NRO"' in rv.data
@@ -278,7 +283,7 @@ def test_cancelled_in_namex_event_history(client, jwt, app):
     EventRecorder.record(user, Event.PATCH, nr, {'state': 'CANCELLED'})
 
     # get the resource (this is the test)
-    rv = client.get('/api/v1/events/NR%200000002', headers=headers)
+    rv = client.get(f'/api/v1/events/{nr.nrNum}', headers=headers)
     assert rv.status_code == 200
 
     assert b'"user_action": "Cancelled in Namex"' in rv.data
@@ -309,7 +314,7 @@ def test_decision_event_history(client, jwt, app):
     EventRecorder.record(user, Event.PATCH, nr, {'state': 'REJECTED'})
 
     # get the resource (this is the test)
-    rv = client.get('/api/v1/events/NR%200000002', headers=headers)
+    rv = client.get(f'/api/v1/events/{nr.nrNum}', headers=headers)
     assert rv.status_code == 200
 
     assert b'"user_action": "Decision"' in rv.data
@@ -341,7 +346,7 @@ def test_edit_event_history(client, jwt, app):
     EventRecorder.record(user, Event.PUT, nr, nr.json())
 
     # get the resource (this is the test)
-    rv = client.get('/api/v1/events/NR%200000002', headers=headers)
+    rv = client.get(f'/api/v1/events/{nr.nrNum}', headers=headers)
     assert rv.status_code == 200
 
     assert b'"user_action": "Edit NR Details (NameX)"' in rv.data
@@ -384,7 +389,7 @@ def test_reopen_event_history(client, jwt, app):
     EventRecorder.record(user, Event.PUT, nr, {'additional': 'additional', 'furnished': 'N'})
 
     # get the resource (this is the test)
-    rv = client.get('/api/v1/events/NR%200000002', headers=headers)
+    rv = client.get(f'/api/v1/events/{nr.nrNum}', headers=headers)
     assert rv.status_code == 200
 
     assert b'"user_action": "Re-Open"' in rv.data
@@ -428,7 +433,7 @@ def test_edit_inprogress_event_history(client, jwt, app):
     EventRecorder.record(user, Event.PUT, nr, {'additional': 'additional', 'furnished': 'N'})
 
     # get the resource (this is the test)
-    rv = client.get('/api/v1/events/NR%200000002', headers=headers)
+    rv = client.get(f'/api/v1/events/{nr.nrNum}', headers=headers)
     assert rv.status_code == 200
 
     assert b'"user_action": "Edit NR Details (NameX)"' in rv.data
@@ -467,7 +472,7 @@ def test_get_staff_comment_event_history(client, jwt, app):
     EventRecorder.record(user, Event.POST, nr, {'comment': 'test staff comment'})
 
     # get the resource (this is the test)
-    rv = client.get('/api/v1/events/NR%200000002', headers=headers)
+    rv = client.get(f'/api/v1/events/{nr.nrNum}', headers=headers)
     assert rv.status_code == 200
 
     assert b'"user_action": "Staff Comment"' in rv.data
@@ -499,7 +504,7 @@ def test_consumed_event_history(client, jwt, app):
     EventRecorder.record_as_system(Event.UPDATE_FROM_NRO, nr, nr.json())
 
     # get the resource (this is the test)
-    rv = client.get('/api/v1/events/NR%200000002', headers=headers)
+    rv = client.get(f'/api/v1/events/{nr.nrNum}', headers=headers)
     assert rv.status_code == 200
 
     assert b'"user_action": "Get NR Details from NRO"' in rv.data

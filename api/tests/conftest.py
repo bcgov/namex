@@ -1,7 +1,10 @@
 import datetime
+import urllib.parse
 from contextlib import suppress
+from unittest.mock import patch
 
 import pytest
+import responses
 from flask_migrate import Migrate, upgrade
 from sqlalchemy import event, text
 from sqlalchemy.schema import DropConstraint, MetaData
@@ -10,7 +13,7 @@ from namex import create_app
 from namex import jwt as _jwt
 from namex.models import db as _db
 
-from . import FROZEN_DATETIME
+from .python import FROZEN_DATETIME
 
 
 # fixture to freeze utcnow to a fixed date-time
@@ -74,18 +77,18 @@ def db(app, request):
     """
     with app.app_context():
         # Clear out any existing tables
-        metadata = MetaData(_db.engine)
-        metadata.reflect()
+        metadata = MetaData()
+        metadata.reflect(bind=_db.engine)
         for table in metadata.tables.values():
             for fk in table.foreign_keys:
                 _db.engine.execute(DropConstraint(fk.constraint))
         with suppress(Exception):
-            metadata.drop_all()
+            metadata.drop_all(bind=_db.engine)
         with suppress(Exception):
             _db.drop_all()
 
         sequence_sql = """SELECT sequence_name FROM information_schema.sequences
-                          WHERE sequence_schema='public'  
+                          WHERE sequence_schema='public'
                        """
 
         sess = _db.session()
@@ -148,3 +151,38 @@ def session(app, db, request):
         # This instruction rollsback any commit that were executed in the tests.
         txn.rollback()
         conn.close()
+
+
+@pytest.fixture(autouse=True)
+def set_auth_api_url(app):
+    """
+    Automatically sets a dummy Auth API URL for all tests so that services relying on this config key don't fail.
+    Useful when mocking endpoints that depend on this URL (e.g., affiliation checks).
+    """
+    app.config['AUTH_SVC_URL'] = 'https://mock-auth-api/api/v1'
+
+
+@pytest.fixture
+def mock_auth_affiliation():
+    """
+    Mocks the external Auth API affiliation endpoint so tests don't make real HTTP requests.
+    Prevents failures in CI or local testing environments that don't have access to real Auth API credentials.
+    """
+
+    def _mock(nr_num='NR 123456', org_id='1234'):
+        escaped_nr = urllib.parse.quote(nr_num)
+        mocked_auth_url = f'https://mock-auth-api/api/v1/orgs/{org_id}/affiliations/{escaped_nr}'
+        responses.add(responses.GET, mocked_auth_url, json={}, status=200)
+
+    return _mock
+
+
+@pytest.fixture(autouse=True)
+def mock_gcp_queue_publish():
+    """
+    Mocks the Google Cloud Pub/Sub `publish` method to prevent actual message publishing during tests.
+    Ensures tests run without requiring access to GCP credentials or cloud infrastructure.
+    """
+    with patch('namex.utils.queue_util.queue.publish') as mock_publish:
+        mock_publish.return_value = None
+        yield mock_publish

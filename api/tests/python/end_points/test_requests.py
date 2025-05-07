@@ -22,8 +22,9 @@ from namex.models import (
     State,
     User,
 )
-from tests.python import integration_oracle_namesdb
-from tests.python.end_points.util import create_header
+
+from .. import integration_oracle_namesdb
+from ..end_points.util import create_header
 
 
 def test_get_next(client, jwt, app):
@@ -43,9 +44,8 @@ def test_get_next(client, jwt, app):
     # get the resource (this is the test)
     rv = client.get('/api/v1/requests/queues/@me/oldest', headers=headers)
 
-    # will be partial
-    assert rv.status_code == HTTPStatus.PARTIAL_CONTENT
-    assert b'"nameRequest": "NR 0000001"' in rv.data
+    assert rv.status_code == HTTPStatus.OK
+    assert rv.json.get('nameRequest') == 'NR 0000001'
 
 
 def test_get_next_no_draft_avail(client, jwt, app):
@@ -90,8 +90,7 @@ def test_get_next_oldest(client, jwt, app):
     # get the resource (this is the test)
     rv = client.get('/api/v1/requests/queues/@me/oldest', headers=headers)
 
-    # will be partial
-    assert rv.status_code == HTTPStatus.PARTIAL_CONTENT
+    assert rv.status_code == HTTPStatus.OK
     assert b'"nameRequest": "NR 0000001"' in rv.data
 
 
@@ -296,7 +295,6 @@ def test_remove_name_from_nr(client, jwt, app):
 
 
 def test_add_new_comment_to_nr(client, jwt, app):
-
     # add a user for the comment
     user = User(
         'test-user',
@@ -394,6 +392,7 @@ def test_comment_where_no_user(client, jwt, app):
 def test_comment_where_no_comment(client, jwt, app):
     # create JWT & setup header with a Bearer Token using the JWT
     headers = create_header(jwt, [User.VIEWONLY, User.APPROVER, User.EDITOR])
+    headers['Content-Type'] = 'application/json'
     new_comment = None
     rv = client.post('/api/v1/requests/NR%200000002/comments', data=json.dumps(new_comment), headers=headers)
     assert rv.status_code == HTTPStatus.BAD_REQUEST

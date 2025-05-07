@@ -23,7 +23,7 @@ def test_get_queued_oldest(client, app):
     )
     user.save_to_db()
 
-    nr_oldest = RequestDAO.get_queued_oldest(user)
+    nr_oldest = RequestDAO.get_queued_oldest(user, priority_queue=False)
 
     # Tests ####
     assert nr.nrNum == nr_oldest.nrNum
@@ -56,7 +56,7 @@ def test_get_queued_oldest_multirow(client, app):
     )
     user.save_to_db()
 
-    nr_oldest = RequestDAO.get_queued_oldest(user)
+    nr_oldest = RequestDAO.get_queued_oldest(user, priority_queue=False)
 
     # Tests ####
     assert nr_first.nrNum == nr_oldest.nrNum
@@ -82,7 +82,7 @@ def test_get_queued_empty_queue(client, app):
     user.save_to_db()
 
     with pytest.raises(BusinessException) as e_info:
-        nr_oldest = RequestDAO.get_queued_oldest(user)
+        nr_oldest = RequestDAO.get_queued_oldest(user, priority_queue=False)
 
 
 def test_name_search_populated_by_name():

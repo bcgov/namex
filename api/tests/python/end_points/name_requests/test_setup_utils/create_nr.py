@@ -1,5 +1,6 @@
 from namex.models import State
-from tests.python.unit.test_setup_utils.build_nr import build_nr
+
+from ....unit.test_setup_utils.build_nr import build_nr
 
 
 def create_nr(nr_state, data=None):

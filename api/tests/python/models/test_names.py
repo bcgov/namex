@@ -1,4 +1,3 @@
-
 from namex.models import Name, NameSchema
 
 
@@ -61,9 +60,10 @@ def test_name_schema():
         choice=1,
     )
 
-    name_dump = name_schema.dump(name).data
+    name_dump = name_schema.dump(name)
 
-    assert name_dump == name_json
+    for key, val in name_json.items():
+        assert name_dump[key] == val
 
 
 def test_name_schema_db_update(session):
@@ -91,13 +91,17 @@ def test_name_schema_db_update(session):
     session.commit()
 
     # update the name and resave
-    name_schema.load(name_json, instance=name, partial=False)
+    loaded_data = name_schema.load(name_json)
+    for key, value in loaded_data.items():
+        setattr(name, key, value)
     session.add(name)
     session.commit()
 
     assert name.id is not None
     assert name.name == test_name
-    assert name_json == name_schema.dump(name).data
+    dumped = name_schema.dump(name)
+    for key, val in name_json.items():
+        assert dumped[key] == val
 
 
 def test_name_schema_db_query_update(session):
@@ -127,17 +131,20 @@ def test_name_schema_db_query_update(session):
     name_id = name.id
 
     # update it from the json data vi the schema loader
-    name_schema.load(name_json, instance=name, partial=False)
+    loaded_data = name_schema.load(name_json)
+    for key, value in loaded_data.items():
+        setattr(name, key, value)
     session.add(name)
     session.commit()
 
     # get the name from the data base & assert it was updated
-    name = None
-    name = Name.query.filter_by(name=test_name).one_or_none()
-    assert name.id is not None
+    name = Name.query.filter_by(id=name_id).one_or_none()
+    assert name is not None
     assert name.id == name_id
     assert name.name == test_name
-    assert name_json == name_schema.dump(name).data
+    dumped = name_schema.dump(name)
+    for key, val in name_json.items():
+        assert dumped[key] == val
 
 
 def test_name_update_via_save_to_db_method(session):
@@ -169,13 +176,15 @@ def test_name_update_via_save_to_db_method(session):
     name_id = name.id
 
     # update it from the json data vi the schema loader
-    name_schema.load(name_json, instance=name, partial=False)
+    loaded_data = name_schema.load(name_json)
+    for key, value in loaded_data.items():
+        setattr(name, key, value)
     name.save_to_db()
 
     # get the name from the data base & assert it was updated with data changes
     name = None
     name = Name.query.filter_by(id=name_id).one_or_none()
-    assert name.id is not None
+    assert name is not None
     assert name.id == name_id
     assert name.name == test_name.upper()  # name should be uppercase
     assert name.conflict1_num == 'NR 0000001'  # NR number conflicts should be unchanged

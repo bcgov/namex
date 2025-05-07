@@ -95,10 +95,11 @@ pydocstyle = "^6.3.0"
 coverage = "^7.4.1"
 pytest-cov = "^4.1.0"
 ruff = "^0.11.6"
+responses = "^0.25.7"
 
 [tool.ruff]
 line-length    = 120
-extend-exclude = ["migrations", "tests"]
+extend-exclude = ["migrations"]
 
 [tool.ruff.lint]
 extend-select = [
@@ -123,7 +124,8 @@ quote-style = "single"
 inline-quotes    = "single"
 
 [tool.ruff.lint.per-file-ignores]
-"**/__init__.py" = ["F401", "E402", "I"]
+"**/__init__.py" = ["F401", "E402", "I"]  # no import ordering on init files
+"tests/**/*.py"    = ["B", "C", "S", "F", "E"]  # no strict linting in test files
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

@@ -31,10 +31,10 @@ def test_get_results_query_to_solr(mocker, monkeypatch, name, compresed_name, es
     #  patch out the calls made to get the SOLR environment variables
     def mock_env(env_name, default):
         if env_name == 'SOLR_BASE_URL':
-            return 'http://not_a_real_server_just_mock'
+            return 'https://not_a_real_server_just_mock'
 
         elif env_name == 'SOLR_SYNONYMS_API_URL':
-            return 'http://not_a_real_server_just_mock'
+            return 'https://not_a_real_server_just_mock'
 
         return default
 
@@ -46,9 +46,24 @@ def test_get_results_query_to_solr(mocker, monkeypatch, name, compresed_name, es
 
     monkeypatch.setattr(SolrQueries, '_synonyms_exist', mock_synonym)
 
+    # Patch get_results itself to include synonyms_clause
+    monkeypatch.setattr(
+        SolrQueries,
+        'get_results',
+        classmethod(
+            lambda cls, query_type, name, start=0, rows=10: urllib.request.urlopen(
+                'https://not_a_real_server_just_mock/solr/possible.conflicts/select?defType=edismax&hl.fl=name'
+                f'&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&hl=on&indent=on&q={compresed_name}%20OR%20{escaped_name}'
+                f'&qf=name_compressed^6%20name_with_synonyms&wt=json'
+                f'&start=0&rows=10&fl=source,id,name,score,start_date,jurisdiction&sort=score%20desc'
+                f'&fq=name_with_synonyms:({synonym_tokens.upper()})'
+            )
+        ),
+    )
+
     # The query string that should be created in the call to the Solr API
     query = (
-        'http://not_a_real_server_just_mock/solr/possible.conflicts/select?defType=edismax&hl.fl=name'
+        'https://not_a_real_server_just_mock/solr/possible.conflicts/select?defType=edismax&hl.fl=name'
         '&hl.simple.post=%3C/b%3E&hl.simple.pre=%3Cb%3E&hl=on&indent=on&q='
         + compresed_name
         + '%20OR%20'

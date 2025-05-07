@@ -7,16 +7,19 @@ import json
 import pytest
 
 from namex.models import State, User
-from tests.python.common.test_name_request_utils import (
+
+from ....common.test_name_request_utils import (
     assert_applicant_has_id,
     assert_field_is_mapped,
     assert_name_has_id,
     assert_name_has_name,
     pick_name_from_list,
 )
-from tests.python.end_points.common.http import build_request_uri, build_test_query, get_test_headers
-from tests.python.end_points.common.logging import log_request_path
-from tests.python.unit.test_setup_utils import build_nr
+from ....end_points.common.http import build_request_uri, build_test_query, get_test_headers
+from ....end_points.common.logging import log_request_path
+from ....unit.test_setup_utils import build_nr
+from ...common import claims, token_header
+from ...common.http import setup_test_token
 
 # Import token and claims if you need it
 # from tests.python.end_points.common.configuration import claims, token_header
@@ -199,7 +202,7 @@ def create_test_nr(nr_data=None, nr_state=State.DRAFT):
 
         nr.save_to_db()
 
-        return nr.json()
+        return nr
     except Exception as err:
         print(repr(err))
 
@@ -340,12 +343,12 @@ def patch_nr(client, action, nr_id, nr_data, mocker):
 
 
 @pytest.mark.skip
-def get_nr(client, nr_id):
+def get_nr(client, nr_id, jwt):
     try:
         request_uri = API_BASE_URI + str(nr_id)
-        test_params = [{}]
+        test_params = [{'org_id': '1234'}]
 
-        headers = get_test_headers()
+        _, headers = setup_test_token(jwt, claims, token_header)
         query = build_test_query(test_params)
         path = build_request_uri(request_uri, query)
         print('Get Name Request [' + str(nr_id) + ']')

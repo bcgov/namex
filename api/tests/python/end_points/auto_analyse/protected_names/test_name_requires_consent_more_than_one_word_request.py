@@ -5,6 +5,7 @@ import pytest
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
+from .... import integration_synonym_api
 from ...common import claims, token_header
 from ..common import (
     assert_has_word_upper,
@@ -15,6 +16,7 @@ from ..common import (
 from ..configuration import ENDPOINT_PATH
 
 
+@integration_synonym_api
 @pytest.mark.xfail(raises=ValueError)
 def test_name_requires_consent_more_than_one_word_request_response(client, jwt, app):
     words_list_classification = [

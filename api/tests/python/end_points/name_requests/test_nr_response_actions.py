@@ -5,10 +5,12 @@ Integration tests for Name Request state transitions.
 import datetime
 import json
 
+import responses
+
 from namex.constants import NameRequestActions
 from namex.models import State
-from tests.python.common.test_name_request_utils import assert_field_is_mapped, assert_list_contains_exactly
 
+from ...common.test_name_request_utils import assert_field_is_mapped, assert_list_contains_exactly
 from .test_setup_utils.test_helpers import create_test_nr, get_nr
 
 
@@ -46,7 +48,8 @@ def build_test_input_fields():
     }
 
 
-def test_draft_response_actions(client, jwt, app):
+@responses.activate
+def test_draft_response_actions(client, jwt, app, mock_auth_affiliation):
     """
     Test the Name Request's data fields. Excludes associations 'names' and 'applicant' - we have other tests for those.
     Setup:
@@ -64,7 +67,8 @@ def test_draft_response_actions(client, jwt, app):
     assert test_nr is not None
 
     # Grab the record using the API
-    get_response = get_nr(client, test_nr.get('id'))
+    mock_auth_affiliation(nr_num='NR 123456')
+    get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
 
@@ -94,7 +98,8 @@ def test_draft_response_actions(client, jwt, app):
     )
 
 
-def test_approved_response_actions(client, jwt, app):
+@responses.activate
+def test_approved_response_actions(client, jwt, app, mock_auth_affiliation):
     """
     Test the Name Request's data fields. Excludes associations 'names' and 'applicant' - we have other tests for those.
     Setup:
@@ -112,7 +117,8 @@ def test_approved_response_actions(client, jwt, app):
     assert test_nr is not None
 
     # Grab the record using the API
-    get_response = get_nr(client, test_nr.get('id'))
+    mock_auth_affiliation(nr_num='NR 123456')
+    get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
 
@@ -129,18 +135,14 @@ def test_approved_response_actions(client, jwt, app):
     assert_list_contains_exactly(
         actions,
         [
-            NameRequestActions.EDIT.value,
             NameRequestActions.CANCEL.value,
-            # TODO: Show receipt action ONLY if there is an existing payment!
-            # NameRequestActions.RECEIPT.value,
-            # TODO: Add logic to test 5 days / expiry
-            # NameRequestActions.REAPPLY.value,
-            NameRequestActions.RESEND.value,
+            NameRequestActions.RESULT.value,
         ],
     )
 
 
-def test_approved_and_expired_response_actions(client, jwt, app):
+@responses.activate
+def test_approved_and_expired_response_actions(client, jwt, app, mock_auth_affiliation):
     """
     Test the Name Request's data fields. Excludes associations 'names' and 'applicant' - we have other tests for those.
     Setup:
@@ -161,7 +163,8 @@ def test_approved_and_expired_response_actions(client, jwt, app):
     assert test_nr is not None
 
     # Grab the record using the API
-    get_response = get_nr(client, test_nr.get('id'))
+    mock_auth_affiliation(nr_num='NR 123456')
+    get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
 
@@ -178,16 +181,15 @@ def test_approved_and_expired_response_actions(client, jwt, app):
     assert_list_contains_exactly(
         actions,
         [
-            NameRequestActions.EDIT.value,
-            # TODO: Show receipt action ONLY if there is an existing payment!
-            # NameRequestActions.RECEIPT.value,
+            NameRequestActions.CANCEL.value,
             NameRequestActions.REAPPLY.value,
-            NameRequestActions.RESEND.value,
+            NameRequestActions.RESULT.value,
         ],
     )
 
 
-def test_conditional_response_actions(client, jwt, app):
+@responses.activate
+def test_conditional_response_actions(client, jwt, app, mock_auth_affiliation):
     """
     Test the Name Request's data fields. Excludes associations 'names' and 'applicant' - we have other tests for those.
     Setup:
@@ -205,7 +207,8 @@ def test_conditional_response_actions(client, jwt, app):
     assert test_nr is not None
 
     # Grab the record using the API
-    get_response = get_nr(client, test_nr.get('id'))
+    mock_auth_affiliation(nr_num='NR 123456')
+    get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
 
@@ -222,18 +225,14 @@ def test_conditional_response_actions(client, jwt, app):
     assert_list_contains_exactly(
         actions,
         [
-            NameRequestActions.EDIT.value,
             NameRequestActions.CANCEL.value,
-            # TODO: Show receipt action ONLY if there is an existing payment!
-            # NameRequestActions.RECEIPT.value,
-            # TODO: Add logic to test 5 days / expiry
-            # NameRequestActions.REAPPLY.value,
-            NameRequestActions.RESEND.value,
+            NameRequestActions.RESULT.value,
         ],
     )
 
 
-def test_conditional_and_expired_response_actions(client, jwt, app):
+@responses.activate
+def test_conditional_and_expired_response_actions(client, jwt, app, mock_auth_affiliation):
     """
     Test the Name Request's data fields. Excludes associations 'names' and 'applicant' - we have other tests for those.
     Setup:
@@ -254,7 +253,8 @@ def test_conditional_and_expired_response_actions(client, jwt, app):
     assert test_nr is not None
 
     # Grab the record using the API
-    get_response = get_nr(client, test_nr.get('id'))
+    mock_auth_affiliation(nr_num='NR 123456')
+    get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
 
@@ -271,16 +271,15 @@ def test_conditional_and_expired_response_actions(client, jwt, app):
     assert_list_contains_exactly(
         actions,
         [
-            NameRequestActions.EDIT.value,
-            # TODO: Show receipt action ONLY if there is an existing payment!
-            # NameRequestActions.RECEIPT.value,
+            NameRequestActions.CANCEL.value,
             NameRequestActions.REAPPLY.value,
-            NameRequestActions.RESEND.value,
+            NameRequestActions.RESULT.value,
         ],
     )
 
 
-def test_consumed_and_conditional_response_actions(client, jwt, app):
+@responses.activate
+def test_consumed_and_conditional_response_actions(client, jwt, app, mock_auth_affiliation):
     """
     Test the Name Request's data fields. Excludes associations 'names' and 'applicant' - we have other tests for those.
     Setup:
@@ -313,7 +312,8 @@ def test_consumed_and_conditional_response_actions(client, jwt, app):
     assert test_nr is not None
 
     # Grab the record using the API
-    get_response = get_nr(client, test_nr.get('id'))
+    mock_auth_affiliation(nr_num='NR 123456')
+    get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
 
@@ -330,15 +330,14 @@ def test_consumed_and_conditional_response_actions(client, jwt, app):
     assert_list_contains_exactly(
         actions,
         [
-            NameRequestActions.EDIT.value,
-            # TODO: Show receipt action ONLY if there is an existing payment!
-            # NameRequestActions.RECEIPT.value,
-            NameRequestActions.RESEND.value,
+            NameRequestActions.CANCEL.value,
+            NameRequestActions.RESULT.value,
         ],
     )
 
 
-def test_consumed_and_approved_response_actions(client, jwt, app):
+@responses.activate
+def test_consumed_and_approved_response_actions(client, jwt, app, mock_auth_affiliation):
     """
     Test the Name Request's data fields. Excludes associations 'names' and 'applicant' - we have other tests for those.
     Setup:
@@ -371,7 +370,8 @@ def test_consumed_and_approved_response_actions(client, jwt, app):
     assert test_nr is not None
 
     # Grab the record using the API
-    get_response = get_nr(client, test_nr.get('id'))
+    mock_auth_affiliation(nr_num='NR 123456')
+    get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
 
@@ -388,15 +388,14 @@ def test_consumed_and_approved_response_actions(client, jwt, app):
     assert_list_contains_exactly(
         actions,
         [
-            NameRequestActions.EDIT.value,
-            # TODO: Show receipt action ONLY if there is an existing payment!
-            # NameRequestActions.RECEIPT.value,
-            NameRequestActions.RESEND.value,
+            NameRequestActions.CANCEL.value,
+            NameRequestActions.RESULT.value,
         ],
     )
 
 
-def test_rejected_response_actions(client, jwt, app):
+@responses.activate
+def test_rejected_response_actions(client, jwt, app, mock_auth_affiliation):
     """
     Test the Name Request's data fields. Excludes associations 'names' and 'applicant' - we have other tests for those.
     Setup:
@@ -414,7 +413,8 @@ def test_rejected_response_actions(client, jwt, app):
     assert test_nr is not None
 
     # Grab the record using the API
-    get_response = get_nr(client, test_nr.get('id'))
+    mock_auth_affiliation(nr_num='NR 123456')
+    get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
 
@@ -431,15 +431,13 @@ def test_rejected_response_actions(client, jwt, app):
     assert_list_contains_exactly(
         actions,
         [
-            NameRequestActions.EDIT.value,  # TODO: Make sure we can only edit contact info somehow as part of this test
-            # TODO: Show receipt action ONLY if there is an existing payment!
-            # NameRequestActions.RECEIPT.value,
-            NameRequestActions.RESEND.value,
+            NameRequestActions.RESULT.value,
         ],
     )
 
 
-def test_historical_response_actions(client, jwt, app):
+@responses.activate
+def test_historical_response_actions(client, jwt, app, mock_auth_affiliation):
     """
     Test the Name Request's data fields. Excludes associations 'names' and 'applicant' - we have other tests for those.
     Setup:
@@ -457,7 +455,8 @@ def test_historical_response_actions(client, jwt, app):
     assert test_nr is not None
 
     # Grab the record using the API
-    get_response = get_nr(client, test_nr.get('id'))
+    mock_auth_affiliation(nr_num='NR 123456')
+    get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
 
@@ -480,7 +479,8 @@ def test_historical_response_actions(client, jwt, app):
     )
 
 
-def test_hold_response_actions(client, jwt, app):
+@responses.activate
+def test_hold_response_actions(client, jwt, app, mock_auth_affiliation):
     """
     Test the Name Request's data fields. Excludes associations 'names' and 'applicant' - we have other tests for those.
     Setup:
@@ -498,7 +498,8 @@ def test_hold_response_actions(client, jwt, app):
     assert test_nr is not None
 
     # Grab the record using the API
-    get_response = get_nr(client, test_nr.get('id'))
+    mock_auth_affiliation(nr_num='NR 123456')
+    get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
 
@@ -515,7 +516,8 @@ def test_hold_response_actions(client, jwt, app):
     assert len(actions) == 0
 
 
-def test_inprogress_response_actions(client, jwt, app):
+@responses.activate
+def test_inprogress_response_actions(client, jwt, app, mock_auth_affiliation):
     """
     Test the Name Request's data fields. Excludes associations 'names' and 'applicant' - we have other tests for those.
     Setup:
@@ -533,7 +535,8 @@ def test_inprogress_response_actions(client, jwt, app):
     assert test_nr is not None
 
     # Grab the record using the API
-    get_response = get_nr(client, test_nr.get('id'))
+    mock_auth_affiliation(nr_num='NR 123456')
+    get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
 
@@ -550,7 +553,8 @@ def test_inprogress_response_actions(client, jwt, app):
     assert len(actions) == 0
 
 
-def test_cancelled_response_actions(client, jwt, app):
+@responses.activate
+def test_cancelled_response_actions(client, jwt, app, mock_auth_affiliation):
     """
     Test the Name Request's data fields. Excludes associations 'names' and 'applicant' - we have other tests for those.
     Setup:
@@ -568,7 +572,8 @@ def test_cancelled_response_actions(client, jwt, app):
     assert test_nr is not None
 
     # Grab the record using the API
-    get_response = get_nr(client, test_nr.get('id'))
+    mock_auth_affiliation(nr_num='NR 123456')
+    get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
 

@@ -5,11 +5,13 @@ import pytest
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
+from .... import integration_synonym_api
 from ...common import claims, token_header
 from ..common import assert_has_no_issue_type, save_words_list_classification
 from ..configuration import ENDPOINT_PATH
 
 
+@integration_synonym_api
 @pytest.mark.xfail(raises=ValueError)
 def test_designation_existence_request_response(client, jwt, app):
     words_list_classification = [

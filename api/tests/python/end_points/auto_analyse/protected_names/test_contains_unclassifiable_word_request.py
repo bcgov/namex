@@ -5,11 +5,13 @@ import pytest
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
 
+from .... import integration_synonym_api
 from ...common import claims, token_header
 from ..common import assert_has_word_upper, assert_issues_count_is_gt, save_words_list_classification
 from ..configuration import ENDPOINT_PATH
 
 
+@integration_synonym_api
 @pytest.mark.xfail(raises=ValueError)
 def test_contains_unclassifiable_word_request_response(client, jwt, app):
     words_list_classification = [
@@ -30,6 +32,7 @@ def test_contains_unclassifiable_word_request_response(client, jwt, app):
             'location': 'BC',
             'entity_type_cd': 'CR',
             'request_action_cd': 'NEW',
+            'analysis_type': 'structure',
         }
     ]
 
