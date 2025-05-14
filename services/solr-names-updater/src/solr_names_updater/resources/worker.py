@@ -24,7 +24,6 @@ from namex.models import Request as RequestDAO
 from namex.services import queue
 from requests import RequestException
 from sbc_common_components.utils.enums import QueueMessageTypes
-from sentry_sdk import capture_message
 from sqlalchemy.exc import OperationalError
 from urllib3.exceptions import NewConnectionError
 
