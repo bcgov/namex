@@ -37,9 +37,7 @@ This module is the service worker for sending emails about entity related events
 """
 from __future__ import annotations
 
-import sentry_sdk
 from flask import Flask
-from sentry_sdk.integrations.flask import FlaskIntegration
 
 from config import Config, Production
 from namex_emailer.utils import get_run_version
@@ -54,15 +52,6 @@ def create_app(environment: Config = Production, **kwargs) -> Flask:
     """Return a configured Flask App using the Factory method."""
     app = Flask(__name__)
     app.config.from_object(environment)
-
-    # Configure Sentry
-    if dsn := app.config.get("SENTRY_DSN", None):
-        sentry_sdk.init(
-            dsn=dsn,
-            integrations=[FlaskIntegration()],
-            release=f"names-emailer@{get_run_version()}",
-            send_default_pii=False,
-        )
 
     flags.init_app(app)
     queue.init_app(app)
