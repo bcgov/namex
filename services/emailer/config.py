@@ -126,6 +126,12 @@ class Config:  # pylint: disable=too-few-public-methods
                                       'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/\
 permits-licences/businesses-incorporated-companies/approval-business-name')
 
+    # Cloud Tasks
+    GCP_PROJECT = os.getenv('GCP_PROJECT', '')
+    GCP_REGION = os.getenv('GCP_REGION', '')
+    CLOUD_TASKS_QUEUE_ID = os.getenv('CLOUD_TASKS_QUEUE_ID', '')
+    CLOUD_TASKS_INVOKER_SERVICE_ACCOUNT = os.getenv('CLOUD_TASKS_INVOKER_SERVICE_ACCOUNT', '')
+    CLOUD_TASKS_HANDLER_URL = os.getenv('CLOUD_TASKS_HANDLER_URL', '')
 
 class Development(Config):  # pylint: disable=too-few-public-methods
     """Creates the Development Config object."""

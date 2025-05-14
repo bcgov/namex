@@ -39,13 +39,14 @@ from http import HTTPStatus
 from flask import Blueprint, request
 from gcp_queue.logging import structured_log
 from sbc_common_components.utils.enums import QueueMessageTypes
-from simple_cloudevent import SimpleCloudEvent
+from simple_cloudevent import SimpleCloudEvent, to_structured
 
 import namex_emailer.services.helpers
 from namex_emailer.constants.notification_options import DECISION_OPTIONS, NOTIFICATION_OPTIONS, Option
 from namex_emailer.email_processors import name_request, nr_notification, nr_result
 from namex_emailer.email_processors.resend import process_resend_email
 from namex_emailer.services import ce_cache, queue
+from namex_emailer.services.email_scheduler import schedule_or_reschedule_email
 
 bp = Blueprint("worker", __name__)
 
@@ -74,6 +75,18 @@ def worker():
         return process_resend_email(resend_event_id)
 
     structured_log(request, "INFO", f"received ce: {str(ce)}")
+
+    # If approved, conditional, or rejected - schedule a cloud task to send the email in 5 minutes
+    option = ce.data.get("request", {}).get("option")
+    if Option(option) in DECISION_OPTIONS:
+        try:
+            nr_num = ce.data["request"]["nrNum"].replace(" ", "_")
+            schedule_or_reschedule_email(nr_num, option, to_structured(ce))
+            structured_log(request, "INFO", f"Scheduled deferred email for {nr_num} - '{option}'")
+            return {}, HTTPStatus.OK
+        except Exception as err:
+            structured_log(request, "WARNING", f"Scheduling failed, falling back to immediate send: {err}")
+
     token = namex_emailer.services.helpers.get_bearer_token()
     if not (email := process_email(ce)):
         # no email to send, take off queue
