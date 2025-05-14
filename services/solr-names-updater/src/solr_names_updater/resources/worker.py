@@ -79,7 +79,6 @@ def worker():
             raise err  # We don't want to handle the error, as a http connection error would drain the queue
         except Exception as e:  # pylint: disable=broad-except # noqa B902
             # Catch Exception so that any error is still caught and the message is removed from the queue
-            capture_message('Queue Error:' + e, level='error')
             structured_log(request, message=f'Queue Error: {json.dumps(ce)}', severity='ERROR')
         finally:
             return ret
