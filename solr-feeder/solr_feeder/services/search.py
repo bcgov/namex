@@ -73,7 +73,7 @@ def update_search_cores(identifier: str, legal_type: str):
                 current_app.logger.error('BOR update error probably due to many parties associated ' +
                               f'with the entity. Please verify the update for {identifier} and ' +
                               'manually retry if necessary.')
-                # error log for sentry message -- do not return an error msg as COLIN will keep retrying
+                # error log -- do not return an error msg as COLIN will keep retrying
                 current_app.logger.error('Timeout error updating %s', identifier)
             else:
                 current_app.logger.error('Error updating bor core (%s): %s', identifier, error)

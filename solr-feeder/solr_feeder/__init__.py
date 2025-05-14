@@ -15,8 +15,6 @@
 import os
 
 import flask
-import sentry_sdk
-from sentry_sdk.integrations.flask import FlaskIntegration
 from structured_logging import StructuredLogging
 
 from solr_feeder.config import config
@@ -32,15 +30,5 @@ def create_application(config_name: str = os.getenv('APP_ENV') or 'production'):
     app = flask.Flask(__name__)
     app.logger = StructuredLogging().get_logger()
     app.config.from_object(config[config_name])
-    # Configure Sentry
-    if dsn := app.config.get('SENTRY_DSN'):
-        sentry_sdk.init(  # pylint: disable=E0110
-            dsn=dsn,
-            integrations=[FlaskIntegration()],
-            environment=app.config.get('POD_NAMESPACE'),
-            release=f'solr-feeder@{__version__}',
-            traces_sample_rate=app.config.get('SENTRY_TSR')
-        )
-    endpoint.init_app(app)
 
     return app
