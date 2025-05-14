@@ -31,7 +31,6 @@ from namex.models import Event, Payment
 from namex.models import Request as RequestDAO  # noqa:I001; import orders
 from namex.models import State, User
 from namex.services import EventRecorder, is_reapplication_eligible  # noqa:I005;
-from sentry_sdk import capture_message
 from simple_cloudevent import SimpleCloudEvent
 from sqlalchemy.exc import OperationalError
 from sbc_common_components.utils.enums import QueueMessageTypes
@@ -90,12 +89,10 @@ def worker():
             structured_log(request, "INFO", f"completed ce: {str(ce)}")
         except OperationalError as err:  # message goes back on the queue
             structured_log(request, "ERROR", f"Queue locked - Database Issue:: {payment_token.id}")
-            capture_message(f'Queue locked - Database Issue for payment id:{payment_token.id}', level='error')
             ret = {}, HTTPStatus.INTERNAL_SERVER_ERROR
         except Exception as e:  # pylint: disable=broad-except # noqa B902
             # Catch Exception so that any error is still caught and the message is removed from the queue
             structured_log(request, "ERROR", f"Queue Error for payment id: {payment_token.id}, with exception: {e}")
-            capture_message(f'Queue Error for payment id:{payment_token.id}, with exception: {e}', level='error')
         finally:
             return ret
 
@@ -135,7 +132,6 @@ def update_payment_record(payment: Payment) -> Optional[Payment]:
     if payment.payment_completion_date:
         msg = f'Queue Issue: Duplicate, payment already processed for payment.id={payment.id}'
         structured_log(request, message=msg)
-        capture_message(msg)
         return None
 
     payment_action = payment.payment_action
@@ -153,7 +149,6 @@ def update_payment_record(payment: Payment) -> Optional[Payment]:
         case _:
             msg = f'Queue Issue: Unknown action:{payment_action} for payment.id={payment.id}'
             structured_log(request, message=msg)
-            capture_message(msg)
             raise Exception(f'Unknown action:{payment_action} for payment.id={payment.id}')
 
 
@@ -163,7 +158,6 @@ def reapply_payment(nr, payment):
         msg = f'Queue Issue: Failed attempt to extend NR for payment.id={payment.id} '\
             'nr.state{nr.stateCd}, nr.expires:{nr.expirationDate}'
         structured_log(request, message=msg)
-        capture_message(msg)
         raise Exception(msg)
     if is_reapplication_eligible(nr.expirationDate):
         # to avoid duplicate expiration date calculated
@@ -191,7 +185,6 @@ def upgrade_payment(nr, payment):
     if nr.stateCd == State.PENDING_PAYMENT:
         msg = f'Queue Issue: Upgrading a non-DRAFT NR for payment.id={payment.id}'
         structured_log(request, message=msg)
-        capture_message(msg)
         raise Exception(msg)
 
     nr.priorityCd = 'Y'
@@ -208,7 +201,6 @@ def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-oute
     if payment.furnished is True:
         msg = f'Queue Issue: Duplicate, already furnished receipt for payment.id={payment.id}'
         structured_log(request, message=msg)
-        capture_message(msg)
         return
 
     nr = None
@@ -276,7 +268,6 @@ def process_payment(ce: SimpleCloudEvent):
             if not payment:
                 msg = f'Queue Error: Unable to find payment record for :{pay_msg}'
                 structured_log(request, message=msg)
-                capture_message(f'Queue Error: Unable to find payment record for :{pay_msg}', level='error')
                 raise Exception(msg)
 
             if update_payment := update_payment_record(payment):
@@ -296,6 +287,5 @@ def process_payment(ce: SimpleCloudEvent):
         else:
             msg = f'Queue Error: Missing id :{pay_msg}'
             structured_log(request, message=msg)
-            capture_message(f'Queue Error: Missing id :{pay_msg}', level='error')
 
         return

@@ -69,9 +69,6 @@ class Config():  # pylint: disable=too-few-public-methods;
     KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('NDS_SERVICE_ACCOUNT_CLIENT_ID')
     KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('NDS_SERVICE_ACCOUNT_SECRET')
 
-    SENTRY_DSN = os.getenv('SENTRY_DSN')
-    SENTRY_TSR = os.getenv('SENTRY_TSR', '1.0')
-
     DEBUG = False
     TESTING = False
 

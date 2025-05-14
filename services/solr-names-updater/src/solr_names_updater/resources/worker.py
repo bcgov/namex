@@ -24,7 +24,6 @@ from namex.models import Request as RequestDAO
 from namex.services import queue
 from requests import RequestException
 from sbc_common_components.utils.enums import QueueMessageTypes
-from sentry_sdk import capture_message
 from sqlalchemy.exc import OperationalError
 from urllib3.exceptions import NewConnectionError
 
@@ -80,7 +79,6 @@ def worker():
             raise err  # We don't want to handle the error, as a http connection error would drain the queue
         except Exception as e:  # pylint: disable=broad-except # noqa B902
             # Catch Exception so that any error is still caught and the message is removed from the queue
-            capture_message('Queue Error:' + e, level='error')
             structured_log(request, message=f'Queue Error: {json.dumps(ce)}', severity='ERROR')
         finally:
             return ret

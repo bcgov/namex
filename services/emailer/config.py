@@ -75,8 +75,6 @@ class Config:  # pylint: disable=too-few-public-methods
 
     NAMEX_LD_SDK_ID = os.getenv("NAMEX_LD_SDK_ID", None)
 
-    SENTRY_DSN = os.getenv("SENTRY_DSN", None)
-
     # variables
     LEGISLATIVE_TIMEZONE = os.getenv("LEGISLATIVE_TIMEZONE", "America/Vancouver")
     TEMPLATE_PATH = os.getenv("TEMPLATE_PATH", None)

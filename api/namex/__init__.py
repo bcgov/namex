@@ -16,10 +16,8 @@ from .VERSION import __version__
 
 jwt = JwtManager()
 
-import sentry_sdk
 from flask_cors import CORS
 from flask_migrate import Migrate
-from sentry_sdk.integrations.flask import FlaskIntegration
 from structured_logging import StructuredLogging
 
 from namex.services.cache import cache
@@ -46,11 +44,6 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):  # noqa: B008
     structured_logger = StructuredLogging()
     structured_logger.init_app(app)
     app.logger = structured_logger.get_logger()
-
-    # Configure Sentry
-    if str(app.config.get('SENTRY_ENABLE')).lower() == 'true':
-        if app.config.get('SENTRY_DSN', None):
-            sentry_sdk.init(dsn=app.config.get('SENTRY_DSN'), integrations=[FlaskIntegration()])
 
     flags.init_app(app)
     queue.init_app(app)

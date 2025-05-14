@@ -23,7 +23,6 @@ idna = "^3.10"
 itsdangerous = "^2.2.0"
 python-dotenv = "^1.0.1"
 requests = "^2.32.3"
-sentry-sdk = "^2.20.0"
 urllib3 = "^2.3.0"
 
 
