@@ -47,7 +47,7 @@ class Config(object):
 
     COLIN_SVC_URL = f'{os.getenv("COLIN_SVC_URL", None)}{os.getenv("COLIN_SVC_VERSION", None)}'
 
-    ENTITY_SVC_URL = f'{os.getenv("LEGAL_API_URL", None)}{os.getenv("LEGAL_API_VERSION", "/api/v1")}'
+    ENTITY_SVC_URL = f'{os.getenv("LEGAL_API_URL", None)}{os.getenv("LEGAL_API_VERSION", "/api/v2")}'
 
     NAME_REQUEST_URL = os.getenv('NAME_REQUEST_URL', '')
     NAMES_INFORMATION_URL = os.getenv(
