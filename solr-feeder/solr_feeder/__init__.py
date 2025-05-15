@@ -30,5 +30,6 @@ def create_application(config_name: str = os.getenv('APP_ENV') or 'production'):
     app = flask.Flask(__name__)
     app.logger = StructuredLogging().get_logger()
     app.config.from_object(config[config_name])
+    endpoint.init_app(app)
 
     return app
