@@ -69,7 +69,7 @@ def worker():
         return {}, HTTPStatus.OK
 
     # Check if it's a resend
-    resend_event_id = ce.data.get("resendEventId")
+    resend_event_id = ce.data.get("request", {}).get("resendEventId")
     if resend_event_id:
         return process_resend_email(resend_event_id)
 
