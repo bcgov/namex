@@ -37,6 +37,7 @@ class Events(Resource):
 
         # info needed for each event
         nr_event_info = {
+            'id': None,
             'additionalInfo': None,
             'consent_dt': None,
             'consentFlag': None,
@@ -51,6 +52,9 @@ class Events(Resource):
             'stateCd': None,
             'user_action': None,
             'user_name': None,
+            ## the following are for notification events
+            'option': None,
+            'email': None
         }
         # previous event (used for 'user_action' logic)
         e_dict_previous = {}
@@ -60,11 +64,7 @@ class Events(Resource):
         for e in event_results:
             previous_nr_event_info = copy.deepcopy(nr_event_info)
             e_dict = e.json()
-
-            # handle parsing new and older data
-            event_json_data = (
-                dict(json.loads(e_dict['jsonData'])) if isinstance(e_dict['jsonData'], str) else e_dict['jsonData']
-            )
+            nr_event_info['id'] = e_dict['id']
 
             # skip unneeded events for transaction history due to workflow:
             # - 1. patch[checkout] changes the NR state to inprogress
@@ -85,40 +85,14 @@ class Events(Resource):
                     nr_event_info['consentFlag'] = 'N'
                     nr_event_info['consent_dt'] = None
 
-            # TODO: make event data consistent across all events (requires changes in event recording across the api)
-            # - current process is to save payload given, but we need the nr info that was updated saved too
-
-            # if data is a name, update nr_event_info with corresponding name choice
+            event_json_data = (
+                dict(json.loads(e_dict['jsonData'])) if isinstance(e_dict['jsonData'], str) else e_dict['jsonData']
+            )
             if event_json_data:
-                if all(key in event_json_data.keys() for key in ['choice', 'name']):
-                    if len(nr_event_info['names']) > 0:
-                        update_index = 0
-                        for name, i in zip(nr_event_info['names'], range(len(nr_event_info['names']))):
-                            if name['choice'] == event_json_data['choice']:
-                                # save index so we can update it
-                                update_index = i
-                                break
-                        # paste new name info over the old one
-                        nr_event_info['names'][update_index] = event_json_data
-                    else:
-                        nr_event_info['names'].append(event_json_data)
-
-                elif 'state' in event_json_data and event_json_data['state'] == 'CONSUMED':
-                    for name_info in nr_event_info['names']:
-                        if name_info.get('state') in ('APPROVED', 'CONDITION'):
-                            name_info['corpNum'] = event_json_data['corpNum']
-                # else update nr_event_info with any changed event data (should be formatted same as an NR json)
+                if e_dict['action'] == 'notification':
+                    Events.__read_notification_json(nr_event_info, event_json_data)
                 else:
-                    for key in nr_event_info.keys():
-                        if key in event_json_data.keys():
-                            # stateCd updated from e_dict already (not always accurate in event_json_data)
-                            if key == 'stateCd':
-                                continue
-                            # otherwise update nr_event_info
-                            nr_event_info[key] = event_json_data[key]
-                    # entity_type_cd for namerequest is used to change requestTypeCd in namex (it is being mapped incorrectly)
-                    if 'entity_type_cd' in event_json_data.keys() and 'requestTypeCd' not in event_json_data.keys():
-                        nr_event_info['requestTypeCd'] = event_json_data['entity_type_cd']
+                    Events.__read_event_json(nr_event_info, event_json_data)
 
             # update event date
             nr_event_info['eventDate'] = e_dict['eventDate']
@@ -268,6 +242,46 @@ class Events(Resource):
         return make_response(jsonify(resp), 200)
 
     @staticmethod
+    def __read_notification_json(nr_event_info, event_json_data):
+        """
+        Private method to process notification JSON data.
+        :param nr_event_info: Dictionary to update with event information
+        :param event_json_data: JSON data from the event
+        """
+        nr_event_info['email'] = event_json_data['email']
+        nr_event_info['option'] = event_json_data['option']
+
+    @staticmethod
+    def __read_event_json(nr_event_info, event_json_data):
+        """
+        Private method to process event JSON data.
+        :param nr_event_info: Dictionary to update with event information
+        :param event_json_data: JSON data from the event
+        """
+        if all(key in event_json_data.keys() for key in ['choice', 'name']):
+            if len(nr_event_info['names']) > 0:
+                update_index = 0
+                for name, i in zip(nr_event_info['names'], range(len(nr_event_info['names']))):
+                    if name['choice'] == event_json_data['choice']:
+                        update_index = i
+                        break
+                nr_event_info['names'][update_index] = event_json_data
+            else:
+                nr_event_info['names'].append(event_json_data)
+        elif 'state' in event_json_data and event_json_data['state'] == 'CONSUMED':
+            for name_info in nr_event_info['names']:
+                if name_info.get('state') in ('APPROVED', 'CONDITION'):
+                    name_info['corpNum'] = event_json_data['corpNum']
+        else:
+            for key in nr_event_info.keys():
+                if key in event_json_data.keys():
+                    if key == 'stateCd':
+                        continue
+                    nr_event_info[key] = event_json_data[key]
+            if 'entity_type_cd' in event_json_data.keys() and 'requestTypeCd' not in event_json_data.keys():
+                nr_event_info['requestTypeCd'] = event_json_data['entity_type_cd']
+
+    @staticmethod
     def post(nr):
         """
         Record a new event for a Name Request.
@@ -332,6 +346,9 @@ class SingleEvent(Resource):
 
             # Extract necessary data from the event
             event_data = event.json()
+            if event_data.get('action') != 'notification':
+                return make_response(jsonify({'message': 'Event is not a notification event'}), 400)
+
             nr_id = event_data.get('requestId')
             nr_num = RequestDAO.find_by_id(nr_id).nrNum if nr_id else None  # Corrected syntax
 
