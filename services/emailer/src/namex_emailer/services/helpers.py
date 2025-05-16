@@ -114,7 +114,7 @@ def query_notification_event(event_id: str):
 
     token = get_bearer_token()
 
-    nr_response = requests.get(namex_url + '/events/event/' + event_id, headers=get_headers(token))
+    nr_response = requests.get(f'{namex_url}/events/event/{event_id}', headers=get_headers(token))
 
     return nr_response
 
