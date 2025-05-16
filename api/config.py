@@ -96,7 +96,6 @@ permits-licences/businesses-incorporated-companies/approval-business-name',
 
     DISABLE_NAMEREQUEST_SOLR_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0))
 
-    GCP_AUTH_KEY = os.getenv('BUSINESS_GCP_AUTH_KEY', None)
     NAMEX_NR_STATE_TOPIC = os.getenv('NAMEX_NR_STATE_TOPIC', '')
     EMAILER_TOPIC = os.getenv('NAMEX_MAILER_TOPIC', '')
 
