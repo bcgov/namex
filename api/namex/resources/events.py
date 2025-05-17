@@ -1,8 +1,10 @@
 import copy
 import json
+from datetime import datetime, timezone
 
-from flask import jsonify, make_response, request
+from flask import current_app, jsonify, make_response, request
 from flask_restx import Namespace, Resource
+import requests
 
 from namex import jwt
 from namex.models import Event as EventDAO
@@ -250,6 +252,7 @@ class Events(Resource):
         """
         nr_event_info['email'] = event_json_data['email']
         nr_event_info['option'] = event_json_data['option']
+        nr_event_info['resend_date'] = event_json_data.get('resend_date')
 
     @staticmethod
     def __read_event_json(nr_event_info, event_json_data):
@@ -312,8 +315,8 @@ class Events(Resource):
             return make_response(jsonify({'message': f'Error recording event: {str(e)}'}), 500)
 
 
-@cors_preflight('GET, POST')
-@api.route('/event/<int:event_id>', methods=['GET', 'POST', 'OPTIONS'])
+@cors_preflight('GET, POST, PATCH')
+@api.route('/event/<int:event_id>', methods=['GET', 'POST', 'PATCH', 'OPTIONS'])
 class SingleEvent(Resource):
     @staticmethod
     def get(event_id):
@@ -370,4 +373,34 @@ class SingleEvent(Resource):
             return make_response(jsonify({'message': 'Resend notification published successfully'}), 200)
         except Exception as e:
             return make_response(jsonify({'message': f'Error publishing resend notification: {str(e)}'}), 500)
+
+    @staticmethod
+    def patch(event_id):
+        """
+        Update the resend_date in the event's eventJson.
+        """
+        try:
+            # 1. Query the existing event
+            event = EventDAO.query.get_or_404(event_id)
+
+            # Get the existing eventJson from the model (not from .json(), which may be stale)
+            event_json = event.eventJson
+            if isinstance(event_json, str):
+                event_json = json.loads(event_json)
+
+            # 2. Update or add the resend_date in Pacific timezone, formatted as yyyy-mm-dd, hh:mm PM TZ
+            from pytz import timezone as pytz_timezone
+            pacific = pytz_timezone('US/Pacific')
+            now_pacific = datetime.now(pacific)
+            resend_date = now_pacific.strftime('%Y-%m-%d, %I:%M %p %Z')
+            event_json['resend_date'] = resend_date
+
+            # 3. Save and commit the change (ensure eventJson is a JSON string if your model expects it)
+            event.eventJson = json.dumps(event_json)
+            event.save_to_db()
+
+            return make_response(jsonify({'message': f'Event {event_id} updated successfully'}), 200)
+        except Exception as e:
+            current_app.logger.error(f"Failed to update event {event_id}: {e}")
+            return make_response(jsonify({'message': f'Failed to update event {event_id}: {str(e)}'}), 500)
 

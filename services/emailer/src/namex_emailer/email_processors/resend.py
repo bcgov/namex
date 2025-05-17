@@ -3,6 +3,7 @@ from http import HTTPStatus
 from flask import json, request
 from gcp_queue.logging import structured_log
 from namex.resources.name_requests import ReportResource
+import namex_emailer
 from namex_emailer.constants.notification_options import Option, DECISION_OPTIONS
 from namex_emailer.services.helpers import query_notification_event, get_bearer_token, send_email
 
@@ -56,7 +57,9 @@ def _resend_email(event_id: str):
             return
 
     # Send the email
-    _send_email(email)
+    if _send_email(email):
+        namex_emailer.services.helpers.update_resend_timestamp(event_id)
+        structured_log(request, 'DEBUG', f'Successfully resent email for the event {event_id}')
 
 
 def _parse_json(json_str: str):
@@ -108,6 +111,5 @@ def _send_email(email: dict):
             'ERROR',
             f'Failed to resend email for the event: {resp.status_code} - {resp.text}',
         )
-        return
-
-    structured_log(request, 'INFO', 'Successfully resent email for the event')
+        return False
+    return True
