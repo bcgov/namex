@@ -395,7 +395,7 @@ class SingleEvent(Resource):
             resend_date = now_pacific.strftime('%Y-%m-%d, %I:%M %p %Z')
             event_json['resend_date'] = resend_date
 
-            # 3. Save and commit the change (ensure eventJson is a JSON string if your model expects it)
+            # 3. Save and commit the change
             event.eventJson = json.dumps(event_json)
             event.save_to_db()
 
