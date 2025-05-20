@@ -1,10 +1,9 @@
 import copy
 import json
-from datetime import datetime, timezone
+from datetime import datetime
 
 from flask import current_app, jsonify, make_response, request
 from flask_restx import Namespace, Resource
-import requests
 
 from namex import jwt
 from namex.models import Event as EventDAO
@@ -401,6 +400,6 @@ class SingleEvent(Resource):
 
             return make_response(jsonify({'message': f'Event {event_id} updated successfully'}), 200)
         except Exception as e:
-            current_app.logger.error(f"Failed to update event {event_id}: {e}")
+            current_app.logger.error(f'Failed to update event {event_id}: {e}')
             return make_response(jsonify({'message': f'Failed to update event {event_id}: {str(e)}'}), 500)
 
