@@ -1,7 +1,6 @@
 import copy
 import json
 from datetime import datetime
-
 from flask import current_app, jsonify, make_response, request
 from flask_restx import Namespace, Resource
 
@@ -12,6 +11,7 @@ from namex.models import Request as RequestDAO
 from namex.services import EventRecorder
 from namex.utils.auth import cors_preflight
 from namex.utils.queue_util import publish_resend_email_notification
+from pytz import timezone as pytz_timezone
 
 # Register a local namespace for the event history
 api = Namespace('events', description='Audit trail of events for a Name Request')
@@ -388,7 +388,6 @@ class SingleEvent(Resource):
                 event_json = json.loads(event_json)
 
             # 2. Update or add the resend_date in Pacific timezone, formatted as yyyy-mm-dd, hh:mm PM TZ
-            from pytz import timezone as pytz_timezone
             pacific = pytz_timezone('US/Pacific')
             now_pacific = datetime.now(pacific)
             resend_date = now_pacific.strftime('%Y-%m-%d, %I:%M %p %Z')
