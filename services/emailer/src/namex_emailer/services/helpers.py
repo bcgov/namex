@@ -150,7 +150,7 @@ def record_notification_event(nr_num: str, email: dict):
         nr_response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
         return nr_response
     except requests.exceptions.RequestException as e:
-        structured_log(request, "ERROR", f"Failed to record notification event for NR {nr_num}: {e}")
+        structured_log(request, "ERROR", f'Failed to record notification event for NR {nr_num}: {e}')
         return None
     
 @staticmethod
@@ -185,7 +185,7 @@ def update_resend_timestamp(event_id: str):
         response.raise_for_status()
         return True
     except requests.exceptions.RequestException as e:
-        structured_log(request, "ERROR", f"Failed to update resend timestamp for event {event_id}: {e}")
+        structured_log(request, "ERROR", f'Failed to update resend timestamp for event {event_id}: {e}')
         return False
 
 @staticmethod
@@ -197,7 +197,7 @@ def _extract_event_data(ce):
     option = ce.data.get("request", {}).get("option", None)
 
     if not nr_num or option not in {opt.value for opt in Option}:
-        structured_log(request, "ERROR", f"Invalid NR number or option: nrNum={nr_num}, option={option}")
+        structured_log(request, "ERROR", f'Invalid NR number or option: nrNum={nr_num}, option={option}')
         return None, None
 
     return nr_num, option
@@ -218,12 +218,12 @@ def _prepare_event_json(nr_num, option, email):
         try:
             nr_model = query_nr_number(nr_num)
             if nr_model.status_code != 200:
-                structured_log(request, "ERROR", f"Failed to query NR number {nr_num}: {nr_model.status_code}")
+                structured_log(request, "ERROR", f'Failed to query NR number {nr_num}: {nr_model.status_code}')
                 return None
             nr_model = nr_model.json()
             event_json['nr_model'] = nr_model
         except Exception as e:
-            structured_log(request, "ERROR", f"Failed to query NR number {nr_num}: {e}")
+            structured_log(request, "ERROR", f'Failed to query NR number {nr_num}: {e}')
             return None
 
     event_json['email'] = email_for_event
@@ -249,8 +249,8 @@ def _record_event(nr_num, event_json):
             headers=get_headers(token)
         )
         nr_response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
-        structured_log(request, "DEBUG", f"Successfully recorded notification event for NR {nr_num}")
+        structured_log(request, "DEBUG", f'Successfully recorded notification event for NR {nr_num}')
         return True
     except requests.exceptions.RequestException as e:
-        structured_log(request, "ERROR", f"Failed to record notification event for NR {nr_num}: {e}")
+        structured_log(request, "ERROR", f'Failed to record notification event for NR {nr_num}: {e}')
         return False
