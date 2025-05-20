@@ -1,13 +1,13 @@
 import json
 import re
 import string
-import google.auth
 from typing import List
 from urllib import parse, request
 from urllib.error import HTTPError
-from google.auth.transport.requests import Request
 
+import google.auth
 from flask import current_app
+from google.auth.transport.requests import Request
 
 from namex.analytics.phonetic import (
     designations,
@@ -824,17 +824,17 @@ class SolrQueries:
             return credentials.token
 
         except Exception as e:
-            current_app.logger.error(f"Failed to get identity token: {str(e)}")
+            current_app.logger.error(f'Failed to get identity token: {str(e)}')
             return None
-        
+
 
     @classmethod
     def _synonyms_exist(cls, token, col):
         solr_synonyms_api_url = current_app.config.get('SOLR_SYNONYMS_API_URL', None)
         if not solr_synonyms_api_url:
             raise Exception('SOLR: SOLR_SYNONYMS_API_URL is not set')
-        
-        # Get identity token 
+
+        # Get identity token
         identity_token = cls._get_identity_token()
 
         # Add auth header
@@ -864,8 +864,8 @@ class SolrQueries:
         solr_synonyms_api_url = current_app.config.get('SOLR_SYNONYMS_API_URL', None)
         if not solr_synonyms_api_url:
             raise Exception('SOLR: SOLR_SYNONYMS_API_URL is not set')
-        
-        # Get identity token 
+
+        # Get identity token
         identity_token = cls._get_identity_token()
 
         # Add auth header
