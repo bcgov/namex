@@ -11,7 +11,7 @@ from urllib.parse import urlencode
 from namex_emailer.constants.notification_options import DECISION_OPTIONS, Option
 
 @staticmethod
-@cached(cache=TTLCache(maxsize=1, ttl=180)) 
+@cached(cache=TTLCache(maxsize=1, ttl=180))
 def get_bearer_token():
     """Get a valid Bearer token for the service to use."""
     token_url = current_app.config.get('ACCOUNT_SVC_AUTH_URL')
