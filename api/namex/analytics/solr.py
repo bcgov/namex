@@ -5,7 +5,7 @@ from typing import List
 from urllib import parse, request
 from urllib.error import HTTPError
 
-import google.auth
+from google.oauth2 import id_token
 from flask import current_app
 from google.auth.transport.requests import Request
 
@@ -810,18 +810,13 @@ class SolrQueries:
     def _get_identity_token(cls):
         """Get an identity token for authenticating with solr-synonyms-api."""
         try:
-            # Get credentials and project ID.
-            credentials, project = google.auth.default()
-
-            solr_synonyms_api_url = current_app.config.get('SOLR_SYNONYMS_API_URL', None)
+            solr_synonyms_api_url = current_app.config.get('SOLR_SYNONYMS_API_URL')
             if not solr_synonyms_api_url:
                 raise Exception('SOLR: SOLR_SYNONYMS_API_URL is not set')
-
-            # Get an identity token.
-            auth_request = Request()
-            credentials.refresh(auth_request)
-
-            return credentials.token
+            
+            target_audience = solr_synonyms_api_url
+            identity_token = id_token.fetch_id_token(Request(), target_audience)
+            return identity_token
 
         except Exception as e:
             current_app.logger.error(f'Failed to get identity token: {str(e)}')
