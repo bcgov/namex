@@ -829,13 +829,15 @@ class SolrQueries:
         if not solr_synonyms_api_url:
             raise Exception('SOLR: SOLR_SYNONYMS_API_URL is not set')
 
-        # Get identity token
+        # Get identity token and make header
         identity_token = cls._get_identity_token()
-
-        # Add auth header
-        headers = {
-            'Authorization': f'Bearer {identity_token}'
-        }
+        if identity_token is None:
+            current_app.logger.warning('No identity token available - proceeding without authentication.')
+            headers = {}
+        else:
+            headers = {
+                'Authorization': f'Bearer {identity_token}'
+            }
 
         # If the web service call fails, the caller will catch and then return a 500 for us.
         query = solr_synonyms_api_url + '/synonyms/' + col + '/' + parse.quote(token)
@@ -863,13 +865,15 @@ class SolrQueries:
         if not solr_synonyms_api_url:
             raise Exception('SOLR: SOLR_SYNONYMS_API_URL is not set')
 
-        # Get identity token
+        # Get identity token and make header
         identity_token = cls._get_identity_token()
-
-        # Add auth header
-        headers = {
-            'Authorization': f'Bearer {identity_token}'
-        }
+        if identity_token is None:
+            current_app.logger.warning('No identity token available - proceeding without authentication.')
+            headers = {}
+        else:
+            headers = {
+                'Authorization': f'Bearer {identity_token}'
+            }
 
         # If the web service call fails, the caller will catch and then return a 500 for us.
         query = solr_synonyms_api_url + '/synonyms/' + 'stems_text' + '/' + parse.quote(token)
