@@ -830,6 +830,25 @@ protobuf = ">=3.19.5,<3.20.0 || >3.20.0,<3.20.1 || >3.20.1,<4.21.0 || >4.21.0,<4
 libcst = ["libcst (>=0.3.10)"]
 
 [[package]]
+name = "google-cloud-tasks"
+version = "2.19.2"
+description = "Google Cloud Tasks API client library"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "google_cloud_tasks-2.19.2-py3-none-any.whl", hash = "sha256:898bf75020ead4dfb836a43d2ad666389ceeec1a4beb3cb65cc25b9accc289bb"},
+    {file = "google_cloud_tasks-2.19.2.tar.gz", hash = "sha256:276b47e85f4825923a778d543fc0735e4b24be45f73fa7d964ad1655402d07dc"},
+]
+
+[package.dependencies]
+google-api-core = {version = ">=1.34.1,<2.0.0 || >=2.11.0,<3.0.0", extras = ["grpc"]}
+google-auth = ">=2.14.1,<2.24.0 || >2.24.0,<2.25.0 || >2.25.0,<3.0.0"
+grpc-google-iam-v1 = ">=0.14.0,<1.0.0"
+proto-plus = ">=1.22.3,<2.0.0"
+protobuf = ">=3.20.2,<4.21.0 || >4.21.0,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4.21.4 || >4.21.4,<4.21.5 || >4.21.5,<7.0.0"
+
+[[package]]
 name = "googleapis-common-protos"
 version = "1.63.1"
 description = "Common protobufs used in Google APIs"
@@ -922,20 +941,20 @@ test = ["objgraph", "psutil"]
 
 [[package]]
 name = "grpc-google-iam-v1"
-version = "0.13.0"
+version = "0.14.2"
 description = "IAM API client library"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "grpc-google-iam-v1-0.13.0.tar.gz", hash = "sha256:fad318608b9e093258fbf12529180f400d1c44453698a33509cc6ecf005b294e"},
-    {file = "grpc_google_iam_v1-0.13.0-py2.py3-none-any.whl", hash = "sha256:53902e2af7de8df8c1bd91373d9be55b0743ec267a7428ea638db3775becae89"},
+    {file = "grpc_google_iam_v1-0.14.2-py3-none-any.whl", hash = "sha256:a3171468459770907926d56a440b2bb643eec1d7ba215f48f3ecece42b4d8351"},
+    {file = "grpc_google_iam_v1-0.14.2.tar.gz", hash = "sha256:b3e1fc387a1a329e41672197d0ace9de22c78dd7d215048c4c78712073f7bd20"},
 ]
 
 [package.dependencies]
-googleapis-common-protos = {version = ">=1.56.0,<2.0.0dev", extras = ["grpc"]}
-grpcio = ">=1.44.0,<2.0.0dev"
-protobuf = ">=3.19.5,<3.20.0 || >3.20.0,<3.20.1 || >3.20.1,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4.21.4 || >4.21.4,<4.21.5 || >4.21.5,<5.0.0dev"
+googleapis-common-protos = {version = ">=1.56.0,<2.0.0", extras = ["grpc"]}
+grpcio = ">=1.44.0,<2.0.0"
+protobuf = ">=3.20.2,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4.21.4 || >4.21.4,<4.21.5 || >4.21.5,<7.0.0"
 
 [[package]]
 name = "grpcio"
@@ -1731,7 +1750,7 @@ zipp = "^3.8.1"
 type = "git"
 url = "https://github.com/bcgov/namex.git"
 reference = "HEAD"
-resolved_reference = "f1b4f7ed5a3fd69dde6afe695d9d44ccd75bbfef"
+resolved_reference = "d5bf3a7b8dd850d49e209b8692a9b343425e0621"
 subdirectory = "api"
 [[package]]
 name = "nltk"
@@ -3332,4 +3351,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.12,<3.13"
-content-hash = "4efda370707577bda733c0d4d50740775358457361daee0ff14ef3fe0e542457"
+content-hash = "6609e9cd404c219f7feb99117f6f615982fd909bdef4b592d89369f843777d6b"
