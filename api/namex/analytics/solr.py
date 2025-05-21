@@ -846,8 +846,11 @@ class SolrQueries:
         query = solr_synonyms_api_url + '/synonyms/' + col + '/' + parse.quote(token)
         current_app.logger.debug('Query: ' + query)
 
+        # Create a request object with the query and headers
+        req = request.Request(query, headers)
+
         try:
-            connection = request.urlopen(query, headers=headers)
+            connection = request.urlopen(req)
         except HTTPError as http_error:
             # Expected when the token does not have synonyms.
             if http_error.code == 404:
@@ -876,8 +879,12 @@ class SolrQueries:
         # If the web service call fails, the caller will catch and then return a 500 for us.
         query = solr_synonyms_api_url + '/synonyms/' + 'stems_text' + '/' + parse.quote(token)
         current_app.logger.debug('Query: ' + query)
+
+        # Create a request object with the query and headers
+        req = request.Request(query, headers)
+
         try:
-            connection = request.urlopen(query, headers=headers)
+            connection = request.urlopen(req)
         except HTTPError as http_error:
             # Expected when the token does not have synonyms.
             if http_error.code == 404:
