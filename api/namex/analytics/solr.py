@@ -5,9 +5,9 @@ from typing import List
 from urllib import parse, request
 from urllib.error import HTTPError
 
-from google.oauth2 import id_token
 from flask import current_app
 from google.auth.transport.requests import Request
+from google.oauth2 import id_token
 
 from namex.analytics.phonetic import (
     designations,
@@ -813,7 +813,7 @@ class SolrQueries:
             solr_synonyms_api_url = current_app.config.get('SOLR_SYNONYMS_API_URL')
             if not solr_synonyms_api_url:
                 raise Exception('SOLR: SOLR_SYNONYMS_API_URL is not set')
-            
+
             target_audience = solr_synonyms_api_url
             identity_token = id_token.fetch_id_token(Request(), target_audience)
             return identity_token
