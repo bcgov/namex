@@ -818,7 +818,7 @@ class SolrQueries:
 
             return token
         except Exception as e:
-            current_app.logger.warning(f'Error in getting identity token.')
+            current_app.logger.warning(f'Error in getting identity token: {e.message}')
             return None
 
 
@@ -836,7 +836,7 @@ class SolrQueries:
         current_app.logger.debug('Query: ' + query)
 
         try:
-            if id_token is None: 
+            if id_token is None:
                 connection = request.urlopen(query)
             else:
                 connection = request.urlopen(request.Request(
@@ -867,7 +867,7 @@ class SolrQueries:
         current_app.logger.debug('Query: ' + query)
 
         try:
-            if id_token is None: 
+            if id_token is None:
                 connection = request.urlopen(query)
             else:
                 connection = request.urlopen(request.Request(
