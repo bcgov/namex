@@ -1,16 +1,16 @@
+import concurrent.futures
 from copy import deepcopy
 from datetime import datetime
+from urllib.parse import urlencode
 
 import pytz
 import requests
-from cachetools import cached, TTLCache
+from cachetools import TTLCache, cached
 from flask import current_app, request
 from gcp_queue.logging import structured_log
-from urllib.parse import urlencode
 
 from namex_emailer.constants.notification_options import DECISION_OPTIONS, Option
 
-@staticmethod
 @cached(cache=TTLCache(maxsize=1, ttl=180))
 def get_bearer_token():
     """Get a valid Bearer token for the service to use."""
@@ -29,13 +29,11 @@ def get_bearer_token():
     except Exception:
         return None
 
-@staticmethod
 def as_legislation_timezone(date_time: datetime) -> datetime:
     """Return a datetime adjusted to the legislation timezone."""
     return date_time.astimezone(pytz.timezone(current_app.config.get('LEGISLATIVE_TIMEZONE')))
 
 
-@staticmethod
 def format_as_report_string(date_time: datetime) -> str:
     """Return a datetime string in this format (eg: `August 5, 2021 at 11:00 am Pacific time`)."""
     # ensure is set to correct timezone
@@ -47,7 +45,6 @@ def format_as_report_string(date_time: datetime) -> str:
     return date_time_str
 
 
-@staticmethod
 def get_magic_link(nr_data):
     """Return a magic link."""
     BUSINESS_REGISTRY_URL = current_app.config.get("BUSINESS_REGISTRY_URL")
@@ -67,7 +64,6 @@ def get_magic_link(nr_data):
     return f'{BUSINESS_REGISTRY_URL}{route}/?{encoded_params}'
 
 
-@staticmethod
 def get_contact_info(nr_data):
     applicants = nr_data.get('applicants', [])
     
@@ -95,7 +91,6 @@ def get_headers(token: str) -> dict:
     }
 
 
-@staticmethod
 def query_nr_number(identifier: str):
     """Return a JSON object with name request information."""
     namex_url = current_app.config.get('NAMEX_SVC_URL')
@@ -107,7 +102,6 @@ def query_nr_number(identifier: str):
     return nr_response
 
 
-@staticmethod
 def query_notification_event(event_id: str):
     """Return a JSON object with name request information."""
     namex_url = current_app.config.get('NAMEX_SVC_URL')
@@ -119,7 +113,6 @@ def query_notification_event(event_id: str):
     return nr_response
 
 
-@staticmethod
 def send_email(email: dict, token: str):
     """Send the email"""
     structured_log(request, "INFO", f"Send Email: {email}")
@@ -132,29 +125,21 @@ def send_email(email: dict, token: str):
         },
     )
 
-def record_notification_event(nr_num: str, email: dict):
-    payload = {
-        "action": "notification",
-        "eventJson": email
-    }
+# Create a global thread pool executor (tune max_workers as needed)
+thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=5)
 
-    namex_url = current_app.config.get('NAMEX_SVC_URL')
-    token = get_bearer_token()
 
-    try:
-        nr_response = requests.post(
-            namex_url + '/events/' + nr_num,
-            json=payload,
-            headers=get_headers(token)
-        )
-        nr_response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
-        return nr_response
-    except requests.exceptions.RequestException as e:
-        structured_log(request, "ERROR", f'Failed to record notification event for NR {nr_num}: {e}')
-        return None
-    
-@staticmethod
-def write_to_events(ce, email):
+def write_to_events_async(ce, email):
+    """Submit write_to_events to the thread pool."""
+    return thread_pool.submit(_write_to_events, ce, email)
+
+
+def update_resend_timestamp_async(event_id):
+    """Submit update_resend_timestamp to the thread pool."""
+    return thread_pool.submit(_update_resend_timestamp, event_id)
+
+
+def _write_to_events(ce, email):
     """
     Log the event as a system-generated notification in the events table.
     """
@@ -169,8 +154,8 @@ def write_to_events(ce, email):
     # Record the notification event
     return _record_event(nr_num, event_json)
 
-@staticmethod
-def update_resend_timestamp(event_id: str):
+
+def _update_resend_timestamp(event_id: str):
     """
     Update the resend timestamp for the event.
     """
@@ -180,7 +165,8 @@ def update_resend_timestamp(event_id: str):
     try:
         response = requests.patch(
             f"{namex_url}/events/event/{event_id}",
-            headers=get_headers(token)
+            headers=get_headers(token),
+            timeout=5
         )
         response.raise_for_status()
         return True
@@ -188,7 +174,7 @@ def update_resend_timestamp(event_id: str):
         structured_log(request, "ERROR", f'Failed to update resend timestamp for event {event_id}: {e}')
         return False
 
-@staticmethod
+
 def _extract_event_data(ce):
     """
     Extract and validate the NR number and option from the cloud event.
@@ -203,7 +189,6 @@ def _extract_event_data(ce):
     return nr_num, option
 
 
-@staticmethod
 def _prepare_event_json(nr_num, option, email):
     """
     Prepare the event JSON object, including processing attachments if needed.
@@ -230,7 +215,6 @@ def _prepare_event_json(nr_num, option, email):
     return event_json
 
 
-@staticmethod
 def _record_event(nr_num, event_json):
     """
     Record the notification event in the events table.
@@ -246,7 +230,8 @@ def _record_event(nr_num, event_json):
         nr_response = requests.post(
             f"{namex_url}/events/{nr_num}",
             json=payload,
-            headers=get_headers(token)
+            headers=get_headers(token),
+            timeout=5
         )
         nr_response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
         structured_log(request, "DEBUG", f'Successfully recorded notification event for NR {nr_num}')
