@@ -6,7 +6,7 @@ import flask_sqlalchemy
 from structured_logging import StructuredLogging
 
 import config
-from solr_admin import keycloak
+from solr_admin.oidc_callback import bp as oidc_callback_bp
 from solr_admin import models
 
 from solr_admin.models import synonym
@@ -39,8 +39,8 @@ def create_application(run_mode=os.getenv('FLASK_ENV', 'production')):
     structured_logger.init_app(application)
     application.logger = structured_logger.get_logger()
 
-    # Do the call that sets up OIDC for the application.
-    keycloak.Keycloak(application)
+    # Register OIDC callback route to handle Keycloak redirect after login
+    application.register_blueprint(oidc_callback_bp) 
 
     # Create the connection to the database.
     models.db = flask_sqlalchemy.SQLAlchemy(application)
