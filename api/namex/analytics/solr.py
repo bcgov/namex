@@ -817,8 +817,8 @@ class SolrQueries:
                 return None
 
             return token
-        except Exception as e:
-            current_app.logger.warning(f'Error in getting identity token: {e.message}')
+        except Exception:
+            current_app.logger.warning('Error in getting identity token.')
             return None
 
 
