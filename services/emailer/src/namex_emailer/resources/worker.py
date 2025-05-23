@@ -116,7 +116,7 @@ def worker():
         return {}, HTTPStatus.NOT_FOUND
     ce_cache[ce.id] = ce
 
-    namex_emailer.services.helpers.write_to_events(ce, email)
+    namex_emailer.services.helpers.write_to_events_async(ce, email)
 
     structured_log(request, "INFO", f"completed ce: {str(ce)}")
 
