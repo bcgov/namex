@@ -35,7 +35,7 @@ jobs:
       target: ${{ github.event.inputs.target }}  # Corrected the input reference
       app_name: "namex-emailer"
       working_directory: "./services/emailer"
-      redeploy: ${{ inputs.redeploy }}
+      redeploy: ${{ github.event.inputs.redeploy }}
     secrets:
       WORKLOAD_IDENTIFY_POOLS_PROVIDER: ${{ secrets.WORKLOAD_IDENTIFY_POOLS_PROVIDER }}
       GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
