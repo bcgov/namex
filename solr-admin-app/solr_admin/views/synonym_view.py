@@ -1,7 +1,8 @@
 
 import re
 
-from wtforms import validators
+from wtforms import validators, StringField
+from wtforms.validators import DataRequired
 
 from solr_admin import keycloak
 from solr_admin import models
@@ -32,7 +33,10 @@ class SynonymView(SecuredView):
     column_default_sort = 'synonyms_text'
 
     # For some reason this needs to be initialized, but we will override it in is_accessible.
-    column_editable_list = ['category', 'synonyms_text', 'comment']
+    column_editable_list = ['category', 'comment']
+
+    # Explicitly define synonyms_text field to prevent WTForms from breaking on unique=True, nullable=False
+    form_extra_fields = {'synonyms_text': StringField('Synonyms Text', validators=[DataRequired()])}
 
     # List of visible columns
     form_columns = ['category', 'synonyms_text', 'comment']
@@ -56,6 +60,7 @@ class SynonymView(SecuredView):
     def on_model_change(self, form, model, is_created):
         model.synonyms_text = _alphabetize_csv(model.synonyms_text)
         _validate_synonyms_text(model.synonyms_text)
+        model.stems_text = get_stems(model.synonyms_text)
 
 
     # After saving the data create the audit log (we need to wait for a synonym.id value when creating)
@@ -65,7 +70,6 @@ class SynonymView(SecuredView):
         else:
             _create_audit_log(model, 'UPDATE')
 
-        model.stems_text = get_stems(model.synonyms_text)
         self.session.commit()
         #solr.reload_solr_cores()
 
@@ -169,7 +173,7 @@ def _alphabetize_csv(string: str) -> str:
 # Do the audit logging - we will write the complete record, not the delta (although the latter is possible).
 def _create_audit_log(model, action) -> None:
     audit = synonym_audit.SynonymAudit(
-        keycloak.Keycloak(None).get_username(), action, model.id, model.category, model.synonyms_text, model.comment,
+        keycloak.Keycloak().get_username(), action, model.id, model.category, model.synonyms_text, model.comment,
         model.enabled)
 
     session = models.db.session
