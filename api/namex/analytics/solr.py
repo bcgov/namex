@@ -807,19 +807,18 @@ class SolrQueries:
     # Call the synonyms API for the given token.
 
     @classmethod
-    def _get_identity_token(cls):
+    def _get_identity_token(cls, audience):
         """Get an identity token for authenticating with solr-synonyms-api."""
         try:
-            solr_synonyms_api_url = current_app.config.get('SOLR_SYNONYMS_API_URL')
-            if not solr_synonyms_api_url:
-                raise Exception('SOLR: SOLR_SYNONYMS_API_URL is not set')
+            token = id_token.fetch_id_token(Request(), audience)
 
-            target_audience = solr_synonyms_api_url
-            identity_token = id_token.fetch_id_token(Request(), target_audience)
-            return identity_token
+            if not token or not isinstance(token, str):
+                current_app.logger.warning('Failed to get identity token')
+                return None
 
+            return token
         except Exception as e:
-            current_app.logger.error(f'Failed to get identity token: {str(e)}')
+            current_app.logger.warning(f'Error in getting identity token: {e.message}')
             return None
 
 
@@ -830,24 +829,19 @@ class SolrQueries:
             raise Exception('SOLR: SOLR_SYNONYMS_API_URL is not set')
 
         # Get identity token and make header
-        identity_token = cls._get_identity_token()
-        if identity_token is None:
-            current_app.logger.warning('No identity token available - proceeding without authentication.')
-            headers = {}
-        else:
-            headers = {
-                'Authorization': f'Bearer {identity_token}'
-            }
+        id_token = cls._get_identity_token(solr_synonyms_api_url)
 
         # If the web service call fails, the caller will catch and then return a 500 for us.
         query = solr_synonyms_api_url + '/synonyms/' + col + '/' + parse.quote(token)
         current_app.logger.debug('Query: ' + query)
 
-        # Create a request object with the query and headers
-        req = request.Request(query, headers)
-
         try:
-            connection = request.urlopen(req)
+            if id_token is None:
+                connection = request.urlopen(query)
+            else:
+                connection = request.urlopen(request.Request(
+                    query, headers={'Authorization': f'Bearer {id_token}'}
+                ))
         except HTTPError as http_error:
             # Expected when the token does not have synonyms.
             if http_error.code == 404:
@@ -866,24 +860,19 @@ class SolrQueries:
             raise Exception('SOLR: SOLR_SYNONYMS_API_URL is not set')
 
         # Get identity token and make header
-        identity_token = cls._get_identity_token()
-        if identity_token is None:
-            current_app.logger.warning('No identity token available - proceeding without authentication.')
-            headers = {}
-        else:
-            headers = {
-                'Authorization': f'Bearer {identity_token}'
-            }
+        id_token = cls._get_identity_token(solr_synonyms_api_url)
 
         # If the web service call fails, the caller will catch and then return a 500 for us.
         query = solr_synonyms_api_url + '/synonyms/' + 'stems_text' + '/' + parse.quote(token)
         current_app.logger.debug('Query: ' + query)
 
-        # Create a request object with the query and headers
-        req = request.Request(query, headers)
-
         try:
-            connection = request.urlopen(req)
+            if id_token is None:
+                connection = request.urlopen(query)
+            else:
+                connection = request.urlopen(request.Request(
+                    query, headers={'Authorization': f'Bearer {id_token}'}
+                ))
         except HTTPError as http_error:
             # Expected when the token does not have synonyms.
             if http_error.code == 404:
