@@ -128,15 +128,18 @@ def send_email(email: dict, token: str):
 # Create a global thread pool executor (tune max_workers as needed)
 thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=5)
 
+def _run_in_app_context(func, *args, **kwargs):
+    app = current_app._get_current_object()
+    def task():
+        with app.app_context():
+            return func(*args, **kwargs)
+    return thread_pool.submit(task)
 
 def write_to_events_async(ce, email):
-    """Submit write_to_events to the thread pool."""
-    return thread_pool.submit(_write_to_events, ce, email)
-
+    return _run_in_app_context(_write_to_events, ce, email)
 
 def update_resend_timestamp_async(event_id):
-    """Submit update_resend_timestamp to the thread pool."""
-    return thread_pool.submit(_update_resend_timestamp, event_id)
+    return _run_in_app_context(_update_resend_timestamp, event_id)
 
 
 def _write_to_events(ce, email):
