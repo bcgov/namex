@@ -128,31 +128,24 @@ def send_email(email: dict, token: str):
 # Create a global thread pool executor (tune max_workers as needed)
 thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=5)
 
+def _run_in_app_context(func, *args, **kwargs):
+    app = current_app._get_current_object()
+    def task():
+        with app.app_context():
+            return func(*args, **kwargs)
+    return thread_pool.submit(task)
 
 def write_to_events_async(ce, email):
-    """Submit write_to_events to the thread pool."""
-    return thread_pool.submit(_write_to_events, ce, email)
-
-
-def update_resend_timestamp_async(event_id):
-    """Submit update_resend_timestamp to the thread pool."""
-    return thread_pool.submit(_update_resend_timestamp, event_id)
-
-
-def _write_to_events(ce, email):
-    """
-    Log the event as a system-generated notification in the events table.
-    """
-    # Extract and validate data
     nr_num, option = _extract_event_data(ce)
     if not nr_num or not option:
-        return False
+        return
 
     # Prepare event JSON
     event_json = _prepare_event_json(nr_num, option, email)
+    _run_in_app_context(_record_event, nr_num, event_json)
 
-    # Record the notification event
-    return _record_event(nr_num, event_json)
+def update_resend_timestamp_async(event_id):
+    _run_in_app_context(_update_resend_timestamp, event_id)
 
 
 def _update_resend_timestamp(event_id: str):
