@@ -4,7 +4,7 @@ from flask import json, request
 from gcp_queue.logging import structured_log
 from namex.resources.name_requests import ReportResource
 from namex_emailer.constants.notification_options import Option, DECISION_OPTIONS
-from namex_emailer.services.helpers import query_notification_event, get_bearer_token, send_email, update_resend_timestamp_async
+from namex_emailer.services.helpers import query_notification_event, get_bearer_token, send_email, update_resend_timestamp
 
 
 def process_resend_email(event_id: str):
@@ -57,7 +57,7 @@ def _resend_email(event_id: str):
 
     # Send the email
     if _send_email(email):
-        update_resend_timestamp_async(event_id)
+        update_resend_timestamp(event_id)
         structured_log(request, 'DEBUG', f'Successfully resent email for the event {event_id}')
 
 
