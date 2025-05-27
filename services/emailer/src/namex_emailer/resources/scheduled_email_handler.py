@@ -3,7 +3,7 @@ from flask import Blueprint, request
 from gcp_queue.logging import structured_log
 from simple_cloudevent import from_queue_message
 
-from namex_emailer.services.helpers import get_bearer_token, send_email, write_to_events_async
+from namex_emailer.services.helpers import get_bearer_token, send_email, write_to_events
 from namex_emailer.resources.worker import process_email
 from namex_emailer.services import ce_cache
 
@@ -32,6 +32,6 @@ def deliver_scheduled_email():
 
     # Success
     ce_cache[ce.id] = ce  # mark as done so any further retries get skipped
-    write_to_events_async(ce, email)
+    write_to_events(ce, email)
     structured_log(request, "INFO", f"Scheduled email send completed for {nr_num} (CloudEvent ID: {ce.id})")
     return {}, HTTPStatus.OK
