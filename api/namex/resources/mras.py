@@ -2,9 +2,9 @@ from http import HTTPStatus
 
 import requests
 import xmltodict
+from defusedxml.lxml import fromstring
 from flask import current_app, jsonify, make_response
 from flask_restx import Namespace, Resource
-from defusedxml.lxml import fromstring
 
 from namex.utils.api_resource import handle_exception
 from namex.utils.auth import cors_preflight
