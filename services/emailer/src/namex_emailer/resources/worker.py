@@ -78,7 +78,7 @@ def worker():
 
     # If approved, conditional, or rejected - schedule a cloud task to send the email in 5 minutes
     option = ce.data.get("request", {}).get("option")
-    if Option(option) in DECISION_OPTIONS:
+    if option is not None and Option(option) in DECISION_OPTIONS:
         try:
             nr_num = ce.data["request"]["nrNum"].replace(" ", "_")
             schedule_or_reschedule_email(nr_num, option, to_structured(ce))
