@@ -1,58 +1,83 @@
-"""
+import requests
+from flask import current_app, session
+from authlib.jose import jwt, JsonWebKey
 
-"""
-import flask_oidc
 
-
-# Singleton that allows us to create the OIDC once with the application, but then re-use that OIDC without
-# re-instantiating.
-class Keycloak(object):
-    _oidc = None
-
-    '''
-    Initialize the class, but only create the oidc object when it is None (prevent duplicate instantiation) and the
-    application is defined (allow import prior to instantiation).
-    '''
-    def __init__(self, application):
-        if not Keycloak._oidc and application:
-            Keycloak._oidc = flask_oidc.OpenIDConnect(application)
-
-    '''
-    Determines whether or not the user is logged in
-    '''
-    def is_logged_in(self) -> bool:
-        return self._oidc.user_loggedin
+# Manages Keycloak auth via OIDC using well-known config and JWKS for token validation.
+# Used by SecuredView to protect admin views.
+class Keycloak:
+    _cached_well_known_config = None
+    _cached_jwks_key_set = None
 
     '''
     Determines whether or not the user is authorized to use the application. True if the user is logged in.
     '''
     def has_access(self) -> bool:
-        token = self._oidc.get_access_token()
-        if not token:
-            return False
-
-        token_info = self._oidc._get_token_info(token)
-        if not token_info['realm_access']:
-            return False
-
-        roles_ = token_info['realm_access']['roles']
-        access = 'names_manager' in roles_
-
-        return access
+        claims = self._get_validated_token_claims()
+        roles = claims.get("realm_access", {}).get("roles", []) if claims else []
+        return "names_manager" in roles
 
     '''
     Gets the redirect URL that is used to transfer the browser to the identity provider.
     '''
     def get_redirect_url(self, request_url: str) -> str:
-        """
-
-        :rtype: object
-        """
-        return self._oidc.redirect_to_auth_server(request_url)
+        config = self._fetch_well_known_config()
+        return (
+            f"{config['authorization_endpoint']}?response_type=code"
+            f"&client_id={current_app.config['JWT_OIDC_AUDIENCE']}"
+            f"&redirect_uri={current_app.config['OIDC_REDIRECT_URI']}"
+            f"&scope=openid"
+            f"&state={request_url}"
+        )
 
     '''
     Gets the username for the currently logged in user. This will be prefixed with the authentication scheme, such as
     "idir/" or "github/" - no prefix indicates that authentication is performed by the identity provider.
     '''
     def get_username(self) -> str:
-        return self._oidc.user_getfield('preferred_username')
+        claims = self._get_validated_token_claims()
+        return claims.get("preferred_username", "") if claims else ""
+
+    '''
+    Safely decode and validate the access token from session. Return the token claims if valid, or None if the token
+    is missing, expired, invalid, or fails audience/issuer checks. Removes the token from session on failure.
+    '''
+    def _get_validated_token_claims(self):
+        token = session.get("access_token")
+        if not token:
+            return None
+
+        try:
+            config = self._fetch_well_known_config()
+            key_set = self._fetch_jwks_key_set()
+            claims = jwt.decode(token, key_set, claims_params={
+                "aud": current_app.config["JWT_OIDC_AUDIENCE"],
+                "iss": config["issuer"]
+            })
+            claims.validate()
+            return claims
+        except Exception as e:
+            current_app.logger.warning(f"Token decode failed: {e}")
+            session.pop("access_token", None)
+            return None
+
+    '''
+    Fetch and cache the OpenID Connect well-known configuration document.
+    This includes endpoints and metadata like the issuer and JWKS URI.
+    '''
+    def _fetch_well_known_config(self):
+        if not self._cached_well_known_config:
+            response = requests.get(current_app.config["JWT_OIDC_WELL_KNOWN_CONFIG"], timeout=5)
+            self._cached_well_known_config = response.json()
+        return self._cached_well_known_config
+
+    """
+    Fetch and cache the JSON Web Key Set (JWKS) used to verify JWT signatures.
+    Retrieves the keys from the JWKS URI in the well-known config and parses them into a usable format.
+    """
+    def _fetch_jwks_key_set(self):
+        if not self._cached_jwks_key_set:
+            config = self._fetch_well_known_config()
+            jwks = requests.get(config["jwks_uri"], timeout=5).json()
+            self._cached_jwks_key_set = JsonWebKey.import_key_set(jwks)
+        return self._cached_jwks_key_set
