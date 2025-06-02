@@ -2,9 +2,9 @@ from http import HTTPStatus
 
 import requests
 import xmltodict
+from defusedxml.lxml import fromstring
 from flask import current_app, jsonify, make_response
 from flask_restx import Namespace, Resource
-from lxml import etree  # Don't worry about this it exists... the module is dynamically loaded
 
 from namex.utils.api_resource import handle_exception
 from namex.utils.auth import cors_preflight
@@ -36,7 +36,7 @@ def load_xml_response_content(response, xpath_query=None):
     :return:
     """
     # Parse the XML
-    xml_content = etree.fromstring(response.content)  # noqa: S320
+    xml_content = fromstring(response.content)
 
     if xpath_query:
         return xml_content.xpath(xpath_query, namespaces={'mras': 'http://mras.ca/schema/v1'})
