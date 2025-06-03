@@ -1,6 +1,7 @@
 """Request is the main business class that is the real top level object in the system"""
 
 import re
+import math
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import List, Optional, Self
@@ -8,18 +9,14 @@ from typing import List, Optional, Self
 import sqlalchemy
 from flask import current_app
 from marshmallow import fields, post_dump
-from sqlalchemy import Date, and_, event, func
+from sqlalchemy import Date, and_, cast, event, func, select, text
 from sqlalchemy.orm import backref
 from sqlalchemy.orm.attributes import get_history
 
 from namex.constants import (
     EntityTypes,
-    EventAction,
-    EventState,
-    EventUserId,
     LegacyEntityTypes,
     NameState,
-    RequestPriority,
 )
 from namex.exceptions import BusinessException
 
@@ -39,6 +36,7 @@ from .applicant import Applicant, ApplicantSchema
 from .comment import CommentSchema
 from .event import Event
 from .name import Name, NameSchema
+from .payment import Payment
 from .state import State
 from .user import UserSchema
 
@@ -512,47 +510,93 @@ class Request(db.Model):
         return criteria
 
     @classmethod
-    def get_waiting_time(cls, unit):
-        unit_time = 86400 if unit == UnitTime.DAY.value else 60 * 60 if unit == UnitTime.HR.value else 60
-        median_waiting_time = (
-            db.session.query(
-                func.percentile_cont(0.5)
-                .within_group(
-                    (func.extract('epoch', Event.eventDate) - func.extract('epoch', Request.submittedDate)) / unit_time
-                )
-                .label('examinationTime')
+    def get_waiting_time(cls, priority_queue=False):
+        """
+        Calculate the median examination time (in days, hours, or minutes)
+        between request submission and the first decision event, excluding special cases.
+
+        The calculation logic:
+        1. For each NR, select only the first decision event (action='patch' and state_cd in
+           ['APPROVED', 'CONDITIONAL', 'REJECTED', 'CANCELLED']) per NR.
+        2. Only include decision events that occurred yesterday or later.
+        3. Exclude NRs that contain any REAPPLY action or have multiple decision making actions.
+        4. Skip NRs that complete payment more than 5 days after submission (rare).
+        5. Calculate and return the median waiting time using PostgreSQL percentile_cont(0.5).
+        Parameters:
+            unit (UnitTime): Time unit to return the result in (DAY, HR, MIN).
+        Returns:
+            float: Median waiting time in the specified unit, or None if no data is available.
+        """
+        unit_time = 60 * 60 * 24  # Default to days
+        if priority_queue:
+            unit_time = 60 * 60  # Default to hours for priority queue
+
+        # Step 1: decision_candidates CTE
+        decision_candidates = select(
+            Event.nrId.label("nr_id"),
+            Event.eventDate.label("event_dt"),
+            Event.stateCd.label("state_cd"),
+            Event.action,
+            Event.userId.label("user_id")
+        ).where(
+            Event.action == 'patch',
+            Event.stateCd.in_(['APPROVED', 'CONDITIONAL', 'REJECTED', 'CANCELLED']),
+            Event.userId != 1,
+            cast(Event.eventDate, Date) >= cast(func.now() - timedelta(days=1), Date)
+        ).cte('decision_candidates')
+
+        # Step 2: decision_counts CTE
+        decision_counts = select(
+            Event.nrId.label('nr_id'),
+            func.count().label('cnt')
+        ).join(
+            decision_candidates,
+            decision_candidates.c.nr_id == Event.nrId
+        ).where(
+            Event.action == 'patch',
+            Event.stateCd.in_(['APPROVED', 'CONDITIONAL', 'REJECTED', 'CANCELLED']),
+            Event.userId != 1
+        ).group_by(
+            Event.nrId
+        ).cte('decision_counts')
+
+        # Step 3: first_decision_events CTE (join and filter cnt == 1)
+        first_decision_events = select(
+            decision_candidates
+        ).join(
+            decision_counts,
+            decision_candidates.c.nr_id == decision_counts.c.nr_id
+        ).where(
+            decision_counts.c.cnt == 1
+        ).cte('first_decision_events')
+
+        # Step 4: Final median calculation
+        median_waiting_time_query = (
+            select(
+                (func.percentile_cont(0.5).within_group(
+                    func.extract('epoch', first_decision_events.c.event_dt) -
+                    func.extract('epoch', Request.__table__.c.submitted_date)
+                ) / unit_time).label('examinationTime')
             )
-            .join(Request, and_(Event.nrId == Request.id))
-            .filter(
-                Event.action == EventAction.PATCH.value,
-                Event.stateCd.in_(
-                    [
-                        EventState.APPROVED.value,
-                        EventState.REJECTED.value,
-                        EventState.CONDITIONAL.value,
-                        EventState.CANCELLED.value,
-                    ]
-                ),
-                Event.userId != EventUserId.SERVICE_ACCOUNT.value,
-                Event.eventDate.cast(Date) >= (func.now() - timedelta(days=1)).cast(Date),
+            .select_from(
+                first_decision_events
+                .join(Request, Request.__table__.c.id == first_decision_events.c.nr_id)
+                .join(Payment, Payment.__table__.c.nr_id == Request.id)
+            )
+            .where(
+                (Payment.__table__.c.payment_completion_date - Request.__table__.c.submitted_date) <= text("interval '5 days'")
             )
         )
 
-        return median_waiting_time
+        if priority_queue:
+            median_waiting_time_query = median_waiting_time_query.where(Request.priorityCd == 'Y')
 
-    @classmethod
-    def get_waiting_time_priority_queue(cls, unit):
-        median_waiting_time = cls.get_waiting_time(unit)
-        priority_waiting_time = median_waiting_time.filter(Request.priorityCd == RequestPriority.Y.value).all()
-
-        return priority_waiting_time.pop()
-
-    @classmethod
-    def get_waiting_time_regular_queue(cls, unit):
-        median_waiting_time = cls.get_waiting_time(unit)
-        regular_waiting_time = median_waiting_time.filter(Request.priorityCd != RequestPriority.Y.value).all()
-
-        return regular_waiting_time.pop()
+        try:
+            result = db.session.execute(median_waiting_time_query).scalar()
+        except sqlalchemy.exc.SQLAlchemyError as e:
+            current_app.logger.error(f"Error calculating waiting time: {e}")
+            return None
+        return math.ceil(result) if result is not None and isinstance(result, (int, float)) else None
 
     @classmethod
     def get_query_exact_match(
