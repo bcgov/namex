@@ -1,10 +1,7 @@
-import math
 from datetime import datetime, timedelta
 
-import numpy as np
-
 from namex.models import Event, Request
-from namex.services.statistics import get_utc_now, response_keys
+from namex.services.statistics import response_keys
 from namex.utils.api_resource import handle_exception
 from namex.utils.sql_alchemy import query_result_to_dict
 

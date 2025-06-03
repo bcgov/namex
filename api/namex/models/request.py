@@ -1,7 +1,7 @@
 """Request is the main business class that is the real top level object in the system"""
 
-import re
 import math
+import re
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import List, Optional, Self
@@ -27,7 +27,6 @@ from namex.utils import queue_util
 
 # noinspection PyPep8Naming
 from ..criteria.request.query_criteria import RequestConditionCriteria
-from ..services.statistics import UnitTime
 
 # TODO: Only trace if LOCAL_DEV_MODE / DEBUG conf exists
 # import traceback
@@ -523,7 +522,7 @@ class Request(db.Model):
         4. Skip NRs that complete payment more than 5 days after submission (rare).
         5. Calculate and return the median waiting time using PostgreSQL percentile_cont(0.5).
         Parameters:
-            unit (UnitTime): Time unit to return the result in (DAY, HR, MIN).
+            priority_queue: boolean.
         Returns:
             float: Median waiting time in the specified unit, or None if no data is available.
         """
@@ -533,11 +532,11 @@ class Request(db.Model):
 
         # Step 1: decision_candidates CTE
         decision_candidates = select(
-            Event.nrId.label("nr_id"),
-            Event.eventDate.label("event_dt"),
-            Event.stateCd.label("state_cd"),
+            Event.nrId.label('nr_id'),
+            Event.eventDate.label('event_dt'),
+            Event.stateCd.label('state_cd'),
             Event.action,
-            Event.userId.label("user_id")
+            Event.userId.label('user_id')
         ).where(
             Event.action == 'patch',
             Event.stateCd.in_(['APPROVED', 'CONDITIONAL', 'REJECTED', 'CANCELLED']),
@@ -594,7 +593,7 @@ class Request(db.Model):
         try:
             result = db.session.execute(median_waiting_time_query).scalar()
         except sqlalchemy.exc.SQLAlchemyError as e:
-            current_app.logger.error(f"Error calculating waiting time: {e}")
+            current_app.logger.error(f'Error calculating waiting time: {e}')
             return None
         return math.ceil(result) if result is not None and isinstance(result, (int, float)) else None
 
