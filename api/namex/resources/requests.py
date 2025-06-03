@@ -631,7 +631,6 @@ class RequestSearch(Resource):
             q = q.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit)
 
         q = q.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit)
-        print(f"Executing query: {q}")
         requests = request_auth_search_schemas.dump(q.all())
         actions_array = [
             nr_filing_actions.get_actions(r['requestTypeCd'], r['entity_type_cd'], r['request_action_cd'])
