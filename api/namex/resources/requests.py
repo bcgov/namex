@@ -18,7 +18,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from namex import jwt
 from namex.analytics import VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 from namex.analytics import RestrictedWords, SolrQueries
-from namex.constants import DATE_TIME_FORMAT_SQL
+from namex.constants import DATE_TIME_FORMAT_SQL, NameState
 from namex.exceptions import BusinessException
 from namex.models import (
     Applicant,
@@ -590,7 +590,12 @@ class RequestSearch(Resource):
             )
         # Add the state filter if 'state' is provided
         if search_details.status:
-            q = q.filter(RequestDAO.stateCd.in_(search_details.status))
+            if "Pending Staff Review" in search_details.status:
+                q = q.join(RequestDAO.names).filter(
+                        Name.state.in_([NameState.NOT_EXAMINED.value])
+                    )                
+            else:
+                q = q.filter(RequestDAO.stateCd.in_(search_details.status))
 
         # Add the nr_name filter if 'nr_name' is provided
         if search_details.name:
@@ -626,7 +631,7 @@ class RequestSearch(Resource):
             q = q.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit)
 
         q = q.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit)
-
+        print(f"Executing query: {q}")
         requests = request_auth_search_schemas.dump(q.all())
         actions_array = [
             nr_filing_actions.get_actions(r['requestTypeCd'], r['entity_type_cd'], r['request_action_cd'])
