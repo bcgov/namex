@@ -608,6 +608,9 @@ class RequestSearch(Resource):
 
             if filters:
                 q = q.filter(or_(*filters))
+            # Handle Statuses coming from auth which are valid in Lear only such as 'Active'
+            if len(search_details.status) > 0 and  len(filters) == 0:
+                return jsonify([])
 
         # Add the nr_name filter if 'nr_name' is provided
         if search_details.name:
