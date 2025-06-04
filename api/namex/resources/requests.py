@@ -608,6 +608,8 @@ class RequestSearch(Resource):
 
             if filters:
                 q = q.filter(or_(*filters))
+            elif statuses:
+                return jsonify([])
 
         # Add the nr_name filter if 'nr_name' is provided
         if search_details.name:
