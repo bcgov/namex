@@ -590,18 +590,30 @@ class RequestSearch(Resource):
             )
         # Add the state filter if 'state' is provided
         if search_details.status:
-            if "Pending Staff Review" in search_details.status:
-                q = q.join(RequestDAO.names).filter(
-                        Name.state.in_([NameState.NOT_EXAMINED.value])
-                    )                
-            else:
-                q = q.filter(RequestDAO.stateCd.in_(search_details.status))
+            statuses = [s.strip().upper() for s in search_details.status]
+            name_state_values = {ns.value for ns in NameState}
+            name_filters = [s for s in statuses if s in name_state_values]
+            request_state_values = {state.upper() for state in State.ALL_STATES}
+            request_filters = [s for s in statuses if s in request_state_values]
+
+            filters = []
+
+            if request_filters:
+                filters.append(
+                    RequestDAO.stateCd.in_(request_filters)
+                )
+            elif name_filters:
+                q = q.join(RequestDAO.names)
+                filters.append(Name.state.in_(name_filters))
+
+            if filters:
+                q = q.filter(or_(*filters))
 
         # Add the nr_name filter if 'nr_name' is provided
         if search_details.name:
             q = q.filter(RequestDAO.nameSearch.ilike(f'%{search_details.name}%'))
 
-        if search_details.type:
+        if search_details.type and 'NR' not in [t.strip().upper() for t in search_details.type]:
             request_typecd = nr_filing_actions.get_request_type_array(search_details.type)
             flattened_request_types = [item for sublist in request_typecd.values() for item in sublist]
             q = q.filter(RequestDAO.requestTypeCd.in_(flattened_request_types))
