@@ -392,10 +392,13 @@ class NameRequestFields(BaseNameRequestResource):
             # Try to refund all payments associated with the NR
             for payment in nr_model.payments.all():
                 if payment.payment_status_code in valid_states:
+                    payment_response = get_payment(payment.payment_token)
+
                     # Some refunds may fail. Some payment methods are not refundable and return HTTP 400 at the refund.
                     # The refund status is checked from the payment_response and a appropriate message is displayed by the UI.
-                    refund_payment(payment.payment_token, {})
-                    payment_response = get_payment(payment.payment_token)
+                    # Skip REFUND for staff no fee payment.
+                    if payment_response.total != 0:
+                        refund_payment(payment.payment_token, {})
                     payment.payment_status_code = PaymentState.REFUND_REQUESTED.value
                     payment.save_to_db()
                     refund_value += (
