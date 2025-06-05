@@ -1,10 +1,7 @@
-import math
 from datetime import datetime, timedelta
 
-import numpy as np
-
 from namex.models import Event, Request
-from namex.services.statistics import get_utc_now, response_keys
+from namex.services.statistics import response_keys
 from namex.utils.api_resource import handle_exception
 from namex.utils.sql_alchemy import query_result_to_dict
 
@@ -18,26 +15,6 @@ class WaitTimeStatsService:
         approved_names_counter = Event.get_approved_names_counter().approvedNamesCounter
 
         return approved_names_counter
-
-    @classmethod
-    def get_waiting_time_priority_queue(cls, unit):
-        waiting_time = Request.get_waiting_time_priority_queue(unit)
-        if waiting_time.examinationTime is None:
-            return 0
-        else:
-            priority = math.ceil(waiting_time.examinationTime)
-
-        return priority
-
-    @classmethod
-    def get_waiting_time_regular_queue(cls, unit):
-        waiting_time = Request.get_waiting_time_regular_queue(unit)
-        if waiting_time.examinationTime is None:
-            return 0
-        else:
-            regular = math.ceil(waiting_time.examinationTime)
-
-        return regular
 
     @classmethod
     def get_waiting_time_dict(cls):
@@ -57,28 +34,9 @@ class WaitTimeStatsService:
 
     @classmethod
     def get_statistics(cls):
-        # For now not using this to improve performance
-        # response_values = [cls.get_approved_names_counter(),
-        #                    cls.get_waiting_time_priority_queue(unit=UnitTime.HR.value),
-        #                    cls.get_waiting_time_regular_queue(unit=UnitTime.DAY.value)]
+        priority_wait_time = Request.get_waiting_time(priority_queue=True) or 0
+        regular_wait_time = Request.get_waiting_time(priority_queue=False) or 0
 
-        oldest_draft = Request.get_oldest_draft()
-        todays_date = get_utc_now().date()
-        submitted_date = oldest_draft.submittedDate.date()
-
-        # note that busday_count does not count the end date provided
-        delta = np.busday_count(submitted_date, todays_date)
-        delta = int(delta)
-        # add one to waiting time to account for specific scenarios
-        if np.is_busday(todays_date) or delta == 0:
-            delta += 1
-
-        response_values = [
-            0,
-            0,  # cls.get_waiting_time_priority_queue(unit=UnitTime.HR.value),
-            delta,
-        ]
-
+        response_values = [0, priority_wait_time, regular_wait_time]
         response = query_result_to_dict(response_keys, response_values)
-
         return response

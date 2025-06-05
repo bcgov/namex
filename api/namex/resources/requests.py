@@ -18,7 +18,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from namex import jwt
 from namex.analytics import VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 from namex.analytics import RestrictedWords, SolrQueries
-from namex.constants import DATE_TIME_FORMAT_SQL
+from namex.constants import DATE_TIME_FORMAT_SQL, NameState
 from namex.exceptions import BusinessException
 from namex.models import (
     Applicant,
@@ -590,13 +590,32 @@ class RequestSearch(Resource):
             )
         # Add the state filter if 'state' is provided
         if search_details.status:
-            q = q.filter(RequestDAO.stateCd.in_(search_details.status))
+            statuses = [s.strip().upper() for s in search_details.status]
+            name_state_values = {ns.value for ns in NameState}
+            name_filters = [s for s in statuses if s in name_state_values]
+            request_state_values = {state.upper() for state in State.ALL_STATES}
+            request_filters = [s for s in statuses if s in request_state_values]
+
+            filters = []
+
+            if request_filters:
+                filters.append(
+                    RequestDAO.stateCd.in_(request_filters)
+                )
+            elif name_filters:
+                q = q.join(RequestDAO.names)
+                filters.append(Name.state.in_(name_filters))
+
+            if filters:
+                q = q.filter(or_(*filters))
+            elif statuses:
+                return jsonify([])
 
         # Add the nr_name filter if 'nr_name' is provided
         if search_details.name:
             q = q.filter(RequestDAO.nameSearch.ilike(f'%{search_details.name}%'))
 
-        if search_details.type:
+        if search_details.type and 'NR' not in [t.strip().upper() for t in search_details.type]:
             request_typecd = nr_filing_actions.get_request_type_array(search_details.type)
             flattened_request_types = [item for sublist in request_typecd.values() for item in sublist]
             q = q.filter(RequestDAO.requestTypeCd.in_(flattened_request_types))
@@ -626,7 +645,6 @@ class RequestSearch(Resource):
             q = q.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit)
 
         q = q.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit)
-
         requests = request_auth_search_schemas.dump(q.all())
         actions_array = [
             nr_filing_actions.get_actions(r['requestTypeCd'], r['entity_type_cd'], r['request_action_cd'])
