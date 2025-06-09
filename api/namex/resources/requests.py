@@ -10,7 +10,7 @@ from flask_jwt_oidc import AuthError
 from flask_restx import Namespace, Resource, cors, fields
 from marshmallow import ValidationError
 from pytz import timezone
-from sqlalchemy import func, or_, text
+from sqlalchemy import and_, exists, func, or_, text
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import eagerload, lazyload, load_only
 from sqlalchemy.orm.exc import NoResultFound
@@ -590,26 +590,25 @@ class RequestSearch(Resource):
             )
         # Add the state filter if 'state' is provided
         if search_details.status:
-            statuses = [s.strip().upper() for s in search_details.status]
-            name_state_values = {ns.value for ns in NameState}
-            name_filters = [s for s in statuses if s in name_state_values]
-            request_state_values = {state.upper() for state in State.ALL_STATES}
-            request_filters = [s for s in statuses if s in request_state_values]
+            normalized_status = {s.strip().upper() for s in search_details.status}
+            base_statuses = normalized_status & set(State.ALL_STATES)
+            conditions = [RequestDAO.stateCd.in_(base_statuses)] if base_statuses else []
 
-            filters = []
-
-            if request_filters:
-                filters.append(
-                    RequestDAO.stateCd.in_(request_filters)
+            if NameState.NOT_EXAMINED.value in normalized_status:
+                conditions.append(
+                    and_(
+                        RequestDAO.stateCd.in_({State.DRAFT, State.HOLD}),
+                        exists().where(
+                            and_(
+                                Name.nrId == RequestDAO.id,
+                                Name.state == NameState.NOT_EXAMINED.value
+                            )
+                        )
+                    )
                 )
-            elif name_filters:
-                q = q.join(RequestDAO.names)
-                filters.append(Name.state.in_(name_filters))
 
-            if filters:
-                q = q.filter(or_(*filters))
-            elif statuses:
-                return jsonify([])
+            if conditions:
+                q = q.filter(or_(*conditions))
 
         # Add the nr_name filter if 'nr_name' is provided
         if search_details.name:
