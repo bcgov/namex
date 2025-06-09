@@ -39,14 +39,14 @@ from http import HTTPStatus
 from flask import Blueprint, request
 from gcp_queue.logging import structured_log
 from sbc_common_components.utils.enums import QueueMessageTypes
-from simple_cloudevent import SimpleCloudEvent, to_structured
+from simple_cloudevent import SimpleCloudEvent
 
 import namex_emailer.services.helpers
 from namex_emailer.constants.notification_options import DECISION_OPTIONS, NOTIFICATION_OPTIONS, Option
 from namex_emailer.email_processors import name_request, nr_notification, nr_result
 from namex_emailer.email_processors.resend import process_resend_email
 from namex_emailer.services import ce_cache, queue
-from namex_emailer.services.email_scheduler import schedule_or_reschedule_email
+from namex_emailer.services.email_scheduler import schedule_or_reschedule_email, is_scheduled_cloud_event, is_schedulable, cleanup_scheduled_job
 
 bp = Blueprint("worker", __name__)
 
@@ -76,13 +76,13 @@ def worker():
 
     structured_log(request, "INFO", f"received ce: {str(ce)}")
 
-    # If approved, conditional, or rejected - schedule a cloud task to send the email in 5 minutes
-    option = ce.data.get("request", {}).get("option")
-    if option is not None and Option(option) in DECISION_OPTIONS:
+    # Debounce logic for cloud scheduler
+    if is_scheduled_cloud_event(ce):
+        cleanup_scheduled_job(ce)
+    elif is_schedulable(ce):
         try:
-            nr_num = ce.data["request"]["nrNum"].replace(" ", "_")
-            schedule_or_reschedule_email(nr_num, option, to_structured(ce))
-            structured_log(request, "INFO", f"Scheduled deferred email for {nr_num} - '{option}'")
+            schedule_or_reschedule_email(ce)
+            ce_cache[ce.id] = ce
             return {}, HTTPStatus.OK
         except Exception as err:
             structured_log(request, "WARNING", f"Scheduling failed, falling back to immediate send: {err}")
