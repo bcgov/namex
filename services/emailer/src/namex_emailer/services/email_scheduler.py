@@ -1,65 +1,77 @@
 import json
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 import uuid
 
 from flask import current_app, request
+from google.cloud.scheduler_v1 import CloudSchedulerClient, Job, PubsubTarget
+from namex_emailer.constants.notification_options import DECISION_OPTIONS, Option
 from gcp_queue.logging import structured_log
-from google.cloud.tasks_v2 import CloudTasksClient, HttpMethod
-from google.protobuf import timestamp_pb2
+from simple_cloudevent import to_structured
 
 
-# Singleton GCP Cloud Tasks Client
-cloud_tasks_client = CloudTasksClient()
+# Singleton GCP Cloud Scheduler Client
+cloud_scheduler_client = CloudSchedulerClient()
 
 
-def schedule_or_reschedule_email(nr_num: str, option: str, cloud_event_payload: dict):
+def is_scheduled_cloud_event(ce) -> bool:
+    return bool(ce.data.get("request", {}).get("scheduled", False))
+
+
+def is_schedulable(ce) -> bool:
+    option = ce.data.get("request", {}).get("option")
+    return Option(option) in DECISION_OPTIONS if option else False
+
+
+def cleanup_scheduled_job(ce):
+    nr_num = ce.data["request"]["nrNum"].replace(" ", "_")
+    parent = f"projects/{current_app.config['GCP_PROJECT']}/locations/{current_app.config['GCP_REGION']}"
+
+    # Remove any pending jobs for this NR number
+    for job in cloud_scheduler_client.list_jobs(request={"parent": parent}):
+        existing_id = job.name.rsplit("/", 1)[-1]
+        if existing_id.startswith(nr_num):
+            cloud_scheduler_client.delete_job(request={"name": job.name})
+            structured_log(request, "INFO", f"Cancelled scheduled email job '{existing_id}'")
+
+
+def schedule_or_reschedule_email(ce):
     """
-    Cancel any in-flight email task for this nr number and schedule a new one 5 minutes out.
+    Cancel any in-flight email job for this nr number and schedule a new one 5 minutes out.
     This is only used for approved, conditional, and rejected emails that are not resends.
     """
+    # Scheduler constants
+    payload = to_structured(ce)
+    scheduler_parent = f"projects/{current_app.config["GCP_PROJECT"]}/locations/{current_app.config["GCP_REGION"]}"
+    pubsub_topic = current_app.config["NAMEX_MAILER_TOPIC"]
+    nr_num = payload["data"]["request"]["nrNum"].replace(" ", "_")
+    option = payload["data"].get("request", {}).get("option")
 
-    # Identify the queue
-    remote_queue_path = cloud_tasks_client.queue_path(
-        project=current_app.config["GCP_PROJECT"],
-        location=current_app.config["GCP_REGION"],
-        queue=current_app.config["CLOUD_TASKS_QUEUE_ID"],
-    )
-    # Create a timestamp 5 minutes in the future
-    timestamp = timestamp_pb2.Timestamp()
-    timestamp.FromDatetime(datetime.now(timezone.utc) + timedelta(minutes=5))
+    # Create a cron 5 minutes in the future
+    fire_time = datetime.now(tz=ZoneInfo("America/Vancouver")) + timedelta(minutes=5)
+    cron = f"{fire_time.minute} {fire_time.hour} {fire_time.day} {fire_time.month} *"
 
-    # 1) Remove any pending email tasks for this NR number
-    for task in cloud_tasks_client.list_tasks(parent=remote_queue_path):
-        existing_id = task.name.rsplit("/", 1)[-1]
+    # 1) Remove any pending jobs for this NR number
+    for job in cloud_scheduler_client.list_jobs(request={"parent": scheduler_parent}):
+        existing_id = job.name.rsplit("/", 1)[-1]
         if existing_id.startswith(nr_num):
-            structured_log(request, "INFO", f"Cancelled pending Cloud Tasks job '{existing_id}' for {nr_num}")
-            cloud_tasks_client.delete_task(name=task.name)
+            cloud_scheduler_client.delete_job(request={"name": job.name})
+            structured_log(request, "INFO", f"Cancelled scheduled email job '{existing_id}'")
 
-    # 2) Generate a unique task ID for the NR number: 'NR_123456-APPROVED-43255d'
-    task_id = f"{nr_num}-{option}-{uuid.uuid4().hex[:6]}"
-
-    # 3) Build the full remote queue path including the task id
-    task_name = cloud_tasks_client.task_path(
-        project=current_app.config["GCP_PROJECT"],
-        location=current_app.config["GCP_REGION"],
-        queue=current_app.config["CLOUD_TASKS_QUEUE_ID"],
-        task=task_id
+    # 2) Tag and prepare Pub/Sub target
+    payload.setdefault("data", {}).setdefault("request", {})["scheduled"] = True
+    target = PubsubTarget(
+        topic_name=pubsub_topic,
+        data=json.dumps(payload).encode()
     )
 
-    # 4) Assemble the Cloud Task
-    task = {
-        "name":             task_name,
-        "schedule_time":    timestamp,
-        "http_request": {
-            "http_method":  HttpMethod.POST,
-            "url":          current_app.config["CLOUD_TASKS_HANDLER_URL"],
-            "headers":      {"Content-Type": "application/json"},
-            "body":         json.dumps(cloud_event_payload).encode("utf-8"),
-            "oidc_token": {
-                "service_account_email": current_app.config["CLOUD_TASKS_INVOKER_SERVICE_ACCOUNT"]
-            }
-        }
-    }
-
-    # 5) Enqueue the task to come back to the emailer at deliver_scheduled_email() endpoint in 5 minutes time
-    cloud_tasks_client.create_task(parent=remote_queue_path, task=task)
+    # 3) build and create the job
+    job_id = f"{nr_num}-{option}-{uuid.uuid4().hex[:6]}"
+    job = Job(
+        name=f"{scheduler_parent}/jobs/{job_id}",
+        pubsub_target=target,
+        schedule=cron,
+        time_zone="America/Vancouver"
+    )
+    cloud_scheduler_client.create_job(request={"parent": scheduler_parent, "job": job})
+    structured_log(request, "INFO", f"Scheduled email job '{job_id}'")
