@@ -58,8 +58,9 @@ def schedule_or_reschedule_email(ce):
             cloud_scheduler_client.delete_job(request={"name": job.name})
             structured_log(request, "INFO", f"Cancelled scheduled email job '{existing_id}'")
 
-    # 2) Tag and prepare Pub/Sub target
+    # 2) Tag and prepare Pub/Sub target, give a new id so it is not skipped when it comes back around
     payload.setdefault("data", {}).setdefault("request", {})["scheduled"] = True
+    payload["id"] = str(uuid.uuid4())
     target = PubsubTarget(
         topic_name=pubsub_topic,
         data=json.dumps(payload).encode()
