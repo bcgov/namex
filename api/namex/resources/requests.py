@@ -592,6 +592,9 @@ class RequestSearch(Resource):
         if search_details.status:
             normalized_status = {s.strip().upper() for s in search_details.status}
             base_statuses = normalized_status & set(State.ALL_STATES)
+            # Handle Invalid Statuses such 'Active'
+            if not base_statuses and NameState.NOT_EXAMINED.value not in normalized_status:
+                return jsonify([])
             conditions = [RequestDAO.stateCd.in_(base_statuses)] if base_statuses else []
 
             if NameState.NOT_EXAMINED.value in normalized_status:
