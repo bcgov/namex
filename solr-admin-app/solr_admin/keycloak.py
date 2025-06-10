@@ -1,6 +1,7 @@
 import requests
 from flask import current_app, session
 from authlib.jose import jwt, JsonWebKey
+from urllib.parse import urlparse
 
 
 # Manages Keycloak auth via OIDC using well-known config and JWKS for token validation.
@@ -22,12 +23,13 @@ class Keycloak:
     '''
     def get_redirect_url(self, request_url: str) -> str:
         config = self._fetch_well_known_config()
+        parsed_path = urlparse(request_url).path  # Extract only the relative path to avoid open redirect vulnerabilities
         return (
             f"{config['authorization_endpoint']}?response_type=code"
             f"&client_id={current_app.config['JWT_OIDC_AUDIENCE']}"
             f"&redirect_uri={current_app.config['OIDC_REDIRECT_URI']}"
             f"&scope=openid"
-            f"&state={request_url}"
+            f"&state={parsed_path}"
         )
 
     '''
