@@ -6,12 +6,10 @@ from urllib.parse import urlparse
 bp = Blueprint("oidc_callback", __name__)
 
 
-def sanitize_redirect_path(path: str) -> str:
-    """Allow only relative redirect paths to prevent open redirect vulnerabilities."""
+def is_safe_redirect_path(path: str) -> bool:
+    """Validates that the redirect path is a relative URL preventing open redirect vulnerabilities"""
     parsed = urlparse(path)
-    if parsed.netloc or not parsed.path.startswith("/"):
-        return "/"
-    return path
+    return not parsed.netloc and path.startswith("/")
 
 
 @bp.route("/oidc_callback")
@@ -20,9 +18,10 @@ def callback():
 
     code = request.args["code"]  # auth code returned by Keycloak after the user logs in
     state = request.args.get("state", "/")  # original URL the user was trying to access before being redirected to login
+    if not is_safe_redirect_path(state):
+        state = "/"
 
     if session.get("access_token"):
-        state = sanitize_redirect_path(state)
         current_app.logger.debug("User already has access token, redirecting to default or validated state path.")
         return redirect(state)
 
@@ -54,5 +53,4 @@ def callback():
     session["access_token"] = token_response["access_token"]
 
     current_app.logger.debug("Access token successfully saved to session; redirecting to user-specified state URL.")
-    state = sanitize_redirect_path(state)
     return redirect(state)
