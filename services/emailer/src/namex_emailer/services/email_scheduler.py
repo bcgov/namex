@@ -1,6 +1,7 @@
 import json
 from datetime import datetime, timezone, timedelta
 import uuid
+import copy
 
 from flask import current_app, request
 from gcp_queue.logging import structured_log
@@ -28,10 +29,11 @@ def schedule_or_reschedule_email(ce: SimpleCloudEvent):
     Cancel any in-flight email task for this nr number and schedule a new one 5 minutes out.
     This is only used for approved, conditional, and rejected emails that are not resends.
     """
-    ce.id = str(uuid.uuid4())  # Assign a new ID so the event won't be treated as a duplicate when it returns
-    cloud_event_payload = to_structured(ce)
-    nr_num = ce.data["request"]["nrNum"].replace(" ", "_")
-    option = ce.data["request"]["option"]
+    ce_copy = copy.deepcopy(ce)
+    ce_copy.id = str(uuid.uuid4())  # Assign a new ID so the event won't be treated as a duplicate when it returns
+    cloud_event_payload = to_structured(ce_copy)
+    nr_num = ce_copy.data["request"]["nrNum"].replace(" ", "_")
+    option = ce_copy.data["request"]["option"]
 
     # Identify the queue
     remote_queue_path = cloud_tasks_client.queue_path(
