@@ -52,7 +52,7 @@ class VirtualWordConditionView(SecuredView):
 # Do the audit logging - we will write the complete record, not the delta (although the latter is possible).
 def _create_audit_log(model, action) -> None:
     audit = restricted_condition_audit.RestrictedConditionAudit(
-    keycloak.Keycloak(None).get_username(), action,
+    keycloak.Keycloak().get_username(), action,
     model.id, model.rc_condition_text, model.rc_words, model.rc_consent_required, model.rc_consenting_body, model.rc_instructions, model.rc_allow_use)
 
     session = models.db.session
