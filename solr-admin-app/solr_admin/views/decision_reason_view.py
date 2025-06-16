@@ -61,7 +61,7 @@ class DecisionReasonView(SecuredView):
 # Do the audit logging - we will write the complete record, not the delta (although the latter is possible).
 def _create_audit_log(model, action) -> None:
     audit = decision_reason_audit.DecisionReasonAudit(
-        keycloak.Keycloak(None).get_username(), action, model.id, model.name, model.reason)
+        keycloak.Keycloak().get_username(), action, model.id, model.name, model.reason)
 
     session = models.db.session
     session.add(audit)
