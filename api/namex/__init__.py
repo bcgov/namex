@@ -45,6 +45,17 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):  # noqa: B008
     structured_logger.init_app(app)
     app.logger = structured_logger.get_logger()
 
+    # Add support for request-specific log fields like 'app_name'
+    structlog.configure(
+        processors=[structlog.contextvars.merge_contextvars] + structlog.get_config()['processors']
+    )
+
+    # Bind app-name from request headers into the logging context
+    @app.before_request
+    def bind_app_name():
+        structlog.contextvars.clear_contextvars()
+        structlog.contextvars.bind_contextvars(app_name=request.headers.get('App-Name', 'unknown'))
+
     flags.init_app(app)
     queue.init_app(app)
 
