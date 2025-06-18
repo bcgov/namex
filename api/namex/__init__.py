@@ -8,8 +8,9 @@ TODO: Fill in a larger description once the API is defined for V1
 
 import config
 import os
+import structlog
 
-from flask import Flask
+from flask import Flask, request
 from flask_jwt_oidc import JwtManager
 
 from .VERSION import __version__
@@ -18,7 +19,6 @@ jwt = JwtManager()
 
 from flask_cors import CORS
 from flask_migrate import Migrate
-from structured_logging import StructuredLogging
 
 from namex.services.cache import cache
 from namex.services.lookup import nr_filing_actions
@@ -28,7 +28,7 @@ from namex import models
 from namex.models import db, ma
 from namex.resources import api
 from namex.utils.run_version import get_run_version
-from namex.services import flags
+from namex.services import flags, logging_config
 
 
 run_version = get_run_version()
@@ -40,11 +40,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):  # noqa: B008
     CORS(app)
     app.config.from_object(config.CONFIGURATION[run_mode])
 
-    # Configure Structured Logging
-    structured_logger = StructuredLogging()
-    structured_logger.init_app(app)
-    app.logger = structured_logger.get_logger()
-
+    logging_config.configure_logging(app)
     flags.init_app(app)
     queue.init_app(app)
 
