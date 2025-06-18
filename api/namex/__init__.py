@@ -8,6 +8,7 @@ TODO: Fill in a larger description once the API is defined for V1
 
 import config
 import os
+import structlog.contextvars
 
 from flask import Flask
 from flask_jwt_oidc import JwtManager
