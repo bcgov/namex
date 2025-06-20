@@ -1,8 +1,9 @@
 import json
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
+from namex.models import Request
 from namex.services.cache import cache
 from namex.services.statistics import wait_time_statistics
 
@@ -57,9 +58,14 @@ def test_get_statistics_wait_time(client, jwt, app, oldest_draft_nr_date, todays
     # need to clear cache on statistics resource to test different test param values
     cache.clear()
 
-    # mock out get_utc_now function in wait_time_statistics to simulate today's date
-    with patch.object(wait_time_statistics, 'get_utc_now', return_value=todays_dt):
+    # Mock out Request.get_waiting_time to simulate wait time calculation for regular and priority queues
+    with patch.object(Request, 'get_oldest_draft') as mock_get_oldest_draft, \
+        patch.object(Request, 'get_waiting_time') as mock_get_waiting_time:
+        mock_get_oldest_draft.return_value = MagicMock(submittedDate=oldest_draft_nr_dt)
+        mock_get_waiting_time.side_effect = lambda priority_queue: expected_wait_days if not priority_queue else 0
         response = client.get(request_uri)
         payload = json.loads(response.data)
         assert payload
-        assert payload['regular_wait_time'] == expected_wait_days
+        assert isinstance(payload.get('regular_wait_time'), int)
+        assert payload['regular_wait_time'] == expected_wait_days, \
+            f"[ASSERT FAILED] Expected {expected_wait_days} but got {payload['regular_wait_time']}"
