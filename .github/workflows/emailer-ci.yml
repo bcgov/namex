@@ -1,0 +1,22 @@
+name: Namex Emailer CI
+
+on:
+  pull_request:
+    paths:
+      - "services/emailer/**"
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./services/emailer
+
+jobs:
+  namex-emailer-ci:
+    uses: bcgov/bcregistry-sre/.github/workflows/backend-ci.yaml@main
+    with:
+      app_name: "namex-emailer"
+      working_directory: "./services/emailer"
+      codecov_flag: "namexemailer"
+      skip_isort: "true"
+      skip_black: "true"

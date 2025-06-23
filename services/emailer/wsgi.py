@@ -31,8 +31,8 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-"""Provides the WSGI entry point for running the application
-"""
+"""Provides the WSGI entry point for running the application"""
+
 import os
 
 from namex_emailer import create_app
@@ -41,4 +41,4 @@ app = create_app()
 
 if __name__ == "__main__":
     server_port = os.environ.get("PORT", "8080")
-    app.run(debug=False, port=server_port, host="0.0.0.0")
+    app.run(debug=False, port=server_port, host="0.0.0.0")  # noqa: S104

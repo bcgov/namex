@@ -32,6 +32,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 """The Unit Tests and the helper routines."""
+
 import base64
 import json
 from random import randrange
@@ -66,6 +67,7 @@ def create_mock_message(message_payload: dict):
     json_msg_payload = json.dumps(message_payload)
     mock_msg.data.decode = Mock(return_value=json_msg_payload)
     return mock_msg
+
 
 def helper_create_cloud_event_envelope(
     cloud_event_id: str = None,
@@ -111,11 +113,6 @@ def helper_create_cloud_event(
     data: dict = {},
 ):
     if not data:
-        data = {
-                "id": "29590",
-                "statusCode": "COMPLETED",
-                "corpTypeCode": "BC"
-                }
+        data = {"id": "29590", "statusCode": "COMPLETED", "corpTypeCode": "BC"}
     ce = SimpleCloudEvent(id=cloud_event_id, source=source, subject=subject, type=type, data=data)
     return ce
-    

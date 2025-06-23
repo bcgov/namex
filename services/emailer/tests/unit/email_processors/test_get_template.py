@@ -12,12 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The Unit Tests for the pick up template."""
-import base64
-from datetime import datetime
-from unittest.mock import patch, MagicMock
 
 import pytest
-
 from flask import request
 
 from namex_emailer.email_processors import get_main_template
@@ -48,7 +44,6 @@ from namex_emailer.email_processors import get_main_template
         ("get_main_template", "AML", None, "NR-RENEWAL.html", "main"),
         ("get_main_template", "AML", None, "NR-UPGRADE.html", "main"),
         ("get_main_template", "AML", None, "rejected.md", "main"),
-
         ("get_main_template", "ASSUMED", "approved", "approved-modernized.md", "main"),
         ("get_main_template", "ASSUMED", "approved", "approved-colin.md", "main"),
         ("get_main_template", "ASSUMED", "approved", "approved-so.md", "main"),
@@ -71,7 +66,6 @@ from namex_emailer.email_processors import get_main_template
         ("get_main_template", "ASSUMED", None, "NR-RENEWAL.html", "main"),
         ("get_main_template", "ASSUMED", None, "NR-UPGRADE.html", "main"),
         ("get_main_template", "ASSUMED", None, "rejected.md", "main"),
-
         ("get_main_template", "CHG", "approved", "approved-modernized.md", "main"),
         ("get_main_template", "CHG", "approved", "approved-colin.md", "main"),
         ("get_main_template", "CHG", "approved", "approved-so.md", "main"),
@@ -94,7 +88,6 @@ from namex_emailer.email_processors import get_main_template
         ("get_main_template", "CHG", None, "NR-RENEWAL.html", "main"),
         ("get_main_template", "CHG", None, "NR-UPGRADE.html", "main"),
         ("get_main_template", "CHG", None, "rejected.md", "main"),
-
         ("get_main_template", "CHG-ASSUM", "approved", "approved-modernized.md", "main"),
         ("get_main_template", "CHG-ASSUM", "approved", "approved-colin.md", "main"),
         ("get_main_template", "CHG-ASSUM", "approved", "approved-so.md", "main"),
@@ -117,7 +110,6 @@ from namex_emailer.email_processors import get_main_template
         ("get_main_template", "CHG-ASSUM", None, "NR-RENEWAL.html", "main"),
         ("get_main_template", "CHG-ASSUM", None, "NR-UPGRADE.html", "main"),
         ("get_main_template", "CHG-ASSUM", None, "rejected.md", "main"),
-
         ("get_main_template", "CNV", "approved", "approved-modernized.md", "main"),
         ("get_main_template", "CNV", "approved", "approved-colin.md", "main"),
         ("get_main_template", "CNV", "approved", "approved-so.md", "main"),
@@ -140,7 +132,6 @@ from namex_emailer.email_processors import get_main_template
         ("get_main_template", "CNV", None, "NR-RENEWAL.html", "main"),
         ("get_main_template", "CNV", None, "NR-UPGRADE.html", "main"),
         ("get_main_template", "CNV", None, "rejected.md", "main"),
-
         ("get_main_template", "DBA", "approved", "approved-modernized.md", "main"),
         ("get_main_template", "DBA", "approved", "approved-colin.md", "main"),
         ("get_main_template", "DBA", "approved", "approved-so.md", "main"),
@@ -163,7 +154,6 @@ from namex_emailer.email_processors import get_main_template
         ("get_main_template", "DBA", None, "NR-RENEWAL.html", "main"),
         ("get_main_template", "DBA", None, "NR-UPGRADE.html", "main"),
         ("get_main_template", "DBA", None, "rejected.md", "main"),
-
         ("get_main_template", "MVE", "approved", "approved-modernized.md", "main"),
         ("get_main_template", "MVE", "approved", "approved-magic-link.md", "main"),
         ("get_main_template", "MVE", "approved", "approved-colin.md", "main"),
@@ -190,7 +180,6 @@ from namex_emailer.email_processors import get_main_template
         ("get_main_template", "MVE", None, "NR-RENEWAL.html", "main"),
         ("get_main_template", "MVE", None, "NR-UPGRADE.html", "main"),
         ("get_main_template", "MVE", None, "rejected.md", "main"),
-
         ("get_main_template", "NEW", "approved", "approved-modernized.md", "main"),
         ("get_main_template", "NEW", "approved", "approved-magic-link.md", "main"),
         ("get_main_template", "NEW", "approved", "approved-colin.md", "main"),
@@ -217,7 +206,6 @@ from namex_emailer.email_processors import get_main_template
         ("get_main_template", "NEW", None, "NR-RENEWAL.html", "main"),
         ("get_main_template", "NEW", None, "NR-UPGRADE.html", "main"),
         ("get_main_template", "NEW", None, "rejected.md", "main"),
-
         ("get_main_template", "NRO-NEWAML", "approved", "approved-modernized.md", "main"),
         ("get_main_template", "NRO-NEWAML", "approved", "approved-colin.md", "main"),
         ("get_main_template", "NRO-NEWAML", "approved", "approved-so.md", "main"),
@@ -240,7 +228,6 @@ from namex_emailer.email_processors import get_main_template
         ("get_main_template", "NRO-NEWAML", None, "NR-RENEWAL.html", "main"),
         ("get_main_template", "NRO-NEWAML", None, "NR-UPGRADE.html", "main"),
         ("get_main_template", "NRO-NEWAML", None, "rejected.md", "main"),
-
         ("get_main_template", "NRO-REST", "approved", "approved-modernized.md", "main"),
         ("get_main_template", "NRO-REST", "approved", "approved-colin.md", "main"),
         ("get_main_template", "NRO-REST", "approved", "approved-so.md", "main"),
@@ -263,7 +250,6 @@ from namex_emailer.email_processors import get_main_template
         ("get_main_template", "NRO-REST", None, "NR-RENEWAL.html", "main"),
         ("get_main_template", "NRO-REST", None, "NR-UPGRADE.html", "main"),
         ("get_main_template", "NRO-REST", None, "rejected.md", "main"),
-
         ("get_main_template", "REH", "approved", "approved-modernized.md", "main"),
         ("get_main_template", "REH", "approved", "approved-colin.md", "main"),
         ("get_main_template", "REH", "approved", "approved-so.md", "main"),
@@ -286,7 +272,6 @@ from namex_emailer.email_processors import get_main_template
         ("get_main_template", "REH", None, "NR-RENEWAL.html", "main"),
         ("get_main_template", "REH", None, "NR-UPGRADE.html", "main"),
         ("get_main_template", "REH", None, "rejected.md", "main"),
-
         ("get_main_template", "REN", "approved", "approved-modernized.md", "main"),
         ("get_main_template", "REN", "approved", "approved-colin.md", "main"),
         ("get_main_template", "REN", "approved", "approved-so.md", "main"),
@@ -309,7 +294,6 @@ from namex_emailer.email_processors import get_main_template
         ("get_main_template", "REN", None, "NR-RENEWAL.html", "main"),
         ("get_main_template", "REN", None, "NR-UPGRADE.html", "main"),
         ("get_main_template", "REN", None, "rejected.md", "main"),
-
         ("get_main_template", "RESUBMIT", "approved", "approved-modernized.md", "main"),
         ("get_main_template", "RESUBMIT", "approved", "approved-colin.md", "main"),
         ("get_main_template", "RESUBMIT", "approved", "approved-so.md", "main"),
@@ -332,7 +316,6 @@ from namex_emailer.email_processors import get_main_template
         ("get_main_template", "RESUBMIT", None, "NR-RENEWAL.html", "main"),
         ("get_main_template", "RESUBMIT", None, "NR-UPGRADE.html", "main"),
         ("get_main_template", "RESUBMIT", None, "rejected.md", "main"),
-
         ("get_main_template_from_common", "INVALID", "approved", "approved-modernized.md", "common"),
         ("get_main_template_from_common", "INVALID", "approved", "approved-colin.md", "common"),
         ("get_main_template_from_common", "INVALID", "approved", "approved-so.md", "common"),
@@ -355,15 +338,12 @@ from namex_emailer.email_processors import get_main_template
         ("get_main_template_from_common", "INVALID", None, "NR-RENEWAL.html", "common"),
         ("get_main_template_from_common", "INVALID", None, "NR-UPGRADE.html", "common"),
         ("get_main_template_from_common", "INVALID", None, "rejected.md", "common"),
-
         ("no_template_with_valid_request_action", "AML", None, "invalid_name.md", None),
         ("no_template_with_valid_with_request_action", "AML", "approved", "invalid_name.md", None),
         ("no_template", "INVALID", None, "invalid_name.md", None),
     ],
 )
-def test_nr_notification(
-    app, mocker, test_name, request_action, status, template_name, expected_resource
-):
+def test_nr_notification(app, mocker, test_name, request_action, status, template_name, expected_resource):
     """Assert that get the main template function."""
     mock_log = mocker.patch("namex_emailer.email_processors.structured_log")
     result = get_main_template(request_action, template_name, status)

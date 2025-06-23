@@ -32,8 +32,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-"""This Module processes simple cloud event messages for possible filing payments
-"""
+"""This Module processes simple cloud event messages for possible filing payments"""
+
 from http import HTTPStatus
 
 from flask import Blueprint, request
@@ -53,8 +53,7 @@ bp = Blueprint("worker", __name__)
 
 @bp.route("/", methods=("POST",))
 def worker():
-    """Process the incoming cloud event
-    """
+    """Process the incoming cloud event"""
     structured_log(request, "INFO", f"Incoming raw msg: {request.data}")
 
     if not (ce := queue.get_simple_cloud_event(request)):
@@ -63,7 +62,7 @@ def worker():
         # so the event is removed from the Queue
         return {}, HTTPStatus.OK
 
-    item =ce_cache.get(ce.id, None)
+    item = ce_cache.get(ce.id, None)
 
     if item is not None:
         structured_log(request, "INFO", f"skipping duplicate ce: {str(ce)}")
@@ -121,7 +120,7 @@ def worker():
     return {}, HTTPStatus.OK
 
 
-def process_email(email_msg: SimpleCloudEvent):  # pylint: disable=too-many-branches, too-many-statements
+def process_email(email_msg: SimpleCloudEvent):
     """Process the email contained in the submission."""
 
     structured_log(request, "DEBUG", f"Attempting to process email: {email_msg}")

@@ -15,6 +15,7 @@
 
 Processors hold the business logic for how an email is interpreted and sent.
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -36,14 +37,14 @@ def substitute_template_parts(template_code: str) -> str:
     - template parts can only be one level deep, ie: this rudimentary framework does not handle nested template
     parts. There is no recursive search and replace.
     """
-    template_parts = [
-        "nr-footer"
-    ]
+    template_parts = ["nr-footer"]
 
     # substitute template parts - marked up by [[filename]]
     for template_part in template_parts:
         # src/namex_emailer/email_templates/common/nr-footer.html
-        template_part_code = Path(f'{current_app.config.get("TEMPLATE_PATH")}/template-parts/name-request/{template_part}.html').read_text()
+        template_part_code = Path(
+            f"{current_app.config.get('TEMPLATE_PATH')}/template-parts/name-request/{template_part}.html"
+        ).read_text()
         template_code = template_code.replace("[[{}.html]]".format(template_part), template_part_code)
 
     return template_code

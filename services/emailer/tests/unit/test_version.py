@@ -36,10 +36,10 @@
 
 Test-Suite to ensure that the version utilities are working as expected.
 """
+
 from importlib.metadata import version
 
 from namex_emailer import utils
-
 
 PACKAGE_NAME = "namex_emailer"
 

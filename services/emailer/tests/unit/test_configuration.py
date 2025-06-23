@@ -35,6 +35,7 @@
 
 Test-Suite to ensure that the Configuration Classes are working as expected.
 """
+
 import pytest
 from flask import current_app
 

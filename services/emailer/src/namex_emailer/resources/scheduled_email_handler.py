@@ -1,13 +1,15 @@
 from http import HTTPStatus
+
 from flask import Blueprint, request
 from gcp_queue.logging import structured_log
 from simple_cloudevent import from_queue_message
 
-from namex_emailer.services.helpers import get_bearer_token, send_email, write_to_events
 from namex_emailer.resources.worker import process_email
 from namex_emailer.services import ce_cache
+from namex_emailer.services.helpers import get_bearer_token, send_email, write_to_events
 
 bp = Blueprint("tasks", __name__)
+
 
 @bp.route("/handle-send", methods=["POST"])
 def deliver_scheduled_email():

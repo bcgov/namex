@@ -1,34 +1,39 @@
 import uuid
+from http import HTTPStatus
 
 import pytest
-from http import HTTPStatus
-from simple_cloudevent import to_queue_message, SimpleCloudEvent
+from simple_cloudevent import SimpleCloudEvent, to_queue_message
 
-from namex_emailer.services.email_scheduler import schedule_or_reschedule_email, cloud_tasks_client
 from namex_emailer.services import ce_cache
+from namex_emailer.services.email_scheduler import cloud_tasks_client, schedule_or_reschedule_email
 
 
 @pytest.fixture(autouse=True)
 def configure_app(app):
     """Ensure all needed config keys are set to test the email scheduler."""
-    app.config.update({
-        "GCP_PROJECT":                               "test-project",
-        "GCP_REGION":                                "test-region",
-        "CLOUD_TASKS_QUEUE_ID":                      "test-queue",
-        "CLOUD_TASKS_HANDLER_URL":                   "https://example.com/tasks/handle-send",
-        "CLOUD_TASKS_INVOKER_SERVICE_ACCOUNT":       "sa-test@test.iam.gserviceaccount.com",
-    })
+    app.config.update(
+        {
+            "GCP_PROJECT": "test-project",
+            "GCP_REGION": "test-region",
+            "CLOUD_TASKS_QUEUE_ID": "test-queue",
+            "CLOUD_TASKS_HANDLER_URL": "https://example.com/tasks/handle-send",
+            "CLOUD_TASKS_INVOKER_SERVICE_ACCOUNT": "sa-test@test.iam.gserviceaccount.com",
+        }
+    )
     yield
     ce_cache.clear()
 
 
 def make_fake_task(nr_num: str, option: str):
     """Stub out the bare minimum of a CloudTasks Task for our tests."""
-    class T: pass
+
+    class T:
+        pass
+
     t = T()
     t.name = (
         "projects/test-project/locations/test-region/"
-        f"queues/test-queue/tasks/{nr_num.replace(" ", "_")}-{option}-abc123"
+        f"queues/test-queue/tasks/{nr_num.replace(' ', '_')}-{option}-abc123"
     )
     return t
 
@@ -41,7 +46,7 @@ def make_fake_cloud_event(nr_num: str, option: str):
         subject="namerequest",
         type="bc.registry.names.request",
         time="2025-06-09T12:00:00+00:00",
-        data={"request": {"nrNum": nr_num, "option": option}}
+        data={"request": {"nrNum": nr_num, "option": option}},
     )
     return ce
 
@@ -58,7 +63,9 @@ def test_scheduler_creates_one_task_when_none_pending(monkeypatch, app):
 
     # 1) Required Monkeypatching
     monkeypatch.setattr(cloud_tasks_client, "list_tasks", lambda parent: [])
-    monkeypatch.setattr(cloud_tasks_client, "delete_task", lambda *_: (_ for _ in ()).throw(AssertionError("should not delete")))
+    monkeypatch.setattr(
+        cloud_tasks_client, "delete_task", lambda *_: (_ for _ in ()).throw(AssertionError("should not delete"))
+    )
     monkeypatch.setattr(cloud_tasks_client, "create_task", lambda parent, task: created.append((parent, task)))
 
     # 2) Invoke Cloud Tasks Scheduling
@@ -68,10 +75,7 @@ def test_scheduler_creates_one_task_when_none_pending(monkeypatch, app):
 
     # 3) Extract data that cloud tasks used
     parent, task = created[0]
-    prefix = (
-        f"projects/{app.config['GCP_PROJECT']}"
-        f"/locations/{app.config['GCP_REGION']}/queues/"
-    )
+    prefix = f"projects/{app.config['GCP_PROJECT']}/locations/{app.config['GCP_REGION']}/queues/"
     req = task["http_request"]
 
     # 4) Assertions
@@ -123,19 +127,22 @@ def test_deliver_scheduled_email_success(client, monkeypatch):
     # 1) Required Monkeypatching
     monkeypatch.setattr(
         "namex_emailer.resources.scheduled_email_handler.process_email",
-        lambda ce: (calls.setdefault('ce_for_email', ce), {"recipients": ["a@b.com"], "content": {"body": "ok"}})[1]
+        lambda ce: (calls.setdefault("ce_for_email", ce), {"recipients": ["a@b.com"], "content": {"body": "ok"}})[1],
     )
     monkeypatch.setattr(
         "namex_emailer.resources.scheduled_email_handler.get_bearer_token",
-        lambda: (calls.setdefault('got_token', True), "fake-token-123")[1]
+        lambda: (calls.setdefault("got_token", True), "fake-token-123")[1],
     )
     monkeypatch.setattr(
         "namex_emailer.resources.scheduled_email_handler.send_email",
-        lambda payload, token: (calls.setdefault('sent_email', {"payload": payload, "token": token}), type("FakeResp", (), {"status_code": HTTPStatus.OK})())[1]
+        lambda payload, token: (
+            calls.setdefault("sent_email", {"payload": payload, "token": token}),
+            type("FakeResp", (), {"status_code": HTTPStatus.OK})(),
+        )[1],
     )
     monkeypatch.setattr(
         "namex_emailer.resources.scheduled_email_handler.write_to_events",
-        lambda ce, payload: calls.setdefault("wrote_event", {"ce": ce, "email": payload})
+        lambda ce, payload: calls.setdefault("wrote_event", {"ce": ce, "email": payload}),
     )
 
     # 2) Hit the endpoint
@@ -144,14 +151,14 @@ def test_deliver_scheduled_email_success(client, monkeypatch):
     resp = client.post("/tasks/handle-send", data=body, content_type="application/json")
 
     # 3) Extract data that cloud tasks used
-    sent = calls['sent_email']
-    wrote = calls['wrote_event']
+    sent = calls["sent_email"]
+    wrote = calls["wrote_event"]
 
     # 4) Assertions
     assert resp.status_code == 200, resp.data.decode()
     assert cloud_event.id in ce_cache
-    assert calls['ce_for_email'].id == cloud_event.id
-    assert calls.get('got_token') is True
+    assert calls["ce_for_email"].id == cloud_event.id
+    assert calls.get("got_token") is True
     assert sent["token"] == "fake-token-123"
     assert sent["payload"]["recipients"] == ["a@b.com"]
     assert sent["payload"]["content"]["body"] == "ok"
@@ -177,17 +184,13 @@ def test_deliver_scheduled_email_duplicate_skips(client, monkeypatch):
     # 3) Replace send_email() with a stub that fails if it's ever called
     monkeypatch.setattr(
         "namex_emailer.resources.scheduled_email_handler.send_email",
-        lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError(
-            "send_email() should not be called for duplicates"
-        ))
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            AssertionError("send_email() should not be called for duplicates")
+        ),
     )
 
     # 4) Invoke the handler endpoint with the duplicate event
-    resp = client.post(
-        "/tasks/handle-send",
-        data=body,
-        content_type="application/json"
-    )
+    resp = client.post("/tasks/handle-send", data=body, content_type="application/json")
 
     # 5) Handler should still return 200 but not attempt to send_email()
     assert resp.status_code == 200

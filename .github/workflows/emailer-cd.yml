@@ -1,4 +1,4 @@
-name: Namex Emailer CD GCP
+name: Namex Emailer CD
 
 on:
   push:
@@ -32,7 +32,7 @@ jobs:
 
     uses: bcgov/bcregistry-sre/.github/workflows/backend-cd.yaml@main
     with:
-      target: ${{ github.event.inputs.target }}  # Corrected the input reference
+      target: ${{ github.event.inputs.target }}
       app_name: "namex-emailer"
       working_directory: "./services/emailer"
       redeploy: ${{ inputs.redeploy }}

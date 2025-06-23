@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The Unit Tests for the name request expiry email processor."""
+
 from datetime import datetime
 
 import pytest
@@ -83,9 +84,12 @@ def test_nr_notification(
             "applicants": {"emailAddress": "test@test.com"},
         }
         nr_response = MockResponse(nr_json, 200)
-        mocker.patch('namex_emailer.services.helpers.query_nr_number', return_value=nr_response)
+        mocker.patch("namex_emailer.services.helpers.query_nr_number", return_value=nr_response)
         email_msg = {"request": {"nrNum": nr_number, "option": option, "refundValue": refund_value}}
-        message = helper_create_cloud_event(data=email_msg, type=QueueMessageTypes.NAMES_MESSAGE_TYPE.value,)
+        message = helper_create_cloud_event(
+            data=email_msg,
+            type=QueueMessageTypes.NAMES_MESSAGE_TYPE.value,
+        )
         email = nr_notification.process(
             message,
             option,

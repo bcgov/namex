@@ -12,19 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Email processing rules and actions for Name Request Payment Completion."""
+
 from __future__ import annotations
 
 import base64
 from http import HTTPStatus
-from pathlib import Path
 
 import requests
 from flask import current_app, request
 from gcp_queue.logging import structured_log
 from jinja2 import Template
 
-from namex_emailer.services.helpers import query_nr_number, get_bearer_token
 from namex_emailer.email_processors import get_main_template, substitute_template_parts
+from namex_emailer.services.helpers import get_bearer_token, query_nr_number
 
 
 def process(email_info: dict) -> dict:
@@ -75,7 +75,7 @@ def _get_pdfs(nr_id: str, payment_token: str) -> list:
 
     # get nr payments
     nr_payments = requests.get(
-        f'{current_app.config.get("NAMEX_SVC_URL")}/payments/{nr_id}',
+        f"{current_app.config.get('NAMEX_SVC_URL')}/payments/{nr_id}",
         headers={"Accept": "application/json", "Authorization": f"Bearer {token}"},
     )
     if nr_payments.status_code != HTTPStatus.OK:
@@ -97,7 +97,7 @@ def _get_pdfs(nr_id: str, payment_token: str) -> list:
 
     # get receipt
     receipt = requests.post(
-        f'{current_app.config.get("NAMEX_SVC_URL")}/payments/{payment_id}/receipt',
+        f"{current_app.config.get('NAMEX_SVC_URL')}/payments/{payment_id}/receipt",
         json={},
         headers={"Accept": "application/pdf", "Authorization": f"Bearer {token}"},
     )
