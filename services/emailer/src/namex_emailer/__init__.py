@@ -35,17 +35,17 @@
 
 This module is the service worker for sending emails about entity related events.
 """
+
 from __future__ import annotations
 
 from flask import Flask
+from namex.services import flags
 
 from config import Config, Production
 from namex_emailer.utils import get_run_version
 
 from .resources import register_endpoints
 from .services import queue
-
-from namex.services import flags
 
 
 def create_app(environment: Config = Production, **kwargs) -> Flask:

@@ -35,10 +35,11 @@
 
 This module is the service worker for sending emails about entity related events.
 """
+
 from flask import Flask
 
-from .worker import bp as worker_endpoint
 from .scheduled_email_handler import bp as tasks_endpoint
+from .worker import bp as worker_endpoint
 
 
 def register_endpoints(app: Flask):

@@ -1,15 +1,15 @@
-import json
-from datetime import datetime, timezone, timedelta
-import uuid
 import copy
+import json
+import uuid
+from datetime import datetime, timedelta, timezone
 
 from flask import current_app, request
 from gcp_queue.logging import structured_log
 from google.cloud.tasks_v2 import CloudTasksClient, HttpMethod
 from google.protobuf import timestamp_pb2
 from simple_cloudevent import SimpleCloudEvent, to_structured
-from namex_emailer.constants.notification_options import DECISION_OPTIONS, Option
 
+from namex_emailer.constants.notification_options import DECISION_OPTIONS, Option
 
 # Singleton GCP Cloud Tasks Client
 cloud_tasks_client = CloudTasksClient()
@@ -60,22 +60,20 @@ def schedule_or_reschedule_email(ce: SimpleCloudEvent):
         project=current_app.config["GCP_PROJECT"],
         location=current_app.config["GCP_REGION"],
         queue=current_app.config["CLOUD_TASKS_QUEUE_ID"],
-        task=task_id
+        task=task_id,
     )
 
     # 4) Assemble the Cloud Task
     task = {
-        "name":             task_name,
-        "schedule_time":    timestamp,
+        "name": task_name,
+        "schedule_time": timestamp,
         "http_request": {
-            "http_method":  HttpMethod.POST,
-            "url":          current_app.config["CLOUD_TASKS_HANDLER_URL"],
-            "headers":      {"Content-Type": "application/json"},
-            "body":         json.dumps(cloud_event_payload).encode("utf-8"),
-            "oidc_token": {
-                "service_account_email": current_app.config["CLOUD_TASKS_INVOKER_SERVICE_ACCOUNT"]
-            }
-        }
+            "http_method": HttpMethod.POST,
+            "url": current_app.config["CLOUD_TASKS_HANDLER_URL"],
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps(cloud_event_payload).encode("utf-8"),
+            "oidc_token": {"service_account_email": current_app.config["CLOUD_TASKS_INVOKER_SERVICE_ACCOUNT"]},
+        },
     }
 
     # 5) Enqueue the task to come back to the emailer at deliver_scheduled_email() endpoint in 5 minutes time

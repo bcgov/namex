@@ -18,6 +18,7 @@ class Option(Enum):
 
     CONSENT_RECEIVED = "CONSENT_RECEIVED"
 
+
 # Group definitions
 NOTIFICATION_OPTIONS = {
     Option.BEFORE_EXPIRY,

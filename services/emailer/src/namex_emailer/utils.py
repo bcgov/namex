@@ -35,6 +35,7 @@
 
 When deployed in OKD, it adds the last commit hash onto the version info.
 """
+
 import os
 from importlib.metadata import version
 

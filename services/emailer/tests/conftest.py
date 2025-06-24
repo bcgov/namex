@@ -12,22 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
+
 import datetime
 import os
 from contextlib import contextmanager
-from typing import Final
 
 import pytest
+from dotenv import load_dotenv
 
-from namex_emailer import create_app
 from config import Testing
+from namex_emailer import create_app
 
 from . import FROZEN_DATETIME
 
-from dotenv import load_dotenv
-
 # Automatically load the .env file from the root of the project
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
+
 
 @contextmanager
 def not_raises(exception):
@@ -69,7 +69,7 @@ def config(app):
 
 
 @pytest.fixture(scope="session")
-def client(app):  # pylint: disable=redefined-outer-name
+def client(app):
     """Return a session-wide Flask test client."""
     return app.test_client()
 

@@ -32,28 +32,29 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 """The Test Suites to ensure that the worker is operating correctly."""
+
 import base64
 from http import HTTPStatus
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 import pytest
+from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent, to_queue_message
 
-from sbc_common_components.utils.enums import QueueMessageTypes
-from namex_emailer.resources import worker
 from namex_emailer.email_processors import name_request
+from namex_emailer.resources import worker
 from namex_emailer.services import queue
 from tests import MockResponse
+
 from . import helper_create_cloud_event_envelope
 
-
-default_legal_name = 'TEST COMP'
-default_names_array = [{'name': default_legal_name, 'state': 'NE'}]
+default_legal_name = "TEST COMP"
+default_names_array = [{"name": default_legal_name, "state": "NE"}]
 
 
 def test_no_message(client, mocker):
     """Return a 4xx when an no JSON present."""
-    mocker.patch('gcp_queue.gcp_auth.verify_jwt', return_value='')
+    mocker.patch("gcp_queue.gcp_auth.verify_jwt", return_value="")
     rv = client.post("/")
 
     assert rv.status_code == HTTPStatus.OK
@@ -85,7 +86,7 @@ CLOUD_EVENT_ENVELOPE = {
     [("invalid", {}, HTTPStatus.OK), ("valid", CLOUD_EVENT_ENVELOPE, HTTPStatus.OK)],
 )
 def test_simple_cloud_event(client, test_name, queue_envelope, expected, mocker):
-    mocker.patch('gcp_queue.gcp_auth.verify_jwt', return_value='')
+    mocker.patch("gcp_queue.gcp_auth.verify_jwt", return_value="")
     rv = client.post("/", json=CLOUD_EVENT_ENVELOPE)
     assert rv.status_code == expected
 
@@ -134,7 +135,7 @@ def test_simple_cloud_event(client, test_name, queue_envelope, expected, mocker)
     ],
 )
 def test_nr_notification(
-    app, client, option, nr_number, subject, expiration_date, refund_value, expected_legal_name, names , mocker
+    app, client, option, nr_number, subject, expiration_date, refund_value, expected_legal_name, names, mocker
 ):
     """Assert that the nr notification can be processed."""
     # Setup
@@ -143,7 +144,7 @@ def test_nr_notification(
         "names": names,
         "legalType": "BC",
         "applicants": {"emailAddress": "test@test.com"},
-        "id": "some_id"
+        "id": "some_id",
     }
     nr_response = MockResponse(nr_json, 200)
     token = "token"
@@ -155,9 +156,9 @@ def test_nr_notification(
     }
     message = helper_create_cloud_event_envelope(data=email_msg)
 
-    mocker.patch('namex_emailer.services.helpers.query_nr_number', return_value=nr_response)
-    mocker.patch('namex_emailer.services.helpers.get_bearer_token', return_value=token)
-    mocker.patch('gcp_queue.gcp_auth.verify_jwt', return_value='')
+    mocker.patch("namex_emailer.services.helpers.query_nr_number", return_value=nr_response)
+    mocker.patch("namex_emailer.services.helpers.get_bearer_token", return_value=token)
+    mocker.patch("gcp_queue.gcp_auth.verify_jwt", return_value="")
 
     email_response = MockResponse(nr_json, 200)
     with patch.object(worker, "send_email", return_value=email_response):
@@ -194,9 +195,9 @@ def test_nr_receipt_notification(app, client, mocker):
     }
     message = helper_create_cloud_event_envelope(data=email_msg)
 
-    mocker.patch('namex_emailer.services.helpers.query_nr_number', return_value=nr_response)
-    mocker.patch('namex_emailer.services.helpers.get_bearer_token', return_value=token)
-    mocker.patch('gcp_queue.gcp_auth.verify_jwt', return_value='')
+    mocker.patch("namex_emailer.services.helpers.query_nr_number", return_value=nr_response)
+    mocker.patch("namex_emailer.services.helpers.get_bearer_token", return_value=token)
+    mocker.patch("gcp_queue.gcp_auth.verify_jwt", return_value="")
     email_response = MockResponse(nr_json, 200)
 
     with patch.object(name_request, "_get_pdfs", return_value=pdfs):
@@ -243,7 +244,7 @@ def test_send_email_with_incomplete_payload(app, client, email_msg, mocker):
     """Assert that the email not have body can not be processed."""
     # Setup
     message = helper_create_cloud_event_envelope(data=email_msg)
-    mocker.patch('gcp_queue.gcp_auth.verify_jwt', return_value='')
+    mocker.patch("gcp_queue.gcp_auth.verify_jwt", return_value="")
     # TEST
     rv = client.post("/", json=message)
 
@@ -257,21 +258,21 @@ def test_resend_email_success(mocker):
     event_id = 1234
     email_content = {
         "recipients": ["test@example.com"],
-        "content": {"subject": "Test Resend", "body": "This is a test email."}
+        "content": {"subject": "Test Resend", "body": "This is a test email."},
     }
     mock_event = Mock()
     mock_event.eventJson = email_content
 
     # Mock query_notification_event to return the mock event
-    mocker.patch('namex_emailer.services.helpers.query_notification_event', return_value=mock_event)
+    mocker.patch("namex_emailer.services.helpers.query_notification_event", return_value=mock_event)
 
     # Mock get_bearer_token to return a token
-    mocker.patch('namex_emailer.services.helpers.get_bearer_token', return_value="mocked_token")
+    mocker.patch("namex_emailer.services.helpers.get_bearer_token", return_value="mocked_token")
 
     # Mock send_email to simulate a successful email send
     mock_response = Mock()
     mock_response.status_code = HTTPStatus.OK
-    mocker.patch('namex_emailer.resources.worker.send_email', return_value=mock_response)
+    mocker.patch("namex_emailer.resources.worker.send_email", return_value=mock_response)
 
     # Test
     response, status = worker.resend_email(event_id)
@@ -287,7 +288,7 @@ def test_resend_email_event_not_found(mocker):
     event_id = 1234
 
     # Mock query_notification_event to return None
-    mocker.patch('namex_emailer.services.helpers.query_notification_event', return_value=None)
+    mocker.patch("namex_emailer.services.helpers.query_notification_event", return_value=None)
 
     # Test
     response, status = worker.resend_email(event_id)
@@ -305,7 +306,7 @@ def test_resend_email_no_email_content(mocker):
     mock_event.eventJson = None
 
     # Mock query_notification_event to return the mock event
-    mocker.patch('namex_emailer.services.helpers.query_notification_event', return_value=mock_event)
+    mocker.patch("namex_emailer.services.helpers.query_notification_event", return_value=mock_event)
 
     # Test
     response, status = worker.resend_email(event_id)
@@ -321,22 +322,22 @@ def test_resend_email_send_failure(mocker):
     event_id = 1234
     email_content = {
         "recipients": ["test@example.com"],
-        "content": {"subject": "Test Resend", "body": "This is a test email."}
+        "content": {"subject": "Test Resend", "body": "This is a test email."},
     }
     mock_event = Mock()
     mock_event.eventJson = email_content
 
     # Mock query_notification_event to return the mock event
-    mocker.patch('namex_emailer.services.helpers.query_notification_event', return_value=mock_event)
+    mocker.patch("namex_emailer.services.helpers.query_notification_event", return_value=mock_event)
 
     # Mock get_bearer_token to return a token
-    mocker.patch('namex_emailer.services.helpers.get_bearer_token', return_value="mocked_token")
+    mocker.patch("namex_emailer.services.helpers.get_bearer_token", return_value="mocked_token")
 
     # Mock send_email to simulate a failed email send
     mock_response = Mock()
     mock_response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
     mock_response.text = "Internal Server Error"
-    mocker.patch('namex_emailer.resources.worker.send_email', return_value=mock_response)
+    mocker.patch("namex_emailer.resources.worker.send_email", return_value=mock_response)
 
     # Test
     response, status = worker.resend_email(event_id)

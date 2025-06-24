@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Email processing rules and actions for Name Request before expiry, expiry, renewal, upgrade."""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -20,22 +21,27 @@ from http import HTTPStatus
 from flask import current_app, request
 from gcp_queue.logging import structured_log
 from jinja2 import Template
+from namex.resources.name_requests import ReportResource
 from simple_cloudevent import SimpleCloudEvent
 
-from namex.resources.name_requests import ReportResource
 from namex_emailer.constants.notification_options import Option
 from namex_emailer.email_processors import get_main_template, substitute_template_parts
-from namex_emailer.services.helpers import as_legislation_timezone, format_as_report_string, get_magic_link, query_nr_number
+from namex_emailer.services.helpers import (
+    as_legislation_timezone,
+    format_as_report_string,
+    get_magic_link,
+    query_nr_number,
+)
 
 
-def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-msg=too-many-locals
+def process(email_info: SimpleCloudEvent, option) -> dict:
     """
     Build the email for Name Request notification.
 
     valid values of option: Option
     """
     structured_log(request, "DEBUG", f"NR {option} notification: {email_info}")
-    nr_number = email_info.data['request']['nrNum']
+    nr_number = email_info.data["request"]["nrNum"]
 
     nr_response = query_nr_number(nr_number)
     if nr_response.status_code != HTTPStatus.OK:
@@ -97,7 +103,7 @@ def process(email_info: SimpleCloudEvent, option) -> dict:  # pylint: disable-ms
         form_page_url=form_page_url,
         societies_url=societies_url,
         magic_link=magic_link,
-        steps_to_restore_url=steps_to_restore_url
+        steps_to_restore_url=steps_to_restore_url,
     )
 
     # get recipients
