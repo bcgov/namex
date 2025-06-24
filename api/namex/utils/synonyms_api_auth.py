@@ -70,20 +70,20 @@ class SynonymsAPIAuthHandler(urllib.request.HTTPHandler, urllib.request.HTTPSHan
             current_app.logger.warning('SOLR_SYNONYMS_API_URL not set.')
             return
 
-        id_token = self._get_identity_token(synonyms_url)
-        if id_token: 
-            request.add_header('Authorization', f'Bearer {id_token}')
+        id_token_value = self._get_identity_token(synonyms_url)
+        if id_token_value: 
+            request.add_header('Authorization', f'Bearer {id_token_value}')
         else:
             current_app.logger.warning('Failed to get identity token for synonyms-api request.')
 
     def http_open(self, req): 
         """Injects identity token for synonyms HTTP requests."""
-        self._add_auth_to_request(req, req.full_url)
+        self._inject_token_for_synonyms_api(req, req.full_url)
         return super().http_open(req)
 
     def https_open(self, req):
         """Injects identity token for synonyms HTTPS requests."""
-        self._add_auth_to_request(req, req.full_url)
+        self._inject_token_for_synonyms_api(req, req.full_url)
         return super().https_open(req)
 
 
