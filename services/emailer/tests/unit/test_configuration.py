@@ -37,27 +37,26 @@ Test-Suite to ensure that the Configuration Classes are working as expected.
 """
 
 import pytest
-from flask import current_app
 
 # testdata pattern is ({str: environment}, {expected return value})
+from config import get_named_config
+
 TEST_ENVIRONMENT_DATA = [
-    ("valid", "development", current_app.config.get("DevConfig")),
-    ("valid", "testing", current_app.config.get("TestConfig")),
-    ("valid", "default", current_app.config.get("ProdConfig")),
-    ("valid", "staging", current_app.config.get("ProdConfig")),
-    ("valid", "production", current_app.config.get("ProdConfig")),
+    ("valid", "development", "Development"),
+    ("valid", "testing", "Testing"),
+    ("valid", "default", "Production"),
+    ("valid", "staging", "Production"),
+    ("valid", "production", "Production"),
     ("error", None, KeyError),
 ]
 
 
-@pytest.mark.parametrize("test_type,environment,expected", TEST_ENVIRONMENT_DATA)
+@pytest.mark.parametrize("test_type, environment, expected", TEST_ENVIRONMENT_DATA)
 def test_get_named_config(test_type, environment, expected):
-    """Assert that the named configurations can be loaded.
-
-    Or that a KeyError is returned for missing config types.
-    """
+    """Assert that the named configurations can be loaded or raise KeyError."""
     if test_type == "valid":
-        assert isinstance(current_app.config.get_named_config(environment), expected)
+        config_obj = get_named_config(environment)
+        assert config_obj.__class__.__name__ == expected
     else:
-        with pytest.raises(KeyError):
-            current_app.config.get_named_config(environment)
+        with pytest.raises(expected):
+            get_named_config(environment)

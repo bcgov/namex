@@ -149,6 +149,7 @@ class Testing(Config):
     DEBUG = True
     TESTING = True
     DEPLOYMENT_ENV = "testing"
+    TEMPLATE_PATH = "src/namex_emailer/email_templates"
 
 
 class Production(Config):

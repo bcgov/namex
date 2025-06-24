@@ -81,10 +81,12 @@ def test_nr_notification(
             "expirationDate": expiration_date,
             "names": names,
             "legalType": "BC",
-            "applicants": {"emailAddress": "test@test.com"},
+            "applicants": {"emailAddress": "test@test.com", "phoneNumber": "555-555-5555"},
+            "request_action_cd": "NEW",
+            "nrNum": nr_number,
         }
         nr_response = MockResponse(nr_json, 200)
-        mocker.patch("namex_emailer.services.helpers.query_nr_number", return_value=nr_response)
+        mocker.patch("namex_emailer.email_processors.nr_notification.query_nr_number", return_value=nr_response)
         email_msg = {"request": {"nrNum": nr_number, "option": option, "refundValue": refund_value}}
         message = helper_create_cloud_event(
             data=email_msg,

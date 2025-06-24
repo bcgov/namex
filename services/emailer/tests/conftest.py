@@ -15,10 +15,23 @@
 
 import datetime
 import os
+import sys
 from contextlib import contextmanager
+from unittest.mock import MagicMock
 
 import pytest
 from dotenv import load_dotenv
+
+# Add the project root (emailer/) to sys.path so 'config' can be imported
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+# Create a mock CloudTasksClient with task_path() returning a real string
+mock_client_instance = MagicMock()
+mock_client_instance.task_path.side_effect = lambda *args, **kwargs: f"/tasks/{kwargs['task']}"
+mock_tasks_module = MagicMock()
+mock_tasks_module.CloudTasksClient.return_value = mock_client_instance
+sys.modules["google.cloud.tasks_v2.services.cloud_tasks.client"] = mock_tasks_module
 
 from config import Testing
 from namex_emailer import create_app

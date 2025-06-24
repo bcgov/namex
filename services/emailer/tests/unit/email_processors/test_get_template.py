@@ -345,16 +345,17 @@ from namex_emailer.email_processors import get_main_template
 )
 def test_nr_notification(app, mocker, test_name, request_action, status, template_name, expected_resource):
     """Assert that get the main template function."""
-    mock_log = mocker.patch("namex_emailer.email_processors.structured_log")
-    result = get_main_template(request_action, template_name, status)
-    if not expected_resource:
-        assert result is None
-        mock_log.assert_any_call(
-            request, "ERROR", f"Failed to get {request_action}, {status}, {template_name} email template"
-        )
-    else:
-        assert isinstance(result, str)
-        if expected_resource == "common":
-            mock_log.assert_called_once_with(
-                request, "DEBUG", f"Not Found the template from {request_action}/{status}/{template_name}"
+    with app.app_context():
+        mock_log = mocker.patch("namex_emailer.email_processors.structured_log")
+        result = get_main_template(request_action, template_name, status)
+        if not expected_resource:
+            assert result is None
+            mock_log.assert_any_call(
+                request, "ERROR", f"Failed to get {request_action}, {status}, {template_name} email template"
             )
+        else:
+            assert isinstance(result, str)
+            if expected_resource == "common":
+                mock_log.assert_called_once_with(
+                    request, "DEBUG", f"Not Found the template from {request_action}/{status}/{template_name}"
+                )
