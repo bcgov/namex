@@ -810,8 +810,6 @@ class SolrQueries:
     def _get_identity_token(cls, audience):
         """Get an identity token for authenticating with solr-synonyms-api."""
         try:
-            return None
-
             token = id_token.fetch_id_token(Request(), audience)
 
             if not token or not isinstance(token, str):
