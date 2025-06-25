@@ -4,8 +4,9 @@ from http import HTTPStatus
 import pytest
 from simple_cloudevent import SimpleCloudEvent, to_queue_message
 
+from namex_emailer.resources import worker
 from namex_emailer.services import ce_cache
-from namex_emailer.services.email_scheduler import cloud_tasks_client, schedule_or_reschedule_email
+from namex_emailer.services.email_scheduler import cloud_tasks_client, is_reset, is_schedulable, schedule_email
 
 
 @pytest.fixture(autouse=True)
@@ -38,24 +39,27 @@ def make_fake_task(nr_num: str, option: str):
     return t
 
 
-def make_fake_cloud_event(nr_num: str, option: str):
-    """Example cloud event to be used for testing."""
-    ce = SimpleCloudEvent(
+def make_fake_cloud_event(nr_num: str, option: str, extra_data: dict = None):
+    """Create a test CloudEvent with optional extra request fields."""
+    data = {"nrNum": nr_num, "option": option}
+    if extra_data:
+        data.update(extra_data)
+
+    return SimpleCloudEvent(
         id=str(uuid.uuid4()),
         source=f"/requests/{nr_num}",
         subject="namerequest",
         type="bc.registry.names.request",
         time="2025-06-09T12:00:00+00:00",
-        data={"request": {"nrNum": nr_num, "option": option}},
+        data={"request": data},
     )
-    return ce
 
 
 def test_scheduler_creates_one_task_when_none_pending(monkeypatch, app):
     """
     Verify that when there are no existing tasks for a given NR number,
-    schedule_or_reschedule_email schedules exactly one new Cloud Task
-    using the correct queue, handler URL, and service account.
+    schedule_email schedules exactly one new Cloud Task using the correct
+    queue, handler URL, and service account.
     """
 
     # Capture any tasks created
@@ -71,7 +75,7 @@ def test_scheduler_creates_one_task_when_none_pending(monkeypatch, app):
     # 2) Invoke Cloud Tasks Scheduling
     with app.app_context():
         cloud_event = make_fake_cloud_event("NR 1234567", "APPROVED")
-        schedule_or_reschedule_email(cloud_event)
+        schedule_email(cloud_event)
 
     # 3) Extract data that cloud tasks used
     parent, task = created[0]
@@ -103,7 +107,7 @@ def test_scheduler_deletes_existing_then_creates(monkeypatch, app):
     # 4) Run the scheduler in the Flask app context
     with app.app_context():
         cloud_event = make_fake_cloud_event("NR 1234567", "REJECTED")
-        schedule_or_reschedule_email(cloud_event)
+        schedule_email(cloud_event)
 
     # 5) Assertions
     assert deleted == [make_fake_task("NR 1234567", "APPROVED").name]
@@ -194,3 +198,70 @@ def test_deliver_scheduled_email_duplicate_skips(client, monkeypatch):
 
     # 5) Handler should still return 200 but not attempt to send_email()
     assert resp.status_code == 200
+
+
+def test_worker_handles_reset_event_and_cancels_tasks(client, monkeypatch):
+    """
+    Ensure that RESET events are properly handled by canceling in-flight tasks
+    and that no email is attempted. The response should be 200 OK.
+    """
+    calls = {}
+    ce = make_fake_cloud_event("NR 1234567", "RESET")
+
+    monkeypatch.setattr(
+        "namex_emailer.resources.worker.queue.get_simple_cloud_event",
+        lambda req: ce,
+    )
+    monkeypatch.setattr(
+        "namex_emailer.resources.worker.cancel_any_in_flight_email_tasks",
+        lambda ce: calls.setdefault("cancel_called_with", ce),
+    )
+    monkeypatch.setattr(
+        "namex_emailer.resources.worker.schedule_email",
+        lambda *_: (_ for _ in ()).throw(AssertionError("schedule_email should not be called")),
+    )
+    monkeypatch.setattr(
+        "namex_emailer.resources.worker.process_email",
+        lambda *_: (_ for _ in ()).throw(AssertionError("process_email should not be called")),
+    )
+
+    resp = client.post("/", data={}, content_type="application/json")
+
+    assert resp.status_code == 200
+    assert ce.id in worker.ce_cache
+    assert calls["cancel_called_with"].id == ce.id
+
+
+def test_is_schedulable_true_for_approved():
+    ce = make_fake_cloud_event("NR 1234567", "APPROVED")
+    assert is_schedulable(ce) is True
+
+
+def test_is_schedulable_false_for_non_decision():
+    ce = make_fake_cloud_event("NR 1234567", "before-expiry")
+    assert is_schedulable(ce) is False
+
+
+def test_is_schedulable_false_for_resend_event():
+    ce = make_fake_cloud_event("NR 1234567", "REJECTED", {"resendEventId": "abc"})
+    assert is_schedulable(ce) is False
+
+
+def test_is_schedulable_false_for_invalid_payload():
+    ce = SimpleCloudEvent(id="x", source="/", subject="", type="", time="", data={})
+    assert is_schedulable(ce) is False
+
+
+def test_is_reset_true():
+    ce = make_fake_cloud_event("NR 1234567", "RESET")
+    assert is_reset(ce) is True
+
+
+def test_is_reset_false_if_different_option():
+    ce = make_fake_cloud_event("NR 1234567", "CONDITIONAL")
+    assert is_reset(ce) is False
+
+
+def test_is_reset_false_if_malformed_data():
+    ce = SimpleCloudEvent(id="x", source="/", subject="", type="", time="", data={})
+    assert is_reset(ce) is False
