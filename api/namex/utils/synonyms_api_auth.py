@@ -8,7 +8,7 @@ from google.oauth2 import id_token
 
 
 def _synonyms_api_url() -> Optional[str]:
-    return current_app.config.get("SOLR_SYNONYMS_API_URL")
+    return current_app.config.get('SOLR_SYNONYMS_API_URL')
 
 
 def _is_synonyms_api_request(url: str) -> bool:
@@ -21,18 +21,18 @@ def _get_identity_token() -> Optional[str]:
     if not audience:
         return None
 
-    if os.getenv("FLASK_ENV") == "development":
+    if os.getenv('FLASK_ENV') == 'development':
         # JWT tokens can be generated on GCP console and returned as a string here for testing or in development.
         # 1. Go to the correct env on GCP console: -dev, -test, -prod.
-        # 2. Launch the Goolge Cloud Shell from the GCP console. 
+        # 2. Launch the Goolge Cloud Shell from the GCP console.
         # 3. Enter: gcloud auth print-identity-token --audiences=<entry-your-target-url>
         # 4. Copy the token and paste it here as the return string value.
-        return "dev-dummy-token"
+        return 'dev-dummy-token'
 
     try:
         return id_token.fetch_id_token(Request(), audience)
     except Exception as exc:
-        current_app.logger.warning("Synonyms-API token fetch failed: %s", exc)
+        current_app.logger.warning('Synonyms-API token fetch failed: %s', exc)
         return None
 
 
@@ -41,7 +41,7 @@ def patch_synonyms_api_requests():
     import swagger_client
     from swagger_client.rest import RESTClientObject
 
-    if getattr(swagger_client, "_synonyms_auth_patched", False):
+    if getattr(swagger_client, '_synonyms_auth_patched', False):
         return
 
     real_request = RESTClientObject.request
@@ -51,8 +51,8 @@ def patch_synonyms_api_requests():
             token = _get_identity_token()
             if token:
                 headers = headers or {}
-                headers["Authorization"] = f"Bearer {token}"
-        return real_request(self, method, url, headers=headers, *args, **kwargs)
+                headers['Authorization'] = f'Bearer {token}'
+        return real_request(self, method, url, headers, *args, **kwargs)
 
     RESTClientObject.request = custom_request
     swagger_client._synonyms_auth_patched = True
