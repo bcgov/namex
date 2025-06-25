@@ -22,7 +22,7 @@ from flask_migrate import Migrate
 from namex.services.cache import cache
 from namex.services.lookup import nr_filing_actions
 from .services import queue
-from .utils.synonyms_api_auth import install_synonyms_api_auth
+from namex.utils.synonyms_api_auth import patch_synonyms_api_requests
 
 from namex import models
 from namex.models import db, ma
@@ -57,7 +57,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):  # noqa: B008
 
     # Install request middleware for identity token injecttion for synonyms API requests.
     with app.app_context():
-        install_synonyms_api_auth()
+        patch_synonyms_api_requests()
 
     @app.after_request
     def add_version(response):

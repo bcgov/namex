@@ -1,10 +1,4 @@
-"""
-Synonyms API Authentication Middleware.
-
-This module provides a automatic identity token injection for requests to the synonyms-api. 
-"""
-
-import urllib.request
+import os
 from typing import Optional
 from urllib.parse import urlparse
 
@@ -13,99 +7,48 @@ from google.auth.transport.requests import Request
 from google.oauth2 import id_token
 
 
-class SynonymsAPIAuthHandler(urllib.request.HTTPHandler, urllib.request.HTTPSHandler):
-    """
-    HTTP/HTTPS handler that injects service account identity token for synonyms API requests. 
-    """
-
-    def __init__(self):
-        self._synonyms_api_url: Optional[str] = None
-        self._synonyms_api_host: Optional[str] = None
-    
-    def _get_synonyms_api_url(self) -> Optional[str]:
-        """Get the synonyms API URL from configutation."""
-        if self._synonyms_api_url is None:
-            self._synonyms_api_url = current_app.config.get('SOLR_SYNONYMS_API_URL', None)
-        return self._synonyms_api_url
-
-    def _get_synonyms_api_host(self) -> Optional[str]:
-        """Get the synonyms API host from the URL."""
-        if self._synonyms_api_host is None:
-            url = self._get_synonyms_api_url()
-            if url:
-                parsed = urlparse(url)
-                self._synonyms_api_host = parsed.netloc
-        return self._synonyms_api_host
-    
-    def _is_synonyms_api_request(self, url: str) -> bool:
-        """Check if the str contains the synonyms-api host."""
-        synonyms_host = self._get_synonyms_api_host()
-        if not synonyms_host:
-            return False
-        
-        parsed = urlparse(url)
-        return parsed.netloc == synonyms_host
-
-    def _get_identity_token(self, audience: str) -> Optional[str]:
-        """Get service account identity token for synonyms-api request authentication."""
-        try:
-            token = id_token.fetch_id_token(Request(), audience)
-
-            if not token or not isinstance(token, str):
-                current_app.logger.warning(f'Failed to get identity token.')
-                return None
-
-            return token
-        except Exception as e:
-            current_app.logger.warning(f'Error in gettting identity token: {str(e)}')
-            return None
-        
-    def _inject_token_for_synonyms_api(self, request, url: str) -> None:
-        """Injects the identity token for all synonyms-api requests."""
-        if not self._is_synonyms_api_request(url):
-            return
-        
-        synonyms_url = self._get_synonyms_api_url()
-        if not synonyms_url:
-            current_app.logger.warning('SOLR_SYNONYMS_API_URL not set.')
-            return
-
-        id_token_value = self._get_identity_token(synonyms_url)
-        if id_token_value: 
-            request.add_header('Authorization', f'Bearer {id_token_value}')
-        else:
-            current_app.logger.warning('Failed to get identity token for synonyms-api request.')
-
-    def http_open(self, req): 
-        """Injects identity token for synonyms HTTP requests."""
-        self._inject_token_for_synonyms_api(req, req.full_url)
-        return super().http_open(req)
-
-    def https_open(self, req):
-        """Injects identity token for synonyms HTTPS requests."""
-        self._inject_token_for_synonyms_api(req, req.full_url)
-        return super().https_open(req)
+def _synonyms_api_url() -> Optional[str]:
+    return current_app.config.get("SOLR_SYNONYMS_API_URL")
 
 
-def install_synonyms_api_auth():
-    """
-    Install the synonyms API authentication interceptor.
+def _is_synonyms_api_request(url: str) -> bool:
+    target = _synonyms_api_url()
+    return bool(target) and urlparse(url).netloc == urlparse(target).netloc
 
-    This function is called during application initialization.
-    Once installed, all requests to the synonyms-api will include the identity token.
-    """
 
-    # Create custom opener with authenticated handler
-    opener = urllib.request.build_opener(SynonymsAPIAuthHandler())
+def _get_identity_token() -> Optional[str]:
+    audience = _synonyms_api_url()
+    if not audience:
+        return None
 
-    # Install the opener as the default
-    urllib.request.install_opener(opener)
+    if os.getenv("FLASK_ENV") == "development":
+        # JWT tokens can be generated on GCP console and returned as a string here for testing or in development.
+        return "dev-dummy-token"
 
-    current_app.logger.info('Synonyms API authentication interceptor installed.')
+    try:
+        return id_token.fetch_id_token(Request(), audience)
+    except Exception as exc:
+        current_app.logger.warning("Synonyms-API token fetch failed: %s", exc)
+        return None
 
-def uninstall_synonyms_api_auth():
-    """Uninstall the synonyms API authentication interceptor."""
-    # Reinstall the default opener
-    urllib.request.install_opener(urllib.request.build_opener())
-    
-    current_app.logger.info('Synonyms API authentication interceptor uninstalled')
+
+def patch_synonyms_api_requests():
+    """Monkey-patch swagger_client to add Bearer token to Synonyms API calls."""
+    import swagger_client
+    from swagger_client.rest import RESTClientObject
+
+    if getattr(swagger_client, "_synonyms_auth_patched", False):
+        return
+
+    real_request = RESTClientObject.request
+
+    def custom_request(self, method, url, headers=None, *args, **kwargs):
+        if _is_synonyms_api_request(url):
+            token = _get_identity_token()
+            if token:
+                headers = headers or {}
+                headers["Authorization"] = f"Bearer {token}"
+        return real_request(self, method, url, headers=headers, *args, **kwargs)
+
+    RESTClientObject.request = custom_request
+    swagger_client._synonyms_auth_patched = True
