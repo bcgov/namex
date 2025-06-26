@@ -644,21 +644,19 @@ class RequestSearch(Resource):
             and search_details.limit is not None
             and search_details.limit > 0
         ):
-            offset_value = (search_details.page - 1) * search_details.limit
-            q = q.offset(offset_value).limit(search_details.limit + 1)
-        
-        q_results = q.all()
-
-        requests = request_auth_search_schemas.dump(q_results[:search_details.limit])
+            q = q.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit+1)
+        q = q.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit+1)
+        requests = request_auth_search_schemas.dump(q.all())
+        has_more = len(requests)> search_details.limit
         actions_array = [
             nr_filing_actions.get_actions(r['requestTypeCd'], r['entity_type_cd'], r['request_action_cd'])
-            for r in requests
+            for r in requests[:search_details.limit]
         ]
         for r, additional_fields in zip(requests, actions_array):
             if additional_fields:
                 r.update(additional_fields)
-        has_more = len(q_results) > search_details.limit
-        return jsonify({'requests': requests, 'hasMore': has_more})
+        requests = requests or []
+        return jsonify({'requests': requests[:search_details.limit], 'hasMore': has_more})
 
 # noinspection PyUnresolvedReferences
 @cors_preflight('GET, PATCH, PUT, DELETE')
