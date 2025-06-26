@@ -24,7 +24,32 @@ def is_schedulable(ce: SimpleCloudEvent) -> bool:
         return False
 
 
-def schedule_or_reschedule_email(ce: SimpleCloudEvent):
+def is_reset(ce: SimpleCloudEvent) -> bool:
+    try:
+        return ce.data["request"]["option"] == Option.RESET.value
+    except Exception:
+        return False
+
+
+def cancel_any_in_flight_email_tasks(ce: SimpleCloudEvent):
+    nr_num = ce.data["request"]["nrNum"].replace(" ", "_")
+
+    # Identify the queue
+    remote_queue_path = cloud_tasks_client.queue_path(
+        project=current_app.config["GCP_PROJECT"],
+        location=current_app.config["GCP_REGION"],
+        queue=current_app.config["CLOUD_TASKS_QUEUE_ID"],
+    )
+
+    # 1) Remove any pending email tasks for this NR number
+    for task in cloud_tasks_client.list_tasks(parent=remote_queue_path):
+        existing_id = task.name.rsplit("/", 1)[-1]
+        if existing_id.startswith(nr_num):
+            structured_log(request, "INFO", f"Cancelling pending Cloud Task '{existing_id}'...")
+            cloud_tasks_client.delete_task(name=task.name)
+
+
+def schedule_email(ce: SimpleCloudEvent):
     """
     Cancel any in-flight email task for this nr number and schedule a new one 5 minutes out.
     This is only used for approved, conditional, and rejected emails that are not resends.
@@ -45,7 +70,7 @@ def schedule_or_reschedule_email(ce: SimpleCloudEvent):
     timestamp = timestamp_pb2.Timestamp()
     timestamp.FromDatetime(datetime.now(timezone.utc) + timedelta(minutes=5))
 
-    # 1) Remove any pending email tasks for this NR number
+    # 1) Remove any pending email tasks for this NR number (there shouldn't be any as reset would have cancelled)
     for task in cloud_tasks_client.list_tasks(parent=remote_queue_path):
         existing_id = task.name.rsplit("/", 1)[-1]
         if existing_id.startswith(nr_num):

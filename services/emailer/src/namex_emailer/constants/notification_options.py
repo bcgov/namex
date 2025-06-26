@@ -17,6 +17,7 @@ class Option(Enum):
     REJECTED = "REJECTED"
 
     CONSENT_RECEIVED = "CONSENT_RECEIVED"
+    RESET = "RESET"
 
 
 # Group definitions
