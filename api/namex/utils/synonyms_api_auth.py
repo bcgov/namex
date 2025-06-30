@@ -41,18 +41,20 @@ def patch_synonyms_api_requests():
     import swagger_client
     from swagger_client.rest import RESTClientObject
 
-    if getattr(swagger_client, '_synonyms_auth_patched', False):
+    if getattr(swagger_client, "_synonyms_auth_patched", False):
         return
 
     real_request = RESTClientObject.request
 
-    def custom_request(self, method, url, headers=None, *args, **kwargs):
+    def custom_request(self, method, url, *args, **kwargs):
         if _is_synonyms_api_request(url):
             token = _get_identity_token()
             if token:
-                headers = headers or {}
-                headers['Authorization'] = f'Bearer {token}'
-        return real_request(self, method, url, headers, *args, **kwargs)
+                headers = kwargs.get("headers") or {}
+                headers["Authorization"] = f"Bearer {token}"
+                kwargs["headers"] = headers
+        return real_request(self, method, url, *args, **kwargs)
 
     RESTClientObject.request = custom_request
     swagger_client._synonyms_auth_patched = True
+
