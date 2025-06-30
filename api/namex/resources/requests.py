@@ -960,6 +960,9 @@ class Request(Resource):
                 # add a generated comment re. this NR being reset
                 json_input['comments'].append({'comment': 'This NR was RESET.'})
 
+                # send the event to the namex emailer, to cancel the in-flight task, if there is one
+                queue_util.publish_email_notification(nrd.nrNum, 'RESET')
+
             try:
                 previousNr = json_input['previousNr']
                 if previousNr:

@@ -46,7 +46,12 @@ from namex_emailer.constants.notification_options import DECISION_OPTIONS, NOTIF
 from namex_emailer.email_processors import name_request, nr_notification, nr_result
 from namex_emailer.email_processors.resend import process_resend_email
 from namex_emailer.services import ce_cache, queue
-from namex_emailer.services.email_scheduler import is_schedulable, schedule_or_reschedule_email
+from namex_emailer.services.email_scheduler import (
+    cancel_any_in_flight_email_tasks,
+    is_reset,
+    is_schedulable,
+    schedule_email,
+)
 
 bp = Blueprint("worker", __name__)
 
@@ -75,10 +80,19 @@ def worker():
 
     structured_log(request, "INFO", f"received ce: {str(ce)}")
 
+    # Check if it's a reset
+    if is_reset(ce):
+        try:
+            cancel_any_in_flight_email_tasks(ce)
+            ce_cache[ce.id] = ce
+            return {}, HTTPStatus.OK
+        except Exception as err:
+            structured_log(request, "WARNING", f"Error cancelling cloud task from reset: {err}")
+
     # If approved, conditional, or rejected - schedule a cloud task to send the email in 5 minutes
     if is_schedulable(ce):
         try:
-            schedule_or_reschedule_email(ce)
+            schedule_email(ce)
             ce_cache[ce.id] = ce
             return {}, HTTPStatus.OK
         except Exception as err:

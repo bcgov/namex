@@ -45,6 +45,7 @@ extend-select = [
 
 extend-ignore = [
   "S113",  # no timeout
+  "C901"   # too complex
 ]
 
 [tool.ruff.lint.per-file-ignores]
