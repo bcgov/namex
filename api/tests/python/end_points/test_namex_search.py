@@ -623,10 +623,10 @@ def test_namex_search_direct_nrs(client, jwt, app, test_name, identifiers, total
     )
 
     assert rv.status_code == HTTPStatus.OK
-
-    nrs = [x['requests']['nrNum'] for x in rv.json]
-    applicants = [x['requests']['applicants'][0] for x in rv.json]
-    names = [x['requests']['names'][0] for x in rv.json]
+    requests = rv.json.get('requests')
+    nrs = [x['nrNum'] for x in requests]
+    applicants = [x['applicants'][0] for x in requests]
+    names = [x['names'][0] for x in requests]
 
     for nr in nrs:
         assert nr in identifiers
