@@ -10,7 +10,7 @@ from namex import jwt
 from namex.analytics import VALID_ANALYSIS, RestrictedWords, SolrQueries
 from namex.utils.auth import cors_preflight
 
-api = Namespace('namexDocuments', description='Namex - OPS checks')
+api = Namespace('Name Checks', description='Checks names for conflicts, word restrictions, and other issues')
 
 
 class DocumentType(enum.Enum):
@@ -59,6 +59,21 @@ class DocumentAnalysis(Resource):
     @staticmethod
     @jwt.requires_auth
     @api.expect(a_document)
+    @api.doc(
+        description='Check submitted name content for issues like restricted words',
+        params={
+            'analysis': 'The type of check to perform (e.g., conflicts, restricted_words, trademarks, histories)',
+            'start': 'Pagination start index (default: 0)',
+            'rows': 'Number of results to return (default: 50)',
+        },
+        responses={
+            200: 'Analysis completed successfully',
+            400: 'Invalid input or missing content',
+            401: 'Unauthorized',
+            404: 'Unsupported analysis type',
+            500: 'Internal server error',
+        },
+    )
     def post(analysis=None, *args, **kwargs):
         start = request.args.get('start', DocumentAnalysis.START)
         rows = request.args.get('rows', DocumentAnalysis.ROWS)
@@ -90,6 +105,23 @@ class DocumentAnalysis(Resource):
 
     @staticmethod
     @jwt.requires_auth
+    @api.doc(
+        description='Check name content using query parameters instead of a request body',
+        params={
+            'analysis': 'The type of check to perform (e.g., conflicts, restricted_words, trademarks, histories)',
+            'start': 'Pagination start index (default: 0)',
+            'rows': 'Number of results to return (default: 50)',
+            'content': 'The name content to analyze',
+            'type': 'Content type (default: plain_text)',
+        },
+        responses={
+            200: 'Analysis completed successfully',
+            400: 'Invalid input or missing content',
+            401: 'Unauthorized',
+            404: 'Unsupported analysis type',
+            500: 'Internal server error',
+        },
+    )
     def get(analysis=None, *args, **kwargs):
         # added because namerequest has no token and auto generated can't be allowed to POST
         # (would have updated above post to get but corresponding UI change in namex-fe-caddy couldn't be built at the time)

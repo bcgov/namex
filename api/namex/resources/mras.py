@@ -25,7 +25,7 @@ class MrasServiceException(Exception):
 
 
 # Register a local namespace for the NR reserve
-mras_profile_api = Namespace('mras', description='MRAS API')
+mras_profile_api = Namespace('MRAS Profile', description='Check if a business exists in MRAS and get its basic profile')
 
 
 def load_xml_response_content(response, xpath_query=None):
@@ -47,10 +47,17 @@ def load_xml_response_content(response, xpath_query=None):
 @cors_preflight('GET')
 @mras_profile_api.route('/<string:province>/<string:corp_num>', strict_slashes=False, methods=['GET', 'OPTIONS'])
 @mras_profile_api.doc(
+    description='Check if a given corporation exists in the specified MRAS jurisdiction and return its profile as XML',
     params={
-        'province': 'Province - This field is required',
-        'corp_num': 'Incorporation Number - This field is required',
-    }
+        'province': 'Two-letter code of the MRAS-participating province',
+        'corp_num': 'Incorporation number of the business',
+    },
+    responses={
+        200: 'Profile found and returned successfully',
+        400: 'Jurisdiction mismatch or malformed request',
+        404: 'Profile not found or MRAS returned an error',
+        500: 'Internal server error',
+    },
 )
 class MrasProfile(Resource):
     def get(self, province, corp_num):

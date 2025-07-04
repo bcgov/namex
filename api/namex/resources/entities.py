@@ -14,12 +14,20 @@ MSG_NOT_FOUND = 'Resource not found'
 
 
 # Register a local namespace for the NR reserve
-entity_api = Namespace('entity', description='ENTITY API')
+entity_api = Namespace('Entity Info', description='Fetch business details such as legal name, status, and filing options')
 
 
 @cors_preflight('GET')
 @entity_api.route('/<string:corp_num>', methods=['GET', 'OPTIONS'])
-@entity_api.doc(params={'corp_num': 'Incorporation Number - This field is required'})
+@entity_api.doc(
+    description='Fetch business details using the given incorporation number',
+    params={'corp_num': 'Incorporation number of the business'},
+    responses={
+        200: 'Entity information fetched successfully',
+        404: 'Entity not found',
+        500: 'Internal server error',
+    },
+)
 class EntityApi(Resource):
     def get(self, corp_num):
         try:

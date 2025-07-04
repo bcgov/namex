@@ -255,7 +255,15 @@ class PaymentNameRequestResource(AbstractNameRequestResource):
 
 @cors_preflight('GET')
 @payment_api.route('/<int:nr_id>', strict_slashes=False, methods=['GET', 'OPTIONS'])
-@payment_api.doc(params={})
+@payment_api.doc(
+    description='Fetch all SBC payment records associated with the given name request',
+    params={'nr_id': 'Name Request ID'},
+    responses={
+        200: 'Payment records fetched successfully',
+        404: 'Name request or payment records not found',
+        500: 'Internal server error',
+    },
+)
 class FindNameRequestPayments(PaymentNameRequestResource):
     """Find name request payments endpoints."""
 
@@ -325,7 +333,6 @@ class FindNameRequestPayments(PaymentNameRequestResource):
 
 @cors_preflight('POST')
 @payment_api.route('/<int:nr_id>/<string:payment_action>', strict_slashes=False, methods=['POST', 'OPTIONS'])
-@payment_api.doc(params={})
 class CreateNameRequestPayment(AbstractNameRequestResource):
     @staticmethod
     def _is_staff(auth_header):
@@ -364,12 +371,17 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
     """Create name request payment endpoints."""
 
     @payment_api.expect(payment_request_schema)
-    @payment_api.response(200, 'Success', '')
     @payment_api.doc(
+        description='Create a payment for a name request and optionally affiliate it with a business account',
         params={
-            'nr_id': 'Name Request number',
+            'nr_id': 'Name Request ID',
             'payment_action': 'Payment NR Action - One of [CREATE, UPGRADE, REAPPLY, RESUBMIT]',
-        }
+        },
+        responses={
+            200: 'Payment created successfully',
+            400: 'Invalid request or input',
+            500: 'Internal server error',
+        },
     )
     def post(self, nr_id, payment_action=NameRequestActions.CREATE.value):
         """
@@ -534,11 +546,22 @@ class CreateNameRequestPayment(AbstractNameRequestResource):
 @payment_api.route(
     '/<int:nr_id>/payment/<string:payment_id>', strict_slashes=False, methods=['DELETE', 'GET', 'PUT', 'OPTIONS']
 )
-@payment_api.doc(params={'nr_id': '', 'payment_id': ''})
 class NameRequestPayment(AbstractNameRequestResource):
     """Name request payment endpoints."""
 
-    @payment_api.response(200, 'Success', '')
+    @payment_api.doc(
+        description='Fetch detailed information for a specific payment, including SBC Pay and receipt data',
+        params={
+            'nr_id': 'Name Request ID',
+            'payment_id': 'SBC payment ID',
+        },
+        responses={
+            200: 'Payment details fetched successfully',
+            400: 'Invalid name request id',
+            404: 'Payment not found',
+            500: 'Internal server error',
+        },
+    )
     # TODO: Update schema and marshal
     # @marshal_with(payment_response_schema)
     def get(self, nr_id, payment_id):
@@ -609,6 +632,20 @@ class NameRequestPayment(AbstractNameRequestResource):
         except Exception as err:
             return handle_exception(err, err, 500)
 
+    @payment_api.doc(
+        description='Cancel a payment if it is still in created state and record the event',
+        params={
+            'nr_id': 'Name Request ID',
+            'payment_id': 'SBC payment ID',
+        },
+        responses={
+            200: 'Payment cancelled successfully',
+            400: 'Payment cannot be cancelled in its current state',
+            404: 'Name Request or payment not found',
+            409: 'Payment conflict - possibly already processed',
+            500: 'Internal server error',
+        },
+    )
     def delete(self, nr_id, payment_id):
         """Delete endpoint."""
         try:
@@ -660,10 +697,16 @@ class NameRequestPayment(AbstractNameRequestResource):
     '/<int:nr_id>/payment/<int:payment_id>/<string:payment_action>', strict_slashes=False, methods=['PATCH', 'OPTIONS']
 )
 @payment_api.doc(
+    description='Perform a payment action on a name request',
     params={
-        'nr_id': 'NR Number - This field is required',
-        'payment_action': 'Payment NR Action - One of [CREATE, UPGRADE, REAPPLY, REFUND]',
-    }
+        'nr_id': 'Name Request ID',
+        'payment_id': 'SBC payment ID',
+        'payment_action': 'One of CREATE, UPGRADE, REAPPLY, REFUND, CANCEL',
+    },
+    responses={
+        200: 'Payment action completed successfully',
+        500: 'Internal Server Error',
+    },
 )
 class NameRequestPaymentAction(AbstractNameRequestResource):
     """Name request payment action endpoints."""

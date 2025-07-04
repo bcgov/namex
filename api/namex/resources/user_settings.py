@@ -1,12 +1,22 @@
 from flask import current_app, g, jsonify, make_response, request
-from flask_restx import Namespace, Resource
+from flask_jwt_oidc.exceptions import AuthError
+from flask_restx import Namespace, Resource, fields
 
 from namex import jwt
 from namex.models import User
 from namex.services.name_request.utils import get_or_create_user_by_jwt
 from namex.utils.auth import cors_preflight
 
-api = Namespace('namexUserSettings', description='Namex - get/update user settings')
+api = Namespace('User Settings', description='Fetch or update saved user preferences')
+
+@api.errorhandler(AuthError)
+def handle_auth_error(ex):
+    return {'message': 'Unauthorized', 'details': ex.error.get('description') or 'Invalid or missing token'}, 401
+
+
+user_settings_model = api.model('UserSettings', {
+    'searchColumns': fields.List(fields.String, required=True, description='List of search column names')
+})
 
 
 @cors_preflight('GET, PUT')
@@ -14,6 +24,14 @@ api = Namespace('namexUserSettings', description='Namex - get/update user settin
 class UserSettings(Resource):
     @staticmethod
     @jwt.requires_auth
+    @api.doc(
+        description='Fetch saved search column preferences for the current user',
+        responses={
+            200: 'User settings fetched successfully',
+            401: 'Unauthorized',
+            500: 'Internal server error',
+        },
+    )
     def get(*args, **kwargs):
         try:
             # GET existing or CREATE new user based on the JWT info
@@ -27,6 +45,16 @@ class UserSettings(Resource):
 
     @staticmethod
     @jwt.requires_auth
+    @api.expect(user_settings_model)
+    @api.doc(
+        description='Update the saved search column preferences for the current user',
+        responses={
+            204: 'User settings updated successfully',
+            400: 'Invalid or missing payload',
+            401: 'Unauthorized',
+            500: 'Internal server error',
+        },
+    )
     def put():
         try:
             # GET existing or CREATE new user based on the JWT info

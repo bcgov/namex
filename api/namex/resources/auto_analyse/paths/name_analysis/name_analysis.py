@@ -24,7 +24,7 @@ from namex.utils.auth import cors_preflight
 from .bc_name_analysis_response import BcAnalysisResponse
 
 # Register a local namespace for the requests
-api = Namespace('nameAnalysis', description='API for Analysing BC Names')
+api = Namespace('Name Analysis', description='Full name analysis based on entity type, jurisdiction, and naming rules')
 
 
 def bc_validate_name_request(location, entity_type, request_action):
@@ -154,6 +154,7 @@ class NameAnalysis(Resource):
     # @jwt.requires_auth
     # @api.expect()
     @api.doc(
+        description='Analyze a proposed BC business name and returns any structural or designation issues',
         params={
             'name': 'A company / organization name string',
             'location': 'A location code [ BC (only)]',
@@ -161,7 +162,13 @@ class NameAnalysis(Resource):
             'request_action_cd': 'A request action code [ NEW ]',
             'analysis_type': '[ designation, structure ]',
             'jurisdiction': '[ BC, XPRO ]',
-        }
+        },
+        responses={
+            200: 'Name analysis completed successfully',
+            400: 'Invalid input parameters',
+            501: 'XPRO jurisdictions are not currently supported',
+            500: 'Internal server error',
+        },
     )
     def get():
         """Get structure analysis for a name."""

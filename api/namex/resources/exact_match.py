@@ -7,7 +7,7 @@ from flask_restx import Namespace, Resource
 from namex import jwt
 from namex.utils.auth import cors_preflight
 
-api = Namespace('exactMatchMeta', description='Exact Match System - Metadata')
+api = Namespace('Exact Match', description='Search for exact business name matches')
 
 
 @cors_preflight('GET')
@@ -15,6 +15,16 @@ api = Namespace('exactMatchMeta', description='Exact Match System - Metadata')
 class ExactMatch(Resource):
     @staticmethod
     @jwt.requires_auth
+    @api.doc(
+        description='Fetch existing business names that exactly match the given query',
+        params={'query': 'The full name to search for'},
+        responses={
+            200: 'Match results fetched successfully',
+            400: 'Invalid or missing query parameter',
+            401: 'Unauthorized',
+            500: 'Internal server error',
+        },
+    )
     def get():
         query = request.args.get('query')
         query = query.lower().replace('*', '')
