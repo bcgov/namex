@@ -21,13 +21,13 @@ class ApiClientException(Exception):
         else:
             self.message = message
         # Map HTTP status if the wrapped error has an HTTP status code
-        self.status_code = wrapped_err.status if wrapped_err and hasattr(wrapped_err, 'status') else status_code
+        self.status_code = getattr(wrapped_err, 'status', status_code)
         super().__init__(self.message)
 
 
 class ApiClientError(ApiClientException):
-    def __init__(self, wrapped_err=None, message='API client error'):
-        super().__init__(wrapped_err, message)
+    def __init__(self, wrapped_err=None, message='API client error', status_code=400):
+        super().__init__(wrapped_err=wrapped_err, message=message, status_code=status_code)
 
 
 class ApiRequestError(Exception):
@@ -50,8 +50,9 @@ class ApiRequestError(Exception):
 
 
 class ApiAuthError(Exception):
-    def __init__(self, response=None, message='API authentication error'):
-        super().__init__(response, response.get('error_description', message))
+    def __init__(self, message='API authentication error', status_code=401):
+        self.status_code = status_code
+        super().__init__(message)
 
 
 def with_authentication(func):
@@ -75,7 +76,12 @@ def with_authentication(func):
 
 
 def log_api_error_response(err, func_call_name='function'):
-    current_app.logger.error('Error when calling {func}'.format(func=func_call_name))
+    log_msg = f'Error when calling {func_call_name}'
+    status_code = getattr(err, 'status_code', None)
+    if status_code:
+        log_msg += f' | Status Code: {status_code}'
+    log_msg += f' | Message: {str(err)}'
+    current_app.logger.error(log_msg)
 
 
 class HttpVerbs(Enum):
@@ -203,7 +209,7 @@ class BaseClient:
                     PAYMENT_SVC_AUTH_URL, PAYMENT_SVC_AUTH_CLIENT_ID, PAYMENT_SVC_CLIENT_SECRET
                 )
                 if not authenticated:
-                    raise ApiAuthError(token, message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
+                    raise ApiAuthError(message=MSG_CLIENT_CREDENTIALS_REQ_FAILED)
                 headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
 
             if not isinstance(headers.get('Account-Id', ''), str):
