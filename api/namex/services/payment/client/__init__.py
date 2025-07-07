@@ -6,6 +6,7 @@ from functools import wraps
 
 import requests
 from flask import current_app
+from namex.services.flags import flags
 
 
 MSG_CLIENT_CREDENTIALS_REQ_FAILED = 'Client credentials request failed'
@@ -26,13 +27,14 @@ class ApiClientException(Exception):
 
 
 class ApiClientError(ApiClientException):
-    def __init__(self, wrapped_err=None, message='API client error', status_code=400):
-        super().__init__(wrapped_err=wrapped_err, message=message, status_code=status_code)
+    def __init__(self, wrapped_err=None, body=None, message='API client error', status_code=400):
+        super().__init__(wrapped_err=wrapped_err, body=body, message=message, status_code=status_code)
 
 
 class ApiRequestError(Exception):
-    def __init__(self, response=None, message='API request failed'):
+    def __init__(self, response=None, message='API request failed', body=None):
         self.status_code = response.status_code
+        self.body = body
         info = json.loads(response.text)
         self.detail = detail = info.get('detail')
         self.title = title = info.get('title')
@@ -41,7 +43,7 @@ class ApiRequestError(Exception):
         error_msg = None
         if title and detail and (title != detail):
             error_msg = '{title}: {detail}'.format(title=self.title, detail=self.detail)
-        if title and not detail or (title and title == detail):
+        elif title and not detail or (title and title == detail):
             error_msg = '{title}'.format(title=title)
         else:
             error_msg = message
@@ -82,6 +84,15 @@ def log_api_error_response(err, func_call_name='function'):
         log_msg += f' | Status Code: {status_code}'
     log_msg += f' | Message: {str(err)}'
     current_app.logger.error(log_msg)
+
+    if flags.is_on('enable-payment-payload-logging'):
+        payload = getattr(err, 'body', None)
+        if payload:
+            try:
+                payload_str = json.dumps(payload)
+            except Exception:
+                payload_str = str(payload)
+            current_app.logger.error(f'Payload: {payload_str}')
 
 
 class HttpVerbs(Enum):
@@ -200,7 +211,7 @@ class BaseClient:
     def call_api(self, method, url, params=None, data=None, headers=None):
         try:
             if method not in HttpVerbs:
-                raise ApiClientError(message=MSG_INVALID_HTTP_VERB)
+                raise ApiClientError(message=MSG_INVALID_HTTP_VERB, body=data, status_code=400)
             if not headers or 'Authorization' not in headers:
                 PAYMENT_SVC_AUTH_URL = current_app.config.get('PAYMENT_SVC_AUTH_URL')
                 PAYMENT_SVC_AUTH_CLIENT_ID = current_app.config.get('PAYMENT_SVC_AUTH_CLIENT_ID')
@@ -229,7 +240,7 @@ class BaseClient:
                 response = requests.request(method.value, url, params=params, headers=headers)
 
             if not response or not response.ok:
-                raise ApiRequestError(response)
+                raise ApiRequestError(response, body=data)
 
             if response and response.headers.get('Content-Type') == 'application/json':
                 return json.loads(response.text)

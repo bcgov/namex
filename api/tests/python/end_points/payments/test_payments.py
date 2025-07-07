@@ -7,7 +7,13 @@ from sbc_common_components.utils.enums import QueueMessageTypes
 from namex.constants import NameRequestPatchActions, NameRequestPaymentActions, PaymentState
 from namex.models import Payment, State, User
 from namex.services import queue
-from namex.services.payment.client import SBCPaymentClient
+from namex.services.payment.client import (
+    ApiAuthError,
+    ApiClientError,
+    ApiRequestError,
+    SBCPaymentClient,
+    log_api_error_response,
+)
 from namex.services.payment.models import PaymentInvoice
 
 from ...end_points.common.http import get_test_headers
@@ -661,3 +667,69 @@ def test_create_payment(
             log_request_path(path)
             response = client.get(path)
             assert response.status_code == 200
+
+
+def get_mock_logger(logs):
+    class DummyLogger:
+        def error(self, msg):
+            logs.append(msg)
+        def warning(self, msg):
+            logs.append(msg)
+    return DummyLogger()
+
+
+@patch('namex.services.flags.flags.is_on', return_value=True)
+def test_log_api_client_error_with_payload(mock_flag):
+    logs = []
+    with patch('namex.services.payment.client.current_app.logger', new=get_mock_logger(logs)):
+        err = ApiClientError(message='Invalid client input', status_code=400, body={'foo': 'bar'})
+        log_api_error_response(err, func_call_name='call_api POST (/test)')
+
+    assert any('Status Code: 400' in log for log in logs)
+    assert any('Invalid client input' in log for log in logs)
+    assert any('Payload:' in log for log in logs)
+    assert any('"foo": "bar"' in log for log in logs)
+
+
+@patch('namex.services.flags.flags.is_on', return_value=False)
+def test_log_api_client_error_no_payload_when_flag_disabled(mock_flag):
+    logs = []
+    with patch('namex.services.payment.client.current_app.logger', new=get_mock_logger(logs)):
+        err = ApiClientError(message='Bad input', status_code=400, body={'should_not': 'log'})
+        log_api_error_response(err, func_call_name='call_api POST (/test)')
+
+    assert any('Status Code: 400' in log for log in logs)
+    assert not any('Payload:' in log for log in logs)
+
+
+@patch('namex.services.flags.flags.is_on', return_value=True)
+def test_log_api_request_error_with_payload(mock_flag):
+    logs = []
+
+    class DummyResponse:
+        def __init__(self):
+            self.status_code = 400
+            self.text = '{"title": "Invalid", "detail": "Invalid input"}'
+            self.headers = {'Content-Type': 'application/json'}
+
+    response = DummyResponse()
+    with patch('namex.services.payment.client.current_app.logger', new=get_mock_logger(logs)):
+        err = ApiRequestError(response=response, body={'foo': 'bar'})
+        log_api_error_response(err, func_call_name='call_api POST (/payment)')
+
+    assert any('Status Code: 400' in log for log in logs)
+    assert any('Invalid' in log and 'input' in log for log in logs)
+    assert any('Payload:' in log for log in logs)
+    assert any('"foo": "bar"' in log for log in logs)
+
+
+@patch('namex.services.flags.flags.is_on', return_value=True)
+def test_log_api_auth_error(mock_flag):
+    logs = []
+    with patch('namex.services.payment.client.current_app.logger', new=get_mock_logger(logs)):
+        err = ApiAuthError(message='Token retrieval failed', status_code=401)
+        log_api_error_response(err, func_call_name='call_api POST (/auth)')
+
+    assert any('Status Code: 401' in log for log in logs)
+    assert any('Token retrieval failed' in log for log in logs)
+    assert not any('Payload:' in log for log in logs)
