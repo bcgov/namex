@@ -541,7 +541,7 @@ class Request(db.Model):
             Event.action == 'patch',
             Event.stateCd.in_(['APPROVED', 'CONDITIONAL', 'REJECTED', 'CANCELLED']),
             Event.userId != 1,
-            cast(Event.eventDate, Date) >= cast(func.now() - timedelta(days=1), Date)
+            cast(Event.eventDate, Date) >= cast(func.now() - timedelta(days=7), Date)
         ).cte('decision_candidates')
 
         # Step 2: decision_counts CTE
