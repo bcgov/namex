@@ -50,7 +50,7 @@ from namex.utils.common import convert_to_ascii, convert_to_utc_max_date_time, c
 from .utils import DateUtils
 
 # Register a local namespace for the requests
-api = Namespace('namexRequests', description='Namex - Requests API')
+api = Namespace('Name Examination', description='Staff-facing name request operations for state, analysis, and name editing')
 
 # Marshmallow schemas
 request_schema = RequestsSchema(many=False)
@@ -82,6 +82,14 @@ class Echo(Resource):
 
     @staticmethod
     @jwt.requires_auth
+    @api.doc(
+        description='Fetches the JWT token info for the current user',
+        responses={
+            200: 'Token info fetched successfully',
+            401: 'Unauthorized',
+            500: 'Internal server error',
+        },
+    )
     def get(*args, **kwargs):
         try:
             return make_response(jsonify(g.jwt_oidc_token_info), 200)
@@ -99,16 +107,19 @@ class RequestsQueue(Resource):
 
     @staticmethod
     @jwt.requires_roles([User.APPROVER])
+    @api.doc(
+        description='Fetches the next draft name request from the queue and assigns it to the current user. '
+                    'If the user already has an in-progress NR, that one is returned instead.',
+        params={'priorityQueue': 'Set to true to fetch from the priority queue'},
+        responses={
+            200: 'Name request assigned successfully',
+            401: 'Unauthorized',
+            403: 'Forbidden',
+            404: 'No name requests found in the queue',
+            500: 'Internal server error',
+        },
+    )
     def get():
-        """Gets the oldest nr num, that is in DRAFT status
-        It then marks the NR as INPROGRESS, and assigns it to the User as found in the JWT
-        It also moves control of the Request from NRO so that NameX fully owns it
-
-        :Authorization: (JWT): valid JWT with the User.APPROVER role
-
-        :return: (str) (dict) (https status): 500, 404, or NR NUM, or NR NUM and a system alert in the dict
-        """
-
         # GET existing or CREATE new user based on the JWT info
         try:
             user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
@@ -157,6 +168,36 @@ class Requests(Resource):
 
     @staticmethod
     @jwt.requires_auth
+    @api.doc(
+        description='Fetches name requests using various filters, with pagination and sorting support',
+        params={
+            'start': 'The result offset (default: 0)',
+            'rows': 'Number of results to return (default: 10)',
+            'queue': 'Comma-separated list of request states to filter by (e.g., DRAFT, INPROGRESS)',
+            'order': 'Sort order in format "column:asc,column:desc" (default: submittedDate:desc,stateCd:desc)',
+            'nrNum': 'Partial or full name request number to search for',
+            'activeUser': 'Filter by active examiner username',
+            'compName': 'Partial or full company name to search',
+            'firstName': 'Applicant first name',
+            'lastName': 'Applicant last name',
+            'consentOption': 'Filter by consent flag (Yes, No, Received, Waived)',
+            'ranking': 'Request priority (Standard or Priority)',
+            'notification': 'Notification status (Notified or Not Notified)',
+            'submittedInterval': 'Submitted in time range (Today, 7 days, 30 days, etc.)',
+            'lastUpdateInterval': 'Last updated in time range (Today, Yesterday, 2 days, etc.)',
+            'submittedStartDate': 'Start date for submission date range (format: YYYY-MM-DD)',
+            'submittedEndDate': 'End date for submission date range (format: YYYY-MM-DD)',
+            'hour': 'Client-local hour offset used for relative date filters',
+        },
+        responses={
+            200: 'Fetch successful',
+            400: 'Invalid input or parameter combination',
+            401: 'Unauthorized',
+            403: 'Forbidden',
+            406: 'Unacceptable parameter type',
+            500: 'Internal server error',
+        },
+    )
     def get(*args, **kwargs):
         # validate row & start params
         start = request.args.get('start', Requests.START)
@@ -438,6 +479,7 @@ class Requests(Resource):
     # return {}, 401
 
     # noinspection PyUnusedLocal,PyUnusedLocal
+    @api.hide
     @api.expect(a_request)
     @jwt.requires_auth
     def post(self, *args, **kwargs):
@@ -456,11 +498,20 @@ class RequestSearch(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
+    @api.doc(
+        description='Searches name requests by partially matching NR number or business name using query parameters',
+        params={
+            'query': 'NR number or business name to search (e.g., "NR1234567" or "abcd")',
+            'start': 'Result offset for pagination (default: 0)',
+            'rows': 'Number of results to return (default: 10)',
+        },
+        responses={
+            200: 'Search results fetched successfully',
+            400: 'Invalid search parameters',
+            500: 'Internal server error',
+        },
+    )
     def get():
-        """Query for name requests with partial matching for both NR number and name.
-
-        example: query=NR3742302 or query=abcd
-        """
         data = []
         start = request.args.get('start', 0, type=int)
         rows = request.args.get('rows', 10, type=int)
@@ -574,6 +625,28 @@ class RequestSearch(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.has_one_of_roles([User.SYSTEM])
+    @api.expect(api.model(
+        'AffiliationInvitationSearch',
+        {
+            'identifiers': fields.List(fields.String, description='List of NR identifiers to search'),
+            'identifier': fields.String(description='Search for a specific NR number'),
+            'status': fields.List(fields.String, description='Filter by status (e.g. DRAFT, INPROGRESS)'),
+            'name': fields.String(description='Partial name to search'),
+            'type': fields.List(fields.String, description='Request types to filter'),
+            'page': fields.Integer(description='Page number for pagination'),
+            'limit': fields.Integer(description='Limit the number of results per page'),
+        },
+    ))
+    @api.doc(
+        description='Searches name requests by partially matching NR number or business name using a JSON payload',
+        responses={
+            200: 'Search results fetched successfully',
+            400: 'Invalid input provided',
+            401: 'Unauthorized',
+            403: 'Forbidden',
+            500: 'Internal server error',
+        },
+    )
     def post():
         search = request.get_json()
         identifiers = search.get('identifiers', [])
@@ -665,12 +738,23 @@ class Request(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.VIEWONLY])
+    @api.doc(
+        description='Fetches a specific name request by NR number',
+        params={'nr': 'NR number'},
+        responses={
+            200: 'Name request fetched successfully',
+            401: 'Unauthorized',
+            404: 'Name request not found',
+            500: 'Internal server error',
+        },
+    )
     def get(nr):
         # return make_response(jsonify(request_schema.dump(RequestDAO.query.filter_by(nr=nr.upper()).first_or_404()))
         return jsonify(RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404().json())
 
     @staticmethod
     # @cors.crossdomain(origin='*')
+    @api.hide
     @jwt.requires_roles([User.APPROVER, User.EDITOR])
     def delete(nr):
         return '', 501  # not implemented
@@ -685,21 +769,33 @@ class Request(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.SYSTEM])
+    @api.expect(api.model('PatchNRPayload', {
+        'state': fields.String(description='New state to apply to the Name Request'),
+        'previousStateCd': fields.String(description='Optional previous state code'),
+        'corpNum': fields.String(description='Corporation number (required if consuming name)'),
+        'comments': fields.List(fields.Nested(api.model('PatchNRComment', {
+            'comment': fields.String(required=True, description='Comment text'),
+            'id': fields.Integer(description='Set to 0 or omit for new comments')
+        })))
+    }))
+    @api.doc(
+        description=(
+            "Updates a name request's state, records the previous state, optionally adds comments, assigns a corpNum if consumption state, "
+            "and calculates expiration if approval state. Only users with APPROVER, EDITOR, or SYSTEM roles may update state, "
+            "and certain transitions may be restricted based on role or current state."
+        ),
+        params={'nr': 'NR number'},
+        responses={
+            200: 'Name request patched successfully',
+            206: 'Name request patched with warnings',
+            400: 'Missing or invalid request body',
+            401: 'Unauthorized',
+            404: 'Name Request not found',
+            406: 'Validation error or unsupported state transition',
+            500: 'Internal server error',
+        },
+    )
     def patch(nr, *args, **kwargs):
-        """Patches the NR. Currently only handles STATE (with optional comment) and Previous State.
-
-        :param nr (str): NameRequest Number in the format of 'NR 000000000'
-        :param args:  __futures__
-        :param kwargs: __futures__
-        :return: 200 - success; 40X for errors
-
-        :HEADER: Valid JWT Bearer Token for a valid REALM
-        :JWT Scopes: - USER.APPROVER, USER.EDITOR
-
-        APPROVERS: Can change from almost any state, other than CANCELLED, EXPIRED and ( COMPLETED not yet furnished )
-        EDITOR: Can't change to a COMPLETED state (COMPLETED)
-        """
-
         # do the cheap check first before the more expensive ones
         # check states
         # some nr requested from Legancy application includes %20 after NR. e.g. 'NR%209288253', which should be 'NR 9288253'
@@ -840,6 +936,19 @@ class Request(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR])
+    @api.doc(
+        description='Fully replaces an existing name request with new data, including names, applicants, and state transitions',
+        params={'nr': 'NR number'},
+        responses={
+            200: 'Name request replaced successfully',
+            206: 'Replaced with warnings',
+            400: 'Invalid input data or validation error',
+            401: 'Unauthorized',
+            404: 'Name request not found',
+            406: 'Invalid or missing state',
+            500: 'Internal server error',
+        },
+    )
     def put(nr, *args, **kwargs):
         # do the cheap check first before the more expensive ones
         json_input = request.get_json()
@@ -1366,6 +1475,22 @@ class RequestsAnalysis(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
+    @api.doc(
+        description='Performs name analysis for the given NR and name choice using the specified analysis type',
+        params={
+            'nr': 'NR number',
+            'choice': 'Name choice number (1, 2, or 3)',
+            'analysis_type': 'Type of analysis to perform (e.g., conflicts, histories, trademarks, restricted_words)',
+            'start': 'Offset for results pagination (default: 0)',
+            'rows': 'Number of results per page (default: 50)',
+        },
+        responses={
+            200: 'Analysis results returned successfully',
+            404: 'NR, name choice, or analysis type not found',
+            401: 'Unauthorized',
+            500: 'Internal server error',
+        },
+    )
     def get(nr, choice, analysis_type, *args, **kwargs):
         start = request.args.get('start', RequestsAnalysis.START)
         rows = request.args.get('rows', RequestsAnalysis.ROWS)
@@ -1412,6 +1537,20 @@ class SynonymBucket(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
+    @api.doc(
+        description='Fetches potential synonym conflicts for the given name using an optional advanced search filter',
+        params={
+            'name': 'The name to analyze for synonym conflicts',
+            'advanced_search': 'Optional phrase to refine the conflict search (use * for no filter)',
+            'start': 'Offset for pagination (default: 0)',
+            'rows': 'Number of results to return (default: 1000)',
+        },
+        responses={
+            200: 'Conflict results fetched successfully',
+            401: 'Unauthorized',
+            500: 'Internal server error',
+        },
+    )
     def get(name, advanced_search, *args, **kwargs):
         start = request.args.get('start', SynonymBucket.START)
         rows = request.args.get('rows', SynonymBucket.ROWS)
@@ -1433,6 +1572,20 @@ class CobrsPhoneticBucket(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
+    @api.doc(
+        description='Fetches potential COBRS phonetic conflicts for the given name using an optional advanced search filter',
+        params={
+            'name': 'The name to analyze for phonetic conflict',
+            'advanced_search': 'Optional phrase to refine the search (use * for no filter)',
+            'start': 'Offset for pagination (default: 0)',
+            'rows': 'Number of results to return (default: 500)',
+        },
+        responses={
+            200: 'Conflict results fetched successfully',
+            401: 'Unauthorized',
+            500: 'Internal server error',
+        },
+    )
     def get(name, advanced_search, *args, **kwargs):
         start = request.args.get('start', CobrsPhoneticBucket.START)
         rows = request.args.get('rows', CobrsPhoneticBucket.ROWS)
@@ -1455,6 +1608,20 @@ class PhoneticBucket(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
+    @api.doc(
+        description='Fetches potential phonetic conflicts for the given name using an optional advanced search filter',
+        params={
+            'name': 'The name to analyze for phonetic conflicts',
+            'advanced_search': 'Optional phrase to refine the search (use * for no filter)',
+            'start': 'Offset for pagination (default: 0)',
+            'rows': 'Number of results to return (default: 100000)',
+        },
+        responses={
+            200: 'Conflict results fetched successfully',
+            401: 'Unauthorized',
+            500: 'Internal server error',
+        },
+    )
     def get(name, advanced_search, *args, **kwargs):
         start = request.args.get('start', PhoneticBucket.START)
         rows = request.args.get('rows', PhoneticBucket.ROWS)
@@ -1496,6 +1663,19 @@ class NRNames(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
+    @api.doc(
+        description='Fetches the name record for the specified name request and choice number',
+        params={
+            'nr': 'NR number',
+            'choice': 'Choice number (1, 2, or 3)'
+        },
+        responses={
+            200: 'Name record fetched successfully',
+            400: 'Invalid NR format',
+            404: 'Name Request or name choice not found',
+            401: 'Unauthorized',
+        },
+    )
     def get(nr, choice, *args, **kwargs):
         nrd, nrd_name, msg, code = NRNames.common(nr, choice)
         if not nrd:
@@ -1503,9 +1683,45 @@ class NRNames(Resource):
 
         return names_schema.dumps(nrd_name).data, 200
 
+    name_model = api.model('NameModel', {
+        'choice': fields.Integer(description='Name choice number (1, 2, or 3)', example=1),
+        'conflict1': fields.String(description='First conflict name'),
+        'conflict2': fields.String(description='Second conflict name'),
+        'conflict3': fields.String(description='Third conflict name'),
+        'conflict1_num': fields.String(description='First conflict NR number'),
+        'conflict2_num': fields.String(description='Second conflict NR number'),
+        'conflict3_num': fields.String(description='Third conflict NR number'),
+        'consumptionDate': fields.String(description='Consumption date in ISO format'),
+        'corpNum': fields.String(description='Corporation number if consumed'),
+        'decision_text': fields.String(description='Decision rationale or notes'),
+        'designation': fields.String(description='Designation like INC, LTD, etc.'),
+        'name_type_cd': fields.String(description='Name type code (e.g., CR, XPRO)'),
+        'name': fields.String(description='The business name'),
+        'state': fields.String(description='State of the name (e.g., APPROVED, REJECTED)'),
+        'comment': fields.Nested(api.model('Comment', {
+            'comment': fields.String(description='Comment about the name decision')
+        }), description='Optional comment on the decision')
+    })
+
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
+    @api.expect(name_model)
+    @api.doc(
+        description='Replaces the entire name record for the specified Name Request and choice number. All fields must be supplied.',
+        params={
+            'nr': 'NR number',
+            'choice': 'Choice number (1, 2, or 3)',
+        },
+        responses={
+            200: 'Name updated successfully',
+            400: 'Validation errors or missing input data',
+            401: 'Unauthorized',
+            403: 'User is not the active editor or NR is not in INPROGRESS',
+            404: 'Name Request or name choice not found',
+            500: 'Internal server error',
+        },
+    )
     def put(nr, choice, *args, **kwargs):
         json_data = request.get_json()
         if not json_data:
@@ -1573,6 +1789,22 @@ class NRNames(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
+    @api.expect(name_model)
+    @api.doc(
+        description='Partially updates the name record for the specified Name Request and choice number. Only the provided fields will be modified.',
+        params={
+            'nr': 'NR number',
+            'choice': 'Choice number (1, 2, or 3)',
+        },
+        responses={
+            200: 'Name patched successfully',
+            400: 'Validation errors or missing input data',
+            401: 'Unauthorized',
+            403: 'User is not the active editor or NR is not in INPROGRESS',
+            404: 'Name Request or name choice not found',
+            500: 'Internal server error',
+        },
+    )
     def patch(nr, choice, *args, **kwargs):
         json_data = request.get_json()
         if not json_data:
@@ -1618,6 +1850,13 @@ class NRNames(Resource):
 class DecisionReasons(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
+    @api.doc(
+        description='Fetches the list of predefined decision reasons used when analyzing or approving name requests',
+        responses={
+            200: 'List of decision reasons fetched successfully',
+            500: 'Internal server error',
+        },
+    )
     def get():
         response = []
         for reason in DecisionReason.query.order_by(DecisionReason.name).all():
@@ -1631,6 +1870,16 @@ class SyncNR(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR])
+    @api.doc(
+        description='Fetches and syncs the name request data for the specified NR',
+        params={'nr': 'NR number'},
+        responses={
+            200: 'Name Request synced and returned successfully',
+            401: 'Unauthorized',
+            404: 'Name Request not found',
+            500: 'Internal server error',
+        },
+    )
     def get(nr):
         try:
             get_or_create_user_by_jwt(g.jwt_oidc_token_info)
@@ -1654,6 +1903,21 @@ class Stats(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
+    @api.doc(
+        description='Fetches name request stats completed in the past [timespan] hours, optionally filtered by user',
+        params={
+            'myStats': 'Set to true to filter results to current user only',
+            'timespan': 'Time range in hours to look back (default: 1)',
+            'currentpage': 'Pagination: current page number (default: 1)',
+            'perpage': 'Pagination: number of results per page (default: 50)',
+        },
+        responses={
+            200: 'Statistics returned successfully',
+            401: 'Unauthorized',
+            406: 'Invalid pagination parameters',
+            500: 'Internal server error',
+        },
+    )
     def get(*args, **kwargs):
         user = None
         if bool(request.args.get('myStats', False)):
@@ -1715,6 +1979,18 @@ class NRComment(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR])
+    @api.expect(api.model('CommentInput', {'comment': fields.String(description='The comment text')}))
+    @api.doc(
+        description='Adds a comment to a name request',
+        params={'nr': 'NR number'},
+        responses={
+            200: 'Comment successfully added',
+            400: 'Missing or invalid input data',
+            401: 'Unauthorized',
+            404: 'Name Request not found or user not found',
+            500: 'Internal server error',
+        },
+    )
     def post(nr, *args, **kwargs):
         json_data = request.get_json()
 
