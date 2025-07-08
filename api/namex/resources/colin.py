@@ -16,12 +16,20 @@ MSG_COULD_NOT_FIND_CORP = 'Error: Could not find corporation details'
 
 
 # Register a local namespace for the NR reserve
-colin_api = Namespace('colin', description='COLIN API')
+colin_api = Namespace('Colin Info', description='Fetch business, office, and party details from Corporate Online (Colin)')
 
 
 @cors_preflight('GET')
 @colin_api.route('/<string:corp_num>', strict_slashes=False, methods=['GET', 'OPTIONS'])
-@colin_api.doc(params={'corp_num': 'Incorporation Number - This field is required'})
+@colin_api.doc(
+    description='Fetch Colin business data including legal name, status, offices, and directors/attorneys',
+    params={'corp_num': 'Incorporation number of the business'},
+    responses={
+        200: 'Business data fetched successfully',
+        404: 'Business not found or Colin returned an error',
+        500: 'Internal server error',
+    },
+)
 class ColinApi(Resource):
     def get(self, corp_num):
         """

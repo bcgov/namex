@@ -1,7 +1,8 @@
 import copy
 
 from flask import current_app, jsonify, make_response, request
-from flask_restx import Namespace, cors
+from flask_jwt_oidc.exceptions import AuthError
+from flask_restx import Namespace, cors, fields
 from sqlalchemy.orm.exc import NoResultFound
 
 from namex import jwt
@@ -12,7 +13,24 @@ from namex.resources.name_requests.abstract_nr_resource import AbstractNameReque
 from namex.utils.auth import cors_preflight
 
 # Register a local namespace for the payment_society
-api = Namespace('payment_society', description='Store data for society from home legancy app')
+api = Namespace('Payment Society', description='Manage payment records for societies')
+
+@api.errorhandler(AuthError)
+def handle_auth_error(ex):
+    return {'message': 'Unauthorized', 'details': ex.error.get('description') or 'Invalid or missing token'}, 401
+
+# Swagger input model for POST payload
+payment_society_payload = api.model('PaymentSocietyPayload', {
+    'nrNum': fields.String(required=True, description='Name Request number (e.g., NR1234567)'),
+    'corpNum': fields.String(required=False, description='Corporation number'),
+    'paymentCompletionDate': fields.DateTime(required=False, description='Payment completion timestamp (ISO format)'),
+    'paymentStatusCode': fields.String(required=False, description='Status code for payment'),
+    'paymentFeeCode': fields.String(required=False, description='Fee code used'),
+    'paymentType': fields.String(required=False, description='Type of payment'),
+    'paymentAmount': fields.Float(required=False, description='Payment amount in dollars'),
+    'paymentJson': fields.Raw(required=False, description='Raw payment metadata (JSON object)'),
+    'paymentAction': fields.String(required=False, description='Action taken (e.g., create, refund)')
+})
 
 
 @cors_preflight('GET')
@@ -21,6 +39,16 @@ class PaymentSocietiesSearch(AbstractNameRequestResource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.SYSTEM])
+    @api.doc(
+        description='Fetch payment transaction history for a society name request',
+        params={'nr': 'Name Request number'},
+        responses={
+            200: 'Payment history fetched successfully',
+            401: 'Unauthorized',
+            404: 'Name request or payment record not found',
+            500: 'Internal server error',
+        },
+    )
     def get(nr):
         try:
             current_app.logger.debug(nr)
@@ -81,6 +109,18 @@ class PaymentSocietiesSearch(AbstractNameRequestResource):
 class PaymentSocieties(AbstractNameRequestResource):
     @cors.crossdomain(origin='*')
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.SYSTEM])
+    @api.expect(payment_society_payload)
+    @api.doc(
+        description='Creates a payment record for a society name request',
+        responses={
+            200: 'Payment record created successfully',
+            400: 'Invalid request payload',
+            401: 'Unauthorized',
+            404: 'Name request not found',
+            406: 'Missing NR number in request',
+            500: 'Internal server error',
+        },
+    )
     def post(self):
         # do the cheap check first before the more expensive ones
         try:

@@ -31,10 +31,18 @@ def handle_auth_error(ex):
 
 @cors_preflight('GET, POST')
 @payment_api.route('/<int:payment_id>/receipt', strict_slashes=False, methods=['GET', 'POST', 'OPTIONS'])
-@payment_api.doc(params={'payment_id': ''})
 class PaymentReceipt(Resource):
     @staticmethod
-    @payment_api.response(201, 'Created', '')
+    @payment_api.doc(
+        description='Generate a PDF receipt for the specified payment',
+        params={'payment_id': 'SBC payment ID'},
+        responses={
+            201: 'Receipt generated successfully',
+            400: 'Missing or invalid name request details',
+            404: 'Payment or name choice not found',
+            500: 'Internal server error',
+        },
+    )
     def post(payment_id):
         try:
             payment = PaymentDAO.query.get(payment_id)
@@ -80,7 +88,16 @@ class PaymentReceipt(Resource):
             return handle_exception(err, err, 500)
 
     @staticmethod
-    @payment_api.response(200, 'Success', '')
+    @payment_api.doc(
+        description='Fetch an existing PDF receipt for the specified payment',
+        params={'payment_id': 'SBC payment ID'},
+        responses={
+            200: 'Receipt fetch successfully',
+            400: 'Missing or invalid Name Request details',
+            404: 'Receipt not found',
+            500: 'Internal server error',
+        },
+    )
     def get(payment_id):
         try:
             payment = PaymentDAO.query.get(payment_id)

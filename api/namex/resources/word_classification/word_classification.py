@@ -8,11 +8,16 @@ from namex.services.word_classification.word_classification import WordClassific
 from namex.utils.auth import cors_preflight
 
 # Register a local namespace for the requests
-api = Namespace('wordClassification', description='API for Word Classifications')
+api = Namespace('Word Classification', description='Fetch and manage word classifications')
 
 word_request = api.model(
-    'word_classification_request',
-    {'classification': fields.String, 'examiner': fields.String, 'name': fields.String, 'word': fields.String},
+    'WordClassificationInput',
+    {
+        'word': fields.String(required=True, description='The word to classify'),
+        'name': fields.String(description='Full name associated with the word'),
+        'classification': fields.String(description='Classification code'),
+        'examiner': fields.String(description='Examiner who submitted the word'),
+    }
 )
 
 word_classification = api.model(
@@ -45,7 +50,15 @@ def handle_auth_error(ex):
 class WordClassification(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
-    @api.expect(word_request)
+    @api.doc(
+        description='Fetch classification info for a given word',
+        params={'word': 'The word to look up classification info for'},
+        responses={
+            200: 'Word classification fetched successfully',
+            404: 'Word not found',
+            500: 'Internal server error',
+        },
+    )
     def get(word):
         try:
             service = WordClassificationService()
@@ -64,6 +77,14 @@ class WordClassification(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     @api.expect(word_request)
+    @api.doc(
+        description='Create a new classification for the given word',
+        responses={
+            200: 'Word classification created successfully',
+            400: 'Missing input',
+            500: 'Internal server error',
+        },
+    )
     def post(word):
         json_input = request.get_json()
         if not json_input:
@@ -89,6 +110,14 @@ class WordClassification(Resource):
     # @jwt.requires_roles([User.APPROVER])
     # @api.marshal_with(word_classification)
     @api.expect(word_request)
+    @api.doc(
+        description='Update or create classification for a given word.',
+        responses={
+            200: 'Word classification updated successfully',
+            400: 'Missing input',
+            500: 'Internal server error',
+        },
+    )
     def put(word):
         json_input = request.get_json()
         if not json_input:
@@ -111,6 +140,13 @@ class WordClassification(Resource):
     @cors.crossdomain(origin='*')
     # @jwt.requires_auth
     # @api.expect()
+    @api.doc(
+        description='Delete the classification for a given word.',
+        responses={
+            200: 'Word classification deleted successfully',
+            500: 'Internal server error',
+        },
+    )
     def delete(word):
         try:
             service = WordClassificationService()

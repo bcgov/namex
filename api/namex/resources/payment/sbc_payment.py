@@ -27,11 +27,18 @@ def handle_auth_error(ex):
 
 @cors_preflight('GET, PUT')
 @payment_api.route('/sbc-pay/<string:payment_identifier>', strict_slashes=False, methods=['GET', 'PUT', 'OPTIONS'])
-@payment_api.doc(params={'payment_identifier': ''})
 class SBCPayment(Resource):
     @staticmethod
     # @jwt.requires_auth
-    @payment_api.response(200, 'Success', '')
+    @payment_api.doc(
+        description='Fetch SBC Pay payment details using the given payment identifier',
+        params={'payment_identifier': 'Unique identifier for the SBC payment'},
+        responses={
+            200: 'Payment record fetched successfully',
+            404: 'Payment record not found',
+            500: 'Internal server error',
+        },
+    )
     # @marshal_with(payment_response_schema)
     def get(payment_identifier):
         try:
@@ -61,9 +68,13 @@ class SBCPayment(Resource):
 class SBCPaymentExtra(Resource):
     @staticmethod
     # @jwt.requires_auth
-    # @payment_api.expect()
-    @payment_api.response(200, 'Success', '')
     # @marshal_with()
-    @payment_api.doc(params={'': ''})
+    @payment_api.doc(
+        description='Stub endpoint for deleting extra SBC payment data. Not yet implemented.',
+        responses={
+            200: 'Successfully deleted (stub response)',
+            501: 'Not implemented',
+        },
+    )
     def delete():
         pass
