@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 
 from flask import current_app, jsonify, make_response, request
-from flask_restx import Namespace, Resource
+from flask_restx import Namespace, Resource, fields
 from pytz import timezone as pytz_timezone
 
 from namex import jwt
@@ -15,7 +15,7 @@ from namex.utils.auth import cors_preflight
 from namex.utils.queue_util import publish_resend_email_notification
 
 # Register a local namespace for the event history
-api = Namespace('events', description='Audit trail of events for a Name Request')
+api = Namespace('Events', description='Audit trail of events for a name request')
 
 
 @cors_preflight('GET, POST')
@@ -23,6 +23,16 @@ api = Namespace('events', description='Audit trail of events for a Name Request'
 class Events(Resource):
     @staticmethod
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.VIEWONLY])
+    @api.doc(
+        description='Fetches event history for a specific name request',
+        params={'nr': 'NR number'},
+        responses={
+            200: 'Event history fetched successfully',
+            401: 'Unauthorized',
+            404: 'No valid events found or name request not found',
+            500: 'Internal server error',
+        },
+    )
     def get(nr):
         nrd = RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404().json()
         request_id = 0
@@ -285,12 +295,19 @@ class Events(Resource):
                 nr_event_info['requestTypeCd'] = event_json_data['entity_type_cd']
 
     @staticmethod
+    @api.expect(api.model('EventPayload', {
+        'action': fields.String(required=True, description='Action name for the event'),
+        'eventJson': fields.Raw(required=False, description='Additional event data (optional)')
+    }))
+    @api.doc(
+        description='Record a new event for a specific name request',
+        params={'nr': 'NR number'},
+        responses={
+            201: 'Event recorded successfully',
+            500: 'Internal server error',
+        },
+    )
     def post(nr):
-        """
-        Record a new event for a Name Request.
-        :param nr: Name Request number
-        :return: Response indicating success or failure
-        """
         try:
             # Fetch the Name Request
             nrd = RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404()
@@ -319,12 +336,15 @@ class Events(Resource):
 @api.route('/event/<int:event_id>', methods=['GET', 'POST', 'PATCH', 'OPTIONS'])
 class SingleEvent(Resource):
     @staticmethod
+    @api.doc(
+        description='Fetches a single event',
+        params={'event_id': 'The unique identifier of the event'},
+        responses={
+            200: 'Event fetched successfully',
+            500: 'Internal server error',
+        },
+    )
     def get(event_id):
-        """
-        Retrieve a single event by its event_id.
-        :param event_id: ID of the event
-        :return: JSON representation of the event or an error message
-        """
         try:
             # Fetch the event by ID
             event = EventDAO.query.get_or_404(event_id)
@@ -337,12 +357,17 @@ class SingleEvent(Resource):
             return make_response(jsonify({'message': f'Error retrieving event: {str(e)}'}), 500)
 
     @staticmethod
+    @api.doc(
+        description='Resend a notification for a specific event. Event must be of type "notification".',
+        params={'event_id': 'The unique identifier of the event'},
+        responses={
+            200: 'Resend notification published successfully',
+            400: 'Missing required data',
+            404: 'Event or option not found',
+            500: 'Internal server error',
+        },
+    )
     def post(event_id):
-        """
-        Resend a notification for a specific event by its event_id.
-        :param event_id: ID of the event
-        :return: Response indicating success or failure
-        """
         try:
             # Fetch the event by ID
             event = EventDAO.query.get_or_404(event_id)
@@ -375,10 +400,16 @@ class SingleEvent(Resource):
             return make_response(jsonify({'message': f'Error publishing resend notification: {str(e)}'}), 500)
 
     @staticmethod
+    @api.doc(
+        description="Update the resend_date field in the event's eventJson to the current Pacific time",
+        params={'event_id': 'The unique identifier of the event'},
+        responses={
+            200: 'Event updated successfully',
+            404: 'Event not found',
+            500: 'Internal server error',
+        },
+    )
     def patch(event_id):
-        """
-        Update the resend_date in the event's eventJson.
-        """
         try:
             # 1. Query the existing event
             event = EventDAO.query.get_or_404(event_id)

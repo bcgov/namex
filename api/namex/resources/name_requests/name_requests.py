@@ -43,8 +43,19 @@ from .utils import parse_nr_num
 class NameRequestsResource(BaseNameRequestResource):
     """Class to handle all name requests."""
 
+    @api.doc(
+        description='Search for an existing Name Request using NR number and either email or phone number',
+        responses={
+            200: 'Matching name request found',
+            400: 'Invalid input',
+            403: 'Forbidden',
+            500: 'Internal server error',
+        },
+    )
+    @api.param('BCREG-NR', 'NR number - required', _in='header')
+    @api.param('BCREG-User-Email', 'Applicant email - required if phone not provided', _in='header')
+    @api.param('BCREG-User-Phone', 'Applicant phone - required if email not provided', _in='header')
     def get(self):
-        """Name request search."""
         try:
             if not full_access_to_name_request(request):
                 return {'message': 'You do not have access to this NameRequest.'}, 403
@@ -132,8 +143,16 @@ class NameRequestsResource(BaseNameRequestResource):
         return make_response(jsonify(results), 200)
 
     @api.expect(nr_request)
+    @api.doc(
+        description='Create a new name request. Validates for duplicates and sets the request state. Returns the created name request.',
+        responses={
+            201: 'Name request created successfully',
+            400: 'Invalid input',
+            409: 'Duplicate name request submission',
+            500: 'Internal server error',
+        },
+    )
     def post(self):
-        """Create a new name request."""
         try:
             # Creates a new NameRequestService, validates the app config, and sets the request data to the NameRequestService instance
             self.initialize()
