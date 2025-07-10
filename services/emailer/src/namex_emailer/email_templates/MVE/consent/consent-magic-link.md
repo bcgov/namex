@@ -50,14 +50,6 @@ Use [BC Corporate Online]({{CORP_ONLINE_URL}}) to complete your application if y
 
 ---
 
-# Attached to this Email
-
-The following documents are attached to this email:
-
-* Results of Name Request
-
----
-
 **Business Registry**
 BC Registries and Online Services
 
