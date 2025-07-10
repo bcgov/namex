@@ -33,14 +33,23 @@ MSG_NOT_FOUND = 'Resource not found'
 
 @cors_preflight('GET, PUT')
 @api.route('/<int:nr_id>', strict_slashes=False, methods=['GET', 'PUT', 'OPTIONS'])
-@api.doc(params={'nr_id': 'NR ID - This field is required'})
 class NameRequestResource(BaseNameRequestResource):
     """Name Request endpoint."""
 
-    @api.expect(nr_request)
     @jwt.requires_auth
+    @api.doc(
+        description='Fetch details and available actions for a name request',
+        params={
+            'nr_id': 'Internal ID of the name request',
+            'org_id': 'Optional organization id',
+        },
+        responses={
+            200: 'Name request fetched successfully',
+            401: 'Unauthorized',
+            500: 'Internal server error',
+        },
+    )
     def get(self, nr_id):
-        """Name Request GET endpoint."""
         try:
             if nr_model := Request.query.get(nr_id):
                 org_id = request.args.get('org_id', None)
@@ -76,13 +85,19 @@ class NameRequestResource(BaseNameRequestResource):
 
     # REST Method Handlers
     @api.expect(nr_request)
+    @api.doc(
+        description="Update a name request's state and key fields. This endpoint supports state transitions including: "
+                    "DRAFT, COND_RESERVE, RESERVED, PENDING_PAYMENT, COND_RESERVE → CONDITIONAL, and RESERVED → APPROVED. "
+                    "Use PATCH instead for partial updates or name-only changes. Requires full access to the name request.",
+        params={'nr_id': 'Internal ID of the name request'},
+        responses={
+            200: 'Successfully updated name request',
+            403: 'Forbidden',
+            400: 'invalid update state or payload',
+            500: 'Internal server error'
+        },
+    )
     def put(self, nr_id):
-        """
-        NOT used for Existing Name Request updates that only change the Name Request. Use 'patch' instead.
-        State changes handled include state changes to [DRAFT, COND_RESERVE, RESERVED, COND_RESERVE to CONDITIONAL, RESERVED to APPROVED]
-        :param nr_id:
-        :return:
-        """
         try:
             if not full_access_to_name_request(request):
                 return {'message': 'You do not have access to this NameRequest.'}, 403
@@ -132,28 +147,32 @@ class NameRequestResource(BaseNameRequestResource):
 
 @cors_preflight('PATCH')
 @api.route('/<int:nr_id>/<string:nr_action>', strict_slashes=False, methods=['PATCH', 'OPTIONS'])
-@api.doc(
-    params={
-        'nr_id': 'NR ID - This field is required',
-        'nr_action': 'NR Action - One of [CHECKOUT, CHECKIN, EDIT, CANCEL, RESEND, REQUEST_REFUND]',
-    }
-)
 class NameRequestFields(BaseNameRequestResource):
     @api.expect(nr_request)
+    @api.doc(
+        description=(
+            'Perform an action or apply partial updates to a name request, depending on the `nr_action` path parameter. '
+            'For `EDIT`, only the fields provided in the request body will be updated; all other fields will remain unchanged. '
+            'Other actions trigger system-defined logic and may not require a request body:\n'
+            '- `CANCEL`: Cancels the name request\n'
+            '- `CHECKOUT`: Locks the name request for editing\n'
+            '- `CHECKIN`: Unlocks the name request and clears its checkout state\n'
+            '- `RESEND`: Resends applicable notifications\n'
+            '- `REQUEST_REFUND`: Initiates a refund process if the request is eligible'
+        ),
+        params={
+            'nr_id': 'Internal ID of the name request',
+            'nr_action': 'Action to perform. One of: CHECKOUT, CHECKIN, EDIT, CANCEL, RESEND, REQUEST_REFUND',
+        },
+        responses={
+            200: 'Action completed or fields updated successfully',
+            400: 'Invalid payload, state transition, or unsupported action',
+            403: 'Forbidden',
+            423: 'Locked: name request is currently checked out by another user',
+            500: 'Internal server error',
+        },
+    )
     def patch(self, nr_id, nr_action: str):
-        """
-        Update a specific set of fields and/or a provided action. Fields excluded from the payload will not be updated.
-        The following data format is expected when providing a data payload:
-        { 'stateCd': 'CANCELLED' }  # Fields to update
-
-        We use this to:
-        - Edit a subset of NR fields
-        - Cancel an NR
-        - Change the state of an NR
-        :param nr_id:
-        :param nr_action: One of [CHECKOUT, CHECKIN, EDIT, CANCEL, RESEND]
-        :return:
-        """
         try:
             if not full_access_to_name_request(request):
                 return {'message': 'You do not have access to this NameRequest.'}, 403
@@ -425,13 +444,24 @@ class NameRequestFields(BaseNameRequestResource):
 )
 class NameRequestRollback(BaseNameRequestResource):
     @api.expect(nr_request)
+    @api.doc(
+        description=(
+            'Rollback a name request to a stable, usable state after a frontend or processing error. '
+            'This endpoint is intended for internal recovery workflows and should only be used when a name request '
+            'has been left in an inconsistent or blocked state due to system failure or UI error.'
+        ),
+        params={
+            'nr_id': 'Internal ID of the name request',
+            'action': 'Rollback action to perform',
+        },
+        responses={
+            200: 'Rollback completed successfully',
+            400: 'Invalid rollback action or request payload',
+            403: 'Forbidden',
+            500: 'Internal server error',
+        },
+    )
     def patch(self, nr_id, action):
-        """
-        Roll back a Name Request to a usable state in case of a frontend error.
-        :param nr_id:
-        :param action:
-        :return:
-        """
         try:
             if not full_access_to_name_request(request):
                 return {'message': 'You do not have access to this NameRequest.'}, 403

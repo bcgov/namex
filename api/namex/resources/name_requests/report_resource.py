@@ -25,13 +25,27 @@ DATE_FORMAT = '%B %-d, %Y at %-I:%M %p Pacific time'
 
 @cors_preflight('GET')
 @api.route('/<int:nr_id>/result', strict_slashes=False, methods=['GET', 'OPTIONS'])
-@api.doc(params={'nr_id': 'NR ID - This field is required'})
 class ReportResource(Resource):
     EX_COOP_ASSOC = 'Extraprovincial Cooperative Association'
     GENERIC_STEPS = 'Submit appropriate form to BC Registries. Call if assistance required'
     BCA = 'Business Corporations Act'
     PA = 'Partnership Act'
 
+    @api.doc(
+        description='Generate and return the name request PDF results report. Requires either applicant email or '
+                    'phone in headers, and the name request must be approved, consumed, expired, or rejected.',
+        params={'nr_id': 'Internal ID of the name request'},
+        responses={
+            200: 'PDF report generated and returned successfully',
+            400: 'Invalid name request state for generating a report',
+            403: 'Forbidden',
+            404: 'Name request not found',
+            500: 'Internal server error',
+        },
+    )
+    @api.param('BCREG-NR', 'NR number - required', _in='header')
+    @api.param('BCREG-User-Email', 'Applicant email - required if phone not provided', _in='header')
+    @api.param('BCREG-User-Phone', 'Applicant phone - required if email not provided', _in='header')
     def get(self, nr_id):
         try:
             if not full_access_to_name_request(request):
