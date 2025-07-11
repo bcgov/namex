@@ -650,6 +650,8 @@ class RequestSearch(Resource):
     def post():
         search = request.get_json()
         identifiers = search.get('identifiers', [])
+        if not identifiers :
+            return {'message': "Expected a list of 1 or more for '/identifiers'"}, 400
         search_details = AffiliationInvitationSearchDetails.from_request_args(search)
 
         # Only names and applicants are needed for this query, we want this query to be lighting fast
