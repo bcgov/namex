@@ -693,6 +693,9 @@ class RequestSearch(Resource):
         if search_details.type and 'NR' not in [t.strip().upper() for t in search_details.type]:
             request_typecd = nr_filing_actions.get_request_type_array(search_details.type)
             flattened_request_types = [item for sublist in request_typecd.values() for item in sublist]
+            action_codes = nr_filing_actions.get_request_type_action(search_details.type)
+            if action_codes:
+                q = q.filter(RequestDAO._request_action_cd.in_(action_codes))
             q = q.filter(RequestDAO.requestTypeCd.in_(flattened_request_types))
 
         q = q.options(
