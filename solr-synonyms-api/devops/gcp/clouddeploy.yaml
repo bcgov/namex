@@ -45,6 +45,19 @@ serialPipeline:
       container-name: "namex-solr-synonyms-api-test"
       service-account: "sa-api@a083gt-test.iam.gserviceaccount.com"
       cloudsql-instances: "a083gt-test:northamerica-northeast1:namex-db-test"
+ - targetId: a083gt-integration
+   profiles: [sandbox]
+   strategy:
+    standard:
+      verify: false
+   deployParameters:
+   - values:
+      deploy-env: "sandbox"
+      deploy-project-id: "a083gt-integration"
+      service-name: "namex-solr-synonyms-api-sandbox"
+      container-name: "namex-solr-synonyms-api-sandbox"
+      service-account: "sa-api@a083gt-sandbox.iam.gserviceaccount.com"
+      cloudsql-instances: "a083gt-sandbox:northamerica-northeast1:namex-db-sandbox"      
  - targetId: a083gt-prod
    profiles: [prod]
    strategy:
