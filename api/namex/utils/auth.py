@@ -17,7 +17,7 @@ def cors_preflight(methods):
                 {
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': methods,
-                    'Access-Control-Allow-Headers': 'Authorization, Content-Type, BCREG-NR, BCREG-NRL, BCREG-User-Email, BCREG-User-Phone, App-Name',
+                    'Access-Control-Allow-Headers': 'Authorization, Content-Type, BCREG-NR, BCREG-NRL, BCREG-User-Email, BCREG-User-Phone, App-Name, x-apikey',
                 },
             )
 
