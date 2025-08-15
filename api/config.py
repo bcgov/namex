@@ -32,6 +32,9 @@ class Config(object):
 
     SOLR_BASE_URL = os.getenv('SOLR_BASE_URL', None)
 
+    SOLR_API_URL = os.getenv('SOLR_API_URL', None)
+    SOLR_API_VERSION = os.getenv('SOLR_API_VERSION', None)
+
     SOLR_SYNONYMS_API_URL = f'{os.getenv("SOLR_SYNONYMS_API_URL", None)}{os.getenv("SOLR_SYNONYMS_API_VERSION", None)}'
 
     AUTO_ANALYZE_URL = os.getenv('AUTO_ANALYZE_URL', None)

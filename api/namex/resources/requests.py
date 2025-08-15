@@ -1529,7 +1529,7 @@ class RequestsAnalysis(Resource):
 
 
 @cors_preflight('GET')
-@api.route('/synonymbucket/<string:name>/<string:advanced_search>', methods=['GET', 'OPTIONS'])
+@api.route('/possible-conflicts/name-request/<string:name>', methods=['GET', 'OPTIONS'])
 class SynonymBucket(Resource):
     START = 0
     ROWS = 1000
@@ -1538,10 +1538,9 @@ class SynonymBucket(Resource):
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
     @api.doc(
-        description='Fetches potential synonym conflicts for the given name using an optional advanced search filter',
+        description='Fetches potential synonym conflicts for the given name for use by name-request ui',
         params={
             'name': 'The name to analyze for synonym conflicts',
-            'advanced_search': 'Optional phrase to refine the conflict search (use * for no filter)',
             'start': 'Offset for pagination (default: 0)',
             'rows': 'Number of results to return (default: 1000)',
         },
@@ -1551,13 +1550,10 @@ class SynonymBucket(Resource):
             500: 'Internal server error',
         },
     )
-    def get(name, advanced_search, *args, **kwargs):
+    def get(name):
         start = request.args.get('start', SynonymBucket.START)
         rows = request.args.get('rows', SynonymBucket.ROWS)
-        exact_phrase = '' if advanced_search == '*' else advanced_search
-        results, msg, code = SolrQueries.get_conflict_results(
-            name.upper(), bucket='synonym', exact_phrase=exact_phrase, start=start, rows=rows
-        )
+        results, msg, code = SolrQueries.get_conflict_results(name.upper(), start=start, rows=rows)
         if code:
             return make_response(jsonify(message=msg), code)
         return make_response(jsonify(results), 200)
