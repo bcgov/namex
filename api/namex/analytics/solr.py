@@ -1,7 +1,8 @@
 import json
 import re
-import requests
 from urllib import parse, request
+
+import requests
 from flask import current_app
 
 from namex.analytics.phonetic import (
@@ -84,20 +85,20 @@ class SolrQueries:
         name = cls.remove_stopwords_designations(name)
 
         request_json = {
-            "query": {
-                "value": name,
-                "corp_num": "",
-                "nr_num": "",
-                "name": ""
+            'query': {
+                'value': name,
+                'corp_num': '',
+                'nr_num': '',
+                'name': ''
             },
-            "start": start,
-            "rows": rows
+            'start': start,
+            'rows': rows
         }
 
         resp = requests.post(
             url=url,
             json=request_json,
-            headers={"Authorization": f"Bearer {cls.get_bearer_token()}"}
+            headers={'Authorization': f'Bearer {cls.get_bearer_token()}'}
         )
 
         if resp.status_code != 200:
