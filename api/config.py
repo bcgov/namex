@@ -30,7 +30,7 @@ class Config(object):
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    SOLR_BASE_URL = os.getenv('SOLR_BASE_URL', None)
+    SOLR_API_URL = f'{os.getenv('SOLR_API_URL', None)}{os.getenv('SOLR_API_VERSION', None)}'
 
     SOLR_SYNONYMS_API_URL = f'{os.getenv("SOLR_SYNONYMS_API_URL", None)}{os.getenv("SOLR_SYNONYMS_API_VERSION", None)}'
 
@@ -89,6 +89,8 @@ permits-licences/businesses-incorporated-companies/approval-business-name',
     ENTITY_SVC_AUTH_URL = os.getenv('KEYCLOAK_AUTH_TOKEN_URL', '')
     ENTITY_SERVICE_ACCOUNT_CLIENT_ID = os.getenv('ENTITY_SERVICE_ACCOUNT_CLIENT_ID', '')
     ENTITY_SERVICE_ACCOUNT_CLIENT_SECRET = os.getenv('ENTITY_SERVICE_ACCOUNT_CLIENT_SECRET', '')
+    SOLR_API_SERVICE_ACCOUNT_CLIENT_ID = os.getenv('SOLR_API_SERVICE_ACCOUNT_CLIENT_ID', '')
+    SOLR_API_SERVICE_ACCOUNT_CLIENT_SECRET = os.getenv('SOLR_API_SERVICE_ACCOUNT_CLIENT_SECRET', '')
 
     PAYMENT_SVC_AUTH_URL = os.getenv('KEYCLOAK_AUTH_TOKEN_URL', '')
     PAYMENT_SVC_AUTH_CLIENT_ID = os.getenv('NAME_REQUEST_SERVICE_ACCOUNT_CLIENT_ID', '')

@@ -12,6 +12,12 @@ SOLR_URL = current_app.config.get('SOLR_BASE_URL')
 MAX_RESULTS = '50'
 
 
+# TO_DO: This needs to be rewritten! - Does not work, used in Name-Examination UI history tab
+# Try calling <namex-search-api>/nrs with this in the query
+# "categories": {
+#    "name_state": ["R", "A", "C"],
+#    "state": ["ACTIVE", "APPROVED", "CONDITION", "REJECTED"]
+# },
 @cors_preflight('GET')
 @api.route('', methods=['GET', 'OPTIONS'])
 class Histories(Resource):
