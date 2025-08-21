@@ -17,6 +17,13 @@ on:
           - test
           - sandbox
           - prod
+      redeploy:
+        description: "Redeploy Application"
+        required: true
+        type: choice
+        options:
+          - "false"
+          - "true"
 
 jobs:
   namex-bad-desi-notifier-cd:
@@ -25,6 +32,7 @@ jobs:
       target: ${{ inputs.target }}
       app_name: "bad-desn-notify"
       working_directory: "./jobs/bad-designation-notifier"
+      redeploy: ${{ inputs.redeploy }}
     secrets:
       WORKLOAD_IDENTIFY_POOLS_PROVIDER: ${{ secrets.WORKLOAD_IDENTIFY_POOLS_PROVIDER }}
       GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
