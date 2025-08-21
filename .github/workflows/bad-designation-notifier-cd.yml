@@ -19,7 +19,7 @@ on:
           - prod
 
 jobs:
-  namex-bad-desi-notifier-cd:
+  namex-bad-designation-notifier-cd:
     uses: bcgov/bcregistry-sre/.github/workflows/backend-job-cd.yaml@main
     with:
       target: ${{ inputs.target }}
