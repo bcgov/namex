@@ -694,10 +694,12 @@ class RequestSearch(Resource):
             request_typecd = nr_filing_actions.get_request_type_array(search_details.type)
             flattened_request_types = [item for sublist in request_typecd.values() for item in sublist]
             action_codes = nr_filing_actions.get_request_type_action(search_details.type)
-            if action_codes:
+            if any(action_codes):
                 q = q.filter(RequestDAO._request_action_cd.in_(action_codes))
             q = q.filter(RequestDAO.requestTypeCd.in_(flattened_request_types))
-
+            query_spgp = nr_filing_actions.get_entity_type_sole_general_nrs(search_details.type)
+            if query_spgp:
+                q = q.filter(RequestDAO._entity_type_cd.in_([query_spgp]))
         q = q.options(
             lazyload('*'),
             eagerload(RequestDAO.names).load_only(Name.state, Name.name),
