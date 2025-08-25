@@ -572,17 +572,6 @@ class NameRequestFilingActions:
         'CUL': ['ULCT', 'CUL', 'RUL', 'UC'],
     }
 
-    requestTypeAction = {
-        'BC': 'NEW',
-        'C': 'MVE',
-        'REH': 'REH',
-        'ATMP': 'AML',
-        'ATMP': 'NRO-NEWAML',
-        'CHG': 'CHG',
-        'CNV': 'CNV',
-        'NRO-REST': 'NRO-REST'
-        }        
-
     @cached_property
     def get_dict(self) -> dict:
         """Return a dict of nr types to the target and filing actions.
@@ -651,15 +640,6 @@ class NameRequestFilingActions:
         else:
             return {self.requestTypecd.get(request_type, 'Key not found')}
         
-    def get_request_type_action(self, request_action):
-        if isinstance(request_action, list):
-            return [
-                self.requestTypeAction.get(action, None) 
-                for action in request_action
-            ]
-        else:
-            return [self.requestTypeAction.get(request_action, None)]
-    
     def get_entity_type_sole_general_nrs(self, request_type):
          # special case for sole and general partnerships
         if request_type == ['GP']:
