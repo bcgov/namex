@@ -1,6 +1,7 @@
 import requests
 import requests
 from flask import current_app
+
 from namex.utils.auth import get_client_credentials
 
 
