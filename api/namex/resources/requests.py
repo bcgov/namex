@@ -506,10 +506,10 @@ class RequestSearch(Resource):
             data.extend(
                 [
                     {
-                        'nrNum': nr["nr_num"],
-                        'names': [name["name"] for name in nr["names"]]
+                        'nrNum': nr['nr_num'],
+                        'names': [name['name'] for name in nr['names']]
                     }
-                    for nr in results["searchResults"]["results"]
+                    for nr in results['searchResults']['results']
                 ]
             )
             return make_response(jsonify(data), 200)

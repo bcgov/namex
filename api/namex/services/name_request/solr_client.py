@@ -1,7 +1,6 @@
 from flask import current_app
 import requests
 
-from namex.resources.utils import EntityUtils
 from namex.utils.auth import get_client_credentials
 
 class SolrClientException(Exception):
@@ -22,13 +21,13 @@ class SolrClientError(SolrClientException):
 class SolrClient:
     @staticmethod
     def get_solr_api_url():
-        return current_app.config.get("SOLR_API_URL")
+        return current_app.config.get('SOLR_API_URL')
 
     @staticmethod
     def _get_bearer_token():
         auth_url = current_app.config.get('SOLR_SVC_AUTH_URL', '')
-        client_id = current_app.config.get("SOLR_API_SERVICE_ACCOUNT_CLIENT_ID")
-        client_secret = current_app.config.get("SOLR_API_SERVICE_ACCOUNT_CLIENT_SECRET")
+        client_id = current_app.config.get('SOLR_API_SERVICE_ACCOUNT_CLIENT_ID', '')
+        client_secret = current_app.config.get('SOLR_API_SERVICE_ACCOUNT_CLIENT_SECRET', '')
 
         authenticated, token = get_client_credentials(auth_url, client_id, client_secret)
         if not authenticated:
@@ -44,7 +43,7 @@ class SolrClient:
         :param start: pagination start
         :param rows: number of rows to return
         """
-        api_url = f"{SolrClient.get_solr_api_url()}/search/nrs"
+        api_url = f'{SolrClient.get_solr_api_url()}/search/nrs'
         try:
             payload = {
                 'query': {'value': query_value},  # value could be either NR name or NR number
@@ -55,11 +54,11 @@ class SolrClient:
             headers = {'Authorization': f'Bearer {token}'}
             resp = requests.post(api_url, json=payload, headers=headers)
             if resp.status_code != 200:
-                raise SolrClientException(message=f"Solr search failed: {resp.text}", status_code=resp.status_code)
+                raise SolrClientException(message=f'Solr search failed: {resp.text}', status_code=resp.status_code)
             return resp.json()
         except Exception as err:
             raise SolrClientException(wrapped_err=err)
-        
+
 
     @classmethod
     def get_possible_conflicts(cls, name, start=0, rows=100):
@@ -76,7 +75,7 @@ class SolrClient:
             headers={'Authorization': f'Bearer {token}'}
         )
         if resp.status_code != 200:
-            raise SolrClientException(message=f"Solr search failed: {resp.text}", status_code=resp.status_code)
+            raise SolrClientException(message=f'Solr search failed: {resp.text}', status_code=resp.status_code)
 
         data = resp.json()
         seen = set()
