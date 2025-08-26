@@ -639,7 +639,7 @@ class NameRequestFilingActions:
             }
         else:
             return {self.requestTypecd.get(request_type, 'Key not found')}
-        
+
     def get_entity_type_sole_general_nrs(self, request_type):
          # special case for sole and general partnerships
         if request_type == ['GP']:
