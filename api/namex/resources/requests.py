@@ -18,7 +18,6 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from namex import jwt
 from namex.analytics.restricted_words import RestrictedWords
-from namex.analytics.solr import SolrQueries
 from namex.constants import DATE_TIME_FORMAT_SQL, NameState
 from namex.exceptions import BusinessException
 from namex.models import (
@@ -43,6 +42,7 @@ from namex.models.request import AffiliationInvitationSearchDetails, RequestsAut
 from namex.services import EventRecorder, MessageServices, ServicesError
 from namex.services.lookup import nr_filing_actions
 from namex.services.name_request import NameRequestService
+from namex.services.name_request.solr_client import SolrClient
 from namex.services.name_request.utils import check_ownership, get_or_create_user_by_jwt, valid_state_transition
 from namex.utils import queue_util
 from namex.utils.auth import cors_preflight
@@ -502,114 +502,20 @@ class RequestSearch(Resource):
             return make_response(jsonify(data), 200)
 
         try:
-            nr_number, nr_name = SolrQueries.extract_nr_number_and_name(query)
-            condition = ''
-            if nr_number:
-                condition = f"requests.nr_num ILIKE '%{nr_number}%'"
-            if nr_name:
-                nr_name = nr_name.replace("'", "''")
-                if condition:
-                    condition += ' OR '
-                name_condition = "requests.name_search ILIKE '%"
-                name_condition += "%' AND requests.name_search ILIKE '%".join(nr_name.split())
-                name_condition += "%'"
-
-                condition += f'({name_condition})'
-
-            results = (
-                RequestDAO.query.filter(
-                    RequestDAO.stateCd.in_([State.DRAFT, State.INPROGRESS, State.REFUND_REQUESTED]),
-                    text(f'({condition})'),
-                )
-                .options(
-                    lazyload('*'),
-                    eagerload(RequestDAO.names).load_only(Name.name),
-                    load_only(RequestDAO.id, RequestDAO.nrNum),
-                )
-                .order_by(RequestDAO.submittedDate.desc())
-                .limit(rows)
-                .all()
-            )
-
+            results = SolrClient.search_nrs(query, start, rows)
             data.extend(
                 [
                     {
-                        # 'id': nr.id,
-                        'nrNum': nr.nrNum,
-                        'names': [n.name for n in nr.names],
+                        'nrNum': nr["nr_num"],
+                        'names': [name["name"] for name in nr["names"]]
                     }
-                    for nr in results
+                    for nr in results["searchResults"]["results"]
                 ]
             )
-
-            while len(data) < rows:
-                if start < rows:
-                    # Check if the search length is less than 7 digits. If so, patch it with zero at the end to increase rows number.
-                    # After this, the search cycles to solr will be reduced a lot.
-                    # Otherwise, the rows is too small and it will take long time (many times solr calling) to search in solr and get timeout exception.
-                    # So the less of search length, the bigger of rows will be.
-                    temp_rows = str(rows)
-                    if nr_number and len(nr_number) < 7:
-                        temp_rows = str(rows).ljust(9 - len(nr_number), '0')
-                    if nr_name and len(nr_name) < 7:
-                        temp_rows = str(rows).ljust(9 - len(nr_name), '0')
-
-                    rows = int(temp_rows)
-
-                nr_data, have_more_data = RequestSearch._get_next_set_from_solr(nr_number, nr_name, start, rows)
-                nr_data = nr_data[: (rows - len(data))]
-                data.extend(
-                    [
-                        {
-                            # 'id': nr.id,
-                            'nrNum': nr.nrNum,
-                            'names': [n.name for n in nr.names],
-                        }
-                        for nr in nr_data
-                    ]
-                )
-
-                if not have_more_data:
-                    break  # no more data in solr
-                start += rows
-
             return make_response(jsonify(data), 200)
         except Exception:
             current_app.logger.error(f'Error when searching for {query}\n{traceback.format_exc()}')
             return make_response(jsonify({'message': 'Internal server error'}), 500)
-
-    @staticmethod
-    def _get_next_set_from_solr(nr_number, nr_name, start, rows):
-        try:
-            results = SolrQueries.get_name_requests(nr_number, nr_name, start, rows)
-            sr = results.get('searchResults') or {}
-            items = sr.get('results') or []
-            total = sr.get('totalResults') or 0
-            have_more_data = (start + rows) < total
-
-            if not items:
-                return [], False
-
-            identifiers = [item.get('nr_num') for item in items if item.get('nr_num')]
-
-            return RequestDAO.query.filter(
-                RequestDAO.nrNum.in_(identifiers),
-                RequestDAO.stateCd != State.CANCELLED,
-                or_(
-                    RequestDAO.stateCd != State.EXPIRED,
-                    text(
-                        f"(requests.state_cd = '{State.EXPIRED}' AND CAST(requests.expiration_date AS DATE) + "
-                        "interval '60 day' >= CAST(now() AS DATE))"
-                    ),
-                ),
-            ).options(
-                lazyload('*'),
-                eagerload(RequestDAO.names).load_only(Name.name),
-                load_only(RequestDAO.id, RequestDAO.nrNum),
-            ).all(), have_more_data
-        except Exception:
-            current_app.logger.error(f'Error when getting next set from Solr\n{traceback.format_exc()}')
-            return [], False
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -1509,7 +1415,7 @@ class PossibleConflicts(Resource):
     def get(name):
         start = request.args.get('start', PossibleConflicts.START)
         rows = request.args.get('rows', PossibleConflicts.ROWS)
-        results, msg, code = SolrQueries.get_possible_conflicts(name.upper(), start=start, rows=rows)
+        results, msg, code = SolrClient.get_possible_conflicts(name.upper(), start=start, rows=rows)
         if code:
             return make_response(jsonify(message=msg), code)
         return make_response(jsonify(results), 200)
