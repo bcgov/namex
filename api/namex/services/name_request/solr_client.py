@@ -1,6 +1,8 @@
 import requests
 from flask import current_app
+
 from namex.utils.auth import get_client_credentials
+
 
 class SolrClientException(Exception):
     def __init__(self, wrapped_err=None, body=None, message='Solr client exception', status_code=500):
