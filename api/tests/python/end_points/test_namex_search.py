@@ -8,8 +8,8 @@ from typing import List
 
 import pytest
 
-from namex.analytics.solr import SolrQueries
 from namex.models import Applicant, Name, Request, State, User
+from namex.services.name_request.solr_client import SolrClient
 
 from ..end_points.common.utils import (
     get_server_now_str,
@@ -691,7 +691,7 @@ def test_search_get(client, jwt, app, monkeypatch, search_name, expected_len):
     def mock_get_name_nr_search_results(solr_query, start=0, rows=10):
         return ({'names': []}, '', None)
 
-    monkeypatch.setattr(SolrQueries, 'get_name_nr_search_results', mock_get_name_nr_search_results)
+    monkeypatch.setattr(SolrClient, 'search_nrs', mock_get_name_nr_search_results)
 
     # create JWT & setup header with a Bearer Token using the JWT
     headers = create_header(jwt, ['public_user'])
