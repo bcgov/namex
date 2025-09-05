@@ -94,46 +94,6 @@ class Name(db.Model):
         db.session.delete(self)
         db.session.commit()
 
-    # Entity types from Name Request that require designation
-    ENTITY_TYPES_REQUIRING_DESIGNATION = [
-        'BC', 'C', 'CBEN', 'CC', 'CCC', 'CP', 'CR', 'CUL', 'LL', 'LP', 'RLC', 'SO', 'UL'
-    ]
-
-    @classmethod
-    def get_distinct_designations(cls):
-        """
-        Returns a list of distinct designations for entity types that require a designation,
-        as defined by Name Request.
-
-        The entity_type_cd values are selected from Name Request for those entity types that
-        require a designation. The SQL query finds the most recent submitted date for each
-        designation, groups by designation and entity type, and returns the distinct designations
-        in uppercase, ordered alphabetically.
-
-        Note:
-            This method is intended for use in Solr search. Currently, Solr search uses a static
-            list of designations, but this method provides a dynamic way to retrieve them from
-            the database. The designation field in the Name model may sometimes contain a part
-            of the name, not just the designation. Some investigation may be needed to ensure
-        """
-        sql = f'''
-            SELECT DISTINCT designation FROM (
-                SELECT r.entity_type_cd,
-                       MAX(r.submitted_date) AS max_date,
-                       UPPER(n.designation) AS designation,
-                       COUNT(n.id) AS cnt
-                FROM requests r, names n
-                WHERE r.id = n.nr_id
-                  AND LENGTH(n.designation) > 0
-                  AND r.entity_type_cd IN ({",".join([f"'{et}'" for et in cls.ENTITY_TYPES_REQUIRING_DESIGNATION])})
-                  AND n.state IN ('APPROVED', 'CONDITION')
-                GROUP BY UPPER(n.designation), r.entity_type_cd
-            ) a
-            ORDER BY designation;
-        '''
-        result = db.session.execute(sql)
-        return [row[0] for row in result]
-
 
 @event.listens_for(Name, 'after_insert')
 @event.listens_for(Name, 'after_update')
