@@ -1,4 +1,10 @@
-from namex.services.solr import designations, first_consonants, first_vowels, has_leading_vowel, replace_special_leading_sounds
+from namex.services.solr import (
+    designations,
+    first_consonants,
+    first_vowels,
+    has_leading_vowel,
+    replace_special_leading_sounds,
+)
 
 
 class SolrHlpers:
