@@ -3,7 +3,7 @@ from flask_restx import Namespace, Resource
 from flask_restx import fields as rp_fields
 
 from namex import jwt
-from namex.analytics.restricted_words import RestrictedWords
+from namex.models.restricted_words import RestrictedWords
 from namex.utils.auth import cors_preflight
 
 api = Namespace('Name Checks', description='Checks names for conflicts, word restrictions, and other issues')

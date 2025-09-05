@@ -1,7 +1,7 @@
 import requests
-import requests
 from flask import current_app
 
+from namex.services.solr.solr_helpers import SolrHlpers
 from namex.utils.auth import get_client_credentials
 
 
@@ -22,7 +22,7 @@ class SolrClientError(SolrClientException):
 
 class SolrClient:
     @staticmethod
-    def get_solr_api_url():
+    def _get_solr_api_url():
         return current_app.config.get('SOLR_API_URL')
 
     @staticmethod
@@ -45,7 +45,7 @@ class SolrClient:
         :param start: pagination start
         :param rows: number of rows to return
         """
-        api_url = f'{SolrClient.get_solr_api_url()}/search/nrs'
+        api_url = f'{SolrClient._get_solr_api_url()}/search/nrs'
         try:
             payload = {
                 'query': {'value': query_value},  # value could be either NR name or NR number
@@ -64,15 +64,16 @@ class SolrClient:
 
     @classmethod
     def get_possible_conflicts(cls, name, start=0, rows=100):
+        q_name = SolrHlpers._get_name_without_designation(name)
         request_json = {
-            'query': { 'value': name },
+            'query': { 'value': q_name },
             'start': start,
             'rows': rows
         }
 
         token = SolrClient._get_bearer_token()
         resp = requests.post(
-            url=f'{SolrClient.get_solr_api_url()}/search/possible-conflict-names',
+            url=f'{SolrClient._get_solr_api_url()}/search/possible-conflict-names',
             json=request_json,
             headers={'Authorization': f'Bearer {token}'}
         )
@@ -80,24 +81,4 @@ class SolrClient:
             raise SolrClientException(message=f'Solr search failed: {resp.text}', status_code=resp.status_code)
 
         data = resp.json()
-        seen = set()
-        exact_matches = []
-        similar_matches = []
-
-        for r in data.get('searchResults', {}).get('results', []):
-            n = r.get('name')
-            if n in seen:
-                continue
-            seen.add(n)
-
-            if n == name:
-                r['type'] = 'exact'
-                exact_matches.append(r)
-            else:
-                r['type'] = 'similar'
-                similar_matches.append(r)
-
-        return {
-            'names': similar_matches,
-            'exactNames': exact_matches
-        }, '', None
+        return SolrHlpers.post_treatment(data, name)
