@@ -1,0 +1,161 @@
+from namex.services.solr import (
+    designations,
+    first_consonants,
+    first_vowels,
+    has_leading_vowel,
+    replace_special_leading_sounds,
+)
+
+
+class SolrHlpers:
+    @classmethod
+    def name_pre_processing(cls, name):
+        processed_name = (
+            (' ' + name.lower() + ' ')
+            .replace('!', '')
+            .replace('@', '')
+            .replace('#', '')
+            .replace('%', '')
+            .replace('&', '')
+            .replace('\\', '')
+            .replace('/', '')
+            .replace('{', '')
+            .replace('}', '')
+            .replace('[', '')
+            .replace(']', '')
+            .replace(')', '')
+            .replace('(', '')
+            .replace('+', '')
+            .replace('-', '')
+            .replace('|', '')
+            .replace('?', '')
+            .replace('.', '')
+            .replace(',', '')
+            .replace('_', '')
+            .replace("'n", '')
+            .replace("'", '')
+            .replace('"', '')
+            .replace(' $ ', 'dollar')
+            .replace('$', 's')
+            .replace(' ¢ ', 'cent')
+            .replace('¢', 'c')
+            .replace('britishcolumbia', 'bc')
+            .replace('britishcolumbias', 'bc')
+            .replace('britishcolumbian', 'bc')
+            .replace('britishcolumbians', 'bc')
+            .replace('british columbia', 'bc')
+            .replace('british columbias', 'bc')
+            .replace('british columbian', 'bc')
+            .replace('british columbians', 'bc')
+        )
+        return processed_name.strip()
+
+    @classmethod
+    def post_treatment(cls, data, query_name):
+        """
+        Processes Solr search results to filter candidates based on phonetic matching and designation exclusion.
+
+        Args:
+            docs (list): Solr search results, each item is a dict representing a candidate name document.
+            query_name (str): The name input to the query, used for matching against candidate names.
+
+        Returns:
+            list: Filtered list of candidate names that match the query criteria.
+        """
+        query_name = cls._get_name_without_designation(query_name)
+
+        seen = set()  # TO_DO we may allow exact name in firms
+        exact_matches = []
+        similar_matches = []
+        histories = []
+
+        for rcd in data.get('searchResults', {}).get('results', []):
+            nm = cls._get_name_without_designation(rcd.get('name'))
+            if nm in seen:
+                continue
+            seen.add(nm)
+
+            if nm == query_name:
+                rcd['type'] = 'exact'
+                exact_matches.append(rcd)
+                if rcd.get('name_state') in ('CORP', 'A'):
+                    histories.append(rcd)
+            else:
+                rcd['type'] = 'similar'
+                stems = cls._find_stems(nm, query_name)
+                rcd['stems'] = stems
+                similar_matches.append(rcd)
+        return {
+            'names': similar_matches,
+            'exactNames': exact_matches,
+            'histories': histories}
+
+    @classmethod
+    def _find_stems(cls, name, query_name):
+        words = name.split()
+        qwords = query_name.split()
+        stems = []
+
+        for qword in qwords:
+            for word in words:
+                phonetic_match = cls._phonetic_match(word, qword)
+                # Count as a stem if phonetic_match is True or qword is a substring of word
+                if phonetic_match:
+                    stems.append(word)
+                elif qword in word:
+                    stems.append(qword)
+        return stems
+
+    @classmethod
+    def _get_name_without_designation(cls, name):
+        if not name:
+            return ''
+        words = name.upper().split()
+        filtered_words = [word for word in words if word not in designations()]
+        return ' '.join(filtered_words)
+
+    @classmethod
+    def _phonetic_match(cls, word, query):
+        # NOTE: The previous Solr search supported phonetic matching.
+        # The current Solr service only matches exact words.
+        # Business requirements for phonetic matching are unclear, and it is unknown if this feature will return.
+        # This function is retained for possible future use if phonetic matching is reintroduced.
+        word = replace_special_leading_sounds(word)
+        query = replace_special_leading_sounds(query)
+
+        word_has_leading_vowel = has_leading_vowel(word)
+        query_has_leading_vowel = has_leading_vowel(query)
+
+        word_first_consonant = first_consonants(word)
+        query_first_consonant = first_consonants(query)
+
+        query_first_vowels = first_vowels(query, query_has_leading_vowel)
+        word_first_vowels = first_vowels(word, word_has_leading_vowel)
+
+        if query_has_leading_vowel:
+            query_sound = query_first_vowels + query_first_consonant
+        else:
+            query_sound = query_first_consonant + query_first_vowels
+
+        if word_has_leading_vowel:
+            word_sound = word_first_vowels + word_first_consonant
+        else:
+            word_sound = word_first_consonant + word_first_vowels
+
+        if word_sound == query_sound:
+            return True
+
+        return False
+
+    @classmethod
+    def _keep_candidate(cls, candidate, name, names):
+        if len([doc['id'] for doc in names if doc['id'] == candidate['id']]) == 0:
+            names.append(
+                {
+                    'name': name,
+                    'id': candidate['id'],
+                    'source': candidate['source'],
+                    'jurisdiction': candidate.get('jurisdiction', ''),
+                    'start_date': candidate.get('start_date', ''),
+                }
+            )

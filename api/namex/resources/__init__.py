@@ -4,7 +4,6 @@ from .requests import api as nr_api
 from .ops import api as nr_ops
 from .document_analysis import api as analysis_api
 from .meta import api as meta_api
-from .exact_match import api as exact_match_api
 from .events import api as events_api
 
 from .name_requests.api_namespace import api as name_request_api
@@ -39,7 +38,6 @@ api.add_namespace(nr_api, path='/requests')
 api.add_namespace(nr_ops, path='/nr-ops')
 api.add_namespace(analysis_api, path='/documents')
 api.add_namespace(meta_api, path='/meta')
-api.add_namespace(exact_match_api, path='/exact-match')
 api.add_namespace(events_api, path='/events')
 api.add_namespace(word_classification_api, path='/word-classification')
 api.add_namespace(name_request_api, path='/namerequests')

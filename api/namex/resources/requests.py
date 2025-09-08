@@ -17,7 +17,6 @@ from sqlalchemy.orm import eagerload, lazyload, load_only
 from sqlalchemy.orm.exc import NoResultFound
 
 from namex import jwt
-from namex.analytics.restricted_words import RestrictedWords
 from namex.constants import DATE_TIME_FORMAT_SQL, NameState
 from namex.exceptions import BusinessException
 from namex.models import (
@@ -39,11 +38,12 @@ from namex.models import (
 )
 from namex.models import Request as RequestDAO
 from namex.models.request import AffiliationInvitationSearchDetails, RequestsAuthSearchSchema
+from namex.models.restricted_words import RestrictedWords
 from namex.services import EventRecorder, MessageServices, ServicesError
 from namex.services.lookup import nr_filing_actions
 from namex.services.name_request import NameRequestService
-from namex.services.name_request.solr_client import SolrClient
 from namex.services.name_request.utils import check_ownership, get_or_create_user_by_jwt, valid_state_transition
+from namex.services.solr.solr_client import SolrClient
 from namex.utils import queue_util
 from namex.utils.auth import cors_preflight
 from namex.utils.common import convert_to_ascii, convert_to_utc_max_date_time, convert_to_utc_min_date_time
@@ -1415,9 +1415,7 @@ class PossibleConflicts(Resource):
     def get(name):
         start = request.args.get('start', PossibleConflicts.START)
         rows = request.args.get('rows', PossibleConflicts.ROWS)
-        results, msg, code = SolrClient.get_possible_conflicts(name.upper(), start=start, rows=rows)
-        if code:
-            return make_response(jsonify(message=msg), code)
+        results = SolrClient.get_possible_conflicts(name, start=start, rows=rows)
         return make_response(jsonify(results), 200)
 
 

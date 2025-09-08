@@ -9,7 +9,7 @@ from typing import List
 import pytest
 
 from namex.models import Applicant, Name, Request, State, User
-from namex.services.name_request.solr_client import SolrClient
+from namex.services.solr.solr_client import SolrClient
 
 from ..end_points.common.utils import (
     get_server_now_str,
