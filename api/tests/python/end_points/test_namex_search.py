@@ -695,8 +695,8 @@ def test_search_get(client, jwt, app, monkeypatch, search_name, expected_len):
 
     # create JWT & setup header with a Bearer Token using the JWT
     headers = create_header(jwt, ['public_user'])
-    rv, status_code = client.get(f'/api/v1/requests/search?query={search_name}', headers=headers)
-    assert status_code == HTTPStatus.OK
+    rv = client.get(f'/api/v1/requests/search?query={search_name}', headers=headers)
+    assert rv.status_code == HTTPStatus.OK
     assert len(rv.json) == expected_len
     if expected_len > 0:
         assert rv.json[0]['nrNum'] == nr.nrNum
