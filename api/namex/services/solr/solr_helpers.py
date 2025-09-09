@@ -7,11 +7,12 @@ from namex.services.solr import (
     has_leading_vowel,
     replace_special_leading_sounds,
 )
+from namex.services.solr.solr_client import SolrClient
 
 
 class SolrHlpers:
     @classmethod
-    def name_pre_processing(cls, name):
+    def _name_pre_processing(cls, name):
         processed_name = (
             (' ' + name.lower() + ' ')
             .replace('!', '')
@@ -53,7 +54,7 @@ class SolrHlpers:
         return processed_name.strip()
 
     @classmethod
-    def post_treatment(cls, data, query_name):
+    def _conflicts_post_process(cls, q_data, synonyms, query_name):
         """
         Processes Solr search results to filter candidates based on phonetic matching and designation exclusion.
 
@@ -64,19 +65,12 @@ class SolrHlpers:
         Returns:
             list: Filtered list of candidate names that match the query criteria.
         """
-        query_name = cls._get_name_without_designation(query_name)
-
-        seen = set()  # TO_DO we may allow exact name in firms
         exact_matches = []
         similar_matches = []
         histories = []
 
-        for rcd in data.get('searchResults', {}).get('results', []):
+        for rcd in q_data.get('searchResults', {}).get('results', []):
             nm = cls._get_name_without_designation(rcd.get('name'))
-            if nm in seen:
-                continue
-            seen.add(nm)
-
             if nm == query_name:
                 rcd['type'] = 'exact'
                 exact_matches.append(rcd)
@@ -84,7 +78,7 @@ class SolrHlpers:
                     histories.append(rcd)
             else:
                 rcd['type'] = 'similar'
-                stems = cls._find_stems(nm, query_name)
+                stems = cls._find_stems(nm, query_name, synonyms)
                 rcd['stems'] = stems
                 similar_matches.append(rcd)
         return {
@@ -93,13 +87,13 @@ class SolrHlpers:
             'histories': histories}
 
     @classmethod
-    def _find_stems(cls, name, query_name):
+    def _find_stems(cls, name, query_name, synonyms):
         def clean_word(word):
             return word.translate(str.maketrans('', '', string.punctuation))
 
         words = [clean_word(w) for w in name.split()]
         qwords = [clean_word(q) for q in query_name.split()]
-        stems = []
+        stems = set()
 
         for qword in qwords:
             for word in words:
@@ -108,10 +102,19 @@ class SolrHlpers:
                 phonetic_match = cls._phonetic_match(word, qword)
                 # Count as a stem if phonetic_match is True or qword is a substring of word
                 if phonetic_match:
-                    stems.append(word)
+                    stems.add(word)
                 elif qword in word:
-                    stems.append(qword)
-        return stems
+                    stems.add(qword)
+
+        # find synonyms matches
+        for word in words:
+            for syn in synonyms:
+                if len(word) == 0 or len(syn) == 0:
+                    continue
+                if word == syn or word in syn or syn in word:
+                    stems.add(word)
+
+        return list(stems)
 
     @classmethod
     def _get_name_without_designation(cls, name):
@@ -166,3 +169,30 @@ class SolrHlpers:
                     'start_date': candidate.get('start_date', ''),
                 }
             )
+
+    @classmethod
+    def get_possible_conflicts(cls, name, start=0, rows=100):
+        q_name = cls._name_pre_processing(name)
+        q_name = cls._get_name_without_designation(q_name)
+
+        candidates = SolrClient.get_possible_conflicts(q_name, start, rows)
+
+        name_ngrams = cls._get_name_ngrams(q_name)
+        synonyms = SolrClient.get_synonyms(name_ngrams)
+
+        return cls._conflicts_post_process(candidates, synonyms, q_name)
+
+
+    @classmethod
+    def _get_name_ngrams(cls, name):
+        """
+        Given a name string, returns all contiguous word combinations (n-grams).
+        Example: 'test name 123' -> ['test', 'test name', 'test name 123', 'name', 'name 123', '123']
+        """
+        words = name.split()
+        ngrams = []
+        for i in range(len(words)):
+            for j in range(i + 1, len(words) + 1):
+                ngram = ' '.join(words[i:j])
+                ngrams.append(ngram)
+        return ngrams

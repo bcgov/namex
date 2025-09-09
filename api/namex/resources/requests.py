@@ -44,6 +44,7 @@ from namex.services.lookup import nr_filing_actions
 from namex.services.name_request import NameRequestService
 from namex.services.name_request.utils import check_ownership, get_or_create_user_by_jwt, valid_state_transition
 from namex.services.solr.solr_client import SolrClient
+from namex.services.solr.solr_helpers import SolrHlpers
 from namex.utils import queue_util
 from namex.utils.auth import cors_preflight
 from namex.utils.common import convert_to_ascii, convert_to_utc_max_date_time, convert_to_utc_min_date_time
@@ -1415,7 +1416,7 @@ class PossibleConflicts(Resource):
     def get(name):
         start = request.args.get('start', PossibleConflicts.START)
         rows = request.args.get('rows', PossibleConflicts.ROWS)
-        results = SolrClient.get_possible_conflicts(name, start=start, rows=rows)
+        results = SolrHlpers.get_possible_conflicts(name, start=start, rows=rows)
         return make_response(jsonify(results), 200)
 
 
