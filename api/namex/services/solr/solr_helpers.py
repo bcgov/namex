@@ -1,3 +1,5 @@
+import string
+
 from namex.services.solr import (
     designations,
     first_consonants,
@@ -92,12 +94,17 @@ class SolrHlpers:
 
     @classmethod
     def _find_stems(cls, name, query_name):
-        words = name.split()
-        qwords = query_name.split()
+        def clean_word(word):
+            return word.translate(str.maketrans('', '', string.punctuation))
+
+        words = [clean_word(w) for w in name.split()]
+        qwords = [clean_word(q) for q in query_name.split()]
         stems = []
 
         for qword in qwords:
             for word in words:
+                if len(word) == 0 or len(qword) == 0:
+                    continue
                 phonetic_match = cls._phonetic_match(word, qword)
                 # Count as a stem if phonetic_match is True or qword is a substring of word
                 if phonetic_match:
