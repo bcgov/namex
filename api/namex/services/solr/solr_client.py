@@ -1,7 +1,6 @@
 import requests
 from flask import current_app
 
-from namex.services.solr.solr_helpers import SolrHlpers
 from namex.utils.auth import get_client_credentials
 
 
@@ -21,12 +20,12 @@ class SolrClientError(SolrClientException):
         super().__init__(wrapped_err=wrapped_err, body=body, message=message, status_code=status_code)
 
 class SolrClient:
-    @staticmethod
-    def _get_solr_api_url():
+    @classmethod
+    def _get_solr_api_url(cls):
         return current_app.config.get('SOLR_API_URL')
 
-    @staticmethod
-    def _get_bearer_token():
+    @classmethod
+    def _get_bearer_token(cls):
         auth_url = current_app.config.get('SOLR_SVC_AUTH_URL', '')
         client_id = current_app.config.get('SOLR_API_SERVICE_ACCOUNT_CLIENT_ID', '')
         client_secret = current_app.config.get('SOLR_API_SERVICE_ACCOUNT_CLIENT_SECRET', '')
@@ -37,22 +36,22 @@ class SolrClient:
         return token
 
 
-    @staticmethod
-    def search_nrs(query_value, start=0, rows=10):
+    @classmethod
+    def search_nrs(cls, query_value, start=0, rows=10):
         """
         Search NRs in Solr.
         :param query_value: value could be either NR name or NR number
         :param start: pagination start
         :param rows: number of rows to return
         """
-        api_url = f'{SolrClient._get_solr_api_url()}/search/nrs'
+        api_url = f'{cls._get_solr_api_url()}/search/nrs'
         try:
             payload = {
                 'query': {'value': query_value},  # value could be either NR name or NR number
                 'start': start,
                 'rows': rows
             }
-            token = SolrClient._get_bearer_token()
+            token = cls._get_bearer_token()
             headers = {'Authorization': f'Bearer {token}'}
             resp = requests.post(api_url, json=payload, headers=headers)
             if resp.status_code != 200:
@@ -64,21 +63,48 @@ class SolrClient:
 
     @classmethod
     def get_possible_conflicts(cls, name, start=0, rows=100):
-        q_name = SolrHlpers._get_name_without_designation(name)
         request_json = {
-            'query': { 'value': q_name },
+            'query': { 'value': name },
             'start': start,
             'rows': rows
         }
 
-        token = SolrClient._get_bearer_token()
+        token = cls._get_bearer_token()
         resp = requests.post(
-            url=f'{SolrClient._get_solr_api_url()}/search/possible-conflict-names',
+            url=f'{cls._get_solr_api_url()}/search/possible-conflict-names',
             json=request_json,
             headers={'Authorization': f'Bearer {token}'}
         )
         if resp.status_code != 200:
             raise SolrClientException(message=f'Solr search failed: {resp.text}', status_code=resp.status_code)
 
-        data = resp.json()
-        return SolrHlpers.post_treatment(data, name)
+        return resp.json()
+
+
+    @classmethod
+    def get_synonyms(cls, terms):
+        """
+        Get synonyms for the provided terms from Solr.
+        :param terms: List of terms to get synonyms for.
+        :return: JSON object with synonyms.
+        """
+        api_url = f'{cls._get_solr_api_url()}/synonyms'
+        try:
+            # somehow only lowercase terms work with the Solr synonyms API
+            terms = [term.lower() for term in terms]
+            payload = {
+                'terms': terms
+            }
+            token = cls._get_bearer_token()
+            headers = {'Authorization': f'Bearer {token}'}
+            resp = requests.post(api_url, json=payload, headers=headers)
+            if resp.status_code != 200:
+                raise SolrClientException(message=f'Solr synonyms search failed: {resp.text}', status_code=resp.status_code)
+            # Flatten all synonym lists and convert to uppercase
+            all_synonyms = set()
+            for syn_list in resp.json().values():
+                for syn in syn_list:
+                    all_synonyms.add(syn.upper())
+            return list(all_synonyms)
+        except Exception as err:
+            raise SolrClientException(wrapped_err=err)
