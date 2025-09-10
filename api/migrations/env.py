@@ -1,8 +1,10 @@
 from __future__ import with_statement
-from alembic import context
-from sqlalchemy import engine_from_config, pool
-from logging.config import fileConfig
+
 import logging
+from logging.config import fileConfig
+
+from alembic import context
+from sqlalchemy import engine_from_config, pool, text
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -18,6 +20,9 @@ logger = logging.getLogger('alembic.env')
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from flask import current_app
+
+import config as app_config
+
 config.set_main_option('sqlalchemy.url',
                        current_app.config.get('SQLALCHEMY_DATABASE_URI'))
 target_metadata = current_app.extensions['migrate'].db.metadata
@@ -84,7 +89,13 @@ def run_migrations_online():
 
     try:
         with context.begin_transaction():
+            # Switch to database owner role for DDL operations in cloud environments
+            owner_role = current_app.config.get('DB_OWNER', 'postgres')
+            connection.execute(text(f"SET ROLE {owner_role};"))
+            result = connection.execute(text("SELECT current_user, session_user;"))
+            logger.info(f"User running migration is: {result.fetchone()}")
             context.run_migrations()
+            connection.execute(text("RESET ROLE;"))
     finally:
         connection.close()
 
