@@ -36,13 +36,15 @@ from .services import queue
 run_version = get_run_version()
 
 
-def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):  # noqa: B008
+def create_app(run_mode=os.getenv('DEPLOYMENT_ENV', 'production')):  # noqa: B008
     """Create app."""
     app = Flask(__name__)
     CORS(app)
     app.config.from_object(config.CONFIGURATION[run_mode])
 
     logging_config.configure_logging(app)
+
+    schema = app.config.get("DB_SCHEMA", "public")
 
     if app.config.get("DB_INSTANCE_CONNECTION_NAME"):
         db_config = DBConfig(
@@ -72,7 +74,6 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):  # noqa: B008
     else:
         flags.init_app(app)
         queue.init_app(app)
-        schema = app.config.get("DB_SCHEMA", "public")
         ma.init_app(app)
 
         api.init_app(app)

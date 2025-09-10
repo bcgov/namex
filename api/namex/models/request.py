@@ -13,21 +13,14 @@ from sqlalchemy import Date, and_, cast, event, func, select, text
 from sqlalchemy.orm import backref
 from sqlalchemy.orm.attributes import get_history
 
-from namex.constants import (
-    EntityTypes,
-    LegacyEntityTypes,
-    NameState,
-)
+from namex.constants import EntityTypes, LegacyEntityTypes, NameState
 from namex.exceptions import BusinessException
-
 # TODO: Only trace if LOCAL_DEV_MODE / DEBUG conf exists
 # from flask_sqlalchemy import get_debug_queries
-from namex.services.lookup import nr_filing_actions
 from namex.utils import queue_util
 
 # noinspection PyPep8Naming
 from ..criteria.request.query_criteria import RequestConditionCriteria
-
 # TODO: Only trace if LOCAL_DEV_MODE / DEBUG conf exists
 # import traceback
 from . import db, ma
@@ -216,6 +209,8 @@ class Request(db.Model):
             'notifiedBeforeExpiry': self.notifiedBeforeExpiry,
             'notifiedExpiry': self.notifiedExpiry,
         }
+        # Lazy import to avoid circular dependency
+        from namex.services.lookup import nr_filing_actions
         if nr_actions := nr_filing_actions.get_actions(self.requestTypeCd, self.entity_type_cd, self.request_action_cd):
             nr_json['legalType'] = nr_actions.get('legalType')
             nr_json['target'] = nr_actions.get('target')

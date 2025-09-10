@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Manage the Feature Flags initialization, setup and service."""
+from typing import TYPE_CHECKING
 
 from flask import current_app
 from ldclient import Context
@@ -20,7 +21,8 @@ from ldclient import set_config as ldclient_set_config
 from ldclient.config import Config
 from ldclient.integrations import Files
 
-from namex.models import User
+if TYPE_CHECKING:
+    from namex.models import User
 
 
 class Flags:
@@ -79,10 +81,10 @@ class Flags:
         return Context.create('anonymous')
 
     @staticmethod
-    def _user_as_key(user: User):
+    def _user_as_key(user: 'User'):
         return Context.builder(user.idp_userid).set('firstName', user.firstname).set('lastName', user.lastname).build()
 
-    def is_on(self, flag: str, default: bool = False, user: User = None) -> bool:
+    def is_on(self, flag: str, default: bool = False, user: 'User' = None) -> bool:
         """Assert that the flag is set for this user."""
         client = self._get_client()
 
@@ -96,7 +98,7 @@ class Flags:
 
         return bool(client.variation(flag, flag_user, default))
 
-    def value(self, flag: str, default=None, user: User = None):
+    def value(self, flag: str, default=None, user: 'User' = None):
         """Retrieve the value  of the (flag, user) tuple."""
         client = self._get_client()
 

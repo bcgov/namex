@@ -12,7 +12,7 @@ from marshmallow import ValidationError
 from pytz import timezone
 from sqlalchemy import and_, exists, func, or_, text
 from sqlalchemy.inspection import inspect
-from sqlalchemy.orm import eagerload, lazyload, load_only
+from sqlalchemy.orm import joinedload, lazyload, load_only
 from sqlalchemy.orm.exc import NoResultFound
 
 from namex import jwt
@@ -20,32 +20,24 @@ from namex.analytics import VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
 from namex.analytics import RestrictedWords, SolrQueries
 from namex.constants import DATE_TIME_FORMAT_SQL, NameState
 from namex.exceptions import BusinessException
-from namex.models import (
-    Applicant,
-    ApplicantSchema,
-    Comment,
-    DecisionReason,
-    Event,
-    Name,
-    NameCommentSchema,
-    NameSchema,
-    PartnerNameSystemSchema,
-    RequestsHeaderSchema,
-    RequestsSchema,
-    RequestsSearchSchema,
-    State,
-    User,
-    db,
-)
+from namex.models import (Applicant, ApplicantSchema, Comment, DecisionReason,
+                          Event, Name, NameCommentSchema, NameSchema,
+                          PartnerNameSystemSchema)
 from namex.models import Request as RequestDAO
-from namex.models.request import AffiliationInvitationSearchDetails, RequestsAuthSearchSchema
+from namex.models import (RequestsHeaderSchema, RequestsSchema,
+                          RequestsSearchSchema, State, User, db)
+from namex.models.request import (AffiliationInvitationSearchDetails,
+                                  RequestsAuthSearchSchema)
 from namex.services import EventRecorder, MessageServices, ServicesError
 from namex.services.lookup import nr_filing_actions
 from namex.services.name_request import NameRequestService
-from namex.services.name_request.utils import check_ownership, get_or_create_user_by_jwt, valid_state_transition
+from namex.services.name_request.utils import (check_ownership,
+                                               get_or_create_user_by_jwt,
+                                               valid_state_transition)
 from namex.utils import queue_util
 from namex.utils.auth import cors_preflight
-from namex.utils.common import convert_to_ascii, convert_to_utc_max_date_time, convert_to_utc_min_date_time
+from namex.utils.common import (convert_to_ascii, convert_to_utc_max_date_time,
+                                convert_to_utc_min_date_time)
 
 from .utils import DateUtils
 
@@ -541,7 +533,7 @@ class RequestSearch(Resource):
                 )
                 .options(
                     lazyload('*'),
-                    eagerload(RequestDAO.names).load_only(Name.name),
+                    joinedload(RequestDAO.names).load_only(Name.name),
                     load_only(RequestDAO.id, RequestDAO.nrNum),
                 )
                 .order_by(RequestDAO.submittedDate.desc())
@@ -616,7 +608,7 @@ class RequestSearch(Resource):
                 ),
             ).options(
                 lazyload('*'),
-                eagerload(RequestDAO.names).load_only(Name.name),
+                joinedload(RequestDAO.names).load_only(Name.name),
                 load_only(RequestDAO.id, RequestDAO.nrNum),
             ).all(), have_more_data
 
@@ -699,8 +691,8 @@ class RequestSearch(Resource):
                 q = q.filter(RequestDAO._entity_type_cd.in_([query_spgp]))
         q = q.options(
             lazyload('*'),
-            eagerload(RequestDAO.names).load_only(Name.state, Name.name),
-            eagerload(RequestDAO.applicants).load_only(Applicant.emailAddress, Applicant.phoneNumber),
+            joinedload(RequestDAO.names).load_only(Name.state, Name.name),
+            joinedload(RequestDAO.applicants).load_only(Applicant.emailAddress, Applicant.phoneNumber),
             load_only(
                 RequestDAO.id,
                 RequestDAO.nrNum,

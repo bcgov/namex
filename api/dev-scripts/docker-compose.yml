@@ -1,0 +1,21 @@
+services:
+  postgres:
+    container_name: namex-postgres
+    image: postgres:15
+    environment:
+      POSTGRES_USER: namex
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: namex
+    ports:
+      - "54345:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U namex -d namex"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+volumes:
+  postgres_data:
