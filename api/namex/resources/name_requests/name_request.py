@@ -87,14 +87,14 @@ class NameRequestResource(BaseNameRequestResource):
     @api.expect(nr_request)
     @api.doc(
         description="Update a name request's state and key fields. This endpoint supports state transitions including: "
-                    "DRAFT, COND_RESERVE, RESERVED, PENDING_PAYMENT, COND_RESERVE → CONDITIONAL, and RESERVED → APPROVED. "
-                    "Use PATCH instead for partial updates or name-only changes. Requires full access to the name request.",
+        'DRAFT, COND_RESERVE, RESERVED, PENDING_PAYMENT, COND_RESERVE → CONDITIONAL, and RESERVED → APPROVED. '
+        'Use PATCH instead for partial updates or name-only changes. Requires full access to the name request.',
         params={'nr_id': 'Internal ID of the name request'},
         responses={
             200: 'Successfully updated name request',
             403: 'Forbidden',
             400: 'invalid update state or payload',
-            500: 'Internal server error'
+            500: 'Internal server error',
         },
     )
     def put(self, nr_id):

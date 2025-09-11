@@ -67,20 +67,20 @@ permits-licences/businesses-incorporated-companies/approval-business-name',
     NAMEX_LD_SDK_ID = os.getenv('NAMEX_LD_SDK_ID', '')
 
     # POSTGRESQL
-    DB_USER = os.getenv("DATABASE_USERNAME", "")
-    DB_PASSWORD = os.getenv("DATABASE_PASSWORD", "")
-    DB_NAME = os.getenv("DATABASE_NAME", "")
-    DB_HOST = os.getenv("DATABASE_HOST", "")
-    DB_PORT = int(os.getenv("DATABASE_PORT", "5432"))
+    DB_USER = os.getenv('DATABASE_USERNAME', '')
+    DB_PASSWORD = os.getenv('DATABASE_PASSWORD', '')
+    DB_NAME = os.getenv('DATABASE_NAME', '')
+    DB_HOST = os.getenv('DATABASE_HOST', '')
+    DB_PORT = int(os.getenv('DATABASE_PORT', '5432'))
 
-    DB_SCHEMA = os.getenv("DATABASE_SCHEMA", "public")
-    DB_IP_TYPE = os.getenv("DATABASE_IP_TYPE", "private")
-    DB_OWNER = os.getenv("DATABASE_OWNER", "postgres")
+    DB_SCHEMA = os.getenv('DATABASE_SCHEMA', 'public')
+    DB_IP_TYPE = os.getenv('DATABASE_IP_TYPE', 'private')
+    DB_OWNER = os.getenv('DATABASE_OWNER', 'postgres')
 
-    if DB_INSTANCE_CONNECTION_NAME := os.getenv("DATABASE_INSTANCE_CONNECTION_NAME", None):
-        SQLALCHEMY_DATABASE_URI = "postgresql+pg8000://"
+    if DB_INSTANCE_CONNECTION_NAME := os.getenv('DATABASE_INSTANCE_CONNECTION_NAME', None):
+        SQLALCHEMY_DATABASE_URI = 'postgresql+pg8000://'
     else:
-        SQLALCHEMY_DATABASE_URI = f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+        SQLALCHEMY_DATABASE_URI = f'postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 
     # KEYCLOAK & JWT_OIDC Settings
     JWT_OIDC_WELL_KNOWN_CONFIG = os.getenv('JWT_OIDC_WELL_KNOWN_CONFIG')

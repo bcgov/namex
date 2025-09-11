@@ -17,7 +17,7 @@ word_request = api.model(
         'name': fields.String(description='Full name associated with the word'),
         'classification': fields.String(description='Classification code'),
         'examiner': fields.String(description='Examiner who submitted the word'),
-    }
+    },
 )
 
 word_classification = api.model(

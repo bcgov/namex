@@ -546,7 +546,7 @@ def test_create_payment(
     do_refund,
     cancel_payment,
     request_receipt,
-    mocker
+    mocker,
 ):
     # stub out the internal create_payment helper so endpoint returns 201
     mock_create_payment.return_value = PaymentInvoice(
@@ -559,7 +559,7 @@ def test_create_payment(
         statusCode='CREATED',
         businessIdentifier='NR L000001',
         lineItems=[{'filingTypeCode': 'NM620', 'priority': False, 'waiveFees': False}],
-        references=[]
+        references=[],
     )
 
     topics = []
@@ -673,8 +673,10 @@ def get_mock_logger(logs):
     class DummyLogger:
         def error(self, msg):
             logs.append(msg)
+
         def warning(self, msg):
             logs.append(msg)
+
     return DummyLogger()
 
 

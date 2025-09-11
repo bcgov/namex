@@ -44,33 +44,33 @@ def create_app(run_mode=os.getenv('DEPLOYMENT_ENV', 'production')):  # noqa: B00
 
     logging_config.configure_logging(app)
 
-    schema = app.config.get("DB_SCHEMA", "public")
+    schema = app.config.get('DB_SCHEMA', 'public')
 
-    if app.config.get("DB_INSTANCE_CONNECTION_NAME"):
+    if app.config.get('DB_INSTANCE_CONNECTION_NAME'):
         db_config = DBConfig(
-            instance_name=app.config.get("DB_INSTANCE_CONNECTION_NAME"),
-            database=app.config.get("DB_NAME"),
-            user=app.config.get("DB_USER"),
-            ip_type=app.config.get("DB_IP_TYPE"),
-            schema=schema if run_mode != "migration" else None,
+            instance_name=app.config.get('DB_INSTANCE_CONNECTION_NAME'),
+            database=app.config.get('DB_NAME'),
+            user=app.config.get('DB_USER'),
+            ip_type=app.config.get('DB_IP_TYPE'),
+            schema=schema if run_mode != 'migration' else None,
             pool_recycle=300,
         )
 
-        app.config["SQLALCHEMY_ENGINE_OPTIONS"] = db_config.get_engine_options()
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = db_config.get_engine_options()
     db.init_app(app)
 
-    if run_mode != "migration":
+    if run_mode != 'migration':
         with app.app_context():
             engine = db.engine
             setup_search_path_event_listener(engine, schema)
 
-    if run_mode == "migration":
+    if run_mode == 'migration':
         Migrate(app, db)
-        app.logger.info("Running migration upgrade.")
+        app.logger.info('Running migration upgrade.')
         with app.app_context():
             execute_migrations(app)
-        app.logger.info("Finished migration upgrade.")
-        app.logger.info("Note: endpoints will 404 until the DEPLOYMENT_ENV is switched off of migration.")
+        app.logger.info('Finished migration upgrade.')
+        app.logger.info('Note: endpoints will 404 until the DEPLOYMENT_ENV is switched off of migration.')
     else:
         flags.init_app(app)
         queue.init_app(app)
@@ -118,12 +118,13 @@ def register_shellcontext(app):
 
     app.shell_context_processor(shell_context)
 
+
 def execute_migrations(app):
     """Execute the database migrations."""
     try:
-        upgrade(directory="migrations", revision="head", sql=False, tag=None)
+        upgrade(directory='migrations', revision='head', sql=False, tag=None)
     except Exception as e:  # NOQA pylint: disable=broad-except
         app.logger.disabled = False
-        error_message = f"Error processing migrations: {e}\n{traceback.format_exc()}"
+        error_message = f'Error processing migrations: {e}\n{traceback.format_exc()}'
         app.logger.error(error_message)
         raise e

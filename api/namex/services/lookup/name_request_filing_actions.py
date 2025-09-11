@@ -641,7 +641,7 @@ class NameRequestFilingActions:
             return {self.requestTypecd.get(request_type, 'Key not found')}
 
     def get_entity_type_sole_general_nrs(self, request_type):
-         # special case for sole and general partnerships
+        # special case for sole and general partnerships
         if request_type == ['GP']:
             return NameRequestFilingActions.get_actions(self, 'FR', 'GP', 'NEW').get('legalType')
         elif request_type == ['SP']:

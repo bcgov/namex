@@ -57,4 +57,3 @@ def patch_synonyms_api_requests():
 
     RESTClientObject.request = custom_request
     swagger_client._synonyms_auth_patched = True
-

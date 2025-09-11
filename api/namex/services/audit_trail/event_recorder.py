@@ -8,8 +8,6 @@ class EventRecorder(object):
     @staticmethod
     def record(user, action, nr, data_dict, save_to_session=False):
         """Record an event."""
-        # Lazy import to avoid circular dependency
-        from namex.models import Event
         try:
             event = EventRecorder.create_event(user, action, nr, data_dict)
             if save_to_session:
@@ -29,6 +27,7 @@ class EventRecorder(object):
         """Record an event as a system user."""
         # Lazy import to avoid circular dependency
         from namex.models import User
+
         try:
             user = User.get_service_account_user()
             if user:
@@ -50,6 +49,7 @@ class EventRecorder(object):
         """Create an event object."""
         # Lazy import to avoid circular dependency
         from namex.models import Event
+
         event = Event(
             eventDate=datetime.utcnow(),
             action=action,
