@@ -49,13 +49,11 @@ RUN apt-get update && apt-get upgrade -y \
     wait-for-it \
     ca-certificates \
     openssl \
-  # Install setuptools (which includes distutils) first
   && pip install --no-cache-dir setuptools \
-  # Install poetry via pip (more reliable than curl script)
   && pip install --no-cache-dir "poetry==${POETRY_VERSION}" \
   && poetry --version \
-  # Configure poetry for better performance
-  && poetry config installer.max-workers $(nproc) \
+  && poetry config installer.max-workers 2 \
+  && poetry config installer.parallel false \
   # Cleaning cache:
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && apt-get clean -y && rm -rf /var/lib/apt/lists/*
@@ -71,15 +69,14 @@ RUN groupadd -g "${GID}" -r web \
 # Copy only requirements, to cache them in docker layer
 COPY --chown=web:web ./poetry.lock ./pyproject.toml /code/
 
-# Install ALL dependencies including the root package in ONE operation
+# Install dependencies with GitHub Actions optimizations
 RUN --mount=type=cache,target="$POETRY_CACHE_DIR",uid=${UID},gid=${GID} \
   echo "Building for environment: ${APP_ENV:-development}" \
   && poetry version \
-  # Install everything in one go (this is the key change)
+  && poetry config installer.max-workers 1 \
   && poetry install \
-    $(if [ "$APP_ENV" = 'production' ] || [ -z "$APP_ENV" ]; then echo '--only main --no-dev'; fi) \
-    --no-interaction --no-ansi \
-    --compile
+    $(if [ "$APP_ENV" = 'production' ] || [ -z "$APP_ENV" ]; then echo '--only main'; else echo '--with dev'; fi) \
+    --no-interaction --no-ansi --verbose
 
 # Switch to non-root user after installations
 USER web

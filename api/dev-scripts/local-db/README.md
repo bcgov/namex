@@ -42,7 +42,7 @@ DATABASE_SCHEMA="namex"
 DATABASE_OWNER="namex"
 
 # Set to migration mode to initialize database schema
-DEPLOYMENT_ENV=migration
+FLASK_ENV=migration
 ```
 
 **Important**: These values must match the Docker Compose configuration in this `docker-compose.yml` file.

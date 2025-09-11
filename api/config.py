@@ -144,6 +144,8 @@ class TestConfig(Config):
     DB_HOST = os.getenv('DATABASE_TEST_HOST', '')
     DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
     DB_SCHEMA = os.getenv('DATABASE_TEST_SCHEMA', 'public')
+    # Use the database user as the owner by default, fallback to 'postgres' for GitHub Actions
+    DB_OWNER = os.getenv('DATABASE_TEST_OWNER', os.getenv('DATABASE_TEST_USERNAME', 'postgres'))
 
     LOCAL_DEV_MODE = os.getenv('LOCAL_DEV_MODE', False)
     # Set this in your .env to debug SQL Alchemy queries (for local development)

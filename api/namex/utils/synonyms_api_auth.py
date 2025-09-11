@@ -21,7 +21,7 @@ def _get_identity_token() -> Optional[str]:
     if not audience:
         return None
 
-    if os.getenv('DEPLOYMENT_ENV') == 'development':
+    if os.getenv('FLASK_ENV') == 'development':
         # JWT tokens can be generated on GCP console and returned as a string here for testing or in development.
         # 1. Go to the correct env on GCP console: -dev, -test, -prod.
         # 2. Launch the Goolge Cloud Shell from the GCP console.
