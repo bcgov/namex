@@ -59,27 +59,20 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):  # noqa: B008
         app.config['SQLALCHEMY_ENGINE_OPTIONS'] = db_config.get_engine_options()
     db.init_app(app)
 
-    # Ensure SQLAlchemy extension is properly registered before Marshmallow initialization
-    # Some environments (like GitHub Actions) have issues with extension auto-detection
-    with app.app_context():
-        # Force SQLAlchemy to fully initialize its extension registration
-        try:
-            # This ensures the SQLAlchemy extension is fully registered in app.extensions
-            _ = db.engine
-            # Manually ensure the extension is properly registered for Flask-Marshmallow
-            if 'sqlalchemy' not in app.extensions:
-                app.extensions['sqlalchemy'] = db
-            elif not hasattr(app.extensions['sqlalchemy'], 'db'):
-                app.extensions['sqlalchemy'].db = db
-        except Exception:
-            # Fallback: ensure extension is registered even if engine creation fails
-            if 'sqlalchemy' not in app.extensions:
-                app.extensions['sqlalchemy'] = db
-            if not hasattr(app.extensions.get('sqlalchemy', {}), 'db'):
-                app.extensions['sqlalchemy'].db = db
-
-    # Initialize Marshmallow after ensuring SQLAlchemy extension is properly registered
-    ma.init_app(app)
+    # Initialize Marshmallow WITHOUT SQLAlchemy auto-detection to avoid GitHub Actions issues
+    # Flask-Marshmallow tries to auto-detect SQLAlchemy but fails in some CI environments
+    # We'll initialize it manually and set the db reference afterward
+    try:
+        # Try normal initialization first
+        ma.init_app(app)
+    except AttributeError as e:
+        if 'db' in str(e):
+            # If the auto-detection fails, initialize without SQLAlchemy and set it manually
+            ma.app = app
+            ma._db = db  # Manually set the database reference
+            app.extensions['marshmallow'] = ma
+        else:
+            raise
 
     if run_mode != 'migration':
         with app.app_context():
