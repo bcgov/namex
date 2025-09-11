@@ -95,7 +95,7 @@ def db(app, request):
         sess = _db.session()
         for seq in [name for (name,) in sess.execute(text(sequence_sql))]:
             try:
-                schema = app.config.get("DB_SCHEMA", "public")
+                schema = app.config.get('DB_SCHEMA', 'public')
                 sess.execute(text(f'DROP SEQUENCE {schema}.{seq} ;'))
                 print(f'DROP SEQUENCE {schema}.{seq} ')
             except Exception as e:
