@@ -3,31 +3,23 @@ from datetime import datetime, timezone
 from flask import current_app
 from flask_restx.fields import Boolean
 
-from namex.constants import (
-    EntityTypes,
-    NameRequestActions,
-    NameRequestActiveActions,
-    NameRequestActiveRejectedActions,
-    NameRequestCancelledActions,
-    NameRequestCompletedActions,
-    NameRequestConsumedActions,
-    NameRequestDraftActions,
-    NameRequestExpiredActions,
-    NameRequestHistoricalActions,
-    NameRequestHoldActions,
-    NameRequestInProgressActions,
-    NameRequestPendingPaymentActions,
-    NameRequestReservedActions,
-    PaymentState,
-)
+from namex.constants import (EntityTypes, NameRequestActions,
+                             NameRequestActiveActions,
+                             NameRequestActiveRejectedActions,
+                             NameRequestCancelledActions,
+                             NameRequestCompletedActions,
+                             NameRequestConsumedActions,
+                             NameRequestDraftActions,
+                             NameRequestExpiredActions,
+                             NameRequestHistoricalActions,
+                             NameRequestHoldActions,
+                             NameRequestInProgressActions,
+                             NameRequestPendingPaymentActions,
+                             NameRequestReservedActions, PaymentState)
 from namex.models import State
+from namex.utils.pg8000_compat import safe_date_extraction
 
-from .exceptions import (
-    InvalidStateError,
-    NameRequestActionError,
-    NameRequestIsConsumedError,
-    NameRequestIsExpiredError,
-)
+from .exceptions import InvalidStateError, NameRequestActionError, NameRequestIsConsumedError, NameRequestIsExpiredError
 from .utils import has_complete_payment, has_completed_or_refunded_payment
 
 state_transition_error_msg = 'Invalid state transition [{current_state}] -> [{next_state}]'
@@ -105,7 +97,7 @@ def display_reapply_action(nr_model=None) -> Boolean:
 def is_reapplication_eligible(expiration_date) -> Boolean:
     if expiration_date:
         todays_date = datetime.now(timezone.utc).date()
-        expiry_date = expiration_date.date()
+        expiry_date = safe_date_extraction(expiration_date)
 
         delta = expiry_date - todays_date
         return delta.days <= 14
