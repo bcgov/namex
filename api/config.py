@@ -147,7 +147,8 @@ class TestConfig(Config):
     LOCAL_DEV_MODE = os.getenv('LOCAL_DEV_MODE', False)
     # Set this in your .env to debug SQL Alchemy queries (for local development)
     SQLALCHEMY_ECHO = 'debug' if os.getenv('DEBUG_SQL_QUERIES', False) else False
-    SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
+    # Use pg8000 for tests to match production configuration
+    SQLALCHEMY_DATABASE_URI = 'postgresql+pg8000://{user}:{password}@{host}:{port}/{name}'.format(
         user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=int(DB_PORT), name=DB_NAME
     )
     EMAILER_TOPIC = os.getenv('NAMEX_MAILER_TOPIC', '')
