@@ -132,28 +132,19 @@ class MigrationConfig(Config):  # pylint: disable=too-few-public-methods
     TESTING = (False,)
     DEBUG = True
 
-class TestConfig(Config):
-    """Test config used for pytests."""
+class TestConfig(Config):  # pylint: disable=too-few-public-methods
+    """In support of unit testing only. Used by the pytest suite."""
 
     DEBUG = True
     TESTING = True
     # POSTGRESQL
-    DB_USER = os.getenv('DATABASE_TEST_USERNAME', '')
-    DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD', '')
-    DB_NAME = os.getenv('DATABASE_TEST_NAME', '')
-    DB_HOST = os.getenv('DATABASE_TEST_HOST', '')
-    DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
-    DB_SCHEMA = os.getenv('DATABASE_TEST_SCHEMA', 'public')
-    # Use the database user as the owner by default, fallback to 'postgres' for GitHub Actions
-    DB_OWNER = os.getenv('DATABASE_TEST_OWNER', os.getenv('DATABASE_TEST_USERNAME', 'postgres'))
+    DB_USER = os.getenv("DATABASE_TEST_USERNAME", "postgres")
+    DB_PASSWORD = os.getenv("DATABASE_TEST_PASSWORD", "postgres")
+    DB_NAME = os.getenv("DATABASE_TEST_NAME", "postgres")
+    DB_HOST = os.getenv("DATABASE_TEST_HOST", "localhost")
+    DB_PORT = os.getenv("DATABASE_TEST_PORT", "5432")
+    SQLALCHEMY_DATABASE_URI = f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}"
 
-    LOCAL_DEV_MODE = os.getenv('LOCAL_DEV_MODE', False)
-    # Set this in your .env to debug SQL Alchemy queries (for local development)
-    SQLALCHEMY_ECHO = 'debug' if os.getenv('DEBUG_SQL_QUERIES', False) else False
-    # Use pg8000 for tests to match production configuration
-    SQLALCHEMY_DATABASE_URI = 'postgresql+pg8000://{user}:{password}@{host}:{port}/{name}'.format(
-        user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=int(DB_PORT), name=DB_NAME
-    )
     EMAILER_TOPIC = os.getenv('NAMEX_MAILER_TOPIC', '')
 
     DISABLE_NAMEREQUEST_SOLR_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0))

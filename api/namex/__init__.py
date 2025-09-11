@@ -36,7 +36,7 @@ from .services import queue
 run_version = get_run_version()
 
 
-def create_app(run_mode=os.getenv('DEPLOYMENT_ENV', 'production')):  # noqa: B008
+def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):  # noqa: B008
     """Create app."""
     app = Flask(__name__)
     CORS(app)
@@ -70,7 +70,7 @@ def create_app(run_mode=os.getenv('DEPLOYMENT_ENV', 'production')):  # noqa: B00
         with app.app_context():
             execute_migrations(app)
         app.logger.info('Finished migration upgrade.')
-        app.logger.info('Note: endpoints will 404 until the DEPLOYMENT_ENV is switched off of migration.')
+        app.logger.info('Note: endpoints will 404 until the FLASK_ENV is switched off of migration.')
     else:
         flags.init_app(app)
         queue.init_app(app)
