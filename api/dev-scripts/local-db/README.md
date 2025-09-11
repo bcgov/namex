@@ -33,7 +33,7 @@ Create or update your `.env` file in the API root directory with the following d
 
 ```bash
 # Database Configuration for Docker
-DATABASE_USERNAME="namex"
+DATABASE_USERNAME="posrgres"
 DATABASE_PASSWORD="postgres"
 DATABASE_NAME="namex"
 DATABASE_HOST="localhost"

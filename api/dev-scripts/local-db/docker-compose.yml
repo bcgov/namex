@@ -3,7 +3,7 @@ services:
     container_name: namex-postgres
     image: postgres:15
     environment:
-      POSTGRES_USER: namex
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: namex
     ports:
