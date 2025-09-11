@@ -450,7 +450,7 @@ class Requests(Resource):
         q = q.order_by(text(sort_by))
 
         # get a count of the full set size, this ignore the offset & limit settings
-        count_q = q.statement.with_only_columns([func.count()]).order_by(None)
+        count_q = q.statement.with_only_columns(func.count()).order_by(None)
         count = db.session.execute(count_q).scalar()
 
         # Add the paging
@@ -1960,7 +1960,7 @@ class Stats(Resource):
             q = q.filter(RequestDAO.userId == user.id)
         q = q.order_by(RequestDAO.lastUpdate.desc())
 
-        count_q = q.statement.with_only_columns([func.count()]).order_by(None)
+        count_q = q.statement.with_only_columns(func.count()).order_by(None)
         count = db.session.execute(count_q).scalar()
 
         q = q.offset(start)
