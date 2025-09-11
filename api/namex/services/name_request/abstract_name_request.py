@@ -5,10 +5,8 @@ from pytz import timezone
 from namex.models import db
 from namex.models.nr_number import NRNumber
 from namex.models.user import User
-from namex.services.name_request.exceptions import (GenerateNRKeysError,
-                                                    GetUserIdError)
-from namex.services.name_request.utils import (
-    get_mapped_entity_and_action_code, get_mapped_request_type)
+from namex.services.name_request.exceptions import GenerateNRKeysError, GetUserIdError
+from namex.services.name_request.utils import get_mapped_entity_and_action_code, get_mapped_request_type
 
 
 class AbstractNameRequestMixin(object):

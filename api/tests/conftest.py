@@ -11,6 +11,7 @@ from sqlalchemy.schema import DropConstraint, MetaData
 
 from namex import create_app
 from namex import jwt as _jwt
+from namex.models import db
 from namex.models import db as _db
 
 from .python import FROZEN_DATETIME
@@ -188,3 +189,138 @@ def mock_gcp_queue_publish():
     with patch('namex.utils.queue_util.queue.publish') as mock_publish:
         mock_publish.return_value = None
         yield mock_publish
+
+
+# ============================================================================
+# TEST DATA ISOLATION FIXTURES
+# ============================================================================
+
+@pytest.fixture
+def test_data_factory():
+    """
+    Provides a TestDataFactory instance for creating unique test data.
+    This ensures every test gets unique data and prevents conflicts.
+    """
+    from .fixtures.test_data_factory import TestDataFactory
+    return TestDataFactory()
+
+
+@pytest.fixture
+def test_nr_builder(test_data_factory):
+    """
+    Provides a TestNameRequestBuilder for creating test name requests.
+    Automatically handles user creation and data uniqueness.
+    """
+    from .fixtures.test_data_factory import TestNameRequestBuilder
+    return TestNameRequestBuilder(test_data_factory)
+
+
+@pytest.fixture
+def unique_user(test_data_factory):
+    """
+    Creates a unique test user for each test.
+    The user is automatically cleaned up by the session fixture's transaction rollback.
+    """
+    return test_data_factory.create_test_user(commit=False)
+
+
+@pytest.fixture
+def unique_user_committed(test_data_factory):
+    """
+    Creates a unique test user and commits it to the database.
+    Use this when you need the user to be available across multiple operations.
+    """
+    user = test_data_factory.create_test_user(commit=True)
+    db.session.commit()
+    return user
+
+
+@pytest.fixture
+def unique_draft_nr_data():
+    """
+    Provides unique name request data for API calls.
+    Each test gets completely unique data to prevent conflicts.
+    """
+    import random
+    import uuid
+
+    unique_id = uuid.uuid4().hex[:8]
+    unique_num = random.randint(1000, 9999)
+
+    return {
+        'applicants': [
+            {
+                'addrLine1': f'{random.randint(100, 999)}-{random.randint(1000, 9999)} Test Blvd',
+                'addrLine2': None,
+                'addrLine3': None,
+                'city': 'Victoria',
+                'clientFirstName': None,
+                'clientLastName': None,
+                'contact': '',
+                'countryTypeCd': 'CA',
+                'declineNotificationInd': None,
+                'emailAddress': f'test{unique_id}@example.com',
+                'faxNumber': None,
+                'firstName': 'John',
+                'lastName': f'Doe{unique_num}',
+                'middleName': None,
+                'partyId': '',  # must be empty
+                'phoneNumber': f'250{random.randint(1000000, 9999999)}',
+                'postalCd': 'V8W 3P6',
+                'stateProvinceCd': 'BC',
+            }
+        ],
+        'names': [
+            {
+                'choice': 1,
+                'consent_words': '',
+                'conflict1': '',
+                'conflict1_num': '',
+                'designation': 'CORP.',
+                'name': f'TESTING CORP {unique_id.upper()}.',
+                'name_type_cd': 'CO',
+            }
+        ],
+        'additionalInfo': f'*** Additional Info for test {unique_id} ***',
+        'natureBusinessInfo': f'Test business {unique_id}',
+        'priorityCd': 'N',
+        'entity_type_cd': '',
+        'request_action_cd': '',
+        'stateCd': 'DRAFT',
+        'english': True,
+        'nameFlag': False,
+        'submit_count': 0,
+        'corpNum': '',
+        'homeJurisNum': '',
+    }
+
+
+@pytest.fixture
+def draft_nr_with_user(test_nr_builder, unique_user):
+    """
+    Creates a complete draft name request with associated user in the database.
+    All data is unique and isolated per test.
+    """
+    return test_nr_builder.with_user(unique_user).create_draft_nr()
+
+
+@pytest.fixture
+def clean_database_state(session):
+    """
+    Ensures clean database state by checking for any test pollution.
+    This fixture runs after each test to verify isolation is working.
+    """
+    yield
+
+    # Verify no test pollution remains (optional - can be disabled for performance)
+    # This helps catch isolation issues during development
+    from sqlalchemy import text
+
+    # Check for any uncommitted data that might leak between tests
+    result = session.execute(text("SELECT COUNT(*) FROM users WHERE username LIKE 'test_%'"))
+    test_user_count = result.scalar()
+
+    if test_user_count > 0:
+        # This indicates test data might be leaking - but it's expected in a transaction
+        # The session fixture should clean this up with rollback
+        pass

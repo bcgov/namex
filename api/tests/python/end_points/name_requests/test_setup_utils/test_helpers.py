@@ -111,10 +111,19 @@ def add_states_to_db(states):
         state.save_to_db()
 
 
-@pytest.mark.skip
 def add_test_user_to_db():
+    """Create or get the service account user expected by the API."""
+    # The API expects this specific username
+    expected_username = 'name_request_service_account'
+
+    # Check if user already exists
+    existing_user = User.query.filter_by(username=expected_username).first()
+    if existing_user:
+        return existing_user
+
+    # Create the expected service account user
     user = User(
-        username='name_request_service_account',
+        username=expected_username,
         firstname='Test',
         lastname='User',
         sub='idir/name_request_service_account',
@@ -122,9 +131,17 @@ def add_test_user_to_db():
         idp_userid='123',
         login_source='IDIR',
     )
-    user.save_to_db()
 
-    return user
+    try:
+        user.save_to_db()
+        return user
+    except Exception:
+        # If there's a conflict, try to fetch the existing user again
+        # This can happen in concurrent test runs
+        existing_user = User.query.filter_by(username=expected_username).first()
+        if existing_user:
+            return existing_user
+        raise
 
 
 @pytest.mark.skip
