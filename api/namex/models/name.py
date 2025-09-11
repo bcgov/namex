@@ -102,17 +102,14 @@ def update_nr_name_search(mapper, connection, target):
 
     from sqlalchemy import text
 
-    from namex.models import Request
-
     name = target
-    nr = Request.find_by_id(name.nrId)
-    if nr:
-        # get the names associated with the NR
+    if name.nrId:
+        # get the names associated with the NR using the same connection
         names_q = connection.execute(
             text(f"""
             SELECT names.name from names
             JOIN requests on requests.id = names.nr_id
-            WHERE requests.id={nr.id}
+            WHERE requests.id={name.nrId}
             """)  # noqa: S608
         )
         # format the names into a string like: |1<name1>|2<name2>|3<name3>
@@ -127,7 +124,7 @@ def update_nr_name_search(mapper, connection, target):
             SET name_search = :name_search
             WHERE id = :nr_id
             """),
-            {'name_search': '(' + name_search + ')', 'nr_id': nr.id},
+            {'name_search': '(' + name_search + ')', 'nr_id': name.nrId},
         )
 
 

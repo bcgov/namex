@@ -3,19 +3,23 @@ from datetime import datetime, timezone
 from flask import current_app
 from flask_restx.fields import Boolean
 
-from namex.constants import (EntityTypes, NameRequestActions,
-                             NameRequestActiveActions,
-                             NameRequestActiveRejectedActions,
-                             NameRequestCancelledActions,
-                             NameRequestCompletedActions,
-                             NameRequestConsumedActions,
-                             NameRequestDraftActions,
-                             NameRequestExpiredActions,
-                             NameRequestHistoricalActions,
-                             NameRequestHoldActions,
-                             NameRequestInProgressActions,
-                             NameRequestPendingPaymentActions,
-                             NameRequestReservedActions, PaymentState)
+from namex.constants import (
+    EntityTypes,
+    NameRequestActions,
+    NameRequestActiveActions,
+    NameRequestActiveRejectedActions,
+    NameRequestCancelledActions,
+    NameRequestCompletedActions,
+    NameRequestConsumedActions,
+    NameRequestDraftActions,
+    NameRequestExpiredActions,
+    NameRequestHistoricalActions,
+    NameRequestHoldActions,
+    NameRequestInProgressActions,
+    NameRequestPendingPaymentActions,
+    NameRequestReservedActions,
+    PaymentState,
+)
 from namex.models import State
 from namex.utils.pg8000_compat import safe_date_extraction
 

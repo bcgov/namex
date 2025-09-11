@@ -1,10 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from namex.models import Event, Request
 from namex.services.statistics import response_keys
 from namex.utils.api_resource import handle_exception
+from namex.utils.pg8000_compat import pg8000_utcnow, safe_datetime_delta
 from namex.utils.sql_alchemy import query_result_to_dict
-from namex.utils.pg8000_compat import safe_datetime_delta, pg8000_utcnow
 
 
 class WaitTimeStatsService:
