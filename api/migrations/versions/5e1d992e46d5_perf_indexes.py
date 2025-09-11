@@ -5,9 +5,8 @@ Revises: 73d051437ad0
 Create Date: 2018-11-08 20:54:59.981331
 
 """
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = '5e1d992e46d5'
@@ -32,18 +31,18 @@ def upgrade():
     op.create_index(op.f('ix_users_username'), 'users', ['username'], unique=False)
 
     op.execute('CREATE INDEX ' + op.f('ix_names_name')
-               + ' ON public.names USING btree'
+               + ' ON names USING btree'
                + ' (name COLLATE pg_catalog."default" varchar_pattern_ops)'
                + ' TABLESPACE pg_default;'
                )
 
-    op.execute('ALTER TABLE public.names CLUSTER ON '
+    op.execute('ALTER TABLE names CLUSTER ON '
                + op.f('ix_names_nr_id'))
 
-    op.execute('ALTER TABLE public.comments CLUSTER ON '
+    op.execute('ALTER TABLE comments CLUSTER ON '
                + op.f('ix_comments_nr_id'))
 
-    op.execute('ALTER TABLE public.partner_name_system CLUSTER ON '
+    op.execute('ALTER TABLE partner_name_system CLUSTER ON '
                + op.f('ix_partner_name_system_nr_id'))
 
 

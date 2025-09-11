@@ -143,6 +143,7 @@ class TestConfig(Config):
     DB_NAME = os.getenv('DATABASE_TEST_NAME', '')
     DB_HOST = os.getenv('DATABASE_TEST_HOST', '')
     DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
+    DB_SCHEMA = os.getenv('DATABASE_TEST_SCHEMA', 'public')
 
     LOCAL_DEV_MODE = os.getenv('LOCAL_DEV_MODE', False)
     # Set this in your .env to debug SQL Alchemy queries (for local development)

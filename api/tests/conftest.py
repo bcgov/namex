@@ -79,23 +79,25 @@ def db(app, request):
         # Clear out any existing tables
         metadata = MetaData()
         metadata.reflect(bind=_db.engine)
-        for table in metadata.tables.values():
-            for fk in table.foreign_keys:
-                _db.engine.execute(DropConstraint(fk.constraint))
+        with _db.engine.connect() as connection:
+            for table in metadata.tables.values():
+                for fk in table.foreign_keys:
+                    connection.execute(DropConstraint(fk.constraint))
         with suppress(Exception):
             metadata.drop_all(bind=_db.engine)
         with suppress(Exception):
             _db.drop_all()
 
-        sequence_sql = """SELECT sequence_name FROM information_schema.sequences
-                          WHERE sequence_schema='public'
+        sequence_sql = f"""SELECT sequence_name FROM information_schema.sequences
+                          WHERE sequence_schema='{app.config.get("DB_SCHEMA", "public")}'
                        """
 
         sess = _db.session()
         for seq in [name for (name,) in sess.execute(text(sequence_sql))]:
             try:
-                sess.execute(text('DROP SEQUENCE public.%s ;' % seq))
-                print('DROP SEQUENCE public.%s ' % seq)
+                schema = app.config.get("DB_SCHEMA", "public")
+                sess.execute(text(f'DROP SEQUENCE {schema}.{seq} ;'))
+                print(f'DROP SEQUENCE {schema}.{seq} ')
             except Exception as e:
                 print('Error: {}'.format(e))
         sess.commit()
