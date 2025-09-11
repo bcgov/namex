@@ -7,142 +7,69 @@ from flask import Request
 from werkzeug.test import EnvironBuilder
 
 from namex.constants import ValidSources
-from namex.models import Applicant, State
+from namex.models import Applicant
 from namex.models import Request as RequestDAO
+from namex.models import State
 
 
 @pytest.mark.parametrize(
-    """
-test_name,
-name_request_number,temp_request_number,user_email,user_phone,
-header_name_request_number,header_temp_request_number,header_user_email,header_user_phone,
-expected""",
+    'test_scenario,has_nr_num,has_temp_num,has_email,has_phone,header_has_nr,header_has_temp,header_has_email,header_has_phone,expected',
     [
-        (
-            'valid_nr',  # test_name
-            'NR 0000001',  # name_request_number
-            None,  # temp_request_number
-            'info@example.com',  # user_email
-            '1231231234',  # user_phone
-            'NR 0000001',  # header_name_request_number
-            None,  # header_temp_request_number
-            'info@example.com',  # header_user_email
-            '1231231234',  # header_user_phone
-            True,
-        ),  # expected
-        (
-            'valid_temp_nr',
-            None,
-            'NR L000001',
-            'info@example.com',
-            '1231231234',
-            None,
-            'NR L000001',
-            'info@example.com',
-            '1231231234',
-            True,
-        ),
-        (
-            'no_nr',
-            'NR 0000001',
-            'NR L000001',
-            'info@example.com',
-            '1231231234',
-            None,
-            None,
-            'info@example.com',
-            '1231231234',
-            False,
-        ),
-        (
-            'valid_nr_skip_nrl',
-            'NR 0000001',
-            'NR L000001',
-            'info@example.com',
-            '1231231234',
-            'NR 0000001',
-            'NR L000001',
-            'info@example.com',
-            '1231231234',
-            True,
-        ),
-        (
-            'valid_nr_only_email',
-            'NR 0000001',
-            'NR L000001',
-            'info@example.com',
-            '1231231234',
-            'NR 0000001',
-            'NR L000001',
-            'info@example.com',
-            None,
-            True,
-        ),
-        (
-            'valid_nr_only_phone',
-            'NR 0000001',
-            'NR L000001',
-            'info@example.com',
-            '1231231234',
-            'NR 0000001',
-            'NR L000001',
-            None,
-            '1231231234',
-            True,
-        ),
-        (
-            'valid_nr_no_phone_no_email',
-            'NR 0000001',
-            'NR L000001',
-            'info@example.com',
-            '1231231234',
-            'NR 0000001',
-            'NR L000001',
-            None,
-            None,
-            False,
-        ),
+        ('valid_nr', True, False, True, True, True, False, True, True, True),
+        ('valid_temp_nr', False, True, True, True, False, True, True, True, True),
+        ('no_nr', True, True, True, True, False, False, True, True, False),
+        ('valid_nr_skip_nrl', True, True, True, True, True, True, True, True, True),
+        ('valid_nr_only_email', True, True, True, True, True, True, True, False, True),
+        ('valid_nr_only_phone', True, True, True, True, True, True, False, True, True),
+        ('valid_nr_no_phone_no_email', True, True, True, True, True, True, False, False, False),
     ],
 )
 def test_full_access_to_name_request(
-    test_name,
-    name_request_number,
-    temp_request_number,
-    user_email,
-    user_phone,
-    header_name_request_number,
-    header_temp_request_number,
-    header_user_email,
-    header_user_phone,
+    test_scenario,
+    has_nr_num,
+    has_temp_num,
+    has_email,
+    has_phone,
+    header_has_nr,
+    header_has_temp,
+    header_has_email,
+    header_has_phone,
     expected,
+    test_data_factory,
 ):
     """Assure that this contains the headers required to fully access an NR."""
     from namex.utils.auth import full_access_to_name_request
 
-    # setup
+    # Generate unique data for this test run
+    unique_nr_num = test_data_factory.generate_unique_nr_num() if has_nr_num else None
+    unique_temp_num = f"NR L{test_data_factory.generate_unique_id()[:6]}" if has_temp_num else None
+    unique_email = f"test{test_data_factory.generate_unique_id()}@example.com" if has_email else None
+    unique_phone = f"250{test_data_factory.generate_unique_id()[:7]}" if has_phone else None
+
+    # Setup NR
     nr = RequestDAO()
-    nr.nrNum = name_request_number or temp_request_number
+    nr.nrNum = unique_nr_num or unique_temp_num
     nr.stateCd = State.DRAFT
     nr._source = ValidSources.NAMEREQUEST.value
     applicant = Applicant()
-    applicant.phoneNumber = user_phone
-    applicant.emailAddress = user_email
+    applicant.phoneNumber = unique_phone
+    applicant.emailAddress = unique_email
     nr.applicants.append(applicant)
     nr.save_to_db()
 
-    builder = EnvironBuilder(
-        method='POST',
-        data={},
-        headers={
-            'BCREG_NR': header_name_request_number,
-            'BCREG_NRL': header_temp_request_number,
-            'BCREG-User-Email': header_user_email,
-            'BCREG-User-Phone': header_user_phone,
-        },
-    )
+    # Setup headers based on test scenario
+    headers = {}
+    if header_has_nr and unique_nr_num:
+        headers['BCREG_NR'] = unique_nr_num
+    if header_has_temp and unique_temp_num:
+        headers['BCREG_NRL'] = unique_temp_num
+    if header_has_email and unique_email:
+        headers['BCREG-User-Email'] = unique_email
+    if header_has_phone and unique_phone:
+        headers['BCREG-User-Phone'] = unique_phone
+
+    builder = EnvironBuilder(method='POST', data={}, headers=headers)
     env = builder.get_environ()
     req = Request(env)
-
-    print(req)
 
     assert expected == full_access_to_name_request(req)

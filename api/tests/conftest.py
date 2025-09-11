@@ -121,39 +121,61 @@ def db(app, request):
 @pytest.fixture(scope='function', autouse=True)
 def session(app, db, request):
     """
-    Returns function-scoped session.
+    Returns function-scoped session with proper transaction isolation for pg8000.
     """
     with app.app_context():
-        conn = db.engine.connect()
-        txn = conn.begin()
+        # Create a new connection and transaction for each test
+        connection = db.engine.connect()
+        transaction = connection.begin()
 
-        options = dict(bind=conn, binds={})
-        sess = db._make_scoped_session(options=options)
+        # Create a nested transaction (savepoint) for isolation
+        nested_transaction = connection.begin_nested()
 
-        # establish  a SAVEPOINT just before beginning the test
-        # (http://docs.sqlalchemy.org/en/latest/orm/session_transaction.html#using-savepoint)
-        sess.begin_nested()
+        # Configure session to use this connection
+        session_options = dict(bind=connection, binds={})
+        test_session = db._make_scoped_session(options=session_options)
 
-        @event.listens_for(sess(), 'after_transaction_end')
-        def restart_savepoint(sess2, trans):
-            # Detecting whether this is indeed the nested transaction of the test
-            if trans.nested and not trans._parent.nested:
-                # Handle where test DOESN'T session.commit(),
-                sess2.expire_all()
-                sess.begin_nested()
+        # Store original session and methods
+        original_session = db.session
+        original_commit = test_session.commit
+        original_rollback = test_session.rollback
 
-        db.session = sess
+        # Override commit to only flush, not actually commit
+        def patched_commit():
+            test_session.flush()
 
-        sql = text('select 1')
-        sess.execute(sql)
+        # Override rollback to rollback to savepoint
+        def patched_rollback():
+            nonlocal nested_transaction
+            if nested_transaction.is_active:
+                nested_transaction.rollback()
+                nested_transaction = connection.begin_nested()
+            else:
+                nested_transaction = connection.begin_nested()
 
-        yield sess
+        # Apply patches
+        test_session.commit = patched_commit
+        test_session.rollback = patched_rollback
 
-        # Cleanup
-        sess.remove()
-        # This instruction rollsback any commit that were executed in the tests.
-        txn.rollback()
-        conn.close()
+        # Replace the global session
+        db.session = test_session
+
+        # Test the connection
+        db.session.execute(text('SELECT 1'))
+
+        yield db.session
+
+        # Cleanup: restore everything and rollback
+        test_session.commit = original_commit
+        test_session.rollback = original_rollback
+        db.session = original_session
+        test_session.remove()
+
+        # Rollback all changes
+        if nested_transaction.is_active:
+            nested_transaction.rollback()
+        transaction.rollback()
+        connection.close()
 
 
 @pytest.fixture(autouse=True)

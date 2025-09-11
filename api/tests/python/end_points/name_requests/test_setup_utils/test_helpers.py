@@ -8,19 +8,17 @@ import pytest
 
 from namex.models import State, User
 
-from ....common.test_name_request_utils import (
-    assert_applicant_has_id,
-    assert_field_is_mapped,
-    assert_name_has_id,
-    assert_name_has_name,
-    pick_name_from_list,
-)
-from ....end_points.common.http import build_request_uri, build_test_query, get_test_headers
+from ....common.test_name_request_utils import (assert_applicant_has_id,
+                                                assert_field_is_mapped,
+                                                assert_name_has_id,
+                                                assert_name_has_name,
+                                                pick_name_from_list)
+from ....end_points.common.http import (build_request_uri, build_test_query,
+                                        get_test_headers)
 from ....end_points.common.logging import log_request_path
 from ....unit.test_setup_utils import build_nr
 from ...common import claims, token_header
 from ...common.http import setup_test_token
-
 # Import token and claims if you need it
 # from tests.python.end_points.common.configuration import claims, token_header
 from ..configuration import API_BASE_URI
@@ -62,7 +60,6 @@ state_data = [
 ]
 
 
-@pytest.mark.skip
 def assert_names_are_mapped_correctly(req_names, res_names):
     print('\n-------- Test names --------\n')
     for req_name in req_names:
@@ -88,7 +85,6 @@ def assert_names_are_mapped_correctly(req_names, res_names):
     print('\n-------- Test names complete --------\n')
 
 
-@pytest.mark.skip
 def assert_applicant_is_mapped_correctly(req_applicant, res_applicant):
     print('\n-------- Test applicant --------\n')
     print('\nCompare request applicant: \n' + repr(req_applicant) + '\n')
@@ -104,11 +100,14 @@ def assert_applicant_is_mapped_correctly(req_applicant, res_applicant):
     print('\n-------- Test applicant complete --------\n')
 
 
-@pytest.mark.skip
 def add_states_to_db(states):
+    """Add states to database only if they don't already exist."""
     for code, desc in states:
-        state = State(cd=code, description=desc)
-        state.save_to_db()
+        # Check if state already exists (migrations may have loaded it)
+        existing_state = State.query.filter_by(cd=code).first()
+        if not existing_state:
+            state = State(cd=code, description=desc)
+            state.save_to_db()
 
 
 def add_test_user_to_db():
@@ -144,27 +143,22 @@ def add_test_user_to_db():
         raise
 
 
-@pytest.mark.skip
 def create_approved_nr(client, nr_data=None):
     return create_test_nr(nr_data, State.APPROVED)
 
 
-@pytest.mark.skip
 def create_cancelled_nr(client, nr_data=None):
     return create_test_nr(nr_data, State.CANCELLED)
 
 
-@pytest.mark.skip
 def create_expired_nr(client, nr_data=None):
     return create_test_nr(nr_data, State.EXPIRED)
 
 
-@pytest.mark.skip
 def create_consumed_nr(client, nr_data=None):
     return create_test_nr(nr_data, State.CONSUMED)
 
 
-@pytest.mark.skip
 def create_draft_nr(client, nr_data=None, use_api=True):
     """
     You can optionally set the use_api param to False to create an NR using model persistence as opposed to the API!
@@ -179,7 +173,6 @@ def create_draft_nr(client, nr_data=None, use_api=True):
     return create_test_nr(nr_data, State.DRAFT)
 
 
-@pytest.mark.skip
 def create_test_nr(nr_data=None, nr_state=State.DRAFT):
     """
     Create a draft NR and persist (NOT using the API) to use as the initial state for each test.
@@ -215,7 +208,10 @@ def create_test_nr(nr_data=None, nr_state=State.DRAFT):
         nr.activeUser = user
         nr.submitter = user
         nr.submitter_userid = user.id
-        nr.nrNum = 'NR 123456'
+        # Generate unique NR number using timestamp to prevent conflicts (max 10 chars)
+        import time
+        unique_suffix = str(int(time.time()))[-6:]  # Last 6 digits of timestamp
+        nr.nrNum = f'NR {unique_suffix}'
 
         nr.save_to_db()
 
@@ -224,7 +220,6 @@ def create_test_nr(nr_data=None, nr_state=State.DRAFT):
         print(repr(err))
 
 
-@pytest.mark.skip
 def post_test_nr(client, nr_data=None, nr_state=State.DRAFT):
     """
     Create a draft NR, using the API, to use as the initial state for each test.
