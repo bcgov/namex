@@ -67,7 +67,7 @@ def test_draft_response_actions(client, jwt, app, mock_auth_affiliation):
     assert test_nr is not None
 
     # Grab the record using the API
-    mock_auth_affiliation(nr_num='NR 123456')
+    mock_auth_affiliation()
     get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
@@ -117,7 +117,7 @@ def test_approved_response_actions(client, jwt, app, mock_auth_affiliation):
     assert test_nr is not None
 
     # Grab the record using the API
-    mock_auth_affiliation(nr_num='NR 123456')
+    mock_auth_affiliation()
     get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
@@ -163,7 +163,7 @@ def test_approved_and_expired_response_actions(client, jwt, app, mock_auth_affil
     assert test_nr is not None
 
     # Grab the record using the API
-    mock_auth_affiliation(nr_num='NR 123456')
+    mock_auth_affiliation()
     get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
@@ -207,7 +207,7 @@ def test_conditional_response_actions(client, jwt, app, mock_auth_affiliation):
     assert test_nr is not None
 
     # Grab the record using the API
-    mock_auth_affiliation(nr_num='NR 123456')
+    mock_auth_affiliation()
     get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
@@ -253,7 +253,7 @@ def test_conditional_and_expired_response_actions(client, jwt, app, mock_auth_af
     assert test_nr is not None
 
     # Grab the record using the API
-    mock_auth_affiliation(nr_num='NR 123456')
+    mock_auth_affiliation()
     get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
@@ -312,7 +312,7 @@ def test_consumed_and_conditional_response_actions(client, jwt, app, mock_auth_a
     assert test_nr is not None
 
     # Grab the record using the API
-    mock_auth_affiliation(nr_num='NR 123456')
+    mock_auth_affiliation()
     get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
@@ -370,7 +370,7 @@ def test_consumed_and_approved_response_actions(client, jwt, app, mock_auth_affi
     assert test_nr is not None
 
     # Grab the record using the API
-    mock_auth_affiliation(nr_num='NR 123456')
+    mock_auth_affiliation()
     get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
@@ -413,7 +413,7 @@ def test_rejected_response_actions(client, jwt, app, mock_auth_affiliation):
     assert test_nr is not None
 
     # Grab the record using the API
-    mock_auth_affiliation(nr_num='NR 123456')
+    mock_auth_affiliation()
     get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
@@ -455,7 +455,7 @@ def test_historical_response_actions(client, jwt, app, mock_auth_affiliation):
     assert test_nr is not None
 
     # Grab the record using the API
-    mock_auth_affiliation(nr_num='NR 123456')
+    mock_auth_affiliation()
     get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
@@ -498,7 +498,7 @@ def test_hold_response_actions(client, jwt, app, mock_auth_affiliation):
     assert test_nr is not None
 
     # Grab the record using the API
-    mock_auth_affiliation(nr_num='NR 123456')
+    mock_auth_affiliation()
     get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
@@ -535,7 +535,7 @@ def test_inprogress_response_actions(client, jwt, app, mock_auth_affiliation):
     assert test_nr is not None
 
     # Grab the record using the API
-    mock_auth_affiliation(nr_num='NR 123456')
+    mock_auth_affiliation()
     get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None
@@ -572,7 +572,7 @@ def test_cancelled_response_actions(client, jwt, app, mock_auth_affiliation):
     assert test_nr is not None
 
     # Grab the record using the API
-    mock_auth_affiliation(nr_num='NR 123456')
+    mock_auth_affiliation()
     get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None

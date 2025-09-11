@@ -194,10 +194,21 @@ def mock_auth_affiliation():
     Prevents failures in CI or local testing environments that don't have access to real Auth API credentials.
     """
 
-    def _mock(nr_num='NR 123456', org_id='1234'):
-        escaped_nr = urllib.parse.quote(nr_num)
-        mocked_auth_url = f'https://mock-auth-api/api/v1/orgs/{org_id}/affiliations/{escaped_nr}'
-        responses.add(responses.GET, mocked_auth_url, json={}, status=200)
+    def _mock(nr_num=None, org_id='1234'):
+        if nr_num:
+            # Mock specific NR number if provided
+            escaped_nr = urllib.parse.quote(nr_num)
+            mocked_auth_url = f'https://mock-auth-api/api/v1/orgs/{org_id}/affiliations/{escaped_nr}'
+            responses.add(responses.GET, mocked_auth_url, json={}, status=200)
+        else:
+            # Mock any NR number with regex pattern
+            import re
+            responses.add(
+                responses.GET,
+                re.compile(r'https://mock-auth-api/api/v1/orgs/\d+/affiliations/NR%20\d+'),
+                json={},
+                status=200
+            )
 
     return _mock
 

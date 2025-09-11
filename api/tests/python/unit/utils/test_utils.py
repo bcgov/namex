@@ -7,9 +7,8 @@ from flask import Request
 from werkzeug.test import EnvironBuilder
 
 from namex.constants import ValidSources
-from namex.models import Applicant
+from namex.models import Applicant, State
 from namex.models import Request as RequestDAO
-from namex.models import State
 
 
 @pytest.mark.parametrize(
@@ -42,9 +41,9 @@ def test_full_access_to_name_request(
 
     # Generate unique data for this test run
     unique_nr_num = test_data_factory.generate_unique_nr_num() if has_nr_num else None
-    unique_temp_num = f"NR L{test_data_factory.generate_unique_id()[:6]}" if has_temp_num else None
-    unique_email = f"test{test_data_factory.generate_unique_id()}@example.com" if has_email else None
-    unique_phone = f"250{test_data_factory.generate_unique_id()[:7]}" if has_phone else None
+    unique_temp_num = f'NR L{test_data_factory.generate_unique_id()[:6]}' if has_temp_num else None
+    unique_email = f'test{test_data_factory.generate_unique_id()}@example.com' if has_email else None
+    unique_phone = f'250{test_data_factory.generate_unique_id()[:7]}' if has_phone else None
 
     # Setup NR
     nr = RequestDAO()

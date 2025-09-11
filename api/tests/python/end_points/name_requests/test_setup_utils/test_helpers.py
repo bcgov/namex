@@ -8,17 +8,19 @@ import pytest
 
 from namex.models import State, User
 
-from ....common.test_name_request_utils import (assert_applicant_has_id,
-                                                assert_field_is_mapped,
-                                                assert_name_has_id,
-                                                assert_name_has_name,
-                                                pick_name_from_list)
-from ....end_points.common.http import (build_request_uri, build_test_query,
-                                        get_test_headers)
+from ....common.test_name_request_utils import (
+    assert_applicant_has_id,
+    assert_field_is_mapped,
+    assert_name_has_id,
+    assert_name_has_name,
+    pick_name_from_list,
+)
+from ....end_points.common.http import build_request_uri, build_test_query, get_test_headers
 from ....end_points.common.logging import log_request_path
 from ....unit.test_setup_utils import build_nr
 from ...common import claims, token_header
 from ...common.http import setup_test_token
+
 # Import token and claims if you need it
 # from tests.python.end_points.common.configuration import claims, token_header
 from ..configuration import API_BASE_URI
