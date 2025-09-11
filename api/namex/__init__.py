@@ -59,12 +59,26 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):  # noqa: B008
         app.config['SQLALCHEMY_ENGINE_OPTIONS'] = db_config.get_engine_options()
     db.init_app(app)
 
-    # Ensure SQLAlchemy extension is fully registered before Marshmallow initialization
+    # Ensure SQLAlchemy extension is properly registered before Marshmallow initialization
+    # Some environments (like GitHub Actions) have issues with extension auto-detection
     with app.app_context():
-        # This forces SQLAlchemy to fully initialize and register itself
-        db.engine.connect().close()
+        # Force SQLAlchemy to fully initialize its extension registration
+        try:
+            # This ensures the SQLAlchemy extension is fully registered in app.extensions
+            _ = db.engine
+            # Manually ensure the extension is properly registered for Flask-Marshmallow
+            if 'sqlalchemy' not in app.extensions:
+                app.extensions['sqlalchemy'] = db
+            elif not hasattr(app.extensions['sqlalchemy'], 'db'):
+                app.extensions['sqlalchemy'].db = db
+        except Exception:
+            # Fallback: ensure extension is registered even if engine creation fails
+            if 'sqlalchemy' not in app.extensions:
+                app.extensions['sqlalchemy'] = db
+            if not hasattr(app.extensions.get('sqlalchemy', {}), 'db'):
+                app.extensions['sqlalchemy'].db = db
 
-    # Initialize Marshmallow after SQLAlchemy is fully registered
+    # Initialize Marshmallow after ensuring SQLAlchemy extension is properly registered
     ma.init_app(app)
 
     if run_mode != 'migration':
