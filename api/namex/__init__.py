@@ -59,6 +59,14 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):  # noqa: B008
         app.config['SQLALCHEMY_ENGINE_OPTIONS'] = db_config.get_engine_options()
     db.init_app(app)
 
+    # Ensure SQLAlchemy extension is fully registered before Marshmallow initialization
+    with app.app_context():
+        # This forces SQLAlchemy to fully initialize and register itself
+        db.engine.connect().close()
+    
+    # Initialize Marshmallow after SQLAlchemy is fully registered
+    ma.init_app(app)
+
     if run_mode != 'migration':
         with app.app_context():
             engine = db.engine
@@ -74,7 +82,6 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):  # noqa: B008
     else:
         flags.init_app(app)
         queue.init_app(app)
-        ma.init_app(app)
 
         api.init_app(app)
         setup_jwt_manager(app, jwt)
