@@ -5,8 +5,10 @@ from pytz import timezone
 from namex.models import db
 from namex.models.nr_number import NRNumber
 from namex.models.user import User
-from namex.services.name_request.exceptions import GenerateNRKeysError, GetUserIdError
-from namex.services.name_request.utils import get_mapped_entity_and_action_code, get_mapped_request_type
+from namex.services.name_request.exceptions import (GenerateNRKeysError,
+                                                    GetUserIdError)
+from namex.services.name_request.utils import (
+    get_mapped_entity_and_action_code, get_mapped_request_type)
 
 
 class AbstractNameRequestMixin(object):
@@ -119,19 +121,19 @@ class AbstractNameRequestMixin(object):
     @classmethod
     def get_request_sequence(cls):
         seq = db.Sequence('requests_id_seq')
-        nr_id = db.engine.execute(seq)
+        nr_id = db.session.execute(seq)
         return nr_id
 
     @classmethod
     def get_applicant_sequence(cls):
         seq = db.Sequence('applicants_party_id_seq')
-        party_id = db.engine.execute(seq)
+        party_id = db.session.execute(seq)
         return party_id
 
     @classmethod
     def get_name_sequence(cls):
         seq = db.Sequence('names_id_seq')
-        name_id = db.engine.execute(seq)
+        name_id = db.session.execute(seq)
         return name_id
 
     @classmethod

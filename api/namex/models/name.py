@@ -100,6 +100,8 @@ class Name(db.Model):
 def update_nr_name_search(mapper, connection, target):
     """Add any changes to the name to the request.nameSearch column and publish name state changes where applicable."""
 
+    from sqlalchemy import text
+
     from namex.models import Request
 
     name = target
@@ -107,11 +109,11 @@ def update_nr_name_search(mapper, connection, target):
     if nr:
         # get the names associated with the NR
         names_q = connection.execute(
-            f"""
+            text(f"""
             SELECT names.name from names
             JOIN requests on requests.id = names.nr_id
             WHERE requests.id={nr.id}
-            """  # noqa: S608
+            """)  # noqa: S608
         )
         # format the names into a string like: |1<name1>|2<name2>|3<name3>
         names = [x[0] for x in names_q.all()]
@@ -120,12 +122,12 @@ def update_nr_name_search(mapper, connection, target):
             name_search += f'|{index + 1}{item}{index + 1}|'
         # update the name_search field of the nr with the formatted string
         connection.execute(
-            """
+            text("""
             UPDATE requests
-            SET name_search=%s
-            WHERE id=%s
-            """,
-            ('(' + name_search + ')', nr.id),
+            SET name_search = :name_search
+            WHERE id = :nr_id
+            """),
+            {'name_search': '(' + name_search + ')', 'nr_id': nr.id},
         )
 
 

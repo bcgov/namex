@@ -73,11 +73,13 @@ class RestrictedWords(object):
         - query for list of all restricted words
             - strip each word/phrase of spaces and check if they are a substring of 'stripped_content'
         """
-        restricted_words_obj = db.engine.execute('select * from restricted_word;')
-        restricted_words_dict = []
-        for row in restricted_words_obj:
-            if ' ' + row[1].upper().strip() + ' ' in content:
-                restricted_words_dict.append({'id': row[0], 'phrase': row[1].upper()})
+        from sqlalchemy import text
+        with db.engine.connect() as connection:
+            restricted_words_obj = connection.execute(text('select * from restricted_word;'))
+            restricted_words_dict = []
+            for row in restricted_words_obj:
+                if ' ' + row[1].upper().strip() + ' ' in content:
+                    restricted_words_dict.append({'id': row[0], 'phrase': row[1].upper()})
 
         return restricted_words_dict
 
@@ -85,33 +87,34 @@ class RestrictedWords(object):
     def find_cnd_info(word_id):
         """Get the condition info corresponding to the given word id"""
         get_cnd_id_sql = text('SELECT cnd_id FROM restricted_word_condition WHERE word_id = :word_id')
-        cnd_id_obj = db.engine.execute(get_cnd_id_sql, {'word_id': word_id})
-        cnd_ids = cnd_id_obj.fetchall()
+        with db.engine.connect() as connection:
+            cnd_id_obj = connection.execute(get_cnd_id_sql, {'word_id': word_id})
+            cnd_ids = cnd_id_obj.fetchall()
 
-        cnd_obj_list = []
-        for id in cnd_ids:
-            cnd_id = id[0]
-            get_cnd_sql = text('select * from restricted_condition where cnd_id = :cnd_id')
-            cnd_obj_list.append(db.engine.execute(get_cnd_sql, {'cnd_id': cnd_id}))
+            cnd_obj_list = []
+            for id in cnd_ids:
+                cnd_id = id[0]
+                get_cnd_sql = text('select * from restricted_condition where cnd_id = :cnd_id')
+                cnd_obj_list.append(connection.execute(get_cnd_sql, {'cnd_id': cnd_id}))
 
-        cnd_info = []
-        for obj in cnd_obj_list:
-            obj_tuple = obj.fetchall()[0]
-            cnd_text = obj_tuple[1]
-            cnd_allow_use = obj_tuple[2]
-            cnd_consent_req = obj_tuple[3]
-            cnd_consent_body = obj_tuple[4]
-            cnd_instr = obj_tuple[5]
+            cnd_info = []
+            for obj in cnd_obj_list:
+                obj_tuple = obj.fetchall()[0]
+                cnd_text = obj_tuple[1]
+                cnd_allow_use = obj_tuple[2]
+                cnd_consent_req = obj_tuple[3]
+                cnd_consent_body = obj_tuple[4]
+                cnd_instr = obj_tuple[5]
 
-            cnd_info.append(
-                {
-                    'id': cnd_id,
-                    'text': cnd_text,
-                    'allow_use': cnd_allow_use,
-                    'consent_required': cnd_consent_req,
-                    'consenting_body': cnd_consent_body,
-                    'instructions': cnd_instr,
-                }
-            )
+                cnd_info.append(
+                    {
+                        'id': cnd_id,
+                        'text': cnd_text,
+                        'allow_use': cnd_allow_use,
+                        'consent_required': cnd_consent_req,
+                        'consenting_body': cnd_consent_body,
+                        'instructions': cnd_instr,
+                    }
+                )
 
-        return cnd_info
+            return cnd_info
