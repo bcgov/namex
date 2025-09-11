@@ -63,7 +63,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):  # noqa: B008
     with app.app_context():
         # This forces SQLAlchemy to fully initialize and register itself
         db.engine.connect().close()
-    
+
     # Initialize Marshmallow after SQLAlchemy is fully registered
     ma.init_app(app)
 
