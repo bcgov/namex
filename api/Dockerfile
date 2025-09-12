@@ -87,10 +87,11 @@ COPY --chown=web:web ./README.md /code/
 COPY --chown=web:web . /code
 
 # Set secure permissions immediately after copying to remove write permissions
-# Files: read-only (644), Directories: read+execute (755), wsgi.py: executable (755)
+# Files: read-only (644), Directories: read+execute (755), scripts: executable (755)
 RUN find /code -type f -exec chmod 644 {} \; \
     && find /code -type d -exec chmod 755 {} \; \
-    && chmod 755 /code/wsgi.py
+    && chmod 755 /code/wsgi.py \
+    && chmod 755 /code/update_db.sh
 
 # Run the server
 ENV PYTHONPATH=/code
