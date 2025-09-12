@@ -70,7 +70,7 @@ RUN groupadd -g "${GID}" -r web \
 COPY --chown=web:web ./poetry.lock ./pyproject.toml /code/
 
 # Install dependencies with GitHub Actions optimizations
-RUN --mount=type=cache,target="$POETRY_CACHE_DIR",uid=${UID},gid=${GID} \
+RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
   echo "Building for environment: ${APP_ENV:-development}" \
   && poetry version \
   && poetry config installer.max-workers 1 \
