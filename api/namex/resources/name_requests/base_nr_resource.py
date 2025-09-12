@@ -1,10 +1,8 @@
-import os
 
-from flask import current_app, request
+from flask import request
 
 from namex.constants import NameRequestPatchActions
 from namex.models import Request, State
-from namex.services.name_request.exceptions import NameRequestException
 from namex.services.name_request.name_request import NameRequestService
 
 from .abstract_nr_resource import AbstractNameRequestResource

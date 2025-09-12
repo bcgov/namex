@@ -5,14 +5,15 @@ import requests
 from flask import current_app, jsonify, make_response, request
 
 from namex import db, jwt
-from namex.constants import (NameRequestPatchActions,
-                             NameRequestRollbackActions, PaymentState)
+from namex.constants import NameRequestPatchActions, NameRequestRollbackActions, PaymentState
 from namex.models import Event, Payment, Request, State, User
 from namex.services import EventRecorder
-from namex.services.name_request.exceptions import (
-    InvalidInputError, NameRequestException, NameRequestIsInProgressError)
+from namex.services.name_request.exceptions import InvalidInputError, NameRequestException, NameRequestIsInProgressError
 from namex.services.name_request.name_request_state import (
-    get_nr_state_actions, is_name_request_refundable, is_request_editable)
+    get_nr_state_actions,
+    is_name_request_refundable,
+    is_request_editable,
+)
 from namex.services.name_request.utils import get_mapped_entity_and_action_code
 from namex.services.payment.payments import get_payment, refund_payment
 from namex.services.statistics.wait_time_statistics import WaitTimeStatsService
