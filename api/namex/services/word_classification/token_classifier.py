@@ -1,9 +1,18 @@
 from enum import Enum
 
-import pandas as pd
 from flask import current_app
 
-from ..name_request.auto_analyse.name_analysis_utils import data_frame_to_list
+
+def classifications_to_lists(classifications):
+    """Convert list of classification dictionaries to separate lists by type."""
+    list_dist = [item['word'] for item in classifications
+                 if item['word_classification'] == DataFrameFields.DISTINCTIVE.value]
+    list_desc = [item['word'] for item in classifications
+                 if item['word_classification'] == DataFrameFields.DESCRIPTIVE.value]
+    list_none = [item['word'] for item in classifications
+                 if item['word_classification'] == DataFrameFields.UNCLASSIFIED.value]
+
+    return list_dist, list_desc, list_none
 
 
 class DataFrameFields(Enum):
@@ -68,18 +77,6 @@ class TokenClassifier:
         self.descriptive_word_tokens = []
         self.unclassified_word_tokens = []
 
-    @classmethod
-    def dataframe_to_list(df):
-        df_dist = df.loc[df.word_classification == DataFrameFields.DISTINCTIVE.value]
-        df_desc = df.loc[df.word_classification == DataFrameFields.DESCRIPTIVE.value]
-        df_none = df.loc[df.word_classification == DataFrameFields.UNCLASSIFIED.value]
-
-        list_dist = list(df_dist.word)
-        list_desc = list(df_desc.word)
-        list_none = list(df_none.word)
-
-        return list_dist, list_desc, list_none
-
     """
     Utility for adding unclassified words to distinctive and descriptive list
     Override the abstract / base class method
@@ -107,29 +104,26 @@ class TokenClassifier:
 
     def _classify_tokens(self, word_tokens):
         try:
-            cf = pd.DataFrame(columns=['word', 'word_classification'])
+            classifications = []
 
             wc_svc = self.word_classification_service
 
             # Get the word classification for each word in the supplied name name
             for word in word_tokens:
                 word_classification = wc_svc.find_one(word)
-                new_row = []
                 if not word_classification:
                     current_app.logger.debug('No word classification found for: ' + word)
-                    new_row.append(
+                    classifications.append(
                         {'word': word.lower().strip(), 'word_classification': DataFrameFields.UNCLASSIFIED.value}
                     )
                 else:
                     for row in word_classification:
-                        new_row.append(
+                        classifications.append(
                             {'word': word.lower().strip(), 'word_classification': row.classification.strip()}
                         )
 
-                cf = cf.append(new_row, ignore_index=True)
-
             self.distinctive_word_tokens, self.descriptive_word_tokens, self.unclassified_word_tokens = (
-                data_frame_to_list(cf)
+                classifications_to_lists(classifications)
             )
 
         except Exception as error:
