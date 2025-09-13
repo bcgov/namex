@@ -5,12 +5,20 @@ from flask import current_app
 
 def classifications_to_lists(classifications):
     """Convert list of classification dictionaries to separate lists by type."""
-    list_dist = [item['word'] for item in classifications
-                 if item['word_classification'] == DataFrameFields.DISTINCTIVE.value]
-    list_desc = [item['word'] for item in classifications
-                 if item['word_classification'] == DataFrameFields.DESCRIPTIVE.value]
-    list_none = [item['word'] for item in classifications
-                 if item['word_classification'] == DataFrameFields.UNCLASSIFIED.value]
+    list_dist = []
+    list_desc = []
+    list_none = []
+
+    for item in classifications:
+        classification = item['word_classification']
+        word = item['word']
+
+        if classification == DataFrameFields.DISTINCTIVE.value:
+            list_dist.append(word)
+        elif classification == DataFrameFields.DESCRIPTIVE.value:
+            list_desc.append(word)
+        elif classification == DataFrameFields.UNCLASSIFIED.value:
+            list_none.append(word)
 
     return list_dist, list_desc, list_none
 
