@@ -5,7 +5,10 @@ from unittest.mock import Mock, patch
 import pytest
 
 from namex.services.word_classification.token_classifier import (
-    DataFrameFields, TokenClassifier, classifications_to_lists)
+    DataFrameFields,
+    TokenClassifier,
+    classifications_to_lists,
+)
 
 
 class TestClassificationsToLists:
@@ -15,7 +18,7 @@ class TestClassificationsToLists:
         """Test with empty classifications list."""
         result = classifications_to_lists([])
         distinctive, descriptive, unclassified = result
-        
+
         assert distinctive == []
         assert descriptive == []
         assert unclassified == []
@@ -25,9 +28,9 @@ class TestClassificationsToLists:
         classifications = [
             {'word': 'tech', 'word_classification': DataFrameFields.DISTINCTIVE.value}
         ]
-        
+
         distinctive, descriptive, unclassified = classifications_to_lists(classifications)
-        
+
         assert distinctive == ['tech']
         assert descriptive == []
         assert unclassified == []
@@ -37,9 +40,9 @@ class TestClassificationsToLists:
         classifications = [
             {'word': 'amazing', 'word_classification': DataFrameFields.DESCRIPTIVE.value}
         ]
-        
+
         distinctive, descriptive, unclassified = classifications_to_lists(classifications)
-        
+
         assert distinctive == []
         assert descriptive == ['amazing']
         assert unclassified == []
@@ -49,9 +52,9 @@ class TestClassificationsToLists:
         classifications = [
             {'word': 'unknown', 'word_classification': DataFrameFields.UNCLASSIFIED.value}
         ]
-        
+
         distinctive, descriptive, unclassified = classifications_to_lists(classifications)
-        
+
         assert distinctive == []
         assert descriptive == []
         assert unclassified == ['unknown']
@@ -65,9 +68,9 @@ class TestClassificationsToLists:
             {'word': 'unknown', 'word_classification': DataFrameFields.UNCLASSIFIED.value},
             {'word': 'innovative', 'word_classification': DataFrameFields.DISTINCTIVE.value},
         ]
-        
+
         distinctive, descriptive, unclassified = classifications_to_lists(classifications)
-        
+
         assert distinctive == ['tech', 'innovative']
         assert descriptive == ['amazing', 'solutions']
         assert unclassified == ['unknown']
@@ -79,9 +82,9 @@ class TestClassificationsToLists:
             {'word': 'second', 'word_classification': DataFrameFields.DESCRIPTIVE.value},
             {'word': 'third', 'word_classification': DataFrameFields.DESCRIPTIVE.value},
         ]
-        
+
         distinctive, descriptive, unclassified = classifications_to_lists(classifications)
-        
+
         assert descriptive == ['first', 'second', 'third']
 
     def test_classifications_to_lists_duplicate_words(self):
@@ -90,9 +93,9 @@ class TestClassificationsToLists:
             {'word': 'tech', 'word_classification': DataFrameFields.DISTINCTIVE.value},
             {'word': 'tech', 'word_classification': DataFrameFields.DISTINCTIVE.value},
         ]
-        
+
         distinctive, descriptive, unclassified = classifications_to_lists(classifications)
-        
+
         assert distinctive == ['tech', 'tech']  # Should preserve duplicates
 
     def test_classifications_to_lists_case_sensitivity(self):
@@ -101,9 +104,9 @@ class TestClassificationsToLists:
             {'word': 'Tech', 'word_classification': DataFrameFields.DISTINCTIVE.value},
             {'word': 'AMAZING', 'word_classification': DataFrameFields.DESCRIPTIVE.value},
         ]
-        
+
         distinctive, descriptive, unclassified = classifications_to_lists(classifications)
-        
+
         assert distinctive == ['Tech']
         assert descriptive == ['AMAZING']
 
@@ -126,7 +129,7 @@ class TestTokenClassifier:
     def test_classify_tokens_empty_input(self):
         """Test _classify_tokens with empty word list."""
         self.classifier._classify_tokens([])
-        
+
         assert self.classifier.distinctive_word_tokens == []
         assert self.classifier.descriptive_word_tokens == []
         assert self.classifier.unclassified_word_tokens == []
@@ -135,10 +138,10 @@ class TestTokenClassifier:
         """Test _classify_tokens when no classification is found for words."""
         # Mock the service to return None (no classification found)
         self.mock_word_classification_service.find_one.return_value = None
-        
+
         words = ['unknown', 'mystery']
         self.classifier._classify_tokens(words)
-        
+
         # All words should be unclassified
         assert self.classifier.distinctive_word_tokens == []
         assert self.classifier.descriptive_word_tokens == []
@@ -149,10 +152,10 @@ class TestTokenClassifier:
         # Create mock classification objects
         mock_distinctive_classification = Mock()
         mock_distinctive_classification.classification = 'DIST'
-        
+
         mock_descriptive_classification = Mock()
         mock_descriptive_classification.classification = 'DESC'
-        
+
         # Configure the mock service to return different classifications
         def mock_find_one(word):
             if word == 'tech':
@@ -161,12 +164,12 @@ class TestTokenClassifier:
                 return [mock_descriptive_classification]
             else:
                 return None
-        
+
         self.mock_word_classification_service.find_one.side_effect = mock_find_one
-        
+
         words = ['amazing', 'tech', 'unknown']
         self.classifier._classify_tokens(words)
-        
+
         assert self.classifier.distinctive_word_tokens == ['tech']
         assert self.classifier.descriptive_word_tokens == ['amazing']
         assert self.classifier.unclassified_word_tokens == ['unknown']
@@ -176,19 +179,19 @@ class TestTokenClassifier:
         # Create mock classification objects
         mock_classification_1 = Mock()
         mock_classification_1.classification = 'DIST'
-        
+
         mock_classification_2 = Mock()
         mock_classification_2.classification = 'DESC'
-        
+
         # Configure service to return multiple classifications for one word
         self.mock_word_classification_service.find_one.return_value = [
-            mock_classification_1, 
+            mock_classification_1,
             mock_classification_2
         ]
-        
+
         words = ['multi']
         self.classifier._classify_tokens(words)
-        
+
         # The word should appear in both lists
         assert self.classifier.distinctive_word_tokens == ['multi']
         assert self.classifier.descriptive_word_tokens == ['multi']
@@ -198,12 +201,12 @@ class TestTokenClassifier:
         """Test that words are normalized (lowercased and stripped)."""
         mock_classification = Mock()
         mock_classification.classification = '  DIST  '  # With extra spaces
-        
+
         self.mock_word_classification_service.find_one.return_value = [mock_classification]
-        
+
         words = ['  TECH  ']  # Word with spaces and uppercase
         self.classifier._classify_tokens(words)
-        
+
         # Should be normalized to lowercase and stripped
         assert self.classifier.distinctive_word_tokens == ['tech']
 
@@ -211,12 +214,12 @@ class TestTokenClassifier:
         """Test that classification values are normalized (stripped)."""
         mock_classification = Mock()
         mock_classification.classification = '  DIST  '  # With extra spaces
-        
+
         self.mock_word_classification_service.find_one.return_value = [mock_classification]
-        
+
         words = ['tech']
         self.classifier._classify_tokens(words)
-        
+
         # Should still be classified as distinctive despite extra spaces
         assert self.classifier.distinctive_word_tokens == ['tech']
 
@@ -225,10 +228,10 @@ class TestTokenClassifier:
         """Test that unclassified words are logged."""
         # Mock the service to return None
         self.mock_word_classification_service.find_one.return_value = None
-        
+
         words = ['unknown']
         self.classifier._classify_tokens(words)
-        
+
         # Verify logging was called
         mock_current_app.logger.debug.assert_called_with('No word classification found for: unknown')
 
@@ -236,14 +239,14 @@ class TestTokenClassifier:
     def test_classify_tokens_handles_exceptions(self, mock_current_app):
         """Test that exceptions during classification are handled properly."""
         # Configure the mock service to raise an exception
-        self.mock_word_classification_service.find_one.side_effect = Exception("Database error")
-        
+        self.mock_word_classification_service.find_one.side_effect = Exception('Database error')
+
         words = ['test']
-        
+
         # Should re-raise the exception
-        with pytest.raises(Exception, match="Database error"):
+        with pytest.raises(Exception, match='Database error'):
             self.classifier._classify_tokens(words)
-        
+
         # Should log the error
         mock_current_app.logger.error.assert_called()
 
@@ -252,10 +255,10 @@ class TestTokenClassifier:
         mock_classification = Mock()
         mock_classification.classification = 'DIST'
         self.mock_word_classification_service.find_one.return_value = [mock_classification]
-        
+
         # Setting name_tokens should trigger _classify_tokens
         self.classifier.name_tokens = ['tech', 'solutions']
-        
+
         assert self.classifier.name_tokens == ['tech', 'solutions']
         assert self.classifier.distinctive_word_tokens == ['tech', 'solutions']
 
@@ -263,6 +266,6 @@ class TestTokenClassifier:
         """Test that setting empty name_tokens doesn't trigger classification."""
         # Setting empty list should not trigger classification
         self.classifier.name_tokens = []
-        
+
         # find_one should not be called
         self.mock_word_classification_service.find_one.assert_not_called()
