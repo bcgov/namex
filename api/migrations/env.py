@@ -78,8 +78,8 @@ def run_migrations_online():
 
         with context.begin_transaction():
             owner_role = MigrationConfig.DB_OWNER
-            result = connection.execute(text(f'SET ROLE "{owner_role}";'))
-            connection.execute(text("SELECT current_user, session_user;"))
+            connection.execute(text(f'SET ROLE "{owner_role}";'))
+            result = connection.execute(text("SELECT current_user, session_user;"))
             logger.info(f"User running migration is: {result.fetchone()}")
             context.run_migrations()
             connection.execute(text("RESET ROLE;"))
