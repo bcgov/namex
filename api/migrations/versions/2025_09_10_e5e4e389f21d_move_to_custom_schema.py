@@ -50,6 +50,17 @@ def upgrade():
         conn.execute(text(f"ALTER SCHEMA public RENAME TO {target_schema};"))
         conn.execute(text("CREATE SCHEMA public;"))
 
+        conn.execute(text("""
+            CREATE TABLE public.alembic_version (
+                version_num character varying(32) NOT NULL,
+                CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num)
+            )
+        """))
+        
+        conn.execute(text(f"""
+            INSERT INTO public.alembic_version (version_num) 
+            VALUES ('{down_revision}')
+        """))
         conn.commit()
 
     except Exception as e:
