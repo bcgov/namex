@@ -58,30 +58,27 @@ install: clean ## Install python virtrual environment
 #################################################################################
 # COMMANDS - CI                                                                 #
 #################################################################################
-ci: pylint flake8 test ## CI flow
+ci: ruff test ## CI flow
 
-pylint: ## Linting with pylint
-	. .venv/bin/activate && pylint --rcfile=setup.cfg  $(PROJECT_FOLDER_NAME)
+ruff: ## ruff linter
+	poetry run ruff check
 
-flake8: ## Linting with flake8
-	. .venv/bin/activate && flake8 $(PROJECT_FOLDER_NAME) tests
+ruff-fix: ## auto fix lint issues with ruff
+	poetry run ruff check --fix
 
-lint: pylint flake8 ## run all lint type scripts
-
-test: ## Unit testing
-	. .venv/bin/activate && pytest
-
-mac-cov: local-test ## Run the coverage report and display in a browser window (mac)
-	open -a "Google Chrome" htmlcov/index.html
+test: local-db ## unit testing with local db
+	poetry run pytest
 
 #################################################################################
 # COMMANDS - Local                                                              #
 #################################################################################
-run: db ## Run the project in local
-	. venv/bin/activate && python3.12 -m flask run -p 5000
 
-db: ## Update the local database
-	. venv/bin/activate && python3.12 -m manage db upgrade
+run: local-db ## Run the project in local
+	. .venv/bin/activate && python3.12 -m flask run -p 5000
+
+local-db:  ## Set up the local development database
+	docker compose -f dev-scripts/local-db/docker-compose.yml up -d
+	./update_db.sh
 
 #################################################################################
 # Self Documenting Commands                                                     #
