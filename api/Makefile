@@ -58,7 +58,10 @@ install: clean ## Install python virtrual environment
 #################################################################################
 # COMMANDS - CI                                                                 #
 #################################################################################
-ci: ruff test ## CI flow
+ci: docker-build-check ruff test ## CI flow
+
+docker-build-check: ## Check if Dockerfile builds successfully
+	docker build -f Dockerfile -t namex-api .
 
 ruff: ## ruff linter
 	poetry run ruff check
