@@ -1,18 +1,21 @@
-# local postgres
-version: '1'
 services:
-  db:
-    image: postgres:12.18
-    container_name: namex-pay-testing
+  postgres:
+    container_name: namex-pay-db
+    image: postgres:15
     environment:
-      - POSTGRES_DB=namex_pay
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_HOST_AUTH_METHOD=trust
-    restart: always
-    stdin_open: true
-    tty: true
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: unittesting
     ports:
-      - 5432:5432
+      - "54345:5432"
     volumes:
-      - ./data:/data
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d unittesting"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+volumes:
+  postgres_data:

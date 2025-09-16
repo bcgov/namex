@@ -20,8 +20,8 @@ Flask config, rather than reading environment variables directly
 or by accessing this configuration directly.
 """
 import os
-from dotenv import find_dotenv, load_dotenv
 
+from dotenv import find_dotenv, load_dotenv
 
 # this will load all the envars from a .env file located in the project root (api)
 load_dotenv(find_dotenv())
@@ -64,23 +64,24 @@ class Config():  # pylint: disable=too-few-public-methods
     PAYMENT_SVC_VERSION = os.getenv('PAY_API_VERSION', None)
 
     # POSTGRESQL
-    DB_USER = os.getenv('NAMEX_DATABASE_USERNAME', '')
-    DB_PASSWORD = os.getenv('NAMEX_DATABASE_PASSWORD', '')
-    DB_NAME = os.getenv('NAMEX_DATABASE_NAME', '')
-    DB_HOST = os.getenv('NAMEX_DATABASE_HOST', '')
-    DB_PORT = os.getenv('NAMEX_DATABASE_PORT', '5432')
-    if DB_UNIX_SOCKET := os.getenv('NAMEX_DATABASE_UNIX_SOCKET', None):
-        SQLALCHEMY_DATABASE_URI = f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@/{DB_NAME}?host={DB_UNIX_SOCKET}'
-    else:
-        SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
+    DB_USER = os.getenv('DATABASE_USERNAME', '')
+    DB_PASSWORD = os.getenv('DATABASE_PASSWORD', '')
+    DB_NAME = os.getenv('DATABASE_NAME', '')
+    DB_HOST = os.getenv('DATABASE_HOST', '')
+    DB_PORT = int(os.getenv('DATABASE_PORT', '5432'))
 
-    GCP_AUTH_KEY = os.getenv('BUSINESS_GCP_AUTH_KEY', None)
+    DB_SCHEMA = os.getenv('DATABASE_SCHEMA', 'public')
+    DB_IP_TYPE = os.getenv('DATABASE_IP_TYPE', 'private')
+
+    if DB_INSTANCE_CONNECTION_NAME := os.getenv('DATABASE_INSTANCE_CONNECTION_NAME', None):
+        SQLALCHEMY_DATABASE_URI = 'postgresql+pg8000://'
+    else:
+        SQLALCHEMY_DATABASE_URI = f'postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+
     EMAILER_TOPIC = os.getenv('NAMEX_MAILER_TOPIC', '')
     NAMEX_NR_STATE_TOPIC = os.getenv('NAMEX_NR_STATE_TOPIC', '')
     AUDIENCE = os.getenv('AUDIENCE', 'https://pubsub.googleapis.com/google.pubsub.v1.Subscriber')
     PUBLISHER_AUDIENCE = os.getenv('PUBLISHER_AUDIENCE', 'https://pubsub.googleapis.com/google.pubsub.v1.Publisher')
-    SUB_AUDIENCE = os.getenv('PAY_SUB_AUDIENCE', '')
-    SUB_SERVICE_ACCOUNT = os.getenv('AUTHPAY_SERVICE_ACCOUNT', '')
     DEBUG_REQUEST = os.getenv('DEBUG_REQUEST', False)
 
     ENVIRONMENT = os.getenv('ENVIRONMENT', 'prod')

@@ -16,11 +16,11 @@ import base64
 import json
 from datetime import timedelta
 from http import HTTPStatus
-from sbc_common_components.utils.enums import QueueMessageTypes
 
 import pytest
 from freezegun import freeze_time
 from namex.models import Payment, State
+from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent, to_queue_message
 
 from namex_pay.resources.worker import NAME_REQUEST_LIFESPAN_DAYS, get_payment_token
@@ -28,15 +28,15 @@ from namex_pay.utils import datetime, timedelta
 from tests.unit import nested_session
 
 CLOUD_EVENT = SimpleCloudEvent(
-    id="fake-id",
-    source="fake-for-tests",
-    subject="fake-subject",
+    id='fake-id',
+    source='fake-for-tests',
+    subject='fake-subject',
     type=QueueMessageTypes.PAYMENT.value,
     data={
-            "id": "29590",
-            "statusCode": "COMPLETED",
-            "filingIdentifier": 12345,
-            "corpTypeCode": "BC",
+            'id': '29590',
+            'statusCode': 'COMPLETED',
+            'filingIdentifier': 12345,
+            'corpTypeCode': 'BC',
         }
     )
 
@@ -45,19 +45,19 @@ CLOUD_EVENT = SimpleCloudEvent(
 # This needs to mimic the envelope created by GCP PubSb when call a resource
 #
 CLOUD_EVENT_ENVELOPE = {
-    "subscription": "projects/PUBSUB_PROJECT_ID/subscriptions/SUBSCRIPTION_ID",
-    "message": {
-        "data": base64.b64encode(to_queue_message(CLOUD_EVENT)).decode("UTF-8"),
-        "messageId": "10",
-        "attributes": {},
+    'subscription': 'projects/PUBSUB_PROJECT_ID/subscriptions/SUBSCRIPTION_ID',
+    'message': {
+        'data': base64.b64encode(to_queue_message(CLOUD_EVENT)).decode('UTF-8'),
+        'messageId': '10',
+        'attributes': {},
     },
-    "id": 1,
+    'id': 1,
 }
 
 def test_no_message(client):
     """Return a 4xx when an no JSON present."""
 
-    rv = client.post("/")
+    rv = client.post('/')
 
     assert rv.status_code == HTTPStatus.OK
 
@@ -67,17 +67,17 @@ def test_get_payment_token():
     from copy import deepcopy
 
     CLOUD_EVENT_TEMPLATE = {
-        "data": {
-                "id": 29590,
-                "statusCode": "COMPLETED",
-                "filingIdentifier": None,
-                "corpTypeCode": None
+        'data': {
+                'id': 29590,
+                'statusCode': 'COMPLETED',
+                'filingIdentifier': None,
+                'corpTypeCode': None
         },
-        "id": 29590,
-        "source": "sbc-pay",
-        "subject": "BC1234567",
-        "time": "2023-07-05T22:04:25.952027",
-        "type": QueueMessageTypes.PAYMENT.value,
+        'id': 29590,
+        'source': 'sbc-pay',
+        'subject': 'BC1234567',
+        'time': '2023-07-05T22:04:25.952027',
+        'type': QueueMessageTypes.PAYMENT.value,
     }
 
     # base - should pass
@@ -85,11 +85,11 @@ def test_get_payment_token():
     ce = SimpleCloudEvent(**ce_dict)
     payment_token = get_payment_token(ce)
     assert payment_token
-    assert payment_token.id == ce_dict["data"]["id"]
+    assert payment_token.id == ce_dict['data']['id']
 
     # wrong type
     ce_dict = deepcopy(CLOUD_EVENT_TEMPLATE)
-    ce_dict["type"] = "not-a-payment"
+    ce_dict['type'] = 'not-a-payment'
     ce = SimpleCloudEvent(**ce_dict)
     payment_token = get_payment_token(ce)
     assert not payment_token
@@ -166,11 +166,11 @@ def test_update_payment_record(app,
             payment._payment_completion_date = start_payment_date
             payment.save_to_db()
 
-            payment_token = {"id": PAYMENT_TOKEN, "statusCode": "COMPLETED", "filingIdentifier": None, "corpTypeCode": None}
+            payment_token = {'id': PAYMENT_TOKEN, 'statusCode': 'COMPLETED', 'filingIdentifier': None, 'corpTypeCode': None}
 
-            message = helper_create_cloud_event_envelope(source="sbc-pay", subject="payment", data=payment_token)
+            message = helper_create_cloud_event_envelope(source='sbc-pay', subject='payment', data=payment_token)
 
-            rv = client.post("/", json=message)
+            rv = client.post('/', json=message)
 
             # Check
             topics = queue_publish['topics']
@@ -178,10 +178,10 @@ def test_update_payment_record(app,
 
             assert rv.status_code == HTTPStatus.OK
             assert len(topics) == 1
-            mailer = app.config.get("EMAILER_TOPIC")
+            mailer = app.config.get('EMAILER_TOPIC')
             assert mailer in topics
 
-            email_pub = json.loads(msg.decode("utf-8").replace("'",'"'))
+            email_pub = json.loads(msg.decode('utf-8').replace("'",'"'))
 
             # Verify message that would be sent to the emailer pubsub
             assert email_pub['type'] == QueueMessageTypes.NAMES_MESSAGE_TYPE.value
@@ -287,18 +287,18 @@ def test_process_payment(app,
         payment.save_to_db()
 
         # Test
-        payment_token = {"id": PAYMENT_TOKEN, "statusCode": "COMPLETED", "filingIdentifier": None, "corpTypeCode": None}
-        
-        message = helper_create_cloud_event_envelope(source="sbc-pay", subject="payment", data=payment_token)
+        payment_token = {'id': PAYMENT_TOKEN, 'statusCode': 'COMPLETED', 'filingIdentifier': None, 'corpTypeCode': None}
 
-        rv = client.post("/", json=message)
+        message = helper_create_cloud_event_envelope(source='sbc-pay', subject='payment', data=payment_token)
+
+        rv = client.post('/', json=message)
 
         topics = queue_publish['topics']
         msg = queue_publish['msg']
         # Check
         assert rv.status_code == HTTPStatus.OK
         assert len(topics) == 1
-        mailer = app.config.get("EMAILER_TOPIC")
+        mailer = app.config.get('EMAILER_TOPIC')
         assert mailer in topics
 
         # Get modified data
@@ -311,7 +311,7 @@ def test_process_payment(app,
         payments[0].payment_status_code == State.COMPLETED
         payments[0].payment_token == PAYMENT_TOKEN
 
-        email_pub = json.loads(msg.decode("utf-8").replace("'",'"'))
+        email_pub = json.loads(msg.decode('utf-8').replace("'",'"'))
 
         # Verify message that would be sent to the emailer pubsub
         assert email_pub['type'] == QueueMessageTypes.NAMES_MESSAGE_TYPE.value
@@ -324,12 +324,12 @@ def test_process_payment(app,
 
 def helper_create_cloud_event_envelope(
     cloud_event_id: str = None,
-    source: str = "fake-for-tests",
-    subject: str = "fake-subject",
+    source: str = 'fake-for-tests',
+    subject: str = 'fake-subject',
     type: str = QueueMessageTypes.PAYMENT.value,
     data: dict = {},
-    pubsub_project_id: str = "PUBSUB_PROJECT_ID",
-    subscription_id: str = "SUBSCRIPTION_ID",
+    pubsub_project_id: str = 'PUBSUB_PROJECT_ID',
+    subscription_id: str = 'SUBSCRIPTION_ID',
     message_id: int = 1,
     envelope_id: int = 1,
     attributes: dict = {},
@@ -337,8 +337,8 @@ def helper_create_cloud_event_envelope(
 ):
     if not data:
         data = {
-            "email": {
-                "type": "bn",
+            'email': {
+                'type': 'bn',
             }
         }
     if not ce:
@@ -347,12 +347,12 @@ def helper_create_cloud_event_envelope(
     # This needs to mimic the envelope created by GCP PubSb when call a resource
     #
     envelope = {
-        "subscription": f"projects/{pubsub_project_id}/subscriptions/{subscription_id}",
-        "message": {
-            "data": base64.b64encode(to_queue_message(ce)).decode("UTF-8"),
-            "messageId": str(message_id),
-            "attributes": attributes,
+        'subscription': f'projects/{pubsub_project_id}/subscriptions/{subscription_id}',
+        'message': {
+            'data': base64.b64encode(to_queue_message(ce)).decode('UTF-8'),
+            'messageId': str(message_id),
+            'attributes': attributes,
         },
-        "id": envelope_id,
+        'id': envelope_id,
     }
     return envelope

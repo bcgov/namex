@@ -31,7 +31,7 @@ from namex_pay import db as _db
 
 from . import FROZEN_DATETIME
 
-DB_TEST_NAME: Final = os.getenv("DATABASE_TEST_NAME")
+DB_TEST_NAME: Final = os.getenv('DATABASE_TEST_NAME')
 
 @pytest.fixture
 def create_mock_coro(mocker, monkeypatch):
@@ -73,7 +73,7 @@ def queue_publish(monkeypatch):
         msg[:] = payload
         return {}
 
-    monkeypatch.setattr(GcpQueue, "publish", mock_publish)
+    monkeypatch.setattr(GcpQueue, 'publish', mock_publish)
     return locals()
 
 
@@ -89,7 +89,7 @@ def freeze_datetime_utcnow(monkeypatch):
     monkeypatch.setattr(datetime, 'datetime', _Datetime)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def app():
     """Return a session-wide application configured in TEST mode."""
     _app = create_app(TestConfig)
@@ -174,7 +174,7 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
         return _db
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(scope='function', autouse=True)
 def session(app, db):
     """yields a SQLAlchemy connection which is rollbacked after the test"""
     with app.app_context():
@@ -196,8 +196,8 @@ def session(app, db):
 @pytest.fixture(autouse=True)
 def mock_publish(mocker):
     """Mock pubsub publish events."""
-    mocker.patch("namex.utils.queue_util.send_name_request_state_msg")
-    mocker.patch("namex.utils.queue_util.publish_email_notification")
+    mocker.patch('namex.utils.queue_util.send_name_request_state_msg')
+    mocker.patch('namex.utils.queue_util.publish_email_notification')
 
 
 @pytest.fixture(autouse=True)
