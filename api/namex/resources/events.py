@@ -66,7 +66,7 @@ class Events(Resource):
             'user_name': None,
             ## the following are for notification events
             'option': None,
-            'email': None
+            'email': None,
         }
         # previous event (used for 'user_action' logic)
         e_dict_previous = {}
@@ -295,10 +295,15 @@ class Events(Resource):
                 nr_event_info['requestTypeCd'] = event_json_data['entity_type_cd']
 
     @staticmethod
-    @api.expect(api.model('EventPayload', {
-        'action': fields.String(required=True, description='Action name for the event'),
-        'eventJson': fields.Raw(required=False, description='Additional event data (optional)')
-    }))
+    @api.expect(
+        api.model(
+            'EventPayload',
+            {
+                'action': fields.String(required=True, description='Action name for the event'),
+                'eventJson': fields.Raw(required=False, description='Additional event data (optional)'),
+            },
+        )
+    )
     @api.doc(
         description='Record a new event for a specific name request',
         params={'nr': 'NR number'},
@@ -324,7 +329,7 @@ class Events(Resource):
             EventRecorder.record_as_system(
                 payload.get('action'),
                 nrd,  # Pass the Name Request ID instead of the request object
-                event_json
+                event_json,
             )
 
             return make_response(jsonify({'message': 'Event recorded successfully'}), 201)
@@ -433,4 +438,3 @@ class SingleEvent(Resource):
         except Exception as e:
             current_app.logger.error(f'Failed to update event {event_id}: {e}')
             return make_response(jsonify({'message': f'Failed to update event {event_id}: {str(e)}'}), 500)
-

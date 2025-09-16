@@ -3,25 +3,12 @@ from http import HTTPStatus
 
 from flask import json, jsonify
 
-from namex.models import (
-    Applicant as ApplicantDAO,
-)
-from namex.models import (
-    Comment as CommentDAO,
-)
-from namex.models import (
-    Event as EventDAO,
-)
-from namex.models import (
-    Name as NameDAO,
-)
-from namex.models import (
-    Request as RequestDAO,
-)
-from namex.models import (
-    State,
-    User,
-)
+from namex.models import Applicant as ApplicantDAO
+from namex.models import Comment as CommentDAO
+from namex.models import Event as EventDAO
+from namex.models import Name as NameDAO
+from namex.models import Request as RequestDAO
+from namex.models import State, User
 
 from .. import integration_oracle_namesdb
 from ..end_points.util import create_header

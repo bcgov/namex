@@ -1,10 +1,8 @@
-import os
 
-from flask import current_app, request
+from flask import request
 
 from namex.constants import NameRequestPatchActions
 from namex.models import Request, State
-from namex.services.name_request.exceptions import NameRequestException
 from namex.services.name_request.name_request import NameRequestService
 
 from .abstract_nr_resource import AbstractNameRequestResource
@@ -19,8 +17,6 @@ class BaseNameRequestResource(AbstractNameRequestResource):
     """
 
     def initialize(self):
-        self.validate_config(current_app)
-
         # Store a copy of the request data to our class instance
         request_json = request.get_json()
         self.request_data = request_json if request_json else {}
@@ -31,14 +27,6 @@ class BaseNameRequestResource(AbstractNameRequestResource):
 
         # Set the request data to the service
         self.nr_service.request_data = self.request_data
-
-    @classmethod
-    def validate_config(cls, app):
-        db_host = app.config.get('DB_HOST', None)
-        db_unix_socket = os.getenv('NAMEX_DATABASE_UNIX_SOCKET', None)
-        if not db_host and not db_unix_socket:
-            cls.log_error('ENV is not set', None)
-            raise NameRequestException(message='Internal server error')
 
     """
     The actual methods that map the request data to our domain models and persist the data.

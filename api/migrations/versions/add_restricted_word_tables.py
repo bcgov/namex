@@ -5,9 +5,8 @@ Revises: add_decision_fields_to_name
 Create Date: 2018-06-26 13:43:00
 
 """
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = 'add_restricted_word_tables'
@@ -25,13 +24,13 @@ def upgrade():
                     sa.Column('consenting_body', sa.String(length=195), nullable=True),
                     sa.Column('instructions', sa.String(length=195), nullable=True))
     op.execute(
-        "COMMENT ON TABLE public.restricted_condition IS 'The conditions against a restricted word.  The conditions can apply to one or more rows.'; "
+        "COMMENT ON TABLE restricted_condition IS 'The conditions against a restricted word.  The conditions can apply to one or more rows.'; "
     )
 
 
     op.execute(
         """
-        CREATE SEQUENCE public.restricted_condition_id 
+        CREATE SEQUENCE IF NOT EXISTS restricted_condition_id
         START WITH 1 
         INCREMENT BY 1 
         NO MINVALUE 
@@ -45,7 +44,7 @@ def upgrade():
                     sa.Column('word_phrase', sa.String(length=60), nullable=True))
 
     op.execute(
-        "COMMENT ON TABLE public.restricted_word IS 'Restricted words or word phrases that may not be used in a name at all or require consent from a specific organization.';"
+        "COMMENT ON TABLE restricted_word IS 'Restricted words or word phrases that may not be used in a name at all or require consent from a specific organization.';"
     )
 
     restricted_word_condition_table = op.create_table('restricted_word_condition',
@@ -53,7 +52,7 @@ def upgrade():
                     sa.Column('word_id', sa.Integer, nullable=False))
 
     op.execute(
-        "COMMENT ON TABLE public.restricted_word_condition IS 'An associative entity to resolve a restricted word having multiple conditions and a condition applying to multiple words.';"
+        "COMMENT ON TABLE restricted_word_condition IS 'An associative entity to resolve a restricted word having multiple conditions and a condition applying to multiple words.';"
     )
 
 
@@ -72,7 +71,7 @@ def upgrade():
 
     op.execute(
         """
-        CREATE OR REPLACE FUNCTION public.get_restricted_words(p_name_choice text) RETURNS text
+        CREATE OR REPLACE FUNCTION get_restricted_words(p_name_choice text) RETURNS text
         LANGUAGE plpgsql
         AS $$DECLARE 
         v_word_phrase CHARACTER(100); 

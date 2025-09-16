@@ -821,7 +821,6 @@ class SolrQueries:
             current_app.logger.warning(f'Error in getting identity token: {e.message}')
             return None
 
-
     @classmethod
     def _synonyms_exist(cls, token, col):
         solr_synonyms_api_url = current_app.config.get('SOLR_SYNONYMS_API_URL', None)
@@ -839,9 +838,7 @@ class SolrQueries:
             if id_token is None:
                 connection = request.urlopen(query)
             else:
-                connection = request.urlopen(request.Request(
-                    query, headers={'Authorization': f'Bearer {id_token}'}
-                ))
+                connection = request.urlopen(request.Request(query, headers={'Authorization': f'Bearer {id_token}'}))
         except HTTPError as http_error:
             # Expected when the token does not have synonyms.
             if http_error.code == 404:
@@ -870,9 +867,7 @@ class SolrQueries:
             if id_token is None:
                 connection = request.urlopen(query)
             else:
-                connection = request.urlopen(request.Request(
-                    query, headers={'Authorization': f'Bearer {id_token}'}
-                ))
+                connection = request.urlopen(request.Request(query, headers={'Authorization': f'Bearer {id_token}'}))
         except HTTPError as http_error:
             # Expected when the token does not have synonyms.
             if http_error.code == 404:

@@ -1,92 +1,88 @@
 from __future__ import with_statement
-from alembic import context
-from sqlalchemy import engine_from_config, pool
-from logging.config import fileConfig
+
 import logging
+from logging.config import fileConfig
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
-config = context.config
-
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
-fileConfig(config.config_file_name)
-logger = logging.getLogger('alembic.env')
-
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
+from alembic import context
 from flask import current_app
-config.set_main_option('sqlalchemy.url',
-                       current_app.config.get('SQLALCHEMY_DATABASE_URI'))
-target_metadata = current_app.extensions['migrate'].db.metadata
+from sqlalchemy import text
 
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+from config import MigrationConfig
 
+config = context.config
+fileConfig(config.config_file_name)
+logger = logging.getLogger("alembic.env")
+
+def get_engine():
+    try:
+        return current_app.extensions["migrate"].db.get_engine()
+    except (TypeError, AttributeError):
+        return current_app.extensions["migrate"].db.engine
+
+def get_engine_url():
+    try:
+        return get_engine().url.render_as_string(hide_password=False).replace("%", "%%")
+    except AttributeError:
+        return str(get_engine().url).replace("%", "%%")
+
+config.set_main_option("sqlalchemy.url", get_engine_url())
+target_metadata = current_app.extensions["migrate"].db.metadata
+
+def get_list_from_config(config, key):
+    arr = config.get_main_option(key, [])
+    if arr:
+        arr = [token for a in arr.split("\n") for b in a.split(",") if (token := b.strip())]
+    return arr
+
+exclude_tables = get_list_from_config(config, "exclude_tables")
+
+def include_object(object, name, type_, reflected, compare_to):
+    return not (type_ == "table" and name in exclude_tables)
 
 def run_migrations_offline():
-    """Run migrations in 'offline' mode.
-
-    This configures the context with just a URL
-    and not an Engine, though an Engine is acceptable
-    here as well.  By skipping the Engine creation
-    we don't even need a DBAPI to be available.
-
-    Calls to context.execute() here emit the given string to the
-    script output.
-
-    """
     url = config.get_main_option("sqlalchemy.url")
-    context.configure(url=url)
+    context.configure(
+        url=url,
+        target_metadata=target_metadata,
+        literal_binds=True,
+        include_object=include_object
+    )
 
     with context.begin_transaction():
         context.run_migrations()
 
-
 def run_migrations_online():
-    """Run migrations in 'online' mode.
-
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
-    """
-
-    # this callback is used to prevent an auto-migration from being generated
-    # when there are no changes to the schema
-    # reference: http://alembic.zzzcomputing.com/en/latest/cookbook.html
     def process_revision_directives(context, revision, directives):
-        if getattr(config.cmd_opts, 'autogenerate', False):
+        if getattr(config.cmd_opts, "autogenerate", False):
             script = directives[0]
             if script.upgrade_ops.is_empty():
                 directives[:] = []
-                logger.info('No changes in schema detected.')
+                logger.info("No changes in schema detected.")
 
-    def include_object(object, name, type_, reflected, compare_to):
-        if (type_ == "table" and reflected):
-            return False
-        else:
-            return True
+    connectable = get_engine()
 
-    engine = engine_from_config(config.get_section(config.config_ini_section),
-                                prefix='sqlalchemy.',
-                                poolclass=pool.NullPool)
+    with connectable.connect() as connection:
+        # Get existing configure args but remove compare_type if present
+        configure_args = current_app.extensions["migrate"].configure_args or {}
+        if 'compare_type' in configure_args:
+            del configure_args['compare_type']
 
-    connection = engine.connect()
-    context.configure(connection=connection,
-                      target_metadata=target_metadata,
-                      include_object=include_object,
-                      process_revision_directives=process_revision_directives,
-                      **current_app.extensions['migrate'].configure_args)
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            process_revision_directives=process_revision_directives,
+            include_object=include_object,
+            compare_type=True,  # Only set here explicitly
+            **configure_args
+        )
 
-    try:
         with context.begin_transaction():
+            owner_role = MigrationConfig.DB_OWNER
+            connection.execute(text(f'SET ROLE "{owner_role}";'))
+            result = connection.execute(text("SELECT current_user, session_user;"))
+            logger.info(f"User running migration is: {result.fetchone()}")
             context.run_migrations()
-    finally:
-        connection.close()
+            connection.execute(text("RESET ROLE;"))
 
 if context.is_offline_mode():
     run_migrations_offline()
