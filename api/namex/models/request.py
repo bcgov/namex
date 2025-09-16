@@ -13,16 +13,11 @@ from sqlalchemy import Date, and_, cast, event, func, select, text
 from sqlalchemy.orm import backref
 from sqlalchemy.orm.attributes import get_history
 
-from namex.constants import (
-    EntityTypes,
-    LegacyEntityTypes,
-    NameState,
-)
+from namex.constants import EntityTypes, LegacyEntityTypes, NameState
 from namex.exceptions import BusinessException
 
 # TODO: Only trace if LOCAL_DEV_MODE / DEBUG conf exists
 # from flask_sqlalchemy import get_debug_queries
-from namex.services.lookup import nr_filing_actions
 from namex.utils import queue_util
 
 # noinspection PyPep8Naming
@@ -216,6 +211,9 @@ class Request(db.Model):
             'notifiedBeforeExpiry': self.notifiedBeforeExpiry,
             'notifiedExpiry': self.notifiedExpiry,
         }
+        # Lazy import to avoid circular dependency
+        from namex.services.lookup import nr_filing_actions
+
         if nr_actions := nr_filing_actions.get_actions(self.requestTypeCd, self.entity_type_cd, self.request_action_cd):
             nr_json['legalType'] = nr_actions.get('legalType')
             nr_json['target'] = nr_actions.get('target')
@@ -531,59 +529,63 @@ class Request(db.Model):
             unit_time = 60 * 60  # Default to hours for priority queue
 
         # Step 1: decision_candidates CTE
-        decision_candidates = select(
-            Event.nrId.label('nr_id'),
-            Event.eventDate.label('event_dt'),
-            Event.stateCd.label('state_cd'),
-            Event.action,
-            Event.userId.label('user_id')
-        ).where(
-            Event.action == 'patch',
-            Event.stateCd.in_(['APPROVED', 'CONDITIONAL', 'REJECTED', 'CANCELLED']),
-            Event.userId != 1,
-            cast(Event.eventDate, Date) >= cast(func.now() - timedelta(days=7), Date)
-        ).cte('decision_candidates')
+        decision_candidates = (
+            select(
+                Event.nrId.label('nr_id'),
+                Event.eventDate.label('event_dt'),
+                Event.stateCd.label('state_cd'),
+                Event.action,
+                Event.userId.label('user_id'),
+            )
+            .where(
+                Event.action == 'patch',
+                Event.stateCd.in_(['APPROVED', 'CONDITIONAL', 'REJECTED', 'CANCELLED']),
+                Event.userId != 1,
+                cast(Event.eventDate, Date) >= cast(func.now() - timedelta(days=7), Date),
+            )
+            .cte('decision_candidates')
+        )
 
         # Step 2: decision_counts CTE
-        decision_counts = select(
-            Event.nrId.label('nr_id'),
-            func.count().label('cnt')
-        ).join(
-            decision_candidates,
-            decision_candidates.c.nr_id == Event.nrId
-        ).where(
-            Event.action == 'patch',
-            Event.stateCd.in_(['APPROVED', 'CONDITIONAL', 'REJECTED', 'CANCELLED']),
-            Event.userId != 1
-        ).group_by(
-            Event.nrId
-        ).cte('decision_counts')
+        decision_counts = (
+            select(Event.nrId.label('nr_id'), func.count().label('cnt'))
+            .join(decision_candidates, decision_candidates.c.nr_id == Event.nrId)
+            .where(
+                Event.action == 'patch',
+                Event.stateCd.in_(['APPROVED', 'CONDITIONAL', 'REJECTED', 'CANCELLED']),
+                Event.userId != 1,
+            )
+            .group_by(Event.nrId)
+            .cte('decision_counts')
+        )
 
         # Step 3: first_decision_events CTE (join and filter cnt == 1)
-        first_decision_events = select(
-            decision_candidates
-        ).join(
-            decision_counts,
-            decision_candidates.c.nr_id == decision_counts.c.nr_id
-        ).where(
-            decision_counts.c.cnt == 1
-        ).cte('first_decision_events')
+        first_decision_events = (
+            select(decision_candidates)
+            .join(decision_counts, decision_candidates.c.nr_id == decision_counts.c.nr_id)
+            .where(decision_counts.c.cnt == 1)
+            .cte('first_decision_events')
+        )
 
         # Step 4: Final median calculation
         median_waiting_time_query = (
             select(
-                (func.percentile_cont(0.5).within_group(
-                    func.extract('epoch', first_decision_events.c.event_dt) -
-                    func.extract('epoch', Request.__table__.c.submitted_date)
-                ) / unit_time).label('examinationTime')
+                (
+                    func.percentile_cont(0.5).within_group(
+                        func.extract('epoch', first_decision_events.c.event_dt)
+                        - func.extract('epoch', Request.__table__.c.submitted_date)
+                    )
+                    / unit_time
+                ).label('examinationTime')
             )
             .select_from(
-                first_decision_events
-                .join(Request, Request.__table__.c.id == first_decision_events.c.nr_id)
-                .join(Payment, Payment.__table__.c.nr_id == Request.id)
+                first_decision_events.join(Request, Request.__table__.c.id == first_decision_events.c.nr_id).join(
+                    Payment, Payment.__table__.c.nr_id == Request.id
+                )
             )
             .where(
-                (Payment.__table__.c.payment_completion_date - Request.__table__.c.submitted_date) <= text("interval '5 days'")
+                (Payment.__table__.c.payment_completion_date - Request.__table__.c.submitted_date)
+                <= text("interval '5 days'")
             )
         )
 
@@ -756,7 +758,7 @@ def on_insert_or_update_nr(mapper, connection, request):
 
     Temporary NRs (nrNum starting with 'NR L') are discarded.
     """
-    if not request.nrNum.startswith('NR L'):
+    if request.nrNum and not request.nrNum.startswith('NR L'):
         state_cd_history = get_history(request, 'stateCd')
         nr_num_history = get_history(request, 'nrNum')
         if len(nr_num_history.added) or len(state_cd_history.added):

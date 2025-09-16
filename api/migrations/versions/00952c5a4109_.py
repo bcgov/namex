@@ -5,9 +5,9 @@ Revises: b0fc67a096fe
 Create Date: 2021-06-02 11:24:29.085137
 
 """
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
+from sqlalchemy.sql import text
 
 # revision identifiers, used by Alembic.
 revision = '00952c5a4109'
@@ -23,7 +23,7 @@ def upgrade():
     # ### end Alembic commands ###
     conn = op.get_bind()
     # add all names to nameSearch column
-    cd_exists = conn.execute("select * from states where cd='PENDING_PAYMENT'")
+    cd_exists = conn.execute(text("select * from states where cd='PENDING_PAYMENT'"))
 
 
 def downgrade():

@@ -6,8 +6,7 @@ Create Date: 2020-11-30 10:43:13.218082
 
 """
 from alembic import op
-from sqlalchemy import Table, MetaData
-
+from sqlalchemy import MetaData, Table
 
 # revision identifiers, used by Alembic.
 revision = '8b99aacb139b'
@@ -18,10 +17,10 @@ depends_on = None
 
 def upgrade():
     # Get metadata from current connection
-    meta = MetaData(bind=op.get_bind())
+    meta = MetaData()
 
     # Pass in tuple with tables we want to reflect, otherwise whole database will get reflected
-    meta.reflect(only=('states',))
+    meta.reflect(bind=op.get_bind(), only=('states',))
 
     # Define table representation
     states_tbl = Table('states', meta)

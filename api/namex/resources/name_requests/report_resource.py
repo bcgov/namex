@@ -33,7 +33,7 @@ class ReportResource(Resource):
 
     @api.doc(
         description='Generate and return the name request PDF results report. Requires either applicant email or '
-                    'phone in headers, and the name request must be approved, consumed, expired, or rejected.',
+        'phone in headers, and the name request must be approved, consumed, expired, or rejected.',
         params={'nr_id': 'Internal ID of the name request'},
         responses={
             200: 'PDF report generated and returned successfully',

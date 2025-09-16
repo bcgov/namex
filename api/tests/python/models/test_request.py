@@ -114,8 +114,16 @@ def test_name_search_populated_by_name():
     name.name = 'CHANGED'
     name.save_to_db()
 
+    # Ensure the session is flushed and clear any cached data
+    from namex.models import db
+    db.session.flush()
+    db.session.expunge_all()  # Clear all objects from the session
+
+    # refresh the request object to get updated nameSearch
+    test_updated = RequestDAO.find_by_id(nr.id)
+
     # check nameSearch
-    assert nr.nameSearch == '(|1CHANGED1|)'
+    assert test_updated.nameSearch == '(|1CHANGED1|)'
 
 
 def test_has_consumed_name():

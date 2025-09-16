@@ -14,7 +14,9 @@ MSG_NOT_FOUND = 'Resource not found'
 
 
 # Register a local namespace for the NR reserve
-entity_api = Namespace('Entity Info', description='Fetch business details such as legal name, status, and filing options')
+entity_api = Namespace(
+    'Entity Info', description='Fetch business details such as legal name, status, and filing options'
+)
 
 
 @cors_preflight('GET')

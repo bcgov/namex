@@ -62,7 +62,6 @@ state_data = [
 ]
 
 
-@pytest.mark.skip
 def assert_names_are_mapped_correctly(req_names, res_names):
     print('\n-------- Test names --------\n')
     for req_name in req_names:
@@ -88,7 +87,6 @@ def assert_names_are_mapped_correctly(req_names, res_names):
     print('\n-------- Test names complete --------\n')
 
 
-@pytest.mark.skip
 def assert_applicant_is_mapped_correctly(req_applicant, res_applicant):
     print('\n-------- Test applicant --------\n')
     print('\nCompare request applicant: \n' + repr(req_applicant) + '\n')
@@ -104,17 +102,29 @@ def assert_applicant_is_mapped_correctly(req_applicant, res_applicant):
     print('\n-------- Test applicant complete --------\n')
 
 
-@pytest.mark.skip
 def add_states_to_db(states):
+    """Add states to database only if they don't already exist."""
     for code, desc in states:
-        state = State(cd=code, description=desc)
-        state.save_to_db()
+        # Check if state already exists (migrations may have loaded it)
+        existing_state = State.query.filter_by(cd=code).first()
+        if not existing_state:
+            state = State(cd=code, description=desc)
+            state.save_to_db()
 
 
-@pytest.mark.skip
 def add_test_user_to_db():
+    """Create or get the service account user expected by the API."""
+    # The API expects this specific username
+    expected_username = 'name_request_service_account'
+
+    # Check if user already exists
+    existing_user = User.query.filter_by(username=expected_username).first()
+    if existing_user:
+        return existing_user
+
+    # Create the expected service account user
     user = User(
-        username='name_request_service_account',
+        username=expected_username,
         firstname='Test',
         lastname='User',
         sub='idir/name_request_service_account',
@@ -122,32 +132,35 @@ def add_test_user_to_db():
         idp_userid='123',
         login_source='IDIR',
     )
-    user.save_to_db()
 
-    return user
+    try:
+        user.save_to_db()
+        return user
+    except Exception:
+        # If there's a conflict, try to fetch the existing user again
+        # This can happen in concurrent test runs
+        existing_user = User.query.filter_by(username=expected_username).first()
+        if existing_user:
+            return existing_user
+        raise
 
 
-@pytest.mark.skip
 def create_approved_nr(client, nr_data=None):
     return create_test_nr(nr_data, State.APPROVED)
 
 
-@pytest.mark.skip
 def create_cancelled_nr(client, nr_data=None):
     return create_test_nr(nr_data, State.CANCELLED)
 
 
-@pytest.mark.skip
 def create_expired_nr(client, nr_data=None):
     return create_test_nr(nr_data, State.EXPIRED)
 
 
-@pytest.mark.skip
 def create_consumed_nr(client, nr_data=None):
     return create_test_nr(nr_data, State.CONSUMED)
 
 
-@pytest.mark.skip
 def create_draft_nr(client, nr_data=None, use_api=True):
     """
     You can optionally set the use_api param to False to create an NR using model persistence as opposed to the API!
@@ -162,7 +175,6 @@ def create_draft_nr(client, nr_data=None, use_api=True):
     return create_test_nr(nr_data, State.DRAFT)
 
 
-@pytest.mark.skip
 def create_test_nr(nr_data=None, nr_state=State.DRAFT):
     """
     Create a draft NR and persist (NOT using the API) to use as the initial state for each test.
@@ -198,7 +210,10 @@ def create_test_nr(nr_data=None, nr_state=State.DRAFT):
         nr.activeUser = user
         nr.submitter = user
         nr.submitter_userid = user.id
-        nr.nrNum = 'NR 123456'
+        # Generate unique NR number using timestamp to prevent conflicts (max 10 chars)
+        import time
+        unique_suffix = str(int(time.time()))[-6:]  # Last 6 digits of timestamp
+        nr.nrNum = f'NR {unique_suffix}'
 
         nr.save_to_db()
 
@@ -207,7 +222,6 @@ def create_test_nr(nr_data=None, nr_state=State.DRAFT):
         print(repr(err))
 
 
-@pytest.mark.skip
 def post_test_nr(client, nr_data=None, nr_state=State.DRAFT):
     """
     Create a draft NR, using the API, to use as the initial state for each test.
