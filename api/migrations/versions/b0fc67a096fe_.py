@@ -5,11 +5,10 @@ Revises: 0d8662dfb68a
 Create Date: 2021-05-05 14:24:03.870443
 
 """
-from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.sql import table, column
+from alembic import op
 from sqlalchemy import String
-
+from sqlalchemy.sql import column, table, text
 
 # revision identifiers, used by Alembic.
 revision = 'b0fc67a096fe'
@@ -29,7 +28,7 @@ def upgrade():
     # ### end Alembic commands ###
 
     conn = op.get_bind()
-    cd_exists = conn.execute("select * from states where cd='PENDING_PAYMENT'")
+    cd_exists = conn.execute(text("select * from states where cd='PENDING_PAYMENT'"))
     if not cd_exists.one_or_none():
         states_table = table(
             'states',

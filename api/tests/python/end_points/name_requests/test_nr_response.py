@@ -70,7 +70,7 @@ def test_draft_response(priorityCd, queue_time_returned, status_cd, client, jwt,
     assert test_nr is not None
 
     # Grab the record using the API
-    mock_auth_affiliation(nr_num='NR 123456')
+    mock_auth_affiliation()  # Mock any NR number
     get_response = get_nr(client, test_nr.id, jwt)
     nr = json.loads(get_response.data)
     assert nr is not None

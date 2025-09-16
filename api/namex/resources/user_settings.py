@@ -9,14 +9,16 @@ from namex.utils.auth import cors_preflight
 
 api = Namespace('User Settings', description='Fetch or update saved user preferences')
 
+
 @api.errorhandler(AuthError)
 def handle_auth_error(ex):
     return {'message': 'Unauthorized', 'details': ex.error.get('description') or 'Invalid or missing token'}, 401
 
 
-user_settings_model = api.model('UserSettings', {
-    'searchColumns': fields.List(fields.String, required=True, description='List of search column names')
-})
+user_settings_model = api.model(
+    'UserSettings',
+    {'searchColumns': fields.List(fields.String, required=True, description='List of search column names')},
+)
 
 
 @cors_preflight('GET, PUT')

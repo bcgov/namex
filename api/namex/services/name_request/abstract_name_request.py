@@ -119,19 +119,19 @@ class AbstractNameRequestMixin(object):
     @classmethod
     def get_request_sequence(cls):
         seq = db.Sequence('requests_id_seq')
-        nr_id = db.engine.execute(seq)
+        nr_id = db.session.execute(seq)
         return nr_id
 
     @classmethod
     def get_applicant_sequence(cls):
         seq = db.Sequence('applicants_party_id_seq')
-        party_id = db.engine.execute(seq)
+        party_id = db.session.execute(seq)
         return party_id
 
     @classmethod
     def get_name_sequence(cls):
         seq = db.Sequence('names_id_seq')
-        name_id = db.engine.execute(seq)
+        name_id = db.session.execute(seq)
         return name_id
 
     @classmethod

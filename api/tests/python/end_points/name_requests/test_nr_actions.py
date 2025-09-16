@@ -22,9 +22,9 @@ from ...common.test_name_request_utils import (
 # from ..common import token_header, claims
 from ..common.http import build_request_uri, build_test_query, get_test_headers
 from ..common.logging import log_request_path
-from ..name_requests.test_setup_utils.test_helpers import add_test_user_to_db
 from .configuration import API_BASE_URI
 from .test_setup_utils.test_helpers import (
+    add_test_user_to_db,
     assert_applicant_is_mapped_correctly,
     assert_names_are_mapped_correctly,
     create_approved_nr,
@@ -38,6 +38,12 @@ from .test_setup_utils.test_helpers import (
 # Define our data
 # Check NR number is the same because these are PATCH and call change_nr
 def build_test_input_fields():
+    """Build test input fields with unique data to prevent conflicts."""
+    import random
+    import uuid
+
+    unique_id = uuid.uuid4().hex[:8]
+
     return {
         'additionalInfo': '',
         'consentFlag': None,
@@ -47,24 +53,13 @@ def build_test_input_fields():
         'expirationDate': None,
         'furnished': 'N',
         'hasBeenReset': False,
-        # 'lastUpdate': None,
-        'natureBusinessInfo': 'Test',
-        # 'nrNum': '',
-        # 'nwpta': '',
-        # 'previousNr': '',
-        # 'previousRequestId': '',
-        # 'previousStateCd': '',
+        'natureBusinessInfo': f'Test business {unique_id}',
         'priorityCd': 'N',
-        # 'priorityDate': None,
         'requestTypeCd': 'CR',
         'request_action_cd': 'NEW',
-        # 'source': 'NAMEREQUEST',
-        # 'state': 'DRAFT',
-        # 'stateCd': 'DRAFT',
         'submitCount': 1,
-        # 'submittedDate': None,
-        'submitter_userid': 'name_request_service_account',
-        'userId': 'name_request_service_account',
+        'submitter_userid': f'test_user_{unique_id}',
+        'userId': f'test_user_{unique_id}',
         'xproJurisdiction': '',
     }
 
@@ -915,18 +910,20 @@ draft_input_fields = {
         ('Resubmit BC', 'RESUBMIT', EntityTypes.BENEFIT_COMPANY.value),
     ],
 )
-def test_temp_nr(client, test_name, request_action_cd, entity_type_cd):
+def test_temp_nr(client, test_name, request_action_cd, entity_type_cd, unique_draft_nr_data):
     """
-    Test temp NRs
+    Test temp NRs - now uses fixture for unique data isolation
     """
-    draft_input_fields['request_action_cd'] = request_action_cd
-    draft_input_fields['entity_type_cd'] = entity_type_cd
+    # Use unique data from fixture instead of global shared data
+    test_input_fields = unique_draft_nr_data.copy()
+    test_input_fields['request_action_cd'] = request_action_cd
+    test_input_fields['entity_type_cd'] = entity_type_cd
 
     add_test_user_to_db()
 
     path = build_request_uri(API_BASE_URI, '')
     headers = get_test_headers()
-    post_response = client.post(path, data=json.dumps(draft_input_fields), headers=headers)
+    post_response = client.post(path, data=json.dumps(test_input_fields), headers=headers)
     draft_nr = json.loads(post_response.data)
 
     assert draft_nr['id'] > 0

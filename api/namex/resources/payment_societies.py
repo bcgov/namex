@@ -15,22 +15,29 @@ from namex.utils.auth import cors_preflight
 # Register a local namespace for the payment_society
 api = Namespace('Payment Society', description='Manage payment records for societies')
 
+
 @api.errorhandler(AuthError)
 def handle_auth_error(ex):
     return {'message': 'Unauthorized', 'details': ex.error.get('description') or 'Invalid or missing token'}, 401
 
+
 # Swagger input model for POST payload
-payment_society_payload = api.model('PaymentSocietyPayload', {
-    'nrNum': fields.String(required=True, description='Name Request number (e.g., NR1234567)'),
-    'corpNum': fields.String(required=False, description='Corporation number'),
-    'paymentCompletionDate': fields.DateTime(required=False, description='Payment completion timestamp (ISO format)'),
-    'paymentStatusCode': fields.String(required=False, description='Status code for payment'),
-    'paymentFeeCode': fields.String(required=False, description='Fee code used'),
-    'paymentType': fields.String(required=False, description='Type of payment'),
-    'paymentAmount': fields.Float(required=False, description='Payment amount in dollars'),
-    'paymentJson': fields.Raw(required=False, description='Raw payment metadata (JSON object)'),
-    'paymentAction': fields.String(required=False, description='Action taken (e.g., create, refund)')
-})
+payment_society_payload = api.model(
+    'PaymentSocietyPayload',
+    {
+        'nrNum': fields.String(required=True, description='Name Request number (e.g., NR1234567)'),
+        'corpNum': fields.String(required=False, description='Corporation number'),
+        'paymentCompletionDate': fields.DateTime(
+            required=False, description='Payment completion timestamp (ISO format)'
+        ),
+        'paymentStatusCode': fields.String(required=False, description='Status code for payment'),
+        'paymentFeeCode': fields.String(required=False, description='Fee code used'),
+        'paymentType': fields.String(required=False, description='Type of payment'),
+        'paymentAmount': fields.Float(required=False, description='Payment amount in dollars'),
+        'paymentJson': fields.Raw(required=False, description='Raw payment metadata (JSON object)'),
+        'paymentAction': fields.String(required=False, description='Action taken (e.g., create, refund)'),
+    },
+)
 
 
 @cors_preflight('GET')
