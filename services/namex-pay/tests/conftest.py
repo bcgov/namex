@@ -62,19 +62,40 @@ def not_raises(exception):
 
 @pytest.fixture(autouse=True)
 def queue_publish(monkeypatch):
-    """Pubsub publish mock.
-    """
+    """Pubsub publish mock."""
     topics = []
-    msg=bytearray()
-    def mock_publish(self, topic: str, payload: bytes):
-        nonlocal topics
-        nonlocal msg
-        topics.append(topic)
-        msg[:] = payload
-        return {}
+    messages = []  # Changed to store multiple messages
+    ordering_keys = []  # Track ordering keys if needed
 
+    def mock_publish(self, topic: str, payload: bytes, **kwargs):
+        nonlocal topics, messages, ordering_keys
+        topics.append(topic)
+        messages.append(payload)
+
+        # Store ordering key if provided
+        if 'ordering_key' in kwargs:
+            ordering_keys.append(kwargs['ordering_key'])
+
+        # Return a mock future object with result method
+        class MockFuture:
+            def result(self):
+                return {'message_id': 'mock_message_id'}
+
+        return MockFuture()
+
+    # Mock the publisher property to avoid actual GCP initialization
+    def mock_publisher_property(self):
+        return self  # Return self since we're mocking the publish method directly
+
+    # Apply both mocks
     monkeypatch.setattr(GcpQueue, 'publish', mock_publish)
-    return locals()
+    monkeypatch.setattr(GcpQueue, 'publisher', property(mock_publisher_property))
+
+    return {
+        'topics': topics,
+        'messages': messages,
+        'ordering_keys': ordering_keys
+    }
 
 
 # fixture to freeze utcnow to a fixed date-time
@@ -125,7 +146,6 @@ def client_id():
     return f'client-{_id}'
 
 
-
 @pytest.fixture(scope='function')
 def db(app):  # pylint: disable=redefined-outer-name, invalid-name
     """Return a session-wide initialised database.
@@ -133,29 +153,14 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
     Drops all existing tables - Meta follows Postgres FKs
     """
     with app.app_context():
-        # Clear out any existing tables
-        metadata = MetaData(_db.engine)
-        metadata.reflect()
-        for table in metadata.tables.values():
-            for fk in table.foreign_keys:  # pylint: disable=invalid-name
-                _db.engine.execute(DropConstraint(fk.constraint))
-        with suppress(Exception):
-            metadata.drop_all()
-        with suppress(Exception):
-            _db.drop_all()
-
-        sequence_sql = """SELECT sequence_name FROM information_schema.sequences
-                          WHERE sequence_schema='public'
-                       """
-
-        sess = _db.session()
-        for seq in [name for (name,) in sess.execute(text(sequence_sql))]:
-            try:
-                sess.execute(text('DROP SEQUENCE public.%s ;' % seq))
-                print('DROP SEQUENCE public.%s ' % seq)
-            except Exception as err:  # pylint: disable=broad-except
-                print(f'Error: {err}')
-        sess.commit()
+        # Clear out any existing tables - use a more robust approach
+        with _db.engine.connect() as conn:
+            # Drop all tables first with CASCADE to handle dependencies
+            conn.execute(text('DROP SCHEMA public CASCADE;'))
+            conn.execute(text('CREATE SCHEMA public;'))
+            conn.execute(text('GRANT ALL ON SCHEMA public TO postgres;'))
+            conn.execute(text('GRANT ALL ON SCHEMA public TO public;'))
+            conn.commit()
 
         # ##############################################
         # There are 2 approaches, an empty database, or the same one that the app will use
@@ -198,9 +203,3 @@ def mock_publish(mocker):
     """Mock pubsub publish events."""
     mocker.patch('namex.utils.queue_util.send_name_request_state_msg')
     mocker.patch('namex.utils.queue_util.publish_email_notification')
-
-
-@pytest.fixture(autouse=True)
-def mock_queue_auth(mocker):
-    """Mock queue authorization."""
-    mocker.patch('gcp_queue.gcp_auth.verify_jwt', return_value='')

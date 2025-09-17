@@ -18,6 +18,7 @@ The entry-point is the **cb_subscription_handler**
 """
 import time
 from dataclasses import dataclass
+from datetime import timedelta
 from enum import Enum
 from http import HTTPStatus
 from typing import Optional
@@ -33,11 +34,10 @@ from simple_cloudevent import SimpleCloudEvent
 from sqlalchemy.exc import OperationalError
 from structured_logging import StructuredLogging
 
-from namex_pay.utils import datetime, timedelta
+from namex_pay.utils import datetime
 
 bp = Blueprint('worker', __name__)
-
-logger = StructuredLogging()
+logger = StructuredLogging.get_logger()
 
 NAME_REQUEST_LIFESPAN_DAYS = 56  # TODO this should be defined as a lookup from somewhere
 NAME_REQUEST_EXTENSION_PAD_HOURS = 12  # TODO this should be defined as a lookup from somewhere
@@ -68,30 +68,29 @@ def worker():
     - Once the filing is marked paid, no errors should escape to the Q
     - If there's no matching filing, put back on Q
     """
-    logger.info(f'Incoming raw msg: {request.data}', extra={'request': request})
+    logger.info(f'Incoming raw msg: {request.data}', request=request)
 
     if not (ce := queue.get_simple_cloud_event(request)):
         return {}, HTTPStatus.OK
 
-    logger.info(f'received ce: {str(ce)}', extra={'request': request})
-    logger.info(f'Incoming raw msg: {request.headers}', extra={'request': request})
+    logger.info(f'received ce: {str(ce)}', request=request)
+    logger.info(f'Incoming raw msg: {request.headers}', request=request)
 
 
     if not (payment_token := get_payment_token(ce)) or payment_token.status_code != State.COMPLETED:
         return {}, HTTPStatus.OK
 
     with current_app.app_context():
-        logger.info(f'process namex payment for pay-id: {payment_token.id}', extra={'request': request})
+        logger.info(f'process namex payment for pay-id: {payment_token.id}', request=request)
         ret = {}, HTTPStatus.OK
         try:
             process_payment(ce)
-            logger.info(f'completed ce: {str(ce)}', extra={'request': request})
+            logger.info(f'completed ce: {str(ce)}', request=request)
         except OperationalError:  # message goes back on the queue
-            logger.error(f'Queue locked - Database Issue:: {payment_token.id}', extra={'request': request})
+            logger.error(f'Queue locked - Database Issue:: {payment_token.id}', request=request)
             ret = {}, HTTPStatus.INTERNAL_SERVER_ERROR
         except Exception as e:  # pylint: disable=broad-except # noqa B902
-            # Catch Exception so that any error is still caught and the message is removed from the queue
-            logger.error(f'Queue Error for payment id: {payment_token.id}, with exception: {e}', extra={'request': request})
+            logger.error(f'Queue Error for payment id: {payment_token.id}, with exception: {e}', request=request)
         finally:
             return ret # noqa: B012
 
@@ -130,7 +129,7 @@ def update_payment_record(payment: Payment) -> Optional[Payment]:
     """
     if payment.payment_completion_date:
         msg = f'Queue Issue: Duplicate, payment already processed for payment.id={payment.id}'
-        logger.info(msg, extra={'request': request})
+        logger.info(msg, request=request)
         return None
 
     payment_action = payment.payment_action
@@ -147,7 +146,7 @@ def update_payment_record(payment: Payment) -> Optional[Payment]:
             reapply_payment(nr, payment)
         case _:
             msg = f'Queue Issue: Unknown action:{payment_action} for payment.id={payment.id}'
-            logger.error(msg, extra={'request': request})
+            logger.error(msg, request=request)
             raise Exception(f'Unknown action:{payment_action} for payment.id={payment.id}')
 
 
@@ -155,7 +154,7 @@ def reapply_payment(nr, payment):
     if nr.stateCd != State.APPROVED \
         and nr.expirationDate + timedelta(hours=NAME_REQUEST_EXTENSION_PAD_HOURS) < datetime.utcnow():
         msg = f'Queue Issue: Failed attempt to extend NR for payment.id={payment.id} nr.state{nr.stateCd}, nr.expires:{nr.expirationDate}'
-        logger.error(msg, extra={'request': request})
+        logger.error(msg, request=request)
         raise Exception(msg)
     if is_reapplication_eligible(nr.expirationDate):
         # to avoid duplicate expiration date calculated
@@ -182,7 +181,7 @@ def create_payment(nr, payment):
 def upgrade_payment(nr, payment):
     if nr.stateCd == State.PENDING_PAYMENT:
         msg = f'Queue Issue: Upgrading a non-DRAFT NR for payment.id={payment.id}'
-        logger.error(msg, extra={'request': request})
+        logger.error(msg, request=request)
         raise Exception(msg)
 
     nr.priorityCd = 'Y'
@@ -198,12 +197,12 @@ def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-oute
     """Send receipt info to the mail queue if it hasn't yet been done."""
     if payment.furnished is True:
         msg = f'Queue Issue: Duplicate, already furnished receipt for payment.id={payment.id}'
-        logger.info(msg, extra={'request': request})
+        logger.info(msg, request=request)
         return
 
     nr = None
     msg = f'Start of the furnishing of receipt for payment record:{payment.as_dict()}'
-    logger.info(msg, extra={'request': request})
+    logger.info(msg, request=request)
     try:
         payment.furnished = True
         payment.save_to_db()
@@ -224,7 +223,7 @@ def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-oute
             }}
         )
         msg = f'About to publish email for payment.id={payment.id}'
-        logger.info(msg, extra={'request': request})
+        logger.info(msg, request=request)
         with current_app.app_context():
             namex_topic = current_app.config.get('EMAILER_TOPIC', None)
             payload = queue.to_queue_message(cloud_event_msg)
@@ -234,26 +233,26 @@ def furnish_receipt_message(payment: Payment):  # pylint: disable=redefined-oute
         payment.furnished = False
         payment.save_to_db()
         msg = f'Reset payment furnish status payment.id={payment.id}'
-        logger.error(msg, extra={'request': request})
+        logger.error(msg, request=request)
         raise Exception(err)
 
 
 def process_payment(ce: SimpleCloudEvent):
     """Render the payment status."""
-    logger.debug('entering process payment', extra={'cloud_event': ce})
+    logger.debug('entering process payment', cloud_event=ce)
 
     pay_msg = get_payment_token(ce)
 
     if pay_msg.status_code == PaymentState.TRANSACTION_FAILED.value:
         # TODO: The customer has cancelled out of paying, so we could note this better
         # technically the payment for this service is still pending
-        logger.error('Failed transaction on queue', extra={'payment_msg': pay_msg})
+        logger.error('Failed transaction on queue', payment_msg=pay_msg)
         return
 
     complete_payment_status = [PaymentState.COMPLETED.value, PaymentState.APPROVED.value]
     if pay_msg.status_code in complete_payment_status:  # pylint: disable=R1702
         msg = f'COMPLETED transaction on queue:{pay_msg}'
-        logger.info(msg, extra={'request': request})
+        logger.info(msg, request=request)
         if payment_token := pay_msg.id:
             payment = None
             counter = 1
@@ -265,7 +264,7 @@ def process_payment(ce: SimpleCloudEvent):
 
             if not payment:
                 msg = f'Queue Error: Unable to find payment record for :{pay_msg}'
-                logger.error(msg, extra={'request': request})
+                logger.error(msg, request=request)
                 raise Exception(msg)
 
             if update_payment := update_payment_record(payment):
@@ -284,6 +283,6 @@ def process_payment(ce: SimpleCloudEvent):
             furnish_receipt_message(payment)
         else:
             msg = f'Queue Error: Missing id :{pay_msg}'
-            logger.error(msg, extra={'request': request})
+            logger.error(msg, request=request)
 
         return

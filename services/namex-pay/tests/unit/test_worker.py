@@ -14,6 +14,7 @@
 """The Test Suites to ensure that the worker is operating correctly."""
 import base64
 import json
+import uuid
 from datetime import timedelta
 from http import HTTPStatus
 
@@ -24,7 +25,8 @@ from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent, to_queue_message
 
 from namex_pay.resources.worker import NAME_REQUEST_LIFESPAN_DAYS, get_payment_token
-from namex_pay.utils import datetime, timedelta
+from namex_pay.utils import datetime
+from tests.conftest import queue_publish
 from tests.unit import nested_session
 
 CLOUD_EVENT = SimpleCloudEvent(
@@ -168,14 +170,30 @@ def test_update_payment_record(app,
 
             payment_token = {'id': PAYMENT_TOKEN, 'statusCode': 'COMPLETED', 'filingIdentifier': None, 'corpTypeCode': None}
 
-            message = helper_create_cloud_event_envelope(source='sbc-pay', subject='payment', data=payment_token)
+            ce = SimpleCloudEvent(
+                id=str(uuid.uuid4()),
+                source='sbc-pay',
+                subject='payment',
+                type=QueueMessageTypes.PAYMENT.value,
+                data=payment_token
+            )
 
-            rv = client.post('/', json=message)
+            # Convert CloudEvent to dict using to_structured
+            from simple_cloudevent import to_structured
+            ce_dict = to_structured(ce)
+
+            # Send the CloudEvent directly as JSON
+            rv = client.post('/', json=ce_dict)
 
             # Check
             topics = queue_publish['topics']
-            msg = queue_publish['msg']
+            messages = queue_publish['messages']
 
+            # Get the first message if any were published
+            if messages:
+                msg = messages[0]
+            else:
+                msg = None
             assert rv.status_code == HTTPStatus.OK
             assert len(topics) == 1
             mailer = app.config.get('EMAILER_TOPIC')
@@ -289,12 +307,26 @@ def test_process_payment(app,
         # Test
         payment_token = {'id': PAYMENT_TOKEN, 'statusCode': 'COMPLETED', 'filingIdentifier': None, 'corpTypeCode': None}
 
-        message = helper_create_cloud_event_envelope(source='sbc-pay', subject='payment', data=payment_token)
+        # message = helper_create_cloud_event_envelope(source='sbc-pay', subject='payment', data=payment_token)
 
-        rv = client.post('/', json=message)
+        ce = SimpleCloudEvent(
+            id=str(uuid.uuid4()),
+            source='sbc-pay',
+            subject='payment',
+            type=QueueMessageTypes.PAYMENT.value,
+            data=payment_token
+        )
+
+        # Convert CloudEvent to dict using to_structured
+        from simple_cloudevent import to_structured
+        ce_dict = to_structured(ce)
+
+        # Send the CloudEvent directly as JSON
+        rv = client.post('/', json=ce_dict)
 
         topics = queue_publish['topics']
-        msg = queue_publish['msg']
+        messages = queue_publish['messages']
+
         # Check
         assert rv.status_code == HTTPStatus.OK
         assert len(topics) == 1
@@ -311,6 +343,10 @@ def test_process_payment(app,
         payments[0].payment_status_code == State.COMPLETED
         payments[0].payment_token == PAYMENT_TOKEN
 
+        # Check if any messages were published and get the first one
+        assert len(messages) > 0, 'No messages were published to the queue'
+        msg = messages[0]  # Get the first message
+
         email_pub = json.loads(msg.decode('utf-8').replace("'",'"'))
 
         # Verify message that would be sent to the emailer pubsub
@@ -320,39 +356,3 @@ def test_process_payment(app,
         assert email_pub['data']['request']['header']['nrNum'] == NR_NUMBER
         assert email_pub['data']['request']['paymentToken'] == PAYMENT_TOKEN
         assert email_pub['data']['request']['statusCode'] == State.DRAFT
-
-
-def helper_create_cloud_event_envelope(
-    cloud_event_id: str = None,
-    source: str = 'fake-for-tests',
-    subject: str = 'fake-subject',
-    type: str = QueueMessageTypes.PAYMENT.value,
-    data: dict = {},
-    pubsub_project_id: str = 'PUBSUB_PROJECT_ID',
-    subscription_id: str = 'SUBSCRIPTION_ID',
-    message_id: int = 1,
-    envelope_id: int = 1,
-    attributes: dict = {},
-    ce: SimpleCloudEvent = None,
-):
-    if not data:
-        data = {
-            'email': {
-                'type': 'bn',
-            }
-        }
-    if not ce:
-        ce = SimpleCloudEvent(id=cloud_event_id, source=source, subject=subject, type=type, data=data)
-    #
-    # This needs to mimic the envelope created by GCP PubSb when call a resource
-    #
-    envelope = {
-        'subscription': f'projects/{pubsub_project_id}/subscriptions/{subscription_id}',
-        'message': {
-            'data': base64.b64encode(to_queue_message(ce)).decode('UTF-8'),
-            'messageId': str(message_id),
-            'attributes': attributes,
-        },
-        'id': envelope_id,
-    }
-    return envelope

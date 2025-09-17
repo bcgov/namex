@@ -72,6 +72,7 @@ class Config():  # pylint: disable=too-few-public-methods
 
     DB_SCHEMA = os.getenv('DATABASE_SCHEMA', 'public')
     DB_IP_TYPE = os.getenv('DATABASE_IP_TYPE', 'private')
+    DB_OWNER = os.getenv('DATABASE_OWNER', 'postgres')
 
     if DB_INSTANCE_CONNECTION_NAME := os.getenv('DATABASE_INSTANCE_CONNECTION_NAME', None):
         SQLALCHEMY_DATABASE_URI = 'postgresql+pg8000://'
@@ -105,14 +106,21 @@ class TestConfig(Config):  # pylint: disable=too-few-public-methods
     # POSTGRESQL
     DB_USER = os.getenv('DATABASE_TEST_USERNAME', 'postgres')
     DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD', 'postgres')
-    DB_NAME = os.getenv('DATABASE_TEST_NAME', 'namex_pay')
+    DB_NAME = os.getenv('DATABASE_TEST_NAME', 'unittesting')
     DB_HOST = os.getenv('DATABASE_TEST_HOST', '127.0.0.1')
-    DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
-    SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
+    DB_PORT = os.getenv('DATABASE_TEST_PORT', '54325')
+    SSQLALCHEMY_DATABASE_URI = f'postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
     EMAILER_TOPIC = os.getenv('NAMEX_MAILER_TOPIC', '')
+    NAMEX_NR_STATE_TOPIC = os.getenv('NAMEX_NR_STATE_TOPIC', '')
 
 class ProdConfig(Config):  # pylint: disable=too-few-public-methods
     """Production environment configuration."""
 
     TESTING = False
     DEBUG = False
+
+class MigrationConfig(Config):
+    """Config for db migration."""
+
+    TESTING = False
+    DEBUG = True
