@@ -70,7 +70,7 @@ def worker():
     """
     logger.info(f'Incoming raw msg: {request.data}', request=request)
 
-    if not (ce := queue.get_simple_cloud_event(request)):
+    if not (ce := queue.get_simple_cloud_event(request, wrapped=True)):
         return {}, HTTPStatus.OK
 
     logger.info(f'received ce: {str(ce)}', request=request)
