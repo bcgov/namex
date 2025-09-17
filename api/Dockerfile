@@ -26,7 +26,7 @@ LABEL org.label-schema.vcs-ref=${VCS_REF} \
 
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
-# Install system dependencies and Poetry in optimized layers
+# Install system dependencies and Poetry
 RUN apt-get update && apt-get upgrade -y \
   && apt-get install --no-install-recommends -y \
     curl \
@@ -34,10 +34,6 @@ RUN apt-get update && apt-get upgrade -y \
     libpq-dev \
   && pip install --no-cache-dir "poetry==${POETRY_VERSION}" \
   && poetry --version \
-  # Clean up in same layer to reduce image size
-  && apt-get purge -y --auto-remove \
-    build-essential \
-    curl \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /code
@@ -46,7 +42,8 @@ WORKDIR /code
 RUN groupadd -g "${GID}" -r web \
   && useradd -d '/code' -g web -l -r -u "${UID}" web \
   && chown web:web /code \
-  && mkdir -p /var/cache/pypoetry && chown web:web /var/cache/pypoetry
+  && mkdir -p /var/cache/pypoetry \
+  && chown web:web /var/cache/pypoetry
 
 # Copy only dependency files for better caching
 COPY --chown=web:web pyproject.toml poetry.lock ./
@@ -56,6 +53,12 @@ RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
   poetry install \
   $(if [ "$APP_ENV" = 'production' ]; then echo '--only main'; else echo ''; fi) \
   --no-interaction --no-ansi
+
+# clean up build tools after packages are installed
+RUN apt-get purge -y --auto-remove \
+    curl \
+    build-essential \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Stage 2: Production image
 FROM python:3.12-slim AS production
@@ -93,5 +96,4 @@ USER web
 
 EXPOSE 8080
 
-# Use exec form and PORT environment variable
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--config", "/code/gunicorn_config.py", "wsgi:app"]
