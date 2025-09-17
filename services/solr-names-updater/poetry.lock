@@ -2171,7 +2171,7 @@ zipp = "^3.8.1"
 [package.source]
 type = "git"
 url = "https://github.com/bcgov/namex.git"
-reference = "HEAD"
+reference = "main"
 resolved_reference = "7594181a78c78d87fd358d9f83dcedcaa6903166"
 subdirectory = "api"
 
@@ -4024,4 +4024,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "2dee5c7354efdb8719fe09962ce35baf6421d7e608d27591ebe11bbe39e731c7"
+content-hash = "54fc7fbc88c00a771be830f31a2aac9e8b995c6994b6f6bc57a1fc2c721443d4"
