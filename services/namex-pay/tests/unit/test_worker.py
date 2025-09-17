@@ -290,14 +290,6 @@ def test_process_payment(app,
         # Test
         payment_token = {'id': PAYMENT_TOKEN, 'statusCode': 'COMPLETED', 'filingIdentifier': None, 'corpTypeCode': None}
 
-        ce = SimpleCloudEvent(
-            id=str(uuid.uuid4()),
-            source='sbc-pay',
-            subject='payment',
-            type=QueueMessageTypes.PAYMENT.value,
-            data=payment_token
-        )
-
         message = helper_create_cloud_event_envelope(source='sbc-pay', subject='payment', data=payment_token)
 
         rv = client.post('/', json=message)
