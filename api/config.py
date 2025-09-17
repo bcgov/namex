@@ -142,7 +142,7 @@ class TestConfig(Config):  # pylint: disable=too-few-public-methods
     DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD', 'postgres')
     DB_NAME = os.getenv('DATABASE_TEST_NAME', 'unittesting')
     DB_HOST = os.getenv('DATABASE_TEST_HOST', 'localhost')
-    DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
+    DB_PORT = os.getenv('DATABASE_TEST_PORT', '54345')
     SQLALCHEMY_DATABASE_URI = f'postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
 
     # Ensure SQLAlchemy is properly configured for Flask-Marshmallow compatibility
