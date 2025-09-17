@@ -10,8 +10,6 @@ packages = [{include = "solr_names_updater", from = "src"}]
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
 namex = { git = "https://github.com/bcgov/namex.git", subdirectory = "api" }
-swagger_client = { git = "https://github.com/bcgov/namex-synonyms-api-py-client.git" }
-sbc-common-components = { git = "https://github.com/bcgov/sbc-common-components.git", subdirectory = "python" }
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
