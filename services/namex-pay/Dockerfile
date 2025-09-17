@@ -1,5 +1,5 @@
 # Stage 1: Build environment (with Poetry + dependencies installed)
-FROM python:3.12.5-bullseye AS development_build
+FROM python:3.12.5-slim AS development_build
 
 ARG VCS_REF="missing"
 ARG BUILD_DATE="missing"
@@ -80,8 +80,11 @@ RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
 USER web
 
 # Stage 2: Production image (lighter)
-FROM development_build AS production_build
-COPY --chown=web:web . /code
+FROM python:3.12-slim
+
+WORKDIR /code
+
+COPY --from=development_build /code /code
 
 EXPOSE 8080
 
