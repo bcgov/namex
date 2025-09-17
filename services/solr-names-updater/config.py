@@ -124,7 +124,7 @@ class TestConfig(Config):  # pylint: disable=too-few-public-methods
     DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD', 'postgres')
     DB_NAME = os.getenv('DATABASE_TEST_NAME', 'unittesting')
     DB_HOST = os.getenv('DATABASE_TEST_HOST', 'localhost')
-    DB_PORT = os.getenv('DATABASE_TEST_PORT', '54345')
+    DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
     # Set this in your .env to debug SQL Alchemy queries (for local development)
     # pylint: disable=invalid-envvar-default
     SQLALCHEMY_ECHO = 'debug' if os.getenv('DEBUG_SQL_QUERIES', False) else False
