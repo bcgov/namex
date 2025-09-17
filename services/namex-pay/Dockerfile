@@ -1,5 +1,5 @@
 # Stage 1: Build environment (with Poetry + dependencies installed)
-FROM python:3.12.5-bullseye AS development_build
+FROM python:3.12.5-slim AS development_build
 
 ARG VCS_REF="missing"
 ARG BUILD_DATE="missing"

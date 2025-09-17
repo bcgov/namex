@@ -14,10 +14,7 @@ registry_schemas = { git = "https://github.com/bcgov/business-schemas.git"}
 swagger_client = { git = "https://github.com/bcgov/namex-synonyms-api-py-client.git" }
 sbc-common-components = { git = "https://github.com/bcgov/sbc-common-components.git", subdirectory = "python" }
 
-google-auth = "^2.27.0"
 pyhumps = "3.8.0"
-flask = "^3.0.2"
-pg8000 = "^1.31.5"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
