@@ -40,14 +40,15 @@ from __future__ import annotations
 
 from flask import Flask
 from flask_restx import Api
+from namex import DBConfig, setup_search_path_event_listener
 from namex.models import db
 from namex.resources.ops import api as nr_ops
+from namex.services import queue
 
 from config import Config, ProdConfig
 from namex_pay.utils import get_run_version
 
 from .resources import register_endpoints
-from namex.services import queue
 
 
 def create_app(environment: Config = ProdConfig, **kwargs) -> Flask:
@@ -55,7 +56,26 @@ def create_app(environment: Config = ProdConfig, **kwargs) -> Flask:
     app = Flask(__name__)
     app.config.from_object(environment)
 
+    schema = app.config.get('DB_SCHEMA', 'public')
+
+    if app.config.get('DB_INSTANCE_CONNECTION_NAME'):
+        db_config = DBConfig(
+            instance_name=app.config.get('DB_INSTANCE_CONNECTION_NAME'),
+            database=app.config.get('DB_NAME'),
+            user=app.config.get('DB_USER'),
+            ip_type=app.config.get('DB_IP_TYPE'),
+            schema=schema,
+            pool_recycle=300,
+        )
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = db_config.get_engine_options()
+
     db.init_app(app)
+
+    if app.config.get('DB_INSTANCE_CONNECTION_NAME'):
+        with app.app_context():
+            engine = db.engine
+            setup_search_path_event_listener(engine, schema)
+
     queue.init_app(app)
     register_endpoints(app)
 
