@@ -9,10 +9,8 @@ packages = [{include = "namex_pay", from = "src"}]
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
-namex = { git = "https://github.com/bcgov/namex.git", subdirectory = "api" }
+namex = { git = "https://github.com/bcgov/namex.git", branch = "main", subdirectory = "api" }
 registry_schemas = { git = "https://github.com/bcgov/business-schemas.git"}
-swagger_client = { git = "https://github.com/bcgov/namex-synonyms-api-py-client.git" }
-sbc-common-components = { git = "https://github.com/bcgov/sbc-common-components.git", subdirectory = "python" }
 
 pyhumps = "3.8.0"
 

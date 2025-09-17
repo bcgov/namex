@@ -71,6 +71,7 @@ COPY --chown=web:web ./README.md /code
 RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
   echo "$APP_ENV" \
   && poetry version \
+  && poetry config installer.max-workers 1 \
   && poetry update \
   && poetry install \
     $(if [ -z ${APP_ENV+x} ] || [ "$APP_ENV" = 'production' ]; then echo '--only main'; fi) \
