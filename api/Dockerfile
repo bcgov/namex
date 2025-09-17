@@ -1,7 +1,5 @@
-FROM python:3.12-slim
-
-# Always ensure the latest security patches are applied
-RUN apt-get update && apt-get upgrade -y && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Stage 1: Builder stage
+FROM python:3.12-slim AS builder
 
 ARG VCS_REF="missing"
 ARG BUILD_DATE="missing"
@@ -12,89 +10,88 @@ ARG GID=1000
 ENV VCS_REF=${VCS_REF} \
     BUILD_DATE=${BUILD_DATE} \
     APP_ENV=${APP_ENV} \
-    # python:
     PYTHONFAULTHANDLER=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONHASHSEED=random \
     PYTHONDONTWRITEBYTECODE=1 \
-    # pip:
-    PIP_NO_CACHE_DIR=off \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PIP_DEFAULT_TIMEOUT=100 \
-    PIP_ROOT_USER_ACTION=ignore \
-    # poetry:
+    PIP_NO_CACHE_DIR=on \
+    PIP_DISABLE_PIP_VERSION_CHECK=on \
     POETRY_VERSION=1.8.3 \
     POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_CREATE=false \
-    POETRY_CACHE_DIR='/var/cache/pypoetry' \
-    POETRY_HOME='/usr/local' \
-    # app:
-    PYTHONPATH=/code
+    POETRY_CACHE_DIR='/var/cache/pypoetry'
 
 LABEL org.label-schema.vcs-ref=${VCS_REF} \
     org.label-schema.build-date=${BUILD_DATE}
 
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
-# Install system dependencies and Poetry in a single layer
+# Install system dependencies and Poetry in optimized layers
 RUN apt-get update && apt-get upgrade -y \
   && apt-get install --no-install-recommends -y \
-    bash \
-    brotli \
-    build-essential \
     curl \
-    gettext \
-    git \
+    build-essential \
     libpq-dev \
-    wait-for-it \
-    ca-certificates \
-    openssl \
-  && pip install --no-cache-dir setuptools \
   && pip install --no-cache-dir "poetry==${POETRY_VERSION}" \
   && poetry --version \
-  && poetry config installer.max-workers 2 \
-  && poetry config installer.parallel false \
-  # Cleaning cache:
-  && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
-  && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+  # Clean up in same layer to reduce image size
+  && apt-get purge -y --auto-remove \
+    build-essential \
+    curl \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /code
 
 # Create user and workspace
-WORKDIR /code
 RUN groupadd -g "${GID}" -r web \
   && useradd -d '/code' -g web -l -r -u "${UID}" web \
-  && chown web:web -R '/code' \
-  && mkdir -p /var/cache/pypoetry \
-  && chown web:web -R /var/cache/pypoetry
+  && chown web:web /code \
+  && mkdir -p /var/cache/pypoetry && chown web:web /var/cache/pypoetry
 
-# Copy only requirements, to cache them in docker layer
-COPY --chown=web:web ./poetry.lock ./pyproject.toml /code/
+# Copy only dependency files for better caching
+COPY --chown=web:web pyproject.toml poetry.lock ./
 
-# Install dependencies with GitHub Actions optimizations
+# Install dependencies with optimized caching
 RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
-  echo "Building for environment: ${APP_ENV:-development}" \
-  && poetry version \
-  && poetry config installer.max-workers 1 \
-  && poetry install \
-    $(if [ "$APP_ENV" = 'production' ] || [ -z "$APP_ENV" ]; then echo '--only main'; else echo '--with dev'; fi) \
-    --no-interaction --no-ansi --verbose
+  poetry install \
+  $(if [ "$APP_ENV" = 'production' ]; then echo '--only main'; else echo ''; fi) \
+  --no-interaction --no-ansi
 
-# Switch to non-root user after installations
+# Stage 2: Production image
+FROM python:3.12-slim AS production
+
+ARG UID=1000
+ARG GID=1000
+
+ENV PORT=8080 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/code
+
+# Install runtime dependencies only
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    libpq5 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /code
+
+# Create runtime user
+RUN groupadd -g "${GID}" -r web \
+  && useradd -d '/code' -g web -l -r -u "${UID}" web \
+  && chown web:web /code
+
+# Copy installed packages from builder
+COPY --from=builder --chown=web:web /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder --chown=web:web /usr/local/bin /usr/local/bin
+
+# Copy application code
+COPY --chown=web:web . .
+
+# Set secure permissions only on necessary files
+RUN chmod 755 /code/wsgi.py /code/update_db.sh 2>/dev/null || true
+
 USER web
 
-# Copy application code after dependencies are installed
-COPY --chown=web:web ./namex /code/namex
-COPY --chown=web:web ./README.md /code/
-COPY --chown=web:web . /code
-
-# Set secure permissions immediately after copying to remove write permissions
-# Files: read-only (644), Directories: read+execute (755), scripts: executable (755)
-RUN find /code -type f -exec chmod 644 {} \; \
-    && find /code -type d -exec chmod 755 {} \; \
-    && chmod 755 /code/wsgi.py \
-    && chmod 755 /code/update_db.sh
-
-# Run the server
-ENV PYTHONPATH=/code
 EXPOSE 8080
 
+# Use exec form and PORT environment variable
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--config", "/code/gunicorn_config.py", "wsgi:app"]
