@@ -60,43 +60,6 @@ def not_raises(exception):
         raise pytest.fail(f'DID RAISE {exception}')
 
 
-# @pytest.fixture(autouse=True)
-# def queue_publish(monkeypatch):
-#     """Pubsub publish mock."""
-#     topics = []
-#     messages = []  # Changed to store multiple messages
-#     ordering_keys = []  # Track ordering keys if needed
-
-#     def mock_publish(self, topic: str, payload: bytes, **kwargs):
-#         nonlocal topics, messages, ordering_keys
-#         topics.append(topic)
-#         messages.append(payload)
-
-#         # Store ordering key if provided
-#         if 'ordering_key' in kwargs:
-#             ordering_keys.append(kwargs['ordering_key'])
-
-#         # Return a mock future object with result method
-#         class MockFuture:
-#             def result(self):
-#                 return {'message_id': 'mock_message_id'}
-
-#         return MockFuture()
-
-#     # Mock the publisher property to avoid actual GCP initialization
-#     def mock_publisher_property(self):
-#         return self  # Return self since we're mocking the publish method directly
-
-#     # Apply both mocks
-#     monkeypatch.setattr(GcpQueue, 'publish', mock_publish)
-#     monkeypatch.setattr(GcpQueue, 'publisher', property(mock_publisher_property))
-
-#     return {
-#         'topics': topics,
-#         'messages': messages,
-#         'ordering_keys': ordering_keys
-#     }
-
 @pytest.fixture(autouse=True)
 def queue_publish(monkeypatch):
     """Pubsub publish mock.
