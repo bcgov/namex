@@ -18,19 +18,21 @@ import json
 
 from namex.constants import NameState
 from namex.models import Request as RequestDAO
-from gcp_queue.logging import structured_log
+from structured_logging import StructuredLogging
 
-from solr_names_updater.names_processors import (  # noqa: I001
+from solr_names_updater.names_processors import (
     convert_to_solr_conformant_datetime_str,  # noqa: I001
     find_name_by_name_states,  # noqa: I001
-    post_to_solr_feeder  # noqa: I001
-)  # noqa: I001
+    post_to_solr_feeder,  # noqa: I001; noqa: I001
+)
+
 # noqa: I003, I005
 
+logger = StructuredLogging.get_logger()
 
 def process_add_to_solr(state_change_msg: dict):  # pylint: disable=too-many-locals, , too-many-branches
     """Process possible conflicts update via Solr feeder api."""
-    structured_log(state_change_msg)
+    logger.info(f'Processing add to solr for state_change_msg: {state_change_msg}')
     nr_num = state_change_msg.get('nrNum')
     nr = RequestDAO.find_by_nr(nr_num)
     send_to_solr_add(nr)
@@ -38,7 +40,7 @@ def process_add_to_solr(state_change_msg: dict):  # pylint: disable=too-many-loc
 
 def process_delete_from_solr(state_change_msg: dict):  # pylint: disable=too-many-locals, , too-many-branches
     """Process possible conflicts update via Solr feeder api."""
-    structured_log(state_change_msg)
+    logger.info(f'Processing delete from solr for state_change_msg: {state_change_msg}') # noqa: S608
     nr_num = state_change_msg.get('nrNum')
     nr = RequestDAO.find_by_nr(nr_num)
     send_to_solr_delete(nr)
@@ -54,7 +56,7 @@ def send_to_solr_add(nr: RequestDAO):
 
     resp = post_to_solr_feeder(payload_dict)
     if resp.status_code != 200:
-        structured_log(payload_dict, severity='ERROR', message=f'failed to add possible conflict to solr for {nr.nrNum}, status code: {resp.status_code}, error reason: {resp.reason}, error details: {resp.text}')
+        logger.error(f'failed to add possible conflict to solr for {nr.nrNum}, status code: {resp.status_code}, error reason: {resp.reason}, error details: {resp.text}')
 
 
 def send_to_solr_delete(nr: RequestDAO):
@@ -71,7 +73,7 @@ def send_to_solr_delete(nr: RequestDAO):
     payload_dict['request'] = request_str
     resp = post_to_solr_feeder(payload_dict)
     if resp.status_code != 200:
-        structured_log(payload_dict, severity='ERROR', message=f'failed to delete possible conflict from solr for {nr.nrNum}, status code: {resp.status_code}, error reason: {resp.reason}, error details: {resp.text}')
+        logger.error(f'failed to delete possible conflict from solr for {nr.nrNum}, status code: {resp.status_code}, error reason: {resp.reason}, error details: {resp.text}')
 
 
 def construct_payload_dict(nr: RequestDAO, name, jur):

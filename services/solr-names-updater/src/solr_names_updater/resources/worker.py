@@ -18,70 +18,70 @@ import json
 from http import HTTPStatus
 
 from flask import Blueprint, Flask, current_app, request
-from gcp_queue.gcp_auth import ensure_authorized_queue_user
-from gcp_queue.logging import structured_log
 from namex.models import Request as RequestDAO
 from namex.services import queue
 from requests import RequestException
 from sbc_common_components.utils.enums import QueueMessageTypes
 from sqlalchemy.exc import OperationalError
+from structured_logging import StructuredLogging
 from urllib3.exceptions import NewConnectionError
 
 from solr_names_updater.names_processors.names import process_add_to_solr as process_names_add  # noqa: I001
 from solr_names_updater.names_processors.names import process_delete_from_solr as process_names_delete  # noqa: I001
-from solr_names_updater.names_processors.possible_conflicts import (  # noqa: I001
-    process_add_to_solr as process_possible_conflicts_add,
+from solr_names_updater.names_processors.possible_conflicts import (
+    process_add_to_solr as process_possible_conflicts_add,  # noqa: I001
 )
-from solr_names_updater.names_processors.possible_conflicts import (  # noqa: I001, I005
-    process_delete_from_solr as process_possible_conflicts_delete,
+from solr_names_updater.names_processors.possible_conflicts import (
+    process_delete_from_solr as process_possible_conflicts_delete,  # noqa: I001, I005
 )
 
-bp = Blueprint("worker", __name__)
+bp = Blueprint('worker', __name__)
+logger = StructuredLogging.get_logger()
 
 
-
-@bp.route("/", methods=("POST",))
-@ensure_authorized_queue_user
+@bp.route('/', methods=('POST',))
 def worker():
     """
     Process the incoming cloud event.
     """
-    structured_log(request, "INFO", f"Incoming raw msg: {request.data}")
+
+    logger.info(f'Incoming raw msg: {request.data}')
+
     ret = {}, HTTPStatus.OK
-    if not (ce := queue.get_simple_cloud_event(request)):
+    if not (ce := queue.get_simple_cloud_event(request,  wrapped=True)):
         return ret
 
-    structured_log(request, "INFO", f"received ce: {str(ce)}")
+    logger.info(f'received ce: {str(ce)}')
 
     with current_app.app_context():
         try:
-            structured_log(f'Extracted nr event msg: {ce}')
+            logger.info(f'Extracted nr event msg: {ce}')
 
             if is_processable(ce):
-                structured_log(request, message=f'Begin process_nr_state_change for nr_event_msg: {ce}')
+                logger.info(f'Begin process_nr_state_change for nr_event_msg: {ce}')
                 process_names_event_message(ce, current_app)
-                structured_log(request, message=f'Completed process_nr_state_change for nr_event_msg: {ce}')
+                logger.info(f'Completed process_nr_state_change for nr_event_msg: {ce}')
             elif is_processable_firm(ce):
-                structured_log(request, message=f'Begin process_nr_state_change for firm, nr_event_msg: {ce}')
+                logger.info(f'Begin process_nr_state_change for firm, nr_event_msg: {ce}')
                 process_names_event_message_firm(ce, current_app)
-                structured_log(request, message=f'Completed process_nr_state_change for firm, nr_event_msg: {ce}')
+                logger.info(f'Completed process_nr_state_change for firm, nr_event_msg: {ce}')
             else:
                 # Skip processing of message as it isn't a message type this queue listener processes
-                structured_log(request, message=f'Skipping processing of nr event message as message type is not supported: {ce}')
+                logger.info(f'Skipping processing of nr event message as message type is not supported: {ce}')
 
         except OperationalError as err:  # message goes back on the queue
-            structured_log(request, message=f'Queue Blocked - Database Issue: {json.dumps(ce)}', severity='ERROR')
+            logger.error(f'Queue Blocked - Database Issue: {json.dumps(ce)}')
             ret = {}, HTTPStatus.INTERNAL_SERVER_ERROR
             raise err  # We don't want to handle the error, as a DB down would drain the queue
         except (RequestException, NewConnectionError) as err:  # message goes back on the queue
-            structured_log(request, message=f'Queue Blocked - HTTP Connection Issue: {json.dumps(ce)}', severity='ERROR')
+            logger.error(f'Queue Blocked - HTTP Connection Issue: {json.dumps(ce)}')
             ret = {}, HTTPStatus.INTERNAL_SERVER_ERROR
             raise err  # We don't want to handle the error, as a http connection error would drain the queue
         except Exception as e:  # pylint: disable=broad-except # noqa B902
             # Catch Exception so that any error is still caught and the message is removed from the queue
-            structured_log(request, message=f'Queue Error: {json.dumps(ce)}', severity='ERROR')
+            logger.error(f'Queue Error: {json.dumps(ce)}')
         finally:
-            return ret
+            return ret # noqa: B012
 
 
 def is_names_event_msg_type(msg: dict):
@@ -123,7 +123,7 @@ def process_names_event_message(msg: dict, flask_app: Flask):
     if not flask_app or not msg:
         raise Exception('Flask App or msg not available.')
 
-    structured_log( f'entering processing of nr event msg: {msg}')
+    logger.info(f'entering processing of nr event msg: {msg}')
 
     request_state_change = msg.data.get('request', None)
 
@@ -136,10 +136,10 @@ def process_names_event_message(msg: dict, flask_app: Flask):
             process_names_delete(request_state_change)
             process_possible_conflicts_delete(request_state_change)
         else:
-            structured_log(f'no names processing required for request state change message: {msg}')
+            logger.info(f'no names processing required for request state change message: {msg}')
 
     else:
-        structured_log(f'skipping - no matching state change message: {msg}')
+        logger.info(f'skipping - no matching state change message: {msg}')
 
 
 def process_names_event_message_firm(msg: dict, flask_app: Flask):
@@ -147,7 +147,7 @@ def process_names_event_message_firm(msg: dict, flask_app: Flask):
     if not flask_app or not msg:
         raise Exception('Flask App or msg not available.')
 
-    structured_log( f'entering processing of nr event msg for firm: {msg}')
+    logger.info(f'entering processing of nr event msg for firm: {msg}')
 
     request_state_change = msg.data.get('request', None)
 
@@ -158,8 +158,8 @@ def process_names_event_message_firm(msg: dict, flask_app: Flask):
         elif new_state in ('CANCELLED', 'RESET', 'CONSUMED', 'EXPIRED'):
             process_names_delete(request_state_change)
         else:
-            structured_log(f'no names processing required for request state change message: {msg}')
+            logger.info(f'no names processing required for request state change message: {msg}')
 
     else:
-        structured_log(f'skipping - no matching state change message: {msg}')
+        logger.info(f'skipping - no matching state change message: {msg}')
 

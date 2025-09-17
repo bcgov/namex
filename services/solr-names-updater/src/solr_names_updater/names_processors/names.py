@@ -14,17 +14,20 @@
 """Processing logic to process names updates via Solr feeder api."""
 import json
 
-from gcp_queue.logging import structured_log
 from namex.constants import NameState
 from namex.models import Request as RequestDAO
+from structured_logging import StructuredLogging
 
-from solr_names_updater.names_processors import convert_to_solr_conformant_datetime_str  # noqa: I001
-from solr_names_updater.names_processors import convert_to_solr_conformant_json  # noqa: I001
-from solr_names_updater.names_processors import find_name_by_name_states  # noqa: I001
-from solr_names_updater.names_processors import post_to_solr_feeder  # noqa: I001; noqa: I001
+from solr_names_updater.names_processors import (
+    convert_to_solr_conformant_datetime_str,  # noqa: I001
+    convert_to_solr_conformant_json,  # noqa: I001
+    find_name_by_name_states,  # noqa: I001
+    post_to_solr_feeder,  # noqa: I001; noqa: I001
+)
 
 # noqa: I003, I005
 
+logger = StructuredLogging.get_logger()
 
 def process_add_to_solr(state_change_msg: dict):  # pylint: disable=too-many-locals, , too-many-branches
     """Process names update via Solr feeder api."""
@@ -51,7 +54,7 @@ def send_to_solr_add(nr: RequestDAO):
     payload_dict = construct_payload_dict(nr, names, jur)
     resp = post_to_solr_feeder(payload_dict)
     if resp.status_code != 200:
-        structured_log(payload_dict, severity='ERROR', message=f'failed to add names to solr for {nr.nrNum}, status code: {resp.status_code}, error reason: {resp.reason}, error details: {resp.text}')
+        logger.error(f'failed to add names to solr for {nr.nrNum}, status code: {resp.status_code}, error reason: {resp.reason}, error details: {resp.text}')
 
 
 def send_to_solr_delete(nr: RequestDAO):
@@ -68,7 +71,7 @@ def send_to_solr_delete(nr: RequestDAO):
     payload_dict['request'] = request_str
     resp = post_to_solr_feeder(payload_dict)
     if resp.status_code != 200:
-        structured_log(payload_dict, severity='ERROR', message=f'failed to delete names from solr for {nr.nrNum}, status code: {resp.status_code}, error reason: {resp.reason}, error details: {resp.text}')
+        logger.error(f'failed to delete names from solr for {nr.nrNum}, status code: {resp.status_code}, error reason: {resp.reason}, error details: {resp.text}')
 
 
 def get_nr_ids_to_delete_from_solr(nr: RequestDAO):
