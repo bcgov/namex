@@ -70,6 +70,7 @@ COPY --chown=web:web ./README.md /code
 # Install dependencies
 RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
   echo "$APP_ENV" \
+  && poetry config installer.max-workers 1 \
   && poetry version \
   && poetry update \
   && poetry install \
