@@ -7,7 +7,7 @@ license = "Apache Software License Version 2.0"
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
-namex = { git = "https://github.com/bcgov/namex.git", subdirectory = "api", rev = "main"}
+namex = { git = "https://github.com/bcgov/namex.git", subdirectory = "api", branch = "main"}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
