@@ -61,6 +61,9 @@ ruff: ## ruff linter
 ruff-fix: ## auto fix lint issues with ruff
 	poetry run ruff check --fix
 
+test: ## unit testing with local db
+	poetry run pytest
+
 #################################################################################
 # COMMANDS - Local                                                              #
 #################################################################################
