@@ -17,20 +17,22 @@ import uuid
 from datetime import datetime, timezone
 
 from flask import Flask, current_app
-from namex.models import Request, State, db, Event
-from namex.services import queue, EventRecorder
+from namex import DBConfig, setup_search_path_event_listener
+from namex.models import Event, Request, State, db
+from namex.services import EventRecorder, queue
 from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent
 from sqlalchemy import text
 from structured_logging import StructuredLogging
 
-import config
+from config import Config, ProdConfig, get_named_config
 
-APP_CONFIG = config.get_named_config(os.getenv('FLASK_ENV', 'production'))
+APP_CONFIG = get_named_config(os.getenv('FLASK_ENV', 'production'))
 
 
-def create_app():
+def create_app(environment: Config = ProdConfig, **kwargs) -> Flask:
     """Return a configured Flask App using the Factory method."""
+
     app = Flask(__name__)
     app.config.from_object(APP_CONFIG)
 
@@ -39,9 +41,27 @@ def create_app():
     structured_logger.init_app(app)
     app.logger = structured_logger.get_logger()
 
-    queue.init_app(app)
+    schema = app.config.get('DB_SCHEMA', 'public')
+
+    if app.config.get('DB_INSTANCE_CONNECTION_NAME'):
+        db_config = DBConfig(
+            instance_name=app.config.get('DB_INSTANCE_CONNECTION_NAME'),
+            database=app.config.get('DB_NAME'),
+            user=app.config.get('DB_USER'),
+            ip_type=app.config.get('DB_IP_TYPE'),
+            schema=schema,
+            pool_recycle=300,
+        )
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = db_config.get_engine_options()
+
     db.init_app(app)
 
+    if app.config.get('DB_INSTANCE_CONNECTION_NAME'):
+        with app.app_context():
+            engine = db.engine
+            setup_search_path_event_listener(engine, schema)
+
+    queue.init_app(app)
     register_shellcontext(app)
 
     return app
@@ -71,7 +91,7 @@ def furnish_request_message(
     ce = SimpleCloudEvent(
         id=str(uuid.uuid4()),
         source=f'/requests/{request.nrNum}',
-        subject="namerequest",
+        subject='namerequest',
         type=QueueMessageTypes.NAMES_MESSAGE_TYPE.value,
         time=datetime.now(tz=timezone.utc).isoformat(),
         data={
