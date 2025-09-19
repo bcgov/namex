@@ -57,7 +57,6 @@ def get_ops_params():
 def inprogress_update(user: User, max_rows: int, client_delay: int, examine_delay: int) -> tuple[int, bool]:
     """Update inprogress nrs."""
     row_count = 0
-
     try:
         # for nrs edited by clients
         # pylint: disable=C0121
