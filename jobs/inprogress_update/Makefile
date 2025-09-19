@@ -10,12 +10,6 @@ PROJECT_NAME:=inprogress_update
 DOCKER_NAME:=inprogress-update
 
 #################################################################################
-# COMMANDS -- license                                                           #
-#################################################################################
-license: ## Verify source code license headers.
-	./scripts/verify_license_headers.sh $(CURRENT_ABS_DIR)/src $(CURRENT_ABS_DIR)/tests
-
-#################################################################################
 # COMMANDS -- Setup                                                             #
 #################################################################################
 setup: clean install ## Setup the project
