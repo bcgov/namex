@@ -1,11 +1,25 @@
 """This is test config."""
+
 import datetime
 import logging
+from unittest.mock import patch
+
 import pytest
-from inprogress_update.config import TestConfig
 from sqlalchemy import event, text
-from inprogress_update.inprogress_update import create_app, db as _db
+
+from config import TestConfig
+from inprogress_update.inprogress_update import create_app
+from inprogress_update.inprogress_update import db as _db
+
 from . import FROZEN_DATETIME
+
+
+# Mock Pub/Sub queue publish for all tests
+@pytest.fixture(autouse=True)
+def mock_pubsub_publish():
+    with patch('gcp_queue.gcp_queue.GcpQueue.publish') as mock_publish:
+        mock_publish.return_value = None
+        yield mock_publish
 
 
 # fixture to freeze utcnow to a fixed date-time
@@ -37,7 +51,7 @@ def client(app):
     return client
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def session(app, request):
     """
     Returns function-scoped session.
@@ -46,10 +60,8 @@ def session(app, request):
         conn = _db.engine.connect()
         txn = conn.begin()
 
-        options = dict(bind=conn, binds={})
-        sess = _db.create_scoped_session(options=options)
-
-        # establish  a SAVEPOINT just before beginning the test
+        sess = _db.session
+        # establish a SAVEPOINT just before beginning the test
         # (http://docs.sqlalchemy.org/en/latest/orm/session_transaction.html#using-savepoint)
         sess.begin_nested()
 
