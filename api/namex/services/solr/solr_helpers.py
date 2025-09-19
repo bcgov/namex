@@ -2,11 +2,11 @@ import string
 
 from namex.constants import Designations
 from namex.services.solr import (
-    words_to_filter_from_name,
     first_consonants,
     first_vowels,
     has_leading_vowel,
     replace_special_leading_sounds,
+    words_to_filter_from_name,
 )
 from namex.services.solr.solr_client import SolrClient
 
