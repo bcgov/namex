@@ -97,8 +97,8 @@ def has_leading_vowel(word):
         return False
 
 
-def designations():
-    # List of common designations to filter out from names
+def words_to_filter_from_name():
+    # List of word to filter out from names before solr comparison
     # TO-DO: should confirm with business if this is the complete list
     return [
         'AN',
