@@ -2,13 +2,13 @@
 import sys
 from datetime import datetime, timezone
 
+from config import Config
 from flask import Flask, current_app
-from structured_logging import StructuredLogging
+from namex import DBConfig, setup_search_path_event_listener
 from namex.models import Event, Request, State, User, db
 from namex.services import EventRecorder, queue
 from sqlalchemy import text
-
-from config import Config
+from structured_logging import StructuredLogging
 
 
 def create_app(config=Config):
@@ -21,8 +21,26 @@ def create_app(config=Config):
     structured_logger.init_app(app)
     app.logger = structured_logger.get_logger()
 
+    schema = app.config.get('DB_SCHEMA', 'public')
+
+    if app.config.get('DB_INSTANCE_CONNECTION_NAME'):
+        db_config = DBConfig(
+            instance_name=app.config.get('DB_INSTANCE_CONNECTION_NAME'),
+            database=app.config.get('DB_NAME'),
+            user=app.config.get('DB_USER'),
+            ip_type=app.config.get('DB_IP_TYPE'),
+            schema=schema,
+            pool_recycle=300,
+        )
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = db_config.get_engine_options()
+
     queue.init_app(app)
     db.init_app(app)
+
+    if app.config.get('DB_INSTANCE_CONNECTION_NAME'):
+        with app.app_context():
+            engine = db.engine
+            setup_search_path_event_listener(engine, schema)
 
     return app
 
@@ -44,11 +62,11 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
         # pylint: disable=C0121
         client_edit_reqs = db.session.query(Request). \
             filter(Request.stateCd == State.INPROGRESS). \
-            filter(Request.lastUpdate <= text(f"(now() at time zone 'utc') - INTERVAL \'{client_delay} SECONDS\'")). \
+            filter(Request.lastUpdate <= text(f"(now() at time zone 'utc') - INTERVAL '{client_delay} SECONDS'")). \
             filter(Request.checkedOutBy != None). \
             order_by(Request.lastUpdate.asc()). \
             limit(max_rows). \
-            with_for_update().all()
+            with_for_update().all() # noqa: E711
         for request in client_edit_reqs:
             row_count += 1
             current_app.logger.debug(f'processing: {request.nrNum}')
@@ -66,7 +84,7 @@ def inprogress_update(user: User, max_rows: int, client_delay: int, examine_dela
             filter(Request.checkedOutBy == None). \
             order_by(Request.lastUpdate.asc()). \
             limit(max_rows). \
-            with_for_update().all()
+            with_for_update().all() # noqa: E711
 
         for request in examine_reqs:
             row_count += 1

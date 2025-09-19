@@ -1,10 +1,12 @@
 """This is test job."""
+from datetime import datetime
+
 import pytest
+from namex.models import Request, State, User
+
 import inprogress_update
 
 from . import EPOCH_DATETIME
-from datetime import datetime
-from namex.models import Request, State, User
 
 
 def helper_create_requests(row_data):
@@ -68,7 +70,7 @@ job_test_data = [
 ]
 
 
-@pytest.mark.parametrize("test_name, request_data, expected_row_count", job_test_data)
+@pytest.mark.parametrize('test_name, request_data, expected_row_count', job_test_data)
 def test_run_job(app, session, test_name, request_data, expected_row_count):
 
     # setup
