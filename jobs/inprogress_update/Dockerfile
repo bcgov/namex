@@ -67,6 +67,7 @@ COPY --chown=web:web ./poetry.lock ./pyproject.toml /code/
 COPY --chown=web:web ./src /code/src
 COPY --chown=web:web ./README.md /code
 COPY --chown=web:web ./run.sh /code/run.sh
+COPY --chown=web:web ./config.py /code/config.py
 RUN chmod 755 /code/run.sh
 
 # Install dependencies
