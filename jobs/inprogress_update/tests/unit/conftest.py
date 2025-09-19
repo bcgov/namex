@@ -25,8 +25,8 @@ from flask_migrate import Migrate, upgrade
 from sqlalchemy import event, text
 
 from config import TestConfig
-from inprogress_update.inprogress_update import create_app
-from inprogress_update.inprogress_update import db as _db
+from inprogress_update import create_app
+from inprogress_update import db as _db
 
 from . import FROZEN_DATETIME
 

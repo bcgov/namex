@@ -60,14 +60,9 @@ RUN groupadd -g "${GID}" -r web \
     && useradd -d '/code' -g web -l -r -u "${UID}" web \
     && chown web:web -R '/code'
 
-# Copy dependency files first (better caching)
-COPY --chown=web:web ./poetry.lock ./pyproject.toml /code/
+COPY --chown=web:web . /code
 
-# Copy app source
-COPY --chown=web:web ./src /code/src
-COPY --chown=web:web ./README.md /code
 COPY --chown=web:web ./run.sh /code/run.sh
-COPY --chown=web:web ./config.py /code/config.py
 RUN chmod 755 /code/run.sh
 
 # Install dependencies
@@ -86,6 +81,7 @@ USER web
 # Stage 2: Production image (lighter)
 FROM development_build AS production_build
 COPY --chown=web:web . /code
+RUN chmod -R 755 /code/run.sh
 
 EXPOSE 8080
 

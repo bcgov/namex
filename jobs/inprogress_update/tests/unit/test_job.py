@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 import pytest
 from namex.models import Request, State, User
 
-from inprogress_update.inprogress_update import inprogress_update
+from inprogress_update import inprogress_update
 
 from . import EPOCH_DATETIME
 
