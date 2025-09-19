@@ -18,14 +18,12 @@ Processors hold the business logic for how an email is interpreted and sent.
 
 from __future__ import annotations
 
-from datetime import datetime
 from pathlib import Path
-from typing import Tuple
 
-import requests
-from flask import current_app, request
-from gcp_queue.logging import structured_log
+from flask import current_app
+from structured_logging import StructuredLogging
 
+logger = StructuredLogging.get_logger()
 
 def substitute_template_parts(template_code: str) -> str:
     """Substitute template parts in main template.
@@ -79,7 +77,7 @@ def get_main_template(request_action, template_name, status=None):
         if template_path.exists():
             return template_path.read_text()
 
-    structured_log(request, "DEBUG", f"Not Found the template from {request_action}/{status}/{template_name}")
+    logger.debug(f"Not Found the template from {request_action}/{status}/{template_name}")
 
     # Check the common template fallback
     common_template_path = base_path / "common" / template_name
@@ -93,5 +91,5 @@ def get_main_template(request_action, template_name, status=None):
             return common_template_path.read_text()
 
     # Log error if template not found
-    structured_log(request, "ERROR", f"Failed to get {request_action}, {status}, {template_name} email template")
+    logger.error(f"Failed to get {request_action}, {status}, {template_name} email template")
     return None

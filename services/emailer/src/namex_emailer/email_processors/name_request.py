@@ -19,24 +19,26 @@ import base64
 from http import HTTPStatus
 
 import requests
-from flask import current_app, request
-from gcp_queue.logging import structured_log
+from flask import current_app
 from jinja2 import Template
+from structured_logging import StructuredLogging
 
 from namex_emailer.email_processors import get_main_template, substitute_template_parts
 from namex_emailer.services.helpers import get_bearer_token, query_nr_number
 
+logger = StructuredLogging.get_logger()
+
 
 def process(email_info: dict) -> dict:
     """Build the email for Name Request notification."""
-    structured_log(request, "DEBUG", f"NR_notification: {email_info}")
+    logger.debug(f"NR_notification: {email_info}")
     nr_number = email_info.data.get("request", {}).get("header", {}).get("nrNum", "")
     payment_token = email_info.data.get("request", {}).get("paymentToken", "")
 
     # get nr data
     nr_response = query_nr_number(nr_number)
     if nr_response.status_code != HTTPStatus.OK:
-        structured_log(request, "ERROR", f"Failed to get nr info for name request: {nr_number}")
+        logger.error(f"Failed to get nr info for name request: {nr_number}")
         return {}
     nr_data = nr_response.json()
     request_action = nr_data["request_action_cd"]
@@ -79,7 +81,7 @@ def _get_pdfs(nr_id: str, payment_token: str) -> list:
         headers={"Accept": "application/json", "Authorization": f"Bearer {token}"},
     )
     if nr_payments.status_code != HTTPStatus.OK:
-        structured_log(request, "ERROR", f"Failed to get payment info for name request id: {nr_id}")
+        logger.error(f"Failed to get payment info for name request id: {nr_id}")
         return []
 
     # find specific payment corresponding to payment token
@@ -88,11 +90,7 @@ def _get_pdfs(nr_id: str, payment_token: str) -> list:
         if payment_token == payment["token"]:
             payment_id = payment["id"]
     if not payment_id:
-        structured_log(
-            request,
-            "ERROR",
-            f"No matching payment info found for name request id: {nr_id}, payment token: {payment_token}",
-        )
+        logger.error(f"No matching payment info found for name request id: {nr_id}, payment token: {payment_token}")
         return []
 
     # get receipt
@@ -102,7 +100,7 @@ def _get_pdfs(nr_id: str, payment_token: str) -> list:
         headers={"Accept": "application/pdf", "Authorization": f"Bearer {token}"},
     )
     if receipt.status_code != HTTPStatus.OK:
-        structured_log(request, "ERROR", f"Failed to get receipt pdf for name request id: {nr_id}")
+        logger.error(f"Failed to get receipt pdf for name request id: {nr_id}")
         return []
 
     # add receipt to pdfs
