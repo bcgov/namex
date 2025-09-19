@@ -1,9 +1,9 @@
 import base64
 from http import HTTPStatus
 
-from flask import json, request
-from gcp_queue.logging import structured_log
+from flask import json
 from namex.resources.name_requests import ReportResource
+from structured_logging import StructuredLogging
 
 from namex_emailer.constants.notification_options import DECISION_OPTIONS, Option
 from namex_emailer.services.helpers import (
@@ -13,17 +13,18 @@ from namex_emailer.services.helpers import (
     update_resend_timestamp,
 )
 
+logger = StructuredLogging.get_logger()
 
 def process_resend_email(event_id: str):
     """
     Process the resend email request.
     This function is called when a resend event is triggered.
     """
-    structured_log(request, "INFO", f"[Resend Email] Event ID: {event_id}")
+    logger.info(f"[Resend Email] Event ID: {event_id}")
 
     # Validate the event ID
     if not event_id:
-        structured_log(request, "ERROR", "Invalid event ID provided for resend operation.")
+        logger.error("Invalid event ID provided for resend operation.")
     else:
         # Call the resend_email function to handle the actual email sending
         _resend_email(event_id)
@@ -34,38 +35,38 @@ def _resend_email(event_id: str):
     # Query the event record
     response = query_notification_event(event_id)
     if not response:
-        structured_log(request, "ERROR", "No event found.")
+        logger.error("No event found.")
         return
 
     event = response.json()
     event_json_str = event.get("jsonData")
     if not event_json_str:
-        structured_log(request, "ERROR", f"No email content in the event: {event_id}")
+        logger.error(f"No email content in the event: {event_id}")
         return
 
     # Parse the event JSON
     event_json = _parse_json(event_json_str)
     if not event_json:
-        structured_log(request, "ERROR", f"Failed to parse jsonData for the event: {event_id}")
+        logger.error(f"Failed to parse jsonData for the event: {event_id}")
         return
 
     email = event_json.get("email")
     option = event_json.get("option")
     nr_model = event_json.get("nr_model")
     if not email or not option:
-        structured_log(request, "ERROR", f"Invalid email content in the event: {event_id}")
+        logger.error(f"Invalid email content in the event: {event_id}")
         return
 
     # Handle decision options and generate report if needed
     if option and Option(option) in DECISION_OPTIONS and nr_model:
         if not _handle_attachments(email, nr_model):
-            structured_log(request, "ERROR", f"Failed to handle attachments for the event: {event_id}")
+            logger.error(f"Failed to handle attachments for the event: {event_id}")
             return
 
     # Send the email
     if _send_email(email):
         update_resend_timestamp(event_id)
-        structured_log(request, "DEBUG", f"Successfully resent email for the event {event_id}")
+        logger.debug(f"Successfully resent email for the event {event_id}")
 
 
 def _parse_json(json_str: str):
@@ -73,7 +74,7 @@ def _parse_json(json_str: str):
     try:
         return json.loads(json_str)
     except json.JSONDecodeError as e:
-        structured_log(request, "ERROR", f"Failed to parse jsonData for the event: {e}")
+        logger.error(f"Failed to parse jsonData for the event: {e}")
         return None
 
 
@@ -81,7 +82,7 @@ def _handle_attachments(email: dict, nr_model: dict) -> bool:
     """Generate a report and update the email attachments."""
     report, status_code = ReportResource._get_report(nr_model)
     if status_code != HTTPStatus.OK:
-        structured_log(request, "ERROR", f"Failed to generate report for the event: {report}")
+        logger.error(f"Failed to generate report for the event: {report}")
         return False
 
     attachments = email.get("content", {}).get("attachments", [])
@@ -112,10 +113,6 @@ def _send_email(email: dict):
     resp = send_email(email, token)
 
     if resp.status_code != HTTPStatus.OK:
-        structured_log(
-            request,
-            "ERROR",
-            f"Failed to resend email for the event: {resp.status_code} - {resp.text}",
-        )
+        logger.error(f"Failed to resend email for the event: {resp.status_code} - {resp.text}")
         return False
     return True

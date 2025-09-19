@@ -3,15 +3,18 @@ import traceback
 from datetime import datetime
 from http import HTTPStatus
 
-from flask import current_app, jsonify, make_response, request
-from gcp_queue.logging import structured_log
-from namex.models import State
+from flask import current_app, jsonify, make_response
 from namex.resources.name_requests import ReportResource
 from namex.utils.api_resource import handle_exception
 from simple_cloudevent import SimpleCloudEvent
+from structured_logging import StructuredLogging
 
 from namex_emailer.email_processors import get_main_template
-from namex_emailer.services.helpers import get_contact_info, get_magic_link, query_nr_number
+from namex_emailer.services.helpers import (
+    get_contact_info,  # noqa I001
+    get_magic_link,  # noqa I001
+    query_nr_number,  # noqa I001
+)
 
 RESULT_EMAIL_SUBJECT = "Name Request Results from Corporate Registry"
 CONSENT_EMAIL_SUBJECT = "Consent Received by Corporate Registry"
@@ -22,14 +25,14 @@ GENERIC_STEPS = "Submit appropriate form to BC Registries. Call if assistance re
 BCA = "Business Corporations Act"
 PA = "Partnership Act"
 
-
+logger = StructuredLogging.get_logger()
 def email_consent_letter(email_info: SimpleCloudEvent):
     try:
-        structured_log(request, "DEBUG", f"NR_notification: {email_info}")
+        logger.debug(f"NR_notification: {email_info}")
         nr_number = email_info.data["request"]["nrNum"]
         nr_response = query_nr_number(nr_number)
         if nr_response.status_code != HTTPStatus.OK:
-            structured_log(request, "ERROR", f"Failed to get nr info for name request: {nr_number}")
+            logger.error(f"Failed to get nr info for name request: {nr_number}")
             return {}
         nr_model = nr_response.json()
         nr_model["consentFlag"] = (
@@ -62,17 +65,17 @@ def email_consent_letter(email_info: SimpleCloudEvent):
         email = {"recipients": recipients, "content": {"subject": report_name, "body": email_body, "attachments": []}}
         return email
     except Exception as err:
-        structured_log(request, "ERROR", f"Error retrieving the report: {traceback.format_exc()}")
+        logger.error(f"Error retrieving the report: {traceback.format_exc()}")
         return handle_exception(err, "Error retrieving the report.", 500)
 
 
 def email_report(email_info: SimpleCloudEvent):
     try:
-        structured_log(request, "DEBUG", f"NR_notification: {email_info}")
+        logger.debug(f"NR_notification: {email_info}")
         nr_number = email_info.data["request"]["nrNum"]
         nr_response = query_nr_number(nr_number)
         if nr_response.status_code != HTTPStatus.OK:
-            structured_log(request, "ERROR", f"Failed to get nr info for name request: {nr_number}")
+            logger.error(f"Failed to get nr info for name request: {nr_number}")
             return {}
         nr_model = nr_response.json()
 
@@ -84,7 +87,7 @@ def email_report(email_info: SimpleCloudEvent):
         recipients = ",".join(recipient_emails)
         request_action = nr_model["request_action_cd"]
         email_template = get_main_template(request_action, "rejected.md")
-        if nr_model["stateCd"] in [State.APPROVED, State.CONDITIONAL]:
+        if nr_model["stateCd"] in [State.APPROVED, State.CONDITIONAL]: # noqa F821
             legal_type = nr_model["entity_type_cd"]
             corp_num = nr_model["corpNum"]
             instruction_group = ReportResource._get_instruction_group(legal_type, request_action, corp_num)
@@ -116,7 +119,7 @@ def email_report(email_info: SimpleCloudEvent):
         email["content"]["attachments"] = attachments
         return email
     except Exception as err:
-        structured_log(request, "ERROR", f"Error retrieving the report: {traceback.format_exc()}")
+        logger.error(f"Error retrieving the report: {traceback.format_exc()}")
         return handle_exception(err, "Error retrieving the report.", 500)
 
 
