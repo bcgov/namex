@@ -52,3 +52,12 @@ inline-quotes    = "single"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+minversion = "2.0"
+testpaths = [
+   "tests",
+]
+pythonpath = [
+   "."
+]

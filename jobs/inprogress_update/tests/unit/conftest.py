@@ -5,7 +5,7 @@ import logging
 import pytest
 from sqlalchemy import event, text
 
-from inprogress_update.config import TestConfig
+from config import TestConfig
 from inprogress_update.inprogress_update import create_app
 from inprogress_update.inprogress_update import db as _db
 

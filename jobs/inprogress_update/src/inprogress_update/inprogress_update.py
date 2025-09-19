@@ -2,13 +2,14 @@
 import sys
 from datetime import datetime, timezone
 
-from config import Config
 from flask import Flask, current_app
 from namex import DBConfig, setup_search_path_event_listener
 from namex.models import Event, Request, State, User, db
 from namex.services import EventRecorder, queue
 from sqlalchemy import text
 from structured_logging import StructuredLogging
+
+from config import Config
 
 
 def create_app(config=Config):
