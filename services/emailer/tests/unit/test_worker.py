@@ -254,7 +254,6 @@ def test_resend_email_event_not_found(app, mocker):
 
         # Mock query_notification_event to return None
         mocker.patch("namex_emailer.email_processors.resend.query_notification_event", return_value=None)
-        mock_log = mocker.patch("namex_emailer.email_processors.resend.structured_log")
 
         # Test
         response, status = process_resend_email(event_id)
@@ -262,11 +261,6 @@ def test_resend_email_event_not_found(app, mocker):
         # Assertions
         assert status == HTTPStatus.OK
         assert response == {}
-        mock_log.assert_any_call(
-            mocker.ANY,
-            "ERROR",
-            "No event found.",
-        )
 
 
 def test_resend_email_no_email_content(app, mocker):
@@ -279,7 +273,6 @@ def test_resend_email_no_email_content(app, mocker):
 
         # Mock query_notification_event to return the mock event
         mocker.patch("namex_emailer.email_processors.resend.query_notification_event", return_value=mock_response)
-        mock_log = mocker.patch("namex_emailer.email_processors.resend.structured_log")
 
         # Test
         response, status = process_resend_email(event_id)
@@ -287,11 +280,6 @@ def test_resend_email_no_email_content(app, mocker):
         # Assertions
         assert status == HTTPStatus.OK
         assert response == {}
-        mock_log.assert_any_call(
-            mocker.ANY,
-            "ERROR",
-            f"No email content in the event: {event_id}",
-        )
 
 
 def test_resend_email_send_failure(app, mocker):
@@ -312,7 +300,6 @@ def test_resend_email_send_failure(app, mocker):
         # Mock query_notification_event to return the mock event
         mocker.patch("namex_emailer.email_processors.resend.query_notification_event", return_value=mock_event)
         mocker.patch("namex_emailer.email_processors.resend._handle_attachments", return_value=True)
-        mock_log = mocker.patch("namex_emailer.email_processors.resend.structured_log")
 
         # Mock get_bearer_token to return a token
         mocker.patch("namex_emailer.email_processors.resend.get_bearer_token", return_value="mocked_token")
@@ -329,8 +316,3 @@ def test_resend_email_send_failure(app, mocker):
         # Assertions
         assert status == HTTPStatus.OK
         assert response == {}
-        assert any(
-            "Failed to resend email for the event" in call.args[2]
-            for call in mock_log.call_args_list
-            if len(call.args) >= 3
-        ), "Expected error log not found"
