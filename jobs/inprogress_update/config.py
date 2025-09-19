@@ -60,3 +60,10 @@ class TestConfig(BaseConfig):
     DB_HOST = os.getenv('DATABASE_TEST_HOST', 'localhost')
     DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
     SQLALCHEMY_DATABASE_URI = f'postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
+
+
+class MigrationConfig(Config):
+    """Config for db migration."""
+
+    TESTING = False
+    DEBUG = True
