@@ -1,7 +1,8 @@
 import string
 
+from namex.constants import Designations
 from namex.services.solr import (
-    designations,
+    words_to_filter_from_name,
     first_consonants,
     first_vowels,
     has_leading_vowel,
@@ -120,8 +121,15 @@ class SolrHlpers:
     def _get_name_without_designation(cls, name):
         if not name:
             return ''
-        words = name.upper().split()
-        filtered_words = [word for word in words if word not in designations()]
+        name = name.upper().strip()
+        # Remove trailing designation phrase if present
+        for designation in sorted(Designations.list(), key=lambda x: -len(x)):
+            if name.endswith(' ' + designation) or name == designation:
+                name = name[: -len(designation)].strip()
+                break
+        # Now filter out any remaining words that are in words_to_filter_from_name
+        words = name.split()
+        filtered_words = [word for word in words if word not in words_to_filter_from_name()]
         return ' '.join(filtered_words)
 
     @classmethod
