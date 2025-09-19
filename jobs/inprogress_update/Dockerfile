@@ -1,21 +1,22 @@
-FROM python:3.12.2
-USER root
+# Stage 1: Build environment (with Poetry + dependencies installed)
+FROM python:3.12-slim AS development_build
 
 ARG VCS_REF="missing"
 ARG BUILD_DATE="missing"
 
 ENV VCS_REF=${VCS_REF}
 ENV BUILD_DATE=${BUILD_DATE}
+ENV PORT=8080
 
 LABEL org.label-schema.vcs-ref=${VCS_REF} \
-      org.label-schema.build-date=${BUILD_DATE}
+      org.label-schema.build-date=${BUILD_DATE} \
+      vendor="BCROS"
 
 USER root
 
 ARG APP_ENV \
-  # Needed for fixing permissions of files created by Docker:
-  UID=1000 \
-  GID=1000
+    UID=1000 \
+    GID=1000
 
 ENV APP_ENV=${APP_ENV} \
     # python:
@@ -29,7 +30,7 @@ ENV APP_ENV=${APP_ENV} \
     PIP_DEFAULT_TIMEOUT=100 \
     PIP_ROOT_USER_ACTION=ignore \
     # poetry:
-    POETRY_VERSION=1.3.2 \
+    POETRY_VERSION=2.1.3 \
     POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_CREATE=false \
     POETRY_CACHE_DIR='/var/cache/pypoetry' \
@@ -37,7 +38,6 @@ ENV APP_ENV=${APP_ENV} \
 
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
-# Install system dependencies
 RUN apt-get update && apt-get upgrade -y \
     && apt-get install --no-install-recommends -y \
        bash \
@@ -50,32 +50,38 @@ RUN apt-get update && apt-get upgrade -y \
        wait-for-it \
     && curl -sSL 'https://install.python-poetry.org' | python - \
     && poetry --version \
+    # Clean up apt cache
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
     && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-# Setup the application directory
 WORKDIR /code
+
 RUN groupadd -g "${GID}" -r web \
     && useradd -d '/code' -g web -l -r -u "${UID}" web \
     && chown web:web -R '/code'
 
-# Copy the application code and scripts
 COPY --chown=web:web . /code
+
+COPY --chown=web:web ./run.sh /code/run.sh
 RUN chmod 755 /code/run.sh
 
-# Echo the current Poetry configuration
-RUN echo "Checking Poetry configurations..." \
-    && poetry config --list
-
-# Initialize project and install dependencies
+# Install dependencies
 RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
-    echo "Installing dependencies under APP_ENV=$APP_ENV..." \
+    echo "$APP_ENV" \
+    && poetry config installer.max-workers 1 \
+    && poetry version \
     && poetry run pip install -U pip \
-    && poetry install $(if [ -z ${APP_ENV+x} ] || [ "$APP_ENV" = 'production' ]; then echo '--only main'; fi) \
-    --no-interaction --no-ansi
+    && poetry install \
+        $(if [ -z "${APP_ENV}" ] || [ "$APP_ENV" = 'production' ]; then echo '--only main'; fi) \
+        --no-interaction --no-ansi
 
-# Switch to the non-root user
+# Run as non-root
 USER web
+
+# Stage 2: Production image (lighter)
+FROM development_build AS production_build
+COPY --chown=web:web . /code
+RUN chmod -R 755 /code/run.sh
 
 EXPOSE 8080
 
