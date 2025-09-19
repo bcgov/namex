@@ -117,7 +117,7 @@ def query_notification_event(event_id: str):
 @staticmethod
 def send_email(email: dict, token: str):
     """Send the email"""
-    logger.info(request, f"Send Email: {email}")
+    logger.info(f"Send Email: {email}", request=request)
     return requests.post(
         f"{current_app.config.get('NOTIFY_API_URL', '')}",
         json=email,
