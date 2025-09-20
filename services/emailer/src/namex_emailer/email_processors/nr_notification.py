@@ -115,11 +115,11 @@ def process(email_info: SimpleCloudEvent, option) -> dict:
         return {}
 
     subjects = {
-        Option.BEFORE_EXPIRY.value: "Expiring Soon",
-        Option.EXPIRED.value: "Expired",
-        Option.RENEWAL.value: "Confirmation of Renewal",
-        Option.UPGRADE.value: "Confirmation of Upgrade",
-        Option.REFUND.value: "Refund request confirmation",
+    Option.BEFORE_EXPIRY.value: "Expiring Soon",
+    Option.EXPIRED.value: "Expired",
+    Option.RENEWAL.value: "Confirmation of Renewal",
+    Option.UPGRADE.value: "Confirmation of Upgrade",
+    Option.REFUND.value: "Refund request confirmation",
     }
 
     return {

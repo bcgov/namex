@@ -146,7 +146,7 @@ def process_email(email_msg: SimpleCloudEvent):
         elif option and Option(option) in DECISION_OPTIONS:
             email = nr_result.email_report(email_msg)
         elif option and option in [
-            nr_notification.Option.CONSENT_RECEIVED.value,
+            Option.CONSENT_RECEIVED.value,
         ]:
             email = nr_result.email_consent_letter(email_msg)
         else:

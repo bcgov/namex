@@ -3,12 +3,12 @@ import traceback
 from datetime import datetime
 from http import HTTPStatus
 
-from flask import current_app, jsonify, make_response
+from flask import current_app
 from namex.resources.name_requests import ReportResource
-from namex.utils.api_resource import handle_exception
 from simple_cloudevent import SimpleCloudEvent
 from structured_logging import StructuredLogging
 
+from namex_emailer.constants.notification_options import Option
 from namex_emailer.email_processors import get_main_template
 from namex_emailer.services.helpers import (
     get_contact_info,  # noqa I001
@@ -66,7 +66,7 @@ def email_consent_letter(email_info: SimpleCloudEvent):
         return email
     except Exception as err:
         logger.error(f"Error retrieving the report: {traceback.format_exc()}")
-        return handle_exception(err, "Error retrieving the report.", 500)
+        return {"error": "Error retrieving the report.", "details": str(err)}
 
 
 def email_report(email_info: SimpleCloudEvent):
@@ -81,13 +81,14 @@ def email_report(email_info: SimpleCloudEvent):
 
         report, status_code = ReportResource._get_report(nr_model)
         if status_code != HTTPStatus.OK:
-            return make_response(jsonify(message=str(report)), status_code)
+            return {"error": str(report), "status_code": status_code}
         report_name = nr_number + " - " + RESULT_EMAIL_SUBJECT
         recipient_emails, _ = get_contact_info(nr_model)
         recipients = ",".join(recipient_emails)
         request_action = nr_model["request_action_cd"]
         email_template = get_main_template(request_action, "rejected.md")
-        if nr_model["stateCd"] in [State.APPROVED, State.CONDITIONAL]: # noqa F821
+
+        if nr_model["stateCd"] in [Option.APPROVED.value, Option.CONDITIONAL.value]:
             legal_type = nr_model["entity_type_cd"]
             corp_num = nr_model["corpNum"]
             instruction_group = ReportResource._get_instruction_group(legal_type, request_action, corp_num)
@@ -120,7 +121,7 @@ def email_report(email_info: SimpleCloudEvent):
         return email
     except Exception as err:
         logger.error(f"Error retrieving the report: {traceback.format_exc()}")
-        return handle_exception(err, "Error retrieving the report.", 500)
+        return {"error": "Error retrieving the report.", "details": str(err)}
 
 
 def _build_email_body(template: str, nr_model):
