@@ -18,11 +18,11 @@ from __future__ import annotations
 from datetime import datetime
 from http import HTTPStatus
 
-from flask import current_app, request
-from gcp_queue.logging import structured_log
+from flask import current_app
 from jinja2 import Template
 from namex.resources.name_requests import ReportResource
 from simple_cloudevent import SimpleCloudEvent
+from structured_logging import StructuredLogging
 
 from namex_emailer.constants.notification_options import Option
 from namex_emailer.email_processors import get_main_template, substitute_template_parts
@@ -33,6 +33,9 @@ from namex_emailer.services.helpers import (
     query_nr_number,
 )
 
+logger = StructuredLogging.get_logger()
+
+
 
 def process(email_info: SimpleCloudEvent, option) -> dict:
     """
@@ -40,12 +43,12 @@ def process(email_info: SimpleCloudEvent, option) -> dict:
 
     valid values of option: Option
     """
-    structured_log(request, "DEBUG", f"NR {option} notification: {email_info}")
+    logger.debug(f"NR {option} notification: {email_info}")
     nr_number = email_info.data["request"]["nrNum"]
 
     nr_response = query_nr_number(nr_number)
     if nr_response.status_code != HTTPStatus.OK:
-        structured_log(request, "ERROR", f"Failed to get nr info for name request: {nr_number}")
+        logger.error(f"Failed to get nr info for name request: {nr_number}")
         return {}
 
     nr_data = nr_response.json()
@@ -112,11 +115,11 @@ def process(email_info: SimpleCloudEvent, option) -> dict:
         return {}
 
     subjects = {
-        Option.BEFORE_EXPIRY.value: "Expiring Soon",
-        Option.EXPIRED.value: "Expired",
-        Option.RENEWAL.value: "Confirmation of Renewal",
-        Option.UPGRADE.value: "Confirmation of Upgrade",
-        Option.REFUND.value: "Refund request confirmation",
+    Option.BEFORE_EXPIRY.value: "Expiring Soon",
+    Option.EXPIRED.value: "Expired",
+    Option.RENEWAL.value: "Confirmation of Renewal",
+    Option.UPGRADE.value: "Confirmation of Upgrade",
+    Option.REFUND.value: "Refund request confirmation",
     }
 
     return {
