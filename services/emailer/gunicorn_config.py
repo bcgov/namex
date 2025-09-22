@@ -38,7 +38,7 @@ runtime options from environment variables
 import os
 
 workers = int(os.environ.get("GUNICORN_PROCESSES", "1"))
-threads = int(os.environ.get("GUNICORN_THREADS", "1"))
+threads = int(os.environ.get("GUNICORN_THREADS", "8"))
 timeout = int(os.environ.get("GUNICORN_TIMEOUT", "600"))
 
 forwarded_allow_ips = "*"

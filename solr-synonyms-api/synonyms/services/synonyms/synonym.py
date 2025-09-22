@@ -1,17 +1,16 @@
 import re
 import string
+
+from pyinflect import getInflection
 from sqlalchemy import func
 
-from synonyms.models.synonym import Synonym
 from synonyms.criteria.synonym.query_criteria import SynonymQueryCriteria
-from . import LanguageCodes
-from . import porter
-from pyinflect import getInflection
+from synonyms.models.synonym import Synonym
+from synonyms.utils.service_utils import get_designation_position_code, get_entity_type_code
 
+from . import LanguageCodes, porter
 from .mixins.designation import SynonymDesignationMixin
 from .mixins.model import SynonymModelMixin
-
-from synonyms.utils.service_utils import get_entity_type_code, get_designation_position_code
 
 """
 - Services implement business logic, and NON generic queries. 
@@ -25,7 +24,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     def _model(self):
         return Synonym
 
-    _parse_csv_line = lambda x: (x.split(','))
+    _parse_csv_line = lambda x: (x.split(","))
 
     @classmethod
     def flatten_synonyms_text(cls, results):
@@ -37,9 +36,9 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         flattened_arr = [item for sublist in result_arr for item in sublist]
         return flattened_arr
 
-    '''
+    """
     Designations, distinctives and descriptives return stems_text
-    '''
+    """
 
     def find_word_synonyms(self, word, filters, stand_alone=False, category=False, entity_type=None, stem=False):
         model = self.get_model()
@@ -48,10 +47,10 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         if word:
             if stem:
                 filters.append(
-                    func.lower(model.stems_text).op('~')(r'\y{}\y'.format(porter.stem(word).replace(" ", ""))))
+                    func.lower(model.stems_text).op("~")(r"\y{}\y".format(porter.stem(word).replace(" ", ""))))
             else:
                 filters.append(
-                    func.lower(model.synonyms_text).op('~')(r'\y{}\y'.format(word).replace(" ", "")))
+                    func.lower(model.synonyms_text).op("~")(r"\y{}\y".format(word).replace(" ", "")))
 
         field = []
         if category:
@@ -75,8 +74,8 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         model = self.get_model()
 
         filters = [
-            ~func.lower(model.category).op('~')(r'\y{}\y'.format('sub')),
-            ~func.lower(model.category).op('~')(r'\y{}\y'.format('stop'))
+            ~func.lower(model.category).op("~")(r"\y{}\y".format("sub")),
+            ~func.lower(model.category).op("~")(r"\y{}\y".format("stop"))
         ]
 
         results = self.find_word_synonyms(word, filters, category, stem=False)
@@ -92,7 +91,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         model = self.get_model()
 
         filters = [
-            func.lower(model.category).op('~')(r'\y{}\y'.format('sub'))
+            func.lower(model.category).op("~")(r"\y{}\y".format("sub"))
         ]
 
         results = self.find_word_synonyms(word, filters)
@@ -107,7 +106,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         model = self.get_model()
 
         filters = [
-            func.lower(model.category).op('~')(r'\y{}\y'.format('stop word[s]?')),
+            func.lower(model.category).op("~")(r"\y{}\y".format("stop word[s]?")),
         ]
 
         results = self.find_word_synonyms(word, filters)
@@ -121,7 +120,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         model = self.get_model()
 
         filters = [
-            func.lower(model.category).op('~')(r'\y{}\y'.format('prefix(es)?'))
+            func.lower(model.category).op("~")(r"\y{}\y".format("prefix(es)?"))
         ]
 
         results = self.find_word_synonyms(None, filters)
@@ -132,7 +131,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         model = self.get_model()
 
         filters = [
-            func.lower(model.category).op('~')(r'\y{}\y'.format('stand-alone'))
+            func.lower(model.category).op("~")(r"\y{}\y".format("stand-alone"))
         ]
 
         results = self.find_word_synonyms(None, filters, stand_alone=True)
@@ -146,7 +145,7 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         model = self.get_model()
 
         filters = [
-            func.lower(model.category).op('~')(r'\y{}\y'.format('number(s)? sub')),
+            func.lower(model.category).op("~")(r"\y{}\y".format("number(s)? sub")),
         ]
 
         results = self.find_word_synonyms(None, filters)
@@ -164,35 +163,35 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
         if entity_type_code is not None:
             filters.append(
-                func.lower(model.category).op('~')(r'\y{}[-_]+valid\y'.format(entity_type_code.value.lower())))
+                func.lower(model.category).op("~")(r"\y{}[-_]+valid\y".format(entity_type_code.value.lower())))
 
         if position_code is not None:
-            filters.append(func.lower(model.category).op('~')(
-                r'\y{}\y'.format('designation[s]?[_-]+' + position_code.value.lower())))
+            filters.append(func.lower(model.category).op("~")(
+                r"\y{}\y".format("designation[s]?[_-]+" + position_code.value.lower())))
         else:
-            filters.append(func.lower(model.category).op('~')(r'\y{}\y'.format('designation[s]?[_-]')))
+            filters.append(func.lower(model.category).op("~")(r"\y{}\y".format("designation[s]?[_-]")))
 
-        filters.append(func.lower(model.category).op('~')(r'\y{}\y'.format(lang.lower())))
+        filters.append(func.lower(model.category).op("~")(r"\y{}\y".format(lang.lower())))
 
         results = self.find_word_synonyms(None, filters, entity_type=entity_type_code)
         flattened = list(set(map(str.strip, (list(filter(None, self.flatten_synonyms_text(results)))))))
         flattened.sort(key=len, reverse=True)
         return flattened
 
-    '''
+    """
     Rules for Regex Transform (from bottom to top):
     1.- Replace with non-space 
         A.- .com: internet_domains
     	B.- Commas in numbers: 50,000 --> 50000 (?<=\\d),(?=\\d)|
-    	B.- Set together words followed by punctuation and a character (AB-C, A-C, ABC-C): (?<=\b[A-Za-z])+[\/&-](?=[A-Za-z]\b)
+    	B.- Set together words followed by punctuation and a character (AB-C, A-C, ABC-C): (?<=\b[A-Za-z])+[\\/&-](?=[A-Za-z]\b)
     	C.- Designations anywhere    	
-    2.- Search for prefixes followed by punctuation and a word (re/max) and set them together: \b('+prefixes+')([ &\/.-])([A-Za-z]+)
+    2.- Search for prefixes followed by punctuation and a word (re/max) and set them together: \b('+prefixes+')([ &\\/.-])([A-Za-z]+)
     3.- Replace with space the following:
         A.- Word with possesive such as Reynold's: (?<=[a-zA-Z])\'[Ss]
-    	B.- (NO. 111),NO. 465,(LOT 111),LOT 27,LOT( 100-2),(100): \(?No.?\s*\d+\)?|\(?lot.?\s*\d+[-]?\d+\)?|\(\d+\)
+    	B.- (NO. 111),NO. 465,(LOT 111),LOT 27,LOT( 100-2),(100): \\(?No.?\\s*\\d+\\)?|\\(?lot.?\\s*\\d+[-]?\\d+\\)?|\\(\\d+\\)
     	#C.- Punctuation except ampersand, slash, hyphen used for separation: [^a-zA-Z0-9 &/-]+
-    4.- Remove repeated strings with minimum two characters (AB -- AB --> AB): \b(\w{2,})(\b\W+\b\1\b)*
-    5.- Separate ordinal numbers from words (4THGEN --> 4TH GEN):\b(\d+(ST|[RN]D|TH))(\w+)\b
+    4.- Remove repeated strings with minimum two characters (AB -- AB --> AB): \b(\\w{2,})(\b\\W+\b\1\b)*
+    5.- Separate ordinal numbers from words (4THGEN --> 4TH GEN):\b(\\d+(ST|[RN]D|TH))(\\w+)\b
     6.- Replace with space: 
         Alphanumeric strings separating strings from letters as long as they are not in exception list (substitution list):
         For instance 1st,h20 are not separated because they are in substitution list, but P8 is transformed to P 8 
@@ -202,24 +201,24 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
         Punctuation including ampersand, slash, hyphen used for separation:[&/-]
     8.- Replace with non-space:
          Set together letter of length one separated by spaces: (?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)
-    	 Trailing and leading spaces in string: ^\s+|\s+$
+    	 Trailing and leading spaces in string: ^\\s+|\\s+$
     9.- Replace with non-space:
          Remove numbers and numbers in words at the beginning or keep them as long as the last string is 
-         any BC|HOLDINGS|VENTURES: (^(?:\d+(?:{ordinal_suffixes})?\s+)+(?=[^\d]+$)|(?:({numbers})\s+)(?!.*?(?:{stand_alone_words}$))
+         any BC|HOLDINGS|VENTURES: (^(?:\\d+(?:{ordinal_suffixes})?\\s+)+(?=[^\\d]+$)|(?:({numbers})\\s+)(?!.*?(?:{stand_alone_words}$))
     	 Set single letters together (initials):(?<=\b[A-Za-z]\b) +(?=[a-zA-Z]\b)
-    10.- Remove extra spaces to have just one space: \s+
-    '''
+    10.- Remove extra spaces to have just one space: \\s+
+    """
 
     def regex_transform(self, text, designation_all, prefix_list, number_list, exceptions_ws):
         stand_alone_list = self.get_standalone()
         stand_alone_list.sort(key=len, reverse=True)
 
-        designation_all_regex = '|'.join(designation_all)
+        designation_all_regex = "|".join(designation_all)
         # stand_alone_regex = '$|'.join(stand_alone_list) + '$'
         # prefixes = '|'.join(prefix_list)
 
-        ordinal_suffixes = 'ST|[RN]D|TH'
-        internet_domains = '.COM|.ORG|.NET|.EDU'
+        ordinal_suffixes = "ST|[RN]D|TH"
+        internet_domains = ".COM|.ORG|.NET|.EDU"
         # stand_alone_words = 'HOLDINGS$|BC$|VENTURES$|SOLUTION$|ENTERPRISE$|ENTERPRISES$|INDUSTRIES$'
 
         text = self.regex_remove_designations(text, internet_domains, designation_all_regex)
@@ -238,10 +237,10 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     @classmethod
     def regex_remove_designations(cls, text, internet_domains, designation_all_regex):
-        text = re.sub(r'\b({0})\b|(?<=\d),(?=\d)|(?<!\w)({1})(?![A-Za-z0-9_.])(?=.*$)'.format(
+        text = re.sub(r"\b({0})\b|(?<=\d),(?=\d)|(?<!\w)({1})(?![A-Za-z0-9_.])(?=.*$)".format(
             internet_domains,
             designation_all_regex),
-            '',
+            "",
             text,
             0,
             re.IGNORECASE)
@@ -249,9 +248,9 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     @classmethod
     def regex_prefixes(cls, text, prefixes, exception_designation):
-        exception_designation_rx = '|'.join(map(re.escape, exception_designation))
-        ws_generic_rx = r'(?<![a-zA-Z0-9_.])({0})\s*([ &/.-])\s*([A-Za-z]+)'.format(prefixes)
-        designation_rx = re.compile(r'({0})|{1}'.format(exception_designation_rx, ws_generic_rx), re.I)
+        exception_designation_rx = "|".join(map(re.escape, exception_designation))
+        ws_generic_rx = r"(?<![a-zA-Z0-9_.])({0})\s*([ &/.-])\s*([A-Za-z]+)".format(prefixes)
+        designation_rx = re.compile(r"({0})|{1}".format(exception_designation_rx, ws_generic_rx), re.I)
 
         text = designation_rx.sub(lambda x: x.group(1) or (x.group(2) + x.group(4)), text)
 
@@ -259,8 +258,8 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     @classmethod
     def regex_numbers_lot(cls, text):
-        text = re.sub(r'(?<=[a-zA-Z\.])\'[Ss]|\(.*\d+.*\)|\(?No.?\s*\d+\)?|\(?lot.?\s*\d+[-]?\d*\)?',
-                      '',
+        text = re.sub(r"(?<=[a-zA-Z\.])\'[Ss]|\(.*\d+.*\)|\(?No.?\s*\d+\)?|\(?lot.?\s*\d+[-]?\d*\)?",
+                      "",
                       text,
                       0,
                       re.IGNORECASE)
@@ -268,8 +267,8 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     @classmethod
     def regex_repeated_strings(cls, text):
-        text = re.sub(r'\b(\w{2,})(\b\W+\b\1\b)*',
-                      r'\1',
+        text = re.sub(r"\b(\w{2,})(\b\W+\b\1\b)*",
+                      r"\1",
                       text,
                       0,
                       re.IGNORECASE)
@@ -277,8 +276,8 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     @classmethod
     def regex_separated_ordinals(cls, text, ordinal_suffixes):
-        text = re.sub(r'\b(\d+({}))(\w+)\b'.format(ordinal_suffixes),
-                      r'\1 \3',
+        text = re.sub(r"\b(\d+({}))(\w+)\b".format(ordinal_suffixes),
+                      r"\1 \3",
                       text,
                       0,
                       re.IGNORECASE)
@@ -286,9 +285,9 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     @classmethod
     def regex_keep_together_abv(cls, text, exceptions_ws):
-        exception_ws_rx = '|'.join(map(re.escape, exceptions_ws))
-        ws_generic_rx = r'(?<=\d)(?=[^\d\s])|(?<=[^\d\s])(?=\d)'
-        ws_rx = re.compile(r'({})|{}'.format(exception_ws_rx, ws_generic_rx), re.I)
+        exception_ws_rx = "|".join(map(re.escape, exceptions_ws))
+        ws_generic_rx = r"(?<=\d)(?=[^\d\s])|(?<=[^\d\s])(?=\d)"
+        ws_rx = re.compile(r"({})|{}".format(exception_ws_rx, ws_generic_rx), re.I)
 
         text = ws_rx.sub(lambda x: x.group(1) or " ", text)
 
@@ -302,8 +301,8 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     @classmethod
     def regex_together_one_letter(cls, text):
-        text = re.sub(r'(\b[A-Za-z]{1,2}\b)\s+(?=[a-zA-Z]{1,2}\b)|\s+$',
-                      r'\1',
+        text = re.sub(r"(\b[A-Za-z]{1,2}\b)\s+(?=[a-zA-Z]{1,2}\b)|\s+$",
+                      r"\1",
                       text,
                       0,
                       re.IGNORECASE)
@@ -311,8 +310,8 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     @classmethod
     def regex_strip_out_numbers_middle_end(cls, text, ordinal_suffixes, numbers):
-        text = re.sub(r'(?<=[A-Za-z]\b\s)([ 0-9]+({})?\b|({})\b)'.format(ordinal_suffixes, numbers),
-                      '',
+        text = re.sub(r"(?<=[A-Za-z]\b\s)([ 0-9]+({})?\b|({})\b)".format(ordinal_suffixes, numbers),
+                      "",
                       text,
                       0,
                       re.IGNORECASE)
@@ -321,9 +320,9 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     @classmethod
     def regex_numbers_standalone(cls, text, ordinal_suffixes, numbers, stand_alone_words):
         text = re.sub(
-            r'\b(?=(\d+(?:{0})?\b(?:\s+\d+(?:\b{0}\b)?)*|(?:\b({1})\b)(?:\s+(?:\b({1})\b))*))\1(?!\s+(?:{2})\b)\s*'.format(
+            r"\b(?=(\d+(?:{0})?\b(?:\s+\d+(?:\b{0}\b)?)*|(?:\b({1})\b)(?:\s+(?:\b({1})\b))*))\1(?!\s+(?:{2})\b)\s*".format(
                 ordinal_suffixes, numbers, stand_alone_words),
-            '',
+            "",
             text,
             0,
             re.IGNORECASE)
@@ -331,8 +330,8 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
 
     @classmethod
     def regex_remove_extra_spaces(cls, text):
-        text = re.sub(r'\s+',
-                      ' ',
+        text = re.sub(r"\s+",
+                      " ",
                       text,
                       0,
                       re.IGNORECASE)
@@ -341,15 +340,15 @@ class SynonymService(SynonymDesignationMixin, SynonymModelMixin):
     def exception_regex(self, text):
         # Build exception list to avoid separation of numbers and letters when they are part of synonym table such as H20, 4MULA, ACTIV8
         exceptions_ws = []
-        for word in re.sub(r'[^a-zA-Z0-9 -\']+', ' ', text, 0, re.IGNORECASE).split():
-            if self.get_substitutions(word) and bool(re.search(r'\d', word)):
+        for word in re.sub(r"[^a-zA-Z0-9 -\']+", " ", text, 0, re.IGNORECASE).split():
+            if self.get_substitutions(word) and bool(re.search(r"\d", word)):
                 exceptions_ws.append(word)
 
         if not exceptions_ws:
-            exceptions_ws.append('null')
+            exceptions_ws.append("null")
 
         return exceptions_ws
 
     def get_gerund_word(self, word):
-        gerund = getInflection(word, 'VBG')
-        return [gerund[0]] if gerund is not None else ''
+        gerund = getInflection(word, "VBG")
+        return [gerund[0]] if gerund is not None else ""

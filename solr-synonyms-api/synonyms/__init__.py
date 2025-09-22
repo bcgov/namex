@@ -18,7 +18,7 @@ jwt = JwtManager()
 run_version = get_run_version()
 
 
-def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
+def create_app(run_mode=os.getenv("FLASK_ENV", "production")):
     """Create app."""
     app = flask.Flask(__name__)
     app.config.from_object(config.CONFIGURATION[run_mode])
@@ -36,8 +36,8 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 
     @app.after_request
     def add_version(response):
-        os.getenv('OPENSHIFT_BUILD_COMMIT', '')
-        response.headers['API'] = 'NameX/{ver}'.format(ver=run_version)
+        os.getenv("OPENSHIFT_BUILD_COMMIT", "")
+        response.headers["API"] = "NameX/{ver}".format(ver=run_version)
         return response
 
     register_shellcontext(app)
@@ -48,8 +48,8 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 def setup_jwt_manager(app, jwt):
     """Initialize jwt config."""
     def get_roles(a_dict):
-        return a_dict['realm_access']['roles']
-    app.config['JWT_ROLE_CALLBACK'] = get_roles
+        return a_dict["realm_access"]["roles"]
+    app.config["JWT_ROLE_CALLBACK"] = get_roles
 
     jwt.init_app(app)
 
@@ -61,9 +61,9 @@ def register_shellcontext(app):
     def shell_context():
         """Shell context objects."""
         return {
-            'app': app,
-            'jwt': jwt,
-            'db': db,
-            'models': models}
+            "app": app,
+            "jwt": jwt,
+            "db": db,
+            "models": models}
 
     app.shell_context_processor(shell_context)

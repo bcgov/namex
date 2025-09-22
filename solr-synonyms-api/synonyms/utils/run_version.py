@@ -5,9 +5,9 @@ from synonyms.VERSION import __version__
 
 
 def _build_openshift_run_version_id():
-    commit_hash = os.getenv('OPENSHIFT_BUILD_COMMIT', None)
+    commit_hash = os.getenv("OPENSHIFT_BUILD_COMMIT", None)
     if commit_hash:
-        return '{ver}-{hash}'.format(ver=__version__, hash=commit_hash[:10])
+        return "{ver}-{hash}".format(ver=__version__, hash=commit_hash[:10])
     return None
 
 

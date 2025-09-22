@@ -1,17 +1,24 @@
 import pytest
 
-from . import syn_svc, designation_all_regex, prefixes, ordinal_suffixes, \
-    exceptions_ws, numbers, stand_alone_words, internet_domains
-
+from . import (
+    designation_all_regex,
+    exceptions_ws,
+    internet_domains,
+    numbers,
+    ordinal_suffixes,
+    prefixes,
+    stand_alone_words,
+    syn_svc,
+)
 
 # class TestSynonymService(TestCase):
-'''
+"""
 1. - Replace with non - space
     A. -.com: internet_domains
     B. - Commas in numbers: 50, 000 --> 50000
     B. - Set together words followed by punctuation and a character
     C. - Designations anywhere
-'''
+"""
 
 
 @pytest.mark.parametrize("name, expected",
@@ -29,9 +36,9 @@ def test_regex_remove_designations(name, expected):
     assert syn_svc.regex_remove_designations(name, internet_domains, designation_all_regex) == expected
 
 
-'''
+"""
 2.- Search for prefixes followed by punctuation and a word (re/max) and set them together
-'''
+"""
 
 
 @pytest.mark.parametrize("name, expected",
@@ -44,11 +51,11 @@ def test_regex_prefixes(name, expected):
     assert syn_svc.regex_prefixes(name, prefixes) == expected
 
 
-'''
+"""
 3.- Replace with space the following:
         A.- Word with possesive such as Reynold's
         B.- (NO. 111),NO. 465,(LOT 111),LOT 27,LOT( 100-2),(100)
-'''
+"""
 
 
 @pytest.mark.parametrize("name, expected",
@@ -63,9 +70,9 @@ def test_regex_numbers_lot(name, expected):
     assert syn_svc.regex_numbers_lot(name) == expected
 
 
-'''
+"""
 4.- Remove repeated strings with minimum two characters.
-'''
+"""
 
 
 @pytest.mark.parametrize("name, expected",
@@ -76,9 +83,9 @@ def test_regex_repeated_strings(name, expected):
     assert syn_svc.regex_repeated_strings(name) == expected
 
 
-'''
+"""
 5.- Separate ordinal numbers from words (4THGEN --> 4TH GEN):
-'''
+"""
 
 
 @pytest.mark.parametrize("name, expected",
@@ -90,11 +97,11 @@ def test_regex_separate_ordinals(name, expected):
     assert syn_svc.regex_separated_ordinals(name, ordinal_suffixes) == expected
 
 
-'''
+"""
 6.- Replace with space: 
     Alphanumeric strings separating strings from letters as long as they are not in exception list (substitution list):
     For instance 1st,h20 are not separated because they are in substitution list, but P8 is transformed to P 8 
-'''
+"""
 
 
 @pytest.mark.parametrize("name, expected",
@@ -107,10 +114,10 @@ def test_regex_keep_together_abv(name, expected):
     assert syn_svc.regex_keep_together_abv(name, exceptions_ws) == expected
 
 
-'''
+"""
 7.- Replace with space:
         Punctuation including ampersand, slash, hyphen used for separation
-'''
+"""
 
 
 @pytest.mark.parametrize("name, expected",
@@ -121,11 +128,11 @@ def test_regex_punctuation(name, expected):
     assert syn_svc.regex_punctuation(name) == expected
 
 
-'''
+"""
 8.- Replace with non-space:
     Set together letter of length one separated by spaces.
     Trailing and leading spaces in string
-'''
+"""
 
 
 @pytest.mark.parametrize("name, expected",
@@ -137,10 +144,10 @@ def test_regex_together_one_letter(name, expected):
     assert syn_svc.regex_together_one_letter(name) == expected
 
 
-'''
+"""
 9.- Replace with non-space the following:
          Remove cardinal and ordinal numbers from string in the middle and end: (?<=[A-Za-z]\b )([ 0-9]*(ST|[RN]D|TH)?\b)
-'''
+"""
 
 
 @pytest.mark.parametrize("name, expected",
@@ -158,11 +165,11 @@ def test_regex_strip_out_numbers_middle_end(name, expected):
     assert syn_svc.regex_strip_out_numbers_middle_end(name,ordinal_suffixes, numbers) == expected
 
 
-'''
+"""
 10.- Replace with non-space:
     Remove numbers and numbers in words at the beginning or keep them as long as the last string is 
     any BC|HOLDINGS|VENTURES:    
-'''
+"""
 
 
 @pytest.mark.parametrize("name, expected",

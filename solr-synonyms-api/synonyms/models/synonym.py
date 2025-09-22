@@ -1,10 +1,10 @@
-from . import db, ma
-
 from flask import current_app
-from sqlalchemy import and_
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
+from sqlalchemy import and_
 
 from synonyms.criteria.synonym.query_criteria import SynonymQueryCriteria
+
+from . import db
 
 """
 - Models NEVER implement business logic, ONLY generic queries belong in here.
@@ -18,7 +18,7 @@ from synonyms.criteria.synonym.query_criteria import SynonymQueryCriteria
 
 # The class that corresponds to the database table for synonyms.
 class Synonym(db.Model):
-    __tablename__ = 'synonym'
+    __tablename__ = "synonym"
     # TODO: What's the deal with this bind key?
     # __bind_key__ = 'synonyms'
 
@@ -33,38 +33,38 @@ class Synonym(db.Model):
         return {"id": self.id, "category": self.category, "synonymsText": self.synonyms_text,
                 "stemsText": self.stems_text, "comment": self.comment, "enabled": self.enabled}
 
-    '''
+    """
     Find a term by column.
-    '''
+    """
     @classmethod
     def find(cls, term, col):
-        current_app.logger.debug('finding {} for {}'.format(col, term))
+        current_app.logger.debug("finding {} for {}".format(col, term))
         synonyms_list = []
         term = term.lower()
-        if col == 'synonyms_text':
-            rows = cls.query.filter(Synonym.synonyms_text.ilike('%' + term + '%')).all()
+        if col == "synonyms_text":
+            rows = cls.query.filter(Synonym.synonyms_text.ilike("%" + term + "%")).all()
             for row in rows:
-                synonyms = [synonym.strip().lower() for synonym in row.synonyms_text.split(',')]
+                synonyms = [synonym.strip().lower() for synonym in row.synonyms_text.split(",")]
                 if term in synonyms:
                     synonyms_list.append(row)
         # col == stems_text
         else:
-            rows = cls.query.filter(Synonym.stems_text.ilike('%' + term + '%')).all()
+            rows = cls.query.filter(Synonym.stems_text.ilike("%" + term + "%")).all()
             for row in rows:
-                synonyms = [synonym.strip().lower() for synonym in row.stems_text.split(',')]
+                synonyms = [synonym.strip().lower() for synonym in row.stems_text.split(",")]
                 if term in synonyms:
                     synonyms_list.append(row)
 
         return synonyms_list
 
-    '''
+    r"""
     Query the model collection using an array of filters
     @:param filters An array of query filters eg. 
                     [
                       func.lower(model.category).op('~')(r'\y{}\y'.format('sub')),
                       func.lower(model.category).op('~')(r'\y{}\y'.format('prefix(es)?'))
                     ]
-    '''
+    """
     @classmethod
     def find_by_criteria(cls, criteria=None):
         SynonymQueryCriteria.is_valid_criteria(criteria)

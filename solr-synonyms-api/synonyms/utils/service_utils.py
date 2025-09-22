@@ -1,13 +1,15 @@
-import re
 import collections
-
-from synonyms.constants import DataFrameFields
+import re
 
 # TODO: Implement a true shared lib for stuff like this!
 #  Most, if not all of these methods are shared with the namex api project!
-from synonyms.constants import \
-    BCProtectedNameEntityTypes, BCUnprotectedNameEntityTypes, XproUnprotectedNameEntityTypes, \
-    DesignationPositionCodes
+from synonyms.constants import (
+    BCProtectedNameEntityTypes,
+    BCUnprotectedNameEntityTypes,
+    DataFrameFields,
+    DesignationPositionCodes,
+    XproUnprotectedNameEntityTypes,
+)
 
 # TODO: Implement a true shared lib for stuff like this!
 #  Most, if not all of these methods are shared with the namex api project!
@@ -47,7 +49,7 @@ def data_frame_to_list(df):
 
 
 def get_dataframe_list(df, field):
-    return df[field].str.split(',').tolist()
+    return df[field].str.split(",").tolist()
 
 
 def get_flat_list(lst):
@@ -56,7 +58,7 @@ def get_flat_list(lst):
     # return subs_list
 
 
-'''
+"""
 def remove_french(text, fr_designation_end_list):
     compound = re.findall(r'[^/]+(?://[^/]*)*', text)
     if len(compound) == 2:
@@ -65,9 +67,9 @@ def remove_french(text, fr_designation_end_list):
             compound.pop()
             text = ' '.join(map(str, compound))
     return text
-'''
+"""
 
-'''
+"""
 Previous behaviour: The section after slash considered french designations to imply the section was in French.
 Current behaviour: The section after slash is not longer considering french designation.
 Rules:  1) Before and after slash has to be at least two words to removed string after slash.
@@ -79,27 +81,27 @@ Rules:  1) Before and after slash has to be at least two words to removed string
         3) In the case just having a word at the end, this is kept removing the slash.
            Eg.
            ABC ENGINEERING 7/24 --> ABC ENGINEERING 7 24
-'''
+"""
 
 
 def remove_french(text):
-    text = re.sub(r'(^\w+(?:[^\w\n]+\w+)+[^\w\n]*)/(\w+(?:[^\w\n]+\w+)+[^\w\n]*$)?',
-                  r'\1 ',
+    text = re.sub(r"(^\w+(?:[^\w\n]+\w+)+[^\w\n]*)/(\w+(?:[^\w\n]+\w+)+[^\w\n]*$)?",
+                  r"\1 ",
                   text,
-                  0,
-                  re.IGNORECASE)
+                  count = 0,
+                  flags = re.IGNORECASE)
     return " ".join(text.split())
 
 
 def remove_stop_words(original_name, stop_words):
-    stop_words_rgx = '|'.join(stop_words)
-    regex = re.compile(r'\b({})\b'.format(stop_words_rgx))
+    stop_words_rgx = "|".join(stop_words)
+    regex = re.compile(r"\b({})\b".format(stop_words_rgx))
     found_stop_words = regex.findall(original_name.lower())
 
     for word in found_stop_words:
         original_name = original_name.replace(word, "")
 
-    return re.sub(' +', ' ', original_name)
+    return re.sub(" +", " ", original_name)
 
 
 def list_distinctive_descriptive_same(name_list):
