@@ -59,7 +59,7 @@ class Synonym(db.Model):
 
     r"""
     Query the model collection using an array of filters
-    @:param filters An array of query filters eg. 
+    @:param filters An array of query filters eg.
                     [
                       func.lower(model.category).op('~')(r'\y{}\y'.format('sub')),
                       func.lower(model.category).op('~')(r'\y{}\y'.format('prefix(es)?'))

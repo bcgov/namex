@@ -6,19 +6,21 @@ import os
 
 import flask
 from flask_jwt_oidc import JwtManager
+from structured_logging import StructuredLogging
 
 import config
 from synonyms import models
 from synonyms.endpoints import api
 from synonyms.models import db, ma
 from synonyms.utils.run_version import get_run_version
-from structured_logging import StructuredLogging
 
 jwt = JwtManager()
 run_version = get_run_version()
 
 
-def create_app(run_mode=os.getenv("FLASK_ENV", "production")):
+def create_app(run_mode=None):
+    if run_mode is None:
+        run_mode = os.getenv("FLASK_ENV", "production")
     """Create app."""
     app = flask.Flask(__name__)
     app.config.from_object(config.CONFIGURATION[run_mode])

@@ -38,7 +38,7 @@ class ValidLocations(AbstractEnum):
 
 
 """
-We use the full name in the Enum code KEY so there is always context to what the code type represents, 
+We use the full name in the Enum code KEY so there is always context to what the code type represents,
 so we don't always have to refer to the Enum description, documentation, or this file.
 
 The Enum code VALUE (str) is the actual mapping value for the Enum code type

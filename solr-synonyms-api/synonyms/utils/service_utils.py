@@ -179,7 +179,7 @@ def list_distinctive_descriptive(name_list, dist_list, desc_list):
         desc_list_tmp.append([i for i in name_list if i not in dist and i in desc_list])
 
     # Validate generation of list of lists of distinctives and descriptives with the correct combinations:
-    for idx, element in enumerate(dist_list_tmp):
+    for idx, _element in enumerate(dist_list_tmp):
         if (dist_list_tmp[idx] + desc_list_tmp[idx]) == name_list:
             dist_list_all.append(dist_list_tmp[idx])
             desc_list_all.append(desc_list_tmp[idx])

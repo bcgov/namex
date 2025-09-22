@@ -7,7 +7,7 @@ import requests
 from flask import current_app
 from namex.models import User
 
-from tests.python import integration_postgres_solr, integration_solr, integration_synonym_api
+from tests.utils import integration_postgres_solr, integration_solr, integration_synonym_api
 
 token_header = {
                 "alg": "RS256",

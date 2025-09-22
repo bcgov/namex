@@ -98,9 +98,9 @@ def test_regex_separate_ordinals(name, expected):
 
 
 """
-6.- Replace with space: 
+6.- Replace with space:
     Alphanumeric strings separating strings from letters as long as they are not in exception list (substitution list):
-    For instance 1st,h20 are not separated because they are in substitution list, but P8 is transformed to P 8 
+    For instance 1st,h20 are not separated because they are in substitution list, but P8 is transformed to P 8
 """
 
 
@@ -167,8 +167,8 @@ def test_regex_strip_out_numbers_middle_end(name, expected):
 
 """
 10.- Replace with non-space:
-    Remove numbers and numbers in words at the beginning or keep them as long as the last string is 
-    any BC|HOLDINGS|VENTURES:    
+    Remove numbers and numbers in words at the beginning or keep them as long as the last string is
+    any BC|HOLDINGS|VENTURES:
 """
 
 

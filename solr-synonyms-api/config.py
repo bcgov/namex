@@ -18,11 +18,6 @@ class Config(object):
     """Create base config object."""
 
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
-    # The Flask secret key used to encrypt cookies. This must be kept secret and should be unique per environment. Do
-    # not allow a missing value.
-    SECRET_KEY = os.getenv("SOLR_SYNONYMS_API_FLASK_SECRET_KEY")
-    if not SECRET_KEY:
-        raise RuntimeError("Environment variable SOLR_SYNONYMS_API_FLASK_SECRET_KEY in not defined")
 
     # Turn this off to get rid of warning messages. In future versions of SQLAlchemy, False will be the default and
     # this can be removed.
@@ -68,3 +63,9 @@ class TestConfig(Config):
     DB_HOST = os.getenv("DATABASE_TEST_HOST", "localhost")
     DB_PORT = os.getenv("DATABASE_TEST_PORT", "5432")
     SQLALCHEMY_DATABASE_URI = f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}"
+
+class MigrationConfig(Config):
+    """Config for db migration."""
+
+    TESTING = False
+    DEBUG = True
