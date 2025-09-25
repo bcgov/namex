@@ -1,10 +1,9 @@
-import re
-
 import requests
 from flask import Request, current_app
 from flask_jwt_oidc.jwt_manager import JwtManager
 from jose import jwt
 
+from namex.constants import PHONE_CLEANUP_PATTERN
 from namex.models import Request as RequestDAO
 
 
@@ -65,7 +64,7 @@ def full_access_to_name_request(request: Request) -> bool:
     applicant = name_request.applicants[0]
 
     if phone:
-        phone = re.sub(r'\D', '', phone)
+        phone = PHONE_CLEANUP_PATTERN.sub('', phone)
     if not (phone or email):
         current_app.logger.debug(
             'Failed no phone or email - NR: %s, NRL: %s, Email: %s, Phone: %s', nr, nrl, email, phone
@@ -74,7 +73,7 @@ def full_access_to_name_request(request: Request) -> bool:
     if (
         phone
         and applicant.phoneNumber
-        and phone != re.sub(r'\D', '', applicant.phoneNumber)
+        and phone != PHONE_CLEANUP_PATTERN.sub('', applicant.phoneNumber)
     ):
         current_app.logger.debug(
             'Failed wrong phone - NR: %s, NRL: %s, Email: %s, Phone: %s, Applicant phone %s',
