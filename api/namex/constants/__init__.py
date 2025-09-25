@@ -1,3 +1,4 @@
+import re
 from enum import Enum
 
 # Modes
@@ -12,6 +13,7 @@ stop_w = 'Stop Words'
 
 DATE_FORMAT_NAMEX_SEARCH = '%Y-%m-%d'
 DATE_TIME_FORMAT_SQL = '%Y-%m-%d %H:%M:%S%z'
+PHONE_CLEANUP_PATTERN = re.compile(r'\\D')
 
 
 class AbstractEnum(Enum):
