@@ -2,6 +2,8 @@ from urllib.parse import unquote_plus
 
 from flask import current_app, jsonify, make_response, request
 
+import traceback
+
 """
 General API resource utils.
 """
@@ -12,7 +14,7 @@ def log_error(msg, err):
 
 
 def handle_exception(err, msg, err_code):
-    current_app.logger.error('Error: ' + repr(err))
+    current_app.logger.error(f'Error {traceback.format_exc()}')
     return make_response(jsonify(message=msg), err_code)
 
 
