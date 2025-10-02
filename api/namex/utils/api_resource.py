@@ -1,8 +1,7 @@
+import traceback
 from urllib.parse import unquote_plus
 
 from flask import current_app, jsonify, make_response, request
-
-import traceback
 
 """
 General API resource utils.
