@@ -36,8 +36,7 @@ class Config():  # pylint: disable=too-few-public-methods;
     COLIN_API_URL = os.getenv('COLIN_API_URL', 'http://') + \
         os.getenv('COLIN_API_VERSION', '/api/v1')
 
-    SEARCH_API_URL = os.getenv('REGISTRIES_SEARCH_API_INTERNAL_URL', 'http://') \
-        + os.getenv('REGISTRIES_SEARCH_API_VERSION', '/api/v1')
+    SEARCH_API_URL = os.getenv('REGISTRIES_SEARCH_API_INTERNAL_URL', 'http://')
 
     BOR_API_URL = os.getenv('BOR_API_INTERNAL_URL', '') \
         + os.getenv('BOR_API_VERSION', '')
