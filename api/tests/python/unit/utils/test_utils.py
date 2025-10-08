@@ -74,17 +74,17 @@ def test_full_access_to_name_request(
     assert expected == full_access_to_name_request(req)
 
 
-@pytest.mark.parametrize("input_phone,expected", [
-    ("(555) 123-4567", "5551234567"),
-    ("+1-555-123-4567", "5551234567"),
-    ("555.123.4567", "5551234567"),
-    ("555 123 4567", "5551234567"),
-    ("5551234567", "5551234567"),
-    ("", ""),
-    (None, ""),
+@pytest.mark.parametrize('input_phone,expected', [
+    ('(555) 123-4567', '5551234567'),
+    ('+1-555-123-4567', '5551234567'),
+    ('555.123.4567', '5551234567'),
+    ('555 123 4567', '5551234567'),
+    ('5551234567', '5551234567'),
+    ('', ''),
+    (None, ''),
 ])
 def test_normalize_phone_number(input_phone, expected):
     """Assure that normalized phone number contains only digits."""
     from namex.utils.auth import normalize_phone_number
-    result = normalize_phone_number(input_phone or "")
+    result = normalize_phone_number(input_phone or '')
     assert result == expected
