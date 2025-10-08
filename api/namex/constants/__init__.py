@@ -1,4 +1,3 @@
-import re
 from enum import Enum
 
 # Modes
