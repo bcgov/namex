@@ -525,8 +525,6 @@ class Request(db.Model):
             float: Median waiting time in the specified unit, or None if no data is available.
         """
         unit_time = 60 * 60 * 24  # Default to days
-        if priority_queue:
-            unit_time = 60 * 60  # Default to hours for priority queue
 
         # Step 1: decision_candidates CTE
         decision_candidates = (
