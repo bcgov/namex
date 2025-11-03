@@ -525,8 +525,6 @@ class Request(db.Model):
             float: Median waiting time in the specified unit, or None if no data is available.
         """
         unit_time = 60 * 60 * 24  # Default to days
-        if priority_queue:
-            unit_time = 60 * 60  # Default to hours for priority queue
 
         # Step 1: decision_candidates CTE
         decision_candidates = (
@@ -597,7 +595,17 @@ class Request(db.Model):
         except sqlalchemy.exc.SQLAlchemyError as e:
             current_app.logger.error(f'Error calculating waiting time: {e}')
             return None
-        return math.ceil(result) if result is not None and isinstance(result, (int, float)) else None
+
+        if result is None:
+            return None
+        # Normalize numeric types (Decimal, int, float, numeric-string) to float safely
+        try:
+            numeric = float(result)
+        except Exception:
+            current_app.logger.error(f'Unexpected waiting time result type: {type(result)} value: {result}')
+            return None
+
+        return math.ceil(numeric)
 
     @classmethod
     def get_query_exact_match(
