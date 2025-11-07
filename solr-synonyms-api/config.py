@@ -6,14 +6,6 @@ import dotenv
 # Load all the environment variables from a .env file located in some directory above.
 dotenv.load_dotenv(dotenv.find_dotenv())
 
-CONFIGURATION = {
-    "development": "config.DevConfig",
-    "testing": "config.TestConfig",
-    "production": "config.Config",
-    "default": "config.Config"
-}
-
-
 class Config(object):
     """Create base config object."""
 
@@ -69,3 +61,10 @@ class MigrationConfig(Config):
 
     TESTING = False
     DEBUG = True
+
+CONFIGURATION = {
+    "development": DevConfig,
+    "testing": TestConfig,
+    "production": Config,
+    "default": Config,
+}
