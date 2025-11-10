@@ -10,7 +10,7 @@ class Config(object):
     """Create base config object."""
 
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
-     # The Flask secret key used to encrypt cookies. This must be kept secret and should be unique per environment. Do
+    # The Flask secret key used to encrypt cookies. This must be kept secret and should be unique per environment. Do
     # not allow a missing value.
     SECRET_KEY = os.getenv("SOLR_SYNONYMS_API_FLASK_SECRET_KEY")
     if not SECRET_KEY:

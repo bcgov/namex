@@ -1,6 +1,6 @@
 from flask import jsonify
 from flask_jwt_oidc import AuthError
-from flask_restplus import Namespace, Resource
+from flask_restx import Namespace, Resource
 
 __all__ = ["api"]
 
