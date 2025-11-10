@@ -1,3 +1,7 @@
+import os
+
+os.environ.setdefault("SOLR_SYNONYMS_API_FLASK_SECRET_KEY", "test-secret")
+
 import pytest
 from sqlalchemy import Boolean, Column, Integer, Sequence, String, text
 from sqlalchemy.ext.declarative import declarative_base
