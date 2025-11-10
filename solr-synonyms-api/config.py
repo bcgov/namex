@@ -10,6 +10,11 @@ class Config(object):
     """Create base config object."""
 
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+     # The Flask secret key used to encrypt cookies. This must be kept secret and should be unique per environment. Do
+    # not allow a missing value.
+    SECRET_KEY = os.getenv("SOLR_SYNONYMS_API_FLASK_SECRET_KEY")
+    if not SECRET_KEY:
+        raise RuntimeError("Environment variable SOLR_SYNONYMS_API_FLASK_SECRET_KEY in not defined")
 
     # Turn this off to get rid of warning messages. In future versions of SQLAlchemy, False will be the default and
     # this can be removed.

@@ -18,4 +18,4 @@ def test_get_synonyms(app, db):
         db.commit()
 
         result = SynonymService().get_synonyms("foo")
-        assert set(result) == {'foo', 'foo_stem'}
+        assert set(result) == {"foo", "foo_stem"}

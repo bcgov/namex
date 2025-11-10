@@ -1,7 +1,15 @@
 import pytest
 
-from . import (designation_all_regex, exceptions_ws, internet_domains, numbers,
-               ordinal_suffixes, prefixes, stand_alone_words, syn_svc)
+from . import (
+    designation_all_regex,
+    exceptions_ws,
+    internet_domains,
+    numbers,
+    ordinal_suffixes,
+    prefixes,
+    stand_alone_words,
+    syn_svc,
+)
 
 # class TestSynonymService(TestCase):
 """
