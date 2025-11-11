@@ -74,7 +74,7 @@ __pycache__
 
 # Convenience Files
 # ######################
-/**/.env
+/**/.env*
 /**/.envrc
 /**/*.temp
 /**/*.last
