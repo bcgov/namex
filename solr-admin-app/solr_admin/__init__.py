@@ -4,6 +4,7 @@ import flask
 import flask_admin
 import flask_sqlalchemy
 from cloud_sql_connector import DBConfig, setup_search_path_event_listener
+from sqlalchemy.orm import scoped_session, sessionmaker
 from structured_logging import StructuredLogging
 
 import config
@@ -30,8 +31,8 @@ def create_application(run_mode=os.getenv('FLASK_ENV', 'production')):
     if application.config.get('DB_INSTANCE_CONNECTION_NAME'):
         db_config = DBConfig(
             instance_name=application.config.get('DB_INSTANCE_CONNECTION_NAME'),
-            database=application.config.get('DB_NAME'),
-            user=application.config.get('DB_USER'),
+            database=application.config.get('DATABASE_NAME'),
+            user=application.config.get('DATABASE_USER'),
             ip_type=application.config.get('DB_IP_TYPE'),
             schema=schema,
             pool_recycle=300,
@@ -44,13 +45,20 @@ def create_application(run_mode=os.getenv('FLASK_ENV', 'production')):
     application.logger = structured_logger.get_logger()
 
     # Register OIDC callback route to handle Keycloak redirect after login
-    application.register_blueprint(oidc_callback_bp) 
+    application.register_blueprint(oidc_callback_bp)
 
-    # Create the connection to the database.
-    models.db = flask_sqlalchemy.SQLAlchemy(application)
+
+    models.db.init_app(application)
 
     with application.app_context():
+        # At this point, db.engine exists
         engine = models.db.engine
+
+        # Cloud SQL: override session if using a special engine
+        if application.config.get('SQLALCHEMY_ENGINE_OPTIONS'):
+            models.db.session = scoped_session(sessionmaker(bind=engine))
+
+        # Setup schema search path
         setup_search_path_event_listener(engine, schema)
 
     # The root page - point the users to the admin interface.
