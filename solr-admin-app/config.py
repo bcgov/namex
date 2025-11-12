@@ -1,4 +1,5 @@
 import os
+
 import dotenv
 
 dotenv.load_dotenv(dotenv.find_dotenv(), override=True)
@@ -28,12 +29,15 @@ class Config(object):
     DATABASE_PORT = os.getenv('NAMES_ADMIN_DATABASE_PORT', '5432')
     DATABASE_NAME = os.getenv('NAMES_ADMIN_DATABASE_NAME', '')
 
-    if DB_UNIX_SOCKET := os.getenv('NAMES_ADMIN_DATABASE_UNIX_SOCKET', None):
-        SQLALCHEMY_DATABASE_URI = f'postgresql+psycopg2://{DATABASE_USER}:{DATABASE_PASSWORD}@/{DATABASE_NAME}?host={DB_UNIX_SOCKET}'
-        SQLALCHEMY_BINDS = {'synonyms': f'postgresql+psycopg2://{DATABASE_USER}:{DATABASE_PASSWORD}@/{DATABASE_NAME}?host={DB_UNIX_SOCKET}'}
+    DB_SCHEMA = os.getenv('DATABASE_SCHEMA', 'public')
+    DB_IP_TYPE = os.getenv('DATABASE_IP_TYPE', 'private')
+
+
+    if DB_INSTANCE_CONNECTION_NAME := os.getenv('DATABASE_INSTANCE_CONNECTION_NAME', None):
+        SQLALCHEMY_DATABASE_URI = 'postgresql+pg8000://'
     else:
-        SQLALCHEMY_DATABASE_URI = f'postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{int(DATABASE_PORT)}/{DATABASE_NAME}'
-        SQLALCHEMY_BINDS = {'synonyms': f'postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{int(DATABASE_PORT)}/{DATABASE_NAME}'}
+        SQLALCHEMY_DATABASE_URI = f'postgresql+pg8000://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}'
+
 
     DEBUG = False
     TESTING = False
