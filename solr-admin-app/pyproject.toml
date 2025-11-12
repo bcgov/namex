@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "solr-admin-app"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
@@ -9,6 +9,7 @@ packages = [{include = "solr_admin"}]
 [tool.poetry.dependencies]
 python = "^3.12"
 structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging" }
+cloud-sql-connector = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/cloud-sql-connector", branch = "main" }
 flask-admin = "^1.6.1"
 flask-migrate = "^4.1.0"
 flask = "^3.1.1"
@@ -16,7 +17,6 @@ mako = "^1.3.9"
 markupsafe = "^3.0.2"
 sqlalchemy = "^2.0.41"
 WTForms = "3.1.2"
-alembic = "^1.14.1"
 certifi = "^2025.1.31"
 chardet = "^5.2.0"
 authlib = "^1.6.0"
@@ -25,7 +25,6 @@ gunicorn = "^23.0.0"
 httplib2 = "^0.22.0"
 idna = "^3.10"
 oauth2client = "^4.1.3"
-psycopg2-binary = "^2.9.10"
 pyasn1-modules = "^0.4.1"
 pyasn1 = "^0.6.1"
 pyparsing = "^3.2.1"
