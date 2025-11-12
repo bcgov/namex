@@ -46,7 +46,6 @@ def create_application(run_mode=os.getenv('FLASK_ENV', 'production')):
     # Register OIDC callback route to handle Keycloak redirect after login
     application.register_blueprint(oidc_callback_bp)
 
-
     models.db.init_app(application)
 
     with application.app_context():
