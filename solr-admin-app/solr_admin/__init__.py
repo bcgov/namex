@@ -2,7 +2,6 @@ import os
 
 import flask
 import flask_admin
-import flask_sqlalchemy
 from cloud_sql_connector import DBConfig, setup_search_path_event_listener
 from sqlalchemy.orm import scoped_session, sessionmaker
 from structured_logging import StructuredLogging
