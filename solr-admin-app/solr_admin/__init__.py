@@ -46,19 +46,16 @@ def create_application(run_mode=os.getenv('FLASK_ENV', 'production')):
     # Register OIDC callback route to handle Keycloak redirect after login
     application.register_blueprint(oidc_callback_bp)
 
-
     models.db.init_app(application)
 
     with application.app_context():
-        # At this point, db.engine exists
-        engine = models.db.engine
+        schema = application.config.get("DB_SCHEMA", "public")
 
-        # Cloud SQL: override session if using a special engine
-        if application.config.get('SQLALCHEMY_ENGINE_OPTIONS'):
+        if application.config.get("SQLALCHEMY_ENGINE_OPTIONS"):
+            engine = models.db.engine
             models.db.session = scoped_session(sessionmaker(bind=engine))
+            setup_search_path_event_listener(engine, schema)
 
-        # Setup schema search path
-        setup_search_path_event_listener(engine, schema)
 
     with application.app_context():
         engine = models.db.engine
