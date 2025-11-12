@@ -60,6 +60,10 @@ def create_application(run_mode=os.getenv('FLASK_ENV', 'production')):
         # Setup schema search path
         setup_search_path_event_listener(engine, schema)
 
+    with application.app_context():
+        engine = models.db.engine
+        setup_search_path_event_listener(engine, schema)
+
     # The root page - point the users to the admin interface.
     @application.route('/')
     def index():
