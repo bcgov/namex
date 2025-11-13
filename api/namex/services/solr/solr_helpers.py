@@ -1,9 +1,7 @@
 import string
 
 from namex.constants import Designations
-from namex.services.solr import (
-    words_to_filter_from_name
-)
+from namex.services.solr import words_to_filter_from_name
 from namex.services.solr.solr_client import SolrClient
 
 
@@ -74,13 +72,13 @@ class SolrHlpers:
                 if rcd.get('name_state') in ('CORP', 'A'):
                     histories.append(rcd)
             else:
-                highlighting = rcd.get("highlighting", {})
-                exact = cls.normalize_words(highlighting.get("exact", []))
-                stems = cls.normalize_words(highlighting.get("stems", []))
-                synonyms = cls.normalize_words(highlighting.get("synonyms", []))
+                highlighting = rcd.get('highlighting', {})
+                exact = cls.normalize_words(highlighting.get('exact', []))
+                stems = cls.normalize_words(highlighting.get('stems', []))
+                synonyms = cls.normalize_words(highlighting.get('synonyms', []))
 
                 rcd['type'] = 'similar'
-                rcd['highlighting'] = { "exact": list(exact), "stems": list(stems), "synonyms": list(synonyms) }
+                rcd['highlighting'] = { 'exact': list(exact), 'stems': list(stems), 'synonyms': list(synonyms) }
                 similar_matches.append(rcd)
 
         return {
@@ -93,7 +91,7 @@ class SolrHlpers:
         Normalize a list of words by removing punctuation and converting to uppercase.
         """
         return [w.upper().translate(str.maketrans('', '', string.punctuation)) for w in word]
-    
+
     @classmethod
     def _find_stems(cls, name, query_name, synonyms):
         def clean_word(word):
