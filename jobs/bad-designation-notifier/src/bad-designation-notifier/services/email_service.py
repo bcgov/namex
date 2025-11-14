@@ -1,11 +1,11 @@
-import csv
-import smtplib
-import os
-import requests
-
 from http import HTTPStatus
+
+import requests
 from flask import current_app
-from .utils import get_yesterday_str, column_keys, column_headers, get_bearer_token
+
+from .utils import (column_headers, column_keys, get_bearer_token,
+                    get_yesterday_str)
+
 
 def load_recipients():
     """Load recipients dynamically from an environment variable."""
