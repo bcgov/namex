@@ -14,7 +14,7 @@ install: ## Install Python dependencies in a virtual environment
 	test -f $(VENV_DIR)/bin/activate || python3.12 -m venv $(VENV_DIR) ;\
 	. $(VENV_DIR)/bin/activate ;\
 	pip install poetry ;\
-	poetry install --no-dev
+	poetry install
 
 #################################################################################
 # Clean                                                                         #
@@ -68,7 +68,7 @@ push: build ## Push the Docker container to the registry
 # Run                                                                           #
 #################################################################################
 run: ## Run the project locally
-	. $(VENV_DIR)/bin/activate && poetry run python src/app.py
+	. $(VENV_DIR)/bin/activate && poetry run python3.12 src/app.py
 
 #################################################################################
 # Self-Documenting Commands                                                     #
