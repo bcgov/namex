@@ -68,7 +68,7 @@ push: build ## Push the Docker container to the registry
 # Run                                                                           #
 #################################################################################
 run: ## Run the project locally
-	. $(VENV_DIR)/bin/activate && poetry run python src/app.py
+	. $(VENV_DIR)/bin/activate && poetry run python3.12 src/app.py
 
 #################################################################################
 # Self-Documenting Commands                                                     #
