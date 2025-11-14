@@ -1,23 +1,12 @@
 [tool.poetry]
 name = "bad-designation-notifier"
-version = "0.1.0"
+version = "0.2.0"
 description = "An app to detect and notify about bad designations."
 authors = ["Eve Deng <eve.deng@gov.bc.ca>"]
 license = "Apache-2.0"
 readme = "README.md"
-packages = [
-    { include = "services", from = "src" },  # Updated to specify the `src` path
-    { include = "src" }                      # Ensure `src` folder is packaged
-]
+packages = [{include = "bad-designation-notifier", from = "src"}]
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
-flask = "^3.0.2"
-sqlalchemy = "^1.4.18"
-psycopg2-binary = "^2.9.7"
-pytz = "^2022.4"
-python-dotenv = "0.21.0"
-cachetools = "^5.5.1"
-requests = "^2.32.3"
-namex = { git = "https://github.com/bcgov/namex.git", subdirectory = "api", rev = "main"}
-structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", rev = "7f1cc0ea4a374310ac558ff435fa6b7ea7bb2f8b", subdirectory = "python/structured-logging" }
+namex = { git = "https://github.com/bcgov/namex.git", subdirectory = "api", branch = "main" }

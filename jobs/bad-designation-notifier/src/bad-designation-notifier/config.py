@@ -1,4 +1,5 @@
 import os
+
 from dotenv import find_dotenv, load_dotenv
 
 # Get the project root directory
@@ -13,15 +14,20 @@ class Config:
     PROJECT_ROOT = BASE_DIR
     
     # Database Configuration
-    _DB_USER = os.getenv("NAMEX_DATABASE_USERNAME", "")
-    _DB_PASSWORD = os.getenv("NAMEX_DATABASE_PASSWORD", "")
-    _DB_NAME = os.getenv("NAMEX_DATABASE_NAME", "")
-    _DB_HOST = os.getenv("NAMEX_DATABASE_HOST", "")
-    _DB_PORT = os.getenv("NAMEX_DATABASE_PORT", "5432")
-    if DB_UNIX_SOCKET := os.getenv('NAMEX_DATABASE_UNIX_SOCKET', None):
-        NAMEX_DATABASE_URI = f'postgresql+psycopg2://{_DB_USER}:{_DB_PASSWORD}@/{_DB_NAME}?host={DB_UNIX_SOCKET}'
+    DB_USER = os.getenv('DATABASE_USERNAME', 'postgres')
+    DB_PASSWORD = os.getenv('DATABASE_PASSWORD', 'postgres')
+    DB_NAME = os.getenv('DATABASE_NAME', 'unittesting')
+    DB_HOST = os.getenv('DATABASE_HOST', 'localhost')
+    DB_PORT = os.getenv('DATABASE_PORT', '5432')
+
+    DB_SCHEMA = os.getenv('DATABASE_SCHEMA', 'public')
+    DB_IP_TYPE = os.getenv('DATABASE_IP_TYPE', 'private')
+    DB_OWNER = os.getenv('DATABASE_OWNER', 'postgres')
+
+    if DB_INSTANCE_CONNECTION_NAME := os.getenv('DATABASE_INSTANCE_CONNECTION_NAME', None):
+        SQLALCHEMY_DATABASE_URI = 'postgresql+pg8000://'
     else:
-        NAMEX_DATABASE_URI = f'postgresql://{_DB_USER}:{_DB_PASSWORD}@{_DB_HOST}:{int(_DB_PORT)}/{_DB_NAME}'
+        SQLALCHEMY_DATABASE_URI = f'postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 
     # Email Configuration
     EMAIL_RECIPIENTS = os.getenv("EMAIL_RECIPIENTS", "").split(",")
