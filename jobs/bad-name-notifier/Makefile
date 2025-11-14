@@ -14,7 +14,7 @@ install: ## Install Python dependencies in a virtual environment
 	test -f $(VENV_DIR)/bin/activate || python3.12 -m venv $(VENV_DIR) ;\
 	. $(VENV_DIR)/bin/activate ;\
 	pip install poetry ;\
-	poetry install --no-dev
+	poetry install
 
 #################################################################################
 # Clean                                                                         #
