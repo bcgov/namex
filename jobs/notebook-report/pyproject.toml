@@ -10,7 +10,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.12,<3.13"
 structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging" }
 cloud-sql-connector = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/cloud-sql-connector", branch = "main" }
 flask = "^3.0.2"
@@ -21,7 +21,7 @@ requests = "^2.31.0"
 papermill = "^2.3.3"
 ipython-sql = "^0.4.0"
 ipykernel = "^6.25.2"
-pandas = "^1.5.3"
+pandas = ">=2.0,<3.0"
 notebook = "^7.0.4"
 jupyter_client = "^8.3.1"
 jupyterlab_server = "^2.25.0"
