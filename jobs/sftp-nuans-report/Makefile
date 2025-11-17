@@ -82,6 +82,14 @@ run: ## Run the project in local
 	. .venv/bin/activate && python sftp_nuans_report/sftpnuans.py
 
 #################################################################################
+# Build Docker                                                         #
+#################################################################################
+build: ## Build the Docker container
+	docker build . -t $(DOCKER_NAME) \
+		--build-arg VCS_REF=$(shell git rev-parse --short HEAD) \
+		--build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+#################################################################################
 # Self Documenting Commands                                                     #
 #################################################################################
 .PHONY: help
