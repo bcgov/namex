@@ -1,5 +1,6 @@
 import os
-from dotenv import load_dotenv, find_dotenv
+
+from dotenv import find_dotenv, load_dotenv
 
 # this will load all the envars from a .env file located in the project root (api)
 load_dotenv(find_dotenv())
@@ -19,12 +20,17 @@ class Config(object):
     OCP_SFTP_URL = f"{os.getenv("OCP_SFTP_RELAY_URL", "")}/sftp/upload"
 
     # POSTGRESQL
-    PG_USER = os.getenv('PG_USER', '')
-    PG_PASSWORD = os.getenv('PG_PASSWORD', '')
-    PG_NAME = os.getenv('PG_DB_NAME', '')
-    PG_HOST = os.getenv('PG_HOST', '')
-    PG_PORT = os.getenv('PG_PORT', '5432')
-    if DB_UNIX_SOCKET := os.getenv('PG_UNIX_SOCKET', None):
-        SQLALCHEMY_DATABASE_URI = f'postgresql+psycopg2://{PG_USER}:{PG_PASSWORD}@/{PG_NAME}?host={DB_UNIX_SOCKET}'
+    DATABASE_USERNAME = os.getenv('DATABASE_USERNAME', 'postgres')
+    DATABASE_PASSWORD = os.getenv('DATABASE_PASSWORD', 'postgres')
+    DATABASE_NAME = os.getenv('DATABASE_NAME', 'unittesting')
+    DATABASE_HOST = os.getenv('DATABASE_HOST', 'localhost')
+    DATABASE_PORT = os.getenv('DATABASE_PORT', '5432')
+
+    DATABASE_SCHEMA = os.getenv('DATABASE_SCHEMA', 'public')
+    DATABASE_IP_TYPE = os.getenv('DATABASE_IP_TYPE', 'private')
+    DATABASE_OWNER = os.getenv('DATABASE_OWNER', 'postgres')
+
+    if DATABASE_INSTANCE_CONNECTION_NAME := os.getenv('DATABASE_INSTANCE_CONNECTION_NAME', None):
+        SQLALCHEMY_DATABASE_URI = 'postgresql+pg8000://'
     else:
-        SQLALCHEMY_DATABASE_URI = f'postgresql://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{int(PG_PORT)}/{PG_NAME}'
+        SQLALCHEMY_DATABASE_URI = f'postgresql+pg8000://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}'
