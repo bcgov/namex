@@ -10,10 +10,8 @@ packages = [{include = "sftp_nuans_report"}]
 python = ">=3.12,<3.13"
 structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging" }
 registry_schemas = { git = "https://github.com/bcgov/business-schemas.git", rev = "2.5.0" }
+cloud-sql-connector = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/cloud-sql-connector", branch = "main" }
 jupyter = "^1.1.1"
-sqlalchemy = "^2.0.38"
-psycopg2-binary = "^2.9.10"
-ipython-sql = "^0.5.0"
 simplejson = "^3.20.1"
 pandas = "^2.2.3"
 matplotlib = "^3.10.1"
