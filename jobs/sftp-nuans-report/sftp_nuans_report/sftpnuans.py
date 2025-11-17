@@ -1,19 +1,18 @@
 """The Notebook Report - This module is the API for the Filings Notebook Report."""
 
 import fnmatch
+import logging
 import os
 import sys
 import traceback
-import logging
 from datetime import datetime, timezone
 
 import papermill as pm
-from flask import Flask, current_app
-from structured_logging import StructuredLogging
-
 from config import Config
-from services.sftp import SftpService
+from flask import Flask, current_app
 from services.email import EmailService
+from services.sftp import SftpService
+from structured_logging import StructuredLogging
 
 # Suppress verbose papermill logging
 logging.getLogger("papermill").setLevel(logging.ERROR)
