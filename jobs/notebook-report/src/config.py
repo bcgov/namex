@@ -1,20 +1,26 @@
 import os
-from dotenv import load_dotenv, find_dotenv
+
+from dotenv import find_dotenv, load_dotenv
 
 # this will load all the envars from a .env file located in the project root (api)
 load_dotenv(find_dotenv())
 
 
 class Config(object):
-    _DB_USER = os.getenv("NAMEX_DATABASE_USERNAME", "")
-    _DB_PASSWORD = os.getenv("NAMEX_DATABASE_PASSWORD", "")
-    _DB_NAME = os.getenv("NAMEX_DATABASE_NAME", "")
-    _DB_HOST = os.getenv("NAMEX_DATABASE_HOST", "")
-    _DB_PORT = os.getenv("NAMEX_DATABASE_PORT", "5432")
-    if DB_UNIX_SOCKET := os.getenv('NAMEX_DATABASE_UNIX_SOCKET', None):
-        NAMEX_DATABASE_URI = f'postgresql+psycopg2://{_DB_USER}:{_DB_PASSWORD}@/{_DB_NAME}?host={DB_UNIX_SOCKET}'
+    DATABASE_USERNAME = os.getenv('DATABASE_USERNAME', 'postgres')
+    DATABASE_PASSWORD = os.getenv('DATABASE_PASSWORD', 'postgres')
+    DATABASE_NAME = os.getenv('DATABASE_NAME', 'unittesting')
+    DATABASE_HOST = os.getenv('DATABASE_HOST', 'localhost')
+    DATABASE_PORT = os.getenv('DATABASE_PORT', '5432')
+
+    DATABASE_SCHEMA = os.getenv('DATABASE_SCHEMA', 'public')
+    DATABASE_IP_TYPE = os.getenv('DATABASE_IP_TYPE', 'private')
+    DATABASE_OWNER = os.getenv('DATABASE_OWNER', 'postgres')
+
+    if DATABASE_INSTANCE_CONNECTION_NAME := os.getenv('DATABASE_INSTANCE_CONNECTION_NAME', None):
+        SQLALCHEMY_DATABASE_URI = 'postgresql+pg8000://'
     else:
-        NAMEX_DATABASE_URI = f'postgresql://{_DB_USER}:{_DB_PASSWORD}@{_DB_HOST}:{int(_DB_PORT)}/{_DB_NAME}'
+        SQLALCHEMY_DATABASE_URI = f'postgresql+pg8000://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}'
         
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
     APP_FILE = os.getenv('APP_FILE', '')

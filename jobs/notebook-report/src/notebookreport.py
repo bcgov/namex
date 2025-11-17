@@ -1,18 +1,18 @@
 """s2i based launch script to run the notebook."""
 import ast
+import base64
 import fnmatch
+import logging
 import os
 import sys
 import traceback
-import requests
-import base64
-import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from structured_logging import StructuredLogging
 
 import papermill as pm
+import requests
 from flask import Flask, current_app
+from structured_logging import StructuredLogging
 
 from config import Config
 
@@ -76,19 +76,20 @@ def processnotebooks(notebookdirectory, token):
     # Only run weekly report on Monday (index is 0) for previous 7 days data
     if (notebookdirectory == 'daily' or (notebookdirectory == 'weekly' and datetime.now().weekday() in weekreportday)):
         current_app.logger.info('Processing: %s', notebookdirectory)
-                   
         for file in findfiles(notebookdirectory, '*.ipynb'):
             nbfile = os.path.basename(file).split('.ipynb')[0]
 
             if nbfile == 'daily':
                 subject = 'Daily NameX Stats for ' + date + ext
-                filename = 'daily_totals_' + date + '.csv'
+                # filename = 'daily_totals_' + date + '.csv'
+                filename = os.path.join(notebookdirectory, f'daily_totals_{date}.csv')
                 recipients = Config.DAILY_REPORT_RECIPIENTS   
             elif nbfile == 'weeklynamex':
                 subject = 'Weekly NameX Stats till ' + date + ext
-                filename = 'weekly_totals_till_' + datetime.strftime(datetime.now()-timedelta(1), '%Y-%m-%d') + '.csv'
+                # filename = 'weekly_totals_till_' + datetime.strftime(datetime.now()-timedelta(1), '%Y-%m-%d') + '.csv'
+                filename = os.path.join(notebookdirectory, f'weekly_totals_till_{date}.csv')
                 recipients = Config.WEEKLY_REPORT_NAMEX_RECIPIENTS   
-                
+
             email = {
                 'recipients': recipients,
                 'content': {
@@ -100,7 +101,13 @@ def processnotebooks(notebookdirectory, token):
             
             try:
                 temp_file = 'temp.ipynb'
-                pm.execute_notebook(file, temp_file, parameters=None)
+                # pm.execute_notebook(file, temp_file, parameters=None)
+                pm.execute_notebook(
+                    input_path=file,
+                    output_path=temp_file,
+                    parameters=None,
+                    cwd=os.path.dirname(file),   # crucial!
+                )
 
                 with open(filename, "rb") as f:
                     attachments = []
