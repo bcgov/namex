@@ -1,6 +1,6 @@
-from solr_admin.models.restricted_condition import RestrictedConditionTmp
-from solr_admin.models.restricted_word import RestrictedWordTmp
-from solr_admin.models.restricted_word_condition import RestrictedWordConditionTmp
+from solr_admin.models.restricted_condition_tmp import RestrictedConditionTmp
+from solr_admin.models.restricted_word_tmp import RestrictedWordTmp
+from solr_admin.models.restricted_word_condition_tmp import RestrictedWordConditionTmp
 
 
 def create_records(virtual_word_condition, session):
