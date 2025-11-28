@@ -1,3 +1,4 @@
+import time
 from solr_admin.models.restricted_condition_tmp import RestrictedConditionTmp
 from solr_admin.models.restricted_word_tmp import RestrictedWordTmp
 from solr_admin.models.restricted_word_condition_tmp import RestrictedWordConditionTmp
