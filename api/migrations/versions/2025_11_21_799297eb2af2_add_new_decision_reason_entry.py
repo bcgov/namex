@@ -1,8 +1,9 @@
 """add new decision reason entry
 
 Revision ID: 799297eb2af2
-Revises: e5e4e389f21d
+Revises: 179a7b0089ce
 Create Date: 2025-11-21 10:59:02.782992
+Update Date: 2025-12-03 12:42:00.000000
 
 """
 from alembic import op
@@ -11,7 +12,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '799297eb2af2'
-down_revision = 'e5e4e389f21d'
+down_revision = '179a7b0089ce'
 branch_labels = None
 depends_on = None
 
