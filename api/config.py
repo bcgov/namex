@@ -12,6 +12,7 @@ CONFIGURATION = {
     'development': 'config.DevConfig',
     'testing': 'config.TestConfig',
     'production': 'config.Config',
+    'migration': 'config.MigrationConfig',
     'default': 'config.Config',
 }
 
@@ -66,15 +67,20 @@ permits-licences/businesses-incorporated-companies/approval-business-name',
     NAMEX_LD_SDK_ID = os.getenv('NAMEX_LD_SDK_ID', '')
 
     # POSTGRESQL
-    DB_USER = os.getenv('NAMEX_DATABASE_USERNAME', '')
-    DB_PASSWORD = os.getenv('NAMEX_DATABASE_PASSWORD', '')
-    DB_NAME = os.getenv('NAMEX_DATABASE_NAME', '')
-    DB_HOST = os.getenv('NAMEX_DATABASE_HOST', '')
-    DB_PORT = os.getenv('NAMEX_DATABASE_PORT', '5432')
-    if DB_UNIX_SOCKET := os.getenv('NAMEX_DATABASE_UNIX_SOCKET', None):
-        SQLALCHEMY_DATABASE_URI = f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@/{DB_NAME}?host={DB_UNIX_SOCKET}'
+    DB_USER = os.getenv('DATABASE_USERNAME', '')
+    DB_PASSWORD = os.getenv('DATABASE_PASSWORD', '')
+    DB_NAME = os.getenv('DATABASE_NAME', '')
+    DB_HOST = os.getenv('DATABASE_HOST', '')
+    DB_PORT = int(os.getenv('DATABASE_PORT', '5432'))
+
+    DB_SCHEMA = os.getenv('DATABASE_SCHEMA', 'public')
+    DB_IP_TYPE = os.getenv('DATABASE_IP_TYPE', 'private')
+    DB_OWNER = os.getenv('DATABASE_OWNER', 'postgres')
+
+    if DB_INSTANCE_CONNECTION_NAME := os.getenv('DATABASE_INSTANCE_CONNECTION_NAME', None):
+        SQLALCHEMY_DATABASE_URI = 'postgresql+pg8000://'
     else:
-        SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
+        SQLALCHEMY_DATABASE_URI = f'postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 
     # KEYCLOAK & JWT_OIDC Settings
     JWT_OIDC_WELL_KNOWN_CONFIG = os.getenv('JWT_OIDC_WELL_KNOWN_CONFIG')
@@ -100,7 +106,6 @@ permits-licences/businesses-incorporated-companies/approval-business-name',
 
     DISABLE_NAMEREQUEST_SOLR_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0))
 
-    GCP_AUTH_KEY = os.getenv('BUSINESS_GCP_AUTH_KEY', None)
     NAMEX_NR_STATE_TOPIC = os.getenv('NAMEX_NR_STATE_TOPIC', '')
     EMAILER_TOPIC = os.getenv('NAMEX_MAILER_TOPIC', '')
 
@@ -124,24 +129,32 @@ class DevConfig(Config):
     DISABLE_NAMEREQUEST_SOLR_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0))
 
 
-class TestConfig(Config):
-    """Test config used for pytests."""
+class MigrationConfig(Config):  # pylint: disable=too-few-public-methods
+    """Config for db migration."""
+
+    TESTING = (False,)
+    DEBUG = True
+
+class TestConfig(Config):  # pylint: disable=too-few-public-methods
+    """In support of unit testing only. Used by the pytest suite."""
 
     DEBUG = True
     TESTING = True
     # POSTGRESQL
-    DB_USER = os.getenv('DATABASE_TEST_USERNAME', '')
-    DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD', '')
-    DB_NAME = os.getenv('DATABASE_TEST_NAME', '')
-    DB_HOST = os.getenv('DATABASE_TEST_HOST', '')
-    DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
+    DB_USER = os.getenv('DATABASE_TEST_USERNAME', 'postgres')
+    DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD', 'postgres')
+    DB_NAME = os.getenv('DATABASE_TEST_NAME', 'unittesting')
+    DB_HOST = os.getenv('DATABASE_TEST_HOST', 'localhost')
+    DB_PORT = os.getenv('DATABASE_TEST_PORT', '54345')
+    SQLALCHEMY_DATABASE_URI = f'postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
 
-    LOCAL_DEV_MODE = os.getenv('LOCAL_DEV_MODE', False)
-    # Set this in your .env to debug SQL Alchemy queries (for local development)
-    SQLALCHEMY_ECHO = 'debug' if os.getenv('DEBUG_SQL_QUERIES', False) else False
-    SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
-        user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=int(DB_PORT), name=DB_NAME
-    )
+    # Ensure SQLAlchemy is properly configured for Flask-Marshmallow compatibility
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,
+        'pool_recycle': 300,
+    }
+
     EMAILER_TOPIC = os.getenv('NAMEX_MAILER_TOPIC', '')
 
     DISABLE_NAMEREQUEST_SOLR_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0))

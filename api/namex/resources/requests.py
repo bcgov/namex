@@ -13,7 +13,7 @@ from marshmallow import ValidationError
 from pytz import timezone
 from sqlalchemy import and_, exists, func, or_, text
 from sqlalchemy.inspection import inspect
-from sqlalchemy.orm import eagerload, lazyload, load_only
+from sqlalchemy.orm import joinedload, lazyload, load_only
 from sqlalchemy.orm.exc import NoResultFound
 
 from namex import jwt
@@ -111,7 +111,7 @@ class RequestsQueue(Resource):
     @jwt.requires_roles([User.APPROVER])
     @api.doc(
         description='Fetches the next draft name request from the queue and assigns it to the current user. '
-                    'If the user already has an in-progress NR, that one is returned instead.',
+        'If the user already has an in-progress NR, that one is returned instead.',
         params={'priorityQueue': 'Set to true to fetch from the priority queue'},
         responses={
             200: 'Name request assigned successfully',
@@ -450,7 +450,7 @@ class Requests(Resource):
         q = q.order_by(text(sort_by))
 
         # get a count of the full set size, this ignore the offset & limit settings
-        count_q = q.statement.with_only_columns([func.count()]).order_by(None)
+        count_q = q.statement.with_only_columns(func.count()).order_by(None)
         count = db.session.execute(count_q).scalar()
 
         # Add the paging
@@ -521,18 +521,20 @@ class RequestSearch(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.has_one_of_roles([User.SYSTEM])
-    @api.expect(api.model(
-        'AffiliationInvitationSearch',
-        {
-            'identifiers': fields.List(fields.String, description='List of NR identifiers to search'),
-            'identifier': fields.String(description='Search for a specific NR number'),
-            'status': fields.List(fields.String, description='Filter by status (e.g. DRAFT, INPROGRESS)'),
-            'name': fields.String(description='Partial name to search'),
-            'type': fields.List(fields.String, description='Request types to filter'),
-            'page': fields.Integer(description='Page number for pagination'),
-            'limit': fields.Integer(description='Limit the number of results per page'),
-        },
-    ))
+    @api.expect(
+        api.model(
+            'AffiliationInvitationSearch',
+            {
+                'identifiers': fields.List(fields.String, description='List of NR identifiers to search'),
+                'identifier': fields.String(description='Search for a specific NR number'),
+                'status': fields.List(fields.String, description='Filter by status (e.g. DRAFT, INPROGRESS)'),
+                'name': fields.String(description='Partial name to search'),
+                'type': fields.List(fields.String, description='Request types to filter'),
+                'page': fields.Integer(description='Page number for pagination'),
+                'limit': fields.Integer(description='Limit the number of results per page'),
+            },
+        )
+    )
     @api.doc(
         description='Searches name requests by partially matching NR number or business name using a JSON payload',
         responses={
@@ -570,12 +572,7 @@ class RequestSearch(Resource):
                 conditions.append(
                     and_(
                         RequestDAO.stateCd.in_({State.DRAFT, State.HOLD}),
-                        exists().where(
-                            and_(
-                                Name.nrId == RequestDAO.id,
-                                Name.state == NameState.NOT_EXAMINED.value
-                            )
-                        )
+                        exists().where(and_(Name.nrId == RequestDAO.id, Name.state == NameState.NOT_EXAMINED.value)),
                     )
                 )
 
@@ -590,11 +587,13 @@ class RequestSearch(Resource):
             request_typecd = nr_filing_actions.get_request_type_array(search_details.type)
             flattened_request_types = [item for sublist in request_typecd.values() for item in sublist]
             q = q.filter(RequestDAO.requestTypeCd.in_(flattened_request_types))
-
+            query_spgp = nr_filing_actions.get_entity_type_sole_general_nrs(search_details.type)
+            if query_spgp:
+                q = q.filter(RequestDAO._entity_type_cd.in_([query_spgp]))
         q = q.options(
             lazyload('*'),
-            eagerload(RequestDAO.names).load_only(Name.state, Name.name),
-            eagerload(RequestDAO.applicants).load_only(Applicant.emailAddress, Applicant.phoneNumber),
+            joinedload(RequestDAO.names).load_only(Name.state, Name.name),
+            joinedload(RequestDAO.applicants).load_only(Applicant.emailAddress, Applicant.phoneNumber),
             load_only(
                 RequestDAO.id,
                 RequestDAO.nrNum,
@@ -613,19 +612,20 @@ class RequestSearch(Resource):
             and search_details.limit is not None
             and search_details.limit > 0
         ):
-            q = q.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit+1)
-        q = q.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit+1)
+            q = q.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit + 1)
+        q = q.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit + 1)
         requests = request_auth_search_schemas.dump(q.all())
-        has_more = len(requests)> search_details.limit
+        has_more = len(requests) > search_details.limit
         actions_array = [
             nr_filing_actions.get_actions(r['requestTypeCd'], r['entity_type_cd'], r['request_action_cd'])
-            for r in requests[:search_details.limit]
+            for r in requests[: search_details.limit]
         ]
         for r, additional_fields in zip(requests, actions_array):
             if additional_fields:
                 r.update(additional_fields)
         requests = requests or []
-        return jsonify({'requests': requests[:search_details.limit], 'hasMore': has_more})
+        return jsonify({'requests': requests[: search_details.limit], 'hasMore': has_more})
+
 
 # noinspection PyUnresolvedReferences
 @cors_preflight('GET, PATCH, PUT, DELETE')
@@ -665,20 +665,32 @@ class Request(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.has_one_of_roles([User.APPROVER, User.EDITOR, User.SYSTEM])
-    @api.expect(api.model('PatchNRPayload', {
-        'state': fields.String(description='New state to apply to the Name Request'),
-        'previousStateCd': fields.String(description='Optional previous state code'),
-        'corpNum': fields.String(description='Corporation number (required if consuming name)'),
-        'comments': fields.List(fields.Nested(api.model('PatchNRComment', {
-            'comment': fields.String(required=True, description='Comment text'),
-            'id': fields.Integer(description='Set to 0 or omit for new comments')
-        })))
-    }))
+    @api.expect(
+        api.model(
+            'PatchNRPayload',
+            {
+                'state': fields.String(description='New state to apply to the Name Request'),
+                'previousStateCd': fields.String(description='Optional previous state code'),
+                'corpNum': fields.String(description='Corporation number (required if consuming name)'),
+                'comments': fields.List(
+                    fields.Nested(
+                        api.model(
+                            'PatchNRComment',
+                            {
+                                'comment': fields.String(required=True, description='Comment text'),
+                                'id': fields.Integer(description='Set to 0 or omit for new comments'),
+                            },
+                        )
+                    )
+                ),
+            },
+        )
+    )
     @api.doc(
         description=(
-            "Updates a name request's state, records the previous state, optionally adds comments, assigns a corpNum if consumption state, "
-            "and calculates expiration if approval state. Only users with APPROVER, EDITOR, or SYSTEM roles may update state, "
-            "and certain transitions may be restricted based on role or current state."
+            'Updates a name request\'s state, records the previous state, optionally adds comments, assigns a corpNum if consumption state, '
+            'and calculates expiration if approval state. Only users with APPROVER, EDITOR, or SYSTEM roles may update state, '
+            'and certain transitions may be restricted based on role or current state.'
         ),
         params={'nr': 'NR number'},
         responses={
@@ -1450,10 +1462,7 @@ class NRNames(Resource):
     @jwt.requires_auth
     @api.doc(
         description='Fetches the name record for the specified name request and choice number',
-        params={
-            'nr': 'NR number',
-            'choice': 'Choice number (1, 2, or 3)'
-        },
+        params={'nr': 'NR number', 'choice': 'Choice number (1, 2, or 3)'},
         responses={
             200: 'Name record fetched successfully',
             400: 'Invalid NR format',
@@ -1468,25 +1477,29 @@ class NRNames(Resource):
 
         return names_schema.dumps(nrd_name).data, 200
 
-    name_model = api.model('NameModel', {
-        'choice': fields.Integer(description='Name choice number (1, 2, or 3)', example=1),
-        'conflict1': fields.String(description='First conflict name'),
-        'conflict2': fields.String(description='Second conflict name'),
-        'conflict3': fields.String(description='Third conflict name'),
-        'conflict1_num': fields.String(description='First conflict NR number'),
-        'conflict2_num': fields.String(description='Second conflict NR number'),
-        'conflict3_num': fields.String(description='Third conflict NR number'),
-        'consumptionDate': fields.String(description='Consumption date in ISO format'),
-        'corpNum': fields.String(description='Corporation number if consumed'),
-        'decision_text': fields.String(description='Decision rationale or notes'),
-        'designation': fields.String(description='Designation like INC, LTD, etc.'),
-        'name_type_cd': fields.String(description='Name type code (e.g., CR, XPRO)'),
-        'name': fields.String(description='The business name'),
-        'state': fields.String(description='State of the name (e.g., APPROVED, REJECTED)'),
-        'comment': fields.Nested(api.model('Comment', {
-            'comment': fields.String(description='Comment about the name decision')
-        }), description='Optional comment on the decision')
-    })
+    name_model = api.model(
+        'NameModel',
+        {
+            'choice': fields.Integer(description='Name choice number (1, 2, or 3)', example=1),
+            'conflict1': fields.String(description='First conflict name'),
+            'conflict2': fields.String(description='Second conflict name'),
+            'conflict3': fields.String(description='Third conflict name'),
+            'conflict1_num': fields.String(description='First conflict NR number'),
+            'conflict2_num': fields.String(description='Second conflict NR number'),
+            'conflict3_num': fields.String(description='Third conflict NR number'),
+            'consumptionDate': fields.String(description='Consumption date in ISO format'),
+            'corpNum': fields.String(description='Corporation number if consumed'),
+            'decision_text': fields.String(description='Decision rationale or notes'),
+            'designation': fields.String(description='Designation like INC, LTD, etc.'),
+            'name_type_cd': fields.String(description='Name type code (e.g., CR, XPRO)'),
+            'name': fields.String(description='The business name'),
+            'state': fields.String(description='State of the name (e.g., APPROVED, REJECTED)'),
+            'comment': fields.Nested(
+                api.model('Comment', {'comment': fields.String(description='Comment about the name decision')}),
+                description='Optional comment on the decision',
+            ),
+        },
+    )
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -1730,7 +1743,7 @@ class Stats(Resource):
             q = q.filter(RequestDAO.userId == user.id)
         q = q.order_by(RequestDAO.lastUpdate.desc())
 
-        count_q = q.statement.with_only_columns([func.count()]).order_by(None)
+        count_q = q.statement.with_only_columns(func.count()).order_by(None)
         count = db.session.execute(count_q).scalar()
 
         q = q.offset(start)

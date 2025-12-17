@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bad-name-notifier"
-version = "0.1.0"
+version = "0.2.0"
 description = "An app to detect and notify about bad names."
 authors = ["Your Name <your.email@example.com>"]
 license = "Apache-2.0"
@@ -11,12 +11,5 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.12"
-structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging" }
-flask = "^3.0.2"
-sqlalchemy = "^1.4.18"
-psycopg2-binary = "^2.9.7"
-pytz = "^2022.4"
-python-dotenv = "^1.0.1"
-requests = "^2.32.3"
-cachetools = "^5.5.1"
+python = ">=3.12,<3.13"
+namex = { git = "https://github.com/bcgov/namex.git", subdirectory = "api", branch = "main" }

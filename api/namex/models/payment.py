@@ -2,7 +2,7 @@
 
 from enum import Enum
 
-from sqlalchemy import event
+from sqlalchemy import event, text
 from sqlalchemy.orm.attributes import get_history
 
 from namex.constants import PaymentState, PaymentStatusCode
@@ -110,11 +110,11 @@ def update_nr_state(mapper, connection, target):
         if payment.payment_status_code != 'REFUND_REQUESTED':
             if payment.payment_status_code in completed_payment_status and nr.stateCd == State.PENDING_PAYMENT:
                 connection.execute(
-                    f"""
+                    text(f"""
                     UPDATE requests
                     SET state_cd='{State.DRAFT}'
                     WHERE id={nr.id}
-                    """  # noqa: S608
+                    """)  # noqa: S608
                 )
                 queue_util.send_name_request_state_msg(nr.nrNum, State.DRAFT, State.PENDING_PAYMENT)
 

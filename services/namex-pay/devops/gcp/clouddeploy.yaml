@@ -32,6 +32,7 @@ serialPipeline:
       container-name: "namex-pay-dev"
       service-account: "sa-api@a083gt-dev.iam.gserviceaccount.com"
       cloudsql-instances: "a083gt-dev:northamerica-northeast1:namex-db-dev"
+      container-concurrency: "8"
  - targetId: a083gt-test
    profiles: [test]
    strategy:
@@ -45,6 +46,7 @@ serialPipeline:
       container-name: "namex-pay-test"
       service-account: "sa-api@a083gt-test.iam.gserviceaccount.com"
       cloudsql-instances: "a083gt-test:northamerica-northeast1:namex-db-test"
+      container-concurrency: "8"
  - targetId: a083gt-prod
    profiles: [prod]
    strategy:
@@ -58,3 +60,4 @@ serialPipeline:
       container-name: "namex-pay-prod"
       service-account: "sa-api@a083gt-prod.iam.gserviceaccount.com"
       cloudsql-instances: "a083gt-prod:northamerica-northeast1:namex-db-prod"
+      container-concurrency: "8"

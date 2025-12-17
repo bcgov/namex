@@ -3,16 +3,18 @@ import json
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from flask import current_app, request
-from gcp_queue.logging import structured_log
+from flask import current_app
 from google.cloud.tasks_v2 import CloudTasksClient, HttpMethod
 from google.protobuf import timestamp_pb2
 from simple_cloudevent import SimpleCloudEvent, to_structured
+from structured_logging import StructuredLogging
 
 from namex_emailer.constants.notification_options import DECISION_OPTIONS, Option
 
 # Singleton GCP Cloud Tasks Client
 cloud_tasks_client = CloudTasksClient()
+logger = StructuredLogging.get_logger()
+
 
 
 def is_schedulable(ce: SimpleCloudEvent) -> bool:
@@ -45,7 +47,7 @@ def cancel_any_in_flight_email_tasks(ce: SimpleCloudEvent):
     for task in cloud_tasks_client.list_tasks(parent=remote_queue_path):
         existing_id = task.name.rsplit("/", 1)[-1]
         if existing_id.startswith(nr_num):
-            structured_log(request, "INFO", f"Cancelling pending Cloud Task '{existing_id}'...")
+            logger.info(f"Cancelling pending Cloud Task '{existing_id}'...")
             cloud_tasks_client.delete_task(name=task.name)
 
 
@@ -74,7 +76,7 @@ def schedule_email(ce: SimpleCloudEvent):
     for task in cloud_tasks_client.list_tasks(parent=remote_queue_path):
         existing_id = task.name.rsplit("/", 1)[-1]
         if existing_id.startswith(nr_num):
-            structured_log(request, "INFO", f"Replacing pending Cloud Task '{existing_id}'...")
+            logger.info(f"Replacing pending Cloud Task '{existing_id}'...")
             cloud_tasks_client.delete_task(name=task.name)
 
     # 2) Generate a unique task ID for the NR number: 'NR_123456-APPROVED-43255d'
@@ -103,4 +105,4 @@ def schedule_email(ce: SimpleCloudEvent):
 
     # 5) Enqueue the task to come back to the emailer at deliver_scheduled_email() endpoint in 5 minutes time
     cloud_tasks_client.create_task(parent=remote_queue_path, task=task)
-    structured_log(request, "INFO", f"Scheduled Cloud Task '{task_id}' to be sent in 5 minutes")
+    logger.info(f"Scheduled Cloud Task '{task_id}' to be sent in 5 minutes")

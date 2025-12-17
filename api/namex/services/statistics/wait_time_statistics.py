@@ -1,8 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from namex.models import Event, Request
 from namex.services.statistics import response_keys
 from namex.utils.api_resource import handle_exception
+from namex.utils.pg8000_compat import pg8000_utcnow, safe_datetime_delta
 from namex.utils.sql_alchemy import query_result_to_dict
 
 
@@ -20,12 +21,12 @@ class WaitTimeStatsService:
     def get_waiting_time_dict(cls):
         try:
             if not (oldest_draft := Request.get_oldest_draft()):
-                oldest_draft_date = datetime.now().astimezone()
+                oldest_draft_date = pg8000_utcnow()
             else:
                 oldest_draft_date = oldest_draft.submittedDate
 
             # add one to waiting time to account for current day
-            delta = datetime.now().astimezone() - oldest_draft_date + timedelta(days=1)
+            delta = safe_datetime_delta(pg8000_utcnow(), oldest_draft_date) + timedelta(days=1)
             response_data = {'oldest_draft': oldest_draft_date.isoformat(), 'waiting_time': delta.days}
         except Exception as err:
             return handle_exception(err, repr(err), 500)

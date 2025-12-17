@@ -16,7 +16,7 @@ jobs:
   solr-names-updater-ci:
     uses: bcgov/bcregistry-sre/.github/workflows/backend-ci.yaml@main
     with:
-      app_name: "solr-names-updater"
+      app_name: "namex-solr-names-updater"
       working_directory: "services/solr-names-updater"
       codecov_flag: "solrnamesupdater"
       skip_isort: "true"

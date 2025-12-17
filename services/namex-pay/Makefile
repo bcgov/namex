@@ -50,19 +50,19 @@ install: clean ## Install python virtrual environment
 #################################################################################
 # COMMANDS - CI                                                                 #
 #################################################################################
-ci: pylint flake8 test ## CI flow
+ci: docker-build-check ruff test ## CI flow
 
-pylint: ## Linting with pylint
-	. .venv/bin/activate && pylint --rcfile=setup.cfg src/$(PROJECT_NAME)
+docker-build-check: ## Check if Dockerfile builds successfully
+	docker build -f Dockerfile -t namex-pay .
 
-flake8: ## Linting with flake8 ## tests
-	. .venv/bin/activate && flake8 src/$(PROJECT_NAME)
+ruff: ## ruff linter
+	poetry run ruff check
 
-test: ## Unit testing
-	. .venv/bin/activate && pytest
+ruff-fix: ## auto fix lint issues with ruff
+	poetry run ruff check --fix
 
-mac-cov: test ## Run the coverage report and display in a browser window (mac)
-	@open -a "Google Chrome" htmlcov/index.html
+test: ## unit testing with local db
+	poetry run pytest
 
 #################################################################################
 # COMMANDS - Local                                                              #

@@ -1,11 +1,11 @@
-from flask import request, make_response, jsonify
-from flask_restx import Namespace, Resource, cors
+from flask import jsonify
 from flask_jwt_oidc import AuthError
+from flask_restx import Namespace, Resource
 
-__all__ = ['api']
+__all__ = ["api"]
 
 
-api = Namespace('NameProcessing', description='Name Processing Service - Used by Namex API')
+api = Namespace("NameProcessing", description="Name Processing Service - Used by Namex API")
 
 
 @api.errorhandler(AuthError)
@@ -20,15 +20,15 @@ def validate_request(request):
     return True
 
 
-@api.route('/', strict_slashes=False, methods=['GET'])
+@api.route("/", strict_slashes=False, methods=["GET"])
 class _NameProcessing(Resource):
     @staticmethod
     def get():
-        return ('results', [], 200)
+        return ("results", [], 200)
 
 
-@api.route('/', strict_slashes=False, methods=['GET'])
+@api.route("/", strict_slashes=False, methods=["GET"])
 class _WordClassification(Resource):
     @staticmethod
     def get():
-        return ('results', [], 200)
+        return ("results", [], 200)

@@ -1,11 +1,10 @@
-import string
-
 import requests
 from flask import Request, current_app
 from flask_jwt_oidc.jwt_manager import JwtManager
 from jose import jwt
 
 from namex.models import Request as RequestDAO
+from namex.utils.common import normalize_phone_number
 
 
 def cors_preflight(methods):
@@ -65,7 +64,7 @@ def full_access_to_name_request(request: Request) -> bool:
     applicant = name_request.applicants[0]
 
     if phone:
-        phone = phone.translate(str.maketrans('', '', string.punctuation))
+        phone = normalize_phone_number(phone)
     if not (phone or email):
         current_app.logger.debug(
             'Failed no phone or email - NR: %s, NRL: %s, Email: %s, Phone: %s', nr, nrl, email, phone
@@ -74,7 +73,7 @@ def full_access_to_name_request(request: Request) -> bool:
     if (
         phone
         and applicant.phoneNumber
-        and phone != applicant.phoneNumber.translate(str.maketrans('', '', string.punctuation))
+        and phone != normalize_phone_number(applicant.phoneNumber)
     ):
         current_app.logger.debug(
             'Failed wrong phone - NR: %s, NRL: %s, Email: %s, Phone: %s, Applicant phone %s',

@@ -86,7 +86,7 @@ def test_should_add_names_to_solr(
         not_expected_names_to_add_to_solr: list):
     """Assert that names are added to solr."""
 
-    queue_util.send_name_request_state_msg = mock.Mock(return_value="True")
+    queue_util.send_name_request_state_msg = mock.Mock(return_value='True')
     data_json = json.loads(base64.b64decode(message_payload['message']['data']).decode('utf-8'))
     nr_num = data_json['data']['request']['nrNum']
     nr_new_state = data_json['data']['request']['newState']
@@ -102,7 +102,7 @@ def test_should_add_names_to_solr(
             with patch.object(worker, 'process_possible_conflicts_add', return_value=True):
                 # mock process_possible_conflicts_delete to do nothing in order to isolate testing relevant to this test
                 with patch.object(worker, 'process_possible_conflicts_delete', return_value=True):
-                    rv = client.post("/", json=message_payload)
+                    rv = client.post('/', json=message_payload)
 
                     if len(expected_names_to_add_to_solr) > 0:
                         assert mock_solr_feeder_api_post.called == True
@@ -170,8 +170,8 @@ def test_should_delete_names_from_solr(
         name_states: list):
     """Assert that names are deleted from Solr."""
 
-    queue_util.send_name_request_state_msg = mock.Mock(return_value="True")
-    queue_util.send_name_state_msg = mock.Mock(return_value="True")
+    queue_util.send_name_request_state_msg = mock.Mock(return_value='True')
+    queue_util.send_name_state_msg = mock.Mock(return_value='True')
     data_json = json.loads(base64.b64decode(message_payload['message']['data']).decode('utf-8'))
     nr_num = data_json['data'][state_change_type]['nrNum']
     mock_nr = create_nr(nr_num, new_nr_state, names, name_states)
@@ -182,7 +182,7 @@ def test_should_delete_names_from_solr(
     with patch.object(requests, 'post', return_value=mock_response) as mock_solr_feeder_api_post:
         # mock process_possible_conflicts_delete to do nothing in order to isolate testing relevant to this test
         with patch.object(worker, 'process_possible_conflicts_delete', return_value=True):
-            rv = client.post("/", json=message_payload)
+            rv = client.post('/', json=message_payload)
 
             assert mock_solr_feeder_api_post.called == True
             assert 'api/v1/feeds' in mock_solr_feeder_api_post.call_args[0][0]

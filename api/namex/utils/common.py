@@ -125,3 +125,27 @@ def convert_to_utc_max_date_time(date_str: str):
 
 # def remove_numbers_dict(d):
 #    return {key: value for key, value in d.items() if not key.isdigit()}
+
+
+def normalize_phone_number(phone: str) -> str:
+    """
+    Normalize a phone number by stripping all non-digit characters.
+
+    This function takes a phone number string in various formats
+    (e.g., '555-555-5555', '555 555 5555', '(555) 555-5555', '+1 (555) 555-5555') and returns
+    a normalized string containing only digits.
+
+    Args:
+        phone_number (str): The phone number string to normalize.
+
+    Returns:
+        str: The normalized phone number containing only digits.
+             Example: '5555555555'.
+    """
+    # keep only digits
+    digits = re.sub(r'\D', '', phone)
+
+    # handle North America: allow 10 digits, or 11 with leading "1"
+    if len(digits) == 11 and digits.startswith('1'):
+        digits = digits[1:]
+    return digits
