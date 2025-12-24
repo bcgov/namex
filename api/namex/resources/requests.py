@@ -890,6 +890,7 @@ class Request(Resource):
                             new_comment.comment = convert_to_ascii(in_comment['comment'])
                             new_comment.examiner = user
                             new_comment.nrId = nrd.id
+                            nrd.comments.append(new_comment)
 
                 ### END comments ###
 
@@ -1355,6 +1356,7 @@ class Request(Resource):
                     new_comment.comment = convert_to_ascii(in_comment['comment'])
                     new_comment.examiner = user
                     new_comment.nrId = nrd.id
+                    nrd.comments.append(new_comment)
 
             ### END comments ###
 
