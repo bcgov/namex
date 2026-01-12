@@ -4,6 +4,7 @@ import time
 import pytest
 from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
 from sqlalchemy import engine_from_config
 from tests.external.support.driver.server_driver import ServerDriver
 
@@ -25,7 +26,8 @@ def get_browser():
 
     options = Options()
     options.headless = True
-    browser = WebDriver(options=options, executable_path=(gecko_driver()))
+    service = Service(executable_path=gecko_driver())
+    browser = WebDriver(options=options, service=service)
 
     return browser
 
@@ -81,8 +83,8 @@ def base_url(port):
 
 @pytest.fixture(scope="function")
 def clean_db():
-    from flask_sqlalchemy import SQLAlchemy
     from solr_admin import create_application
+    from solr_admin import models
 
     from solr_admin.models.synonym import Synonym
     from solr_admin.models.synonym_audit import SynonymAudit
@@ -103,7 +105,8 @@ def clean_db():
     Keycloak._oidc = FakeOidc()
     app, admin = create_application(run_mode='testing')
 
-    db = SQLAlchemy(app)
+    # Use the existing db instance that was initialized in create_application
+    db = models.db
 
     synonyms_db = engine_from_config({'sqlalchemy.url': app.config['SQLALCHEMY_BINDS']['synonyms']})
     #Synonym.metadata.drop_all(bind=synonyms_db)
