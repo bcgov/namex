@@ -189,3 +189,10 @@ class ReceiptResponse(Serializable):
     paymentMethod: str = ''
     receiptNumber: str = ''
     routingSlipNumber: str = ''
+
+    def __init__(self, **kwargs):
+        """Set the attributes only if the field is defined."""
+        names = {f.name for f in dataclasses.fields(self)}
+        for k, v in kwargs.items():
+            if k in names:
+                setattr(self, k, v)

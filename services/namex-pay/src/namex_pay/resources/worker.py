@@ -16,6 +16,7 @@
 The entry-point is the **cb_subscription_handler**
 
 """
+import dataclasses
 import time
 from dataclasses import dataclass
 from datetime import timedelta
@@ -104,6 +105,12 @@ class PaymentToken:
     filing_identifier: Optional[str] = None
     corp_type_code: Optional[str] = None
 
+    def __init__(self, **kwargs):
+        """Set the attributes only if the field is defined."""
+        names = {f.name for f in dataclasses.fields(self)}
+        for k, v in kwargs.items():
+            if k in names:
+                setattr(self, k, v)
 
 def get_payment_token(ce: SimpleCloudEvent):
     """Return a PaymentToken if enclosed in the cloud event."""
