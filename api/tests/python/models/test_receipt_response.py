@@ -28,7 +28,7 @@ def test_init_with_valid_fields():
         'receiptNumber': 'REC-999',
         'routingSlipNumber': 'RS-001'
     }
-    response = ReceiptResponse.from_dict(data)
+    response = ReceiptResponse(**data)
 
     assert response.bcOnlineAccountNumber == 'BC12345'
     assert response.filingIdentifier == 'FIL-001'
@@ -44,7 +44,7 @@ def test_init_ignores_invalid_fields():
         'unknownField': 'should-be-ignored',
         'anotherInvalid': 12345
     }
-    response = ReceiptResponse.from_dict(data)
+    response = ReceiptResponse(**data)
 
     assert response.receiptNumber == 'REC-123'
     assert not hasattr(response, 'unknownField')
@@ -67,7 +67,7 @@ def test_init_with_partial_data():
         'receiptNumber': 'REC-PARTIAL',
         'paymentMethod': 'DIRECT_PAY'
     }
-    response = ReceiptResponse.from_dict(data)
+    response = ReceiptResponse(**data)
 
     assert response.receiptNumber == 'REC-PARTIAL'
     assert response.paymentMethod == 'DIRECT_PAY'
@@ -81,7 +81,7 @@ def test_init_with_invoice_dict():
         'receiptNumber': 'REC-INV',
         'invoice': invoice_data
     }
-    response = ReceiptResponse.from_dict(data)
+    response = ReceiptResponse(**data)
 
     assert response.receiptNumber == 'REC-INV'
     assert response.invoice == invoice_data
@@ -92,7 +92,21 @@ def test_init_overwrites_none_defaults():
         'bcOnlineAccountNumber': 'BCOL-NEW',
         'filingIdentifier': 'FIL-NEW'
     }
-    response = ReceiptResponse.from_dict(data)
+    response = ReceiptResponse(**data)
 
     assert response.bcOnlineAccountNumber == 'BCOL-NEW'
     assert response.filingIdentifier == 'FIL-NEW'
+
+def test_init_with_missing_filing_identifier():
+    """Assert that missing filingIdentifier results in None default."""
+    data = {
+        'receiptNumber': 'REC-NO-FILING',
+        'paymentMethod': 'CC',
+        'invoiceNumber': 'INV-200'
+    }
+    response = ReceiptResponse(**data)
+
+    assert response.receiptNumber == 'REC-NO-FILING'
+    assert response.paymentMethod == 'CC'
+    assert response.invoiceNumber == 'INV-200'
+    assert response.filingIdentifier is None

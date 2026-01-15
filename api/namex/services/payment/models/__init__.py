@@ -1,5 +1,7 @@
 import dataclasses
+
 from dataclasses import dataclass, field
+from pydantic.dataclasses import dataclasses as pydantic_dataclass
 from datetime import date
 
 from .abstract import Serializable
@@ -180,7 +182,12 @@ class Receipt(Serializable):
     receiptNumber: str = ''
 
 
-@dataclass
+class PydanticConfig:
+    """Pydantic config to ignore extra fields."""
+    extra = 'ignore'
+
+
+@pydantic_dataclass(config=PydanticConfig)
 class ReceiptResponse(Serializable):
     bcOnlineAccountNumber: str = None
     filingIdentifier: str = None
@@ -189,10 +196,3 @@ class ReceiptResponse(Serializable):
     paymentMethod: str = ''
     receiptNumber: str = ''
     routingSlipNumber: str = ''
-
-    @classmethod
-    def from_dict(cls, data: dict) -> 'ReceiptResponse':
-        """Create instance from dict, ignoring unknown fields."""
-        valid_fields = {f.name for f in dataclasses.fields(cls)}
-        filtered = {k: v for k, v in data.items() if k in valid_fields}
-        return cls(**filtered)

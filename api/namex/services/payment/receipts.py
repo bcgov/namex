@@ -32,7 +32,7 @@ def get_receipt(payment_identifier):
         api_response = api_instance.get_receipt(payment_identifier)
 
         current_app.logger.debug(api_response)
-        return ReceiptResponse.from_dict(api_response)
+        return ReceiptResponse(**api_response)
 
     except Exception as err:
         raise SBCPaymentException(err)

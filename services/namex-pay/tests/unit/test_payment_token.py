@@ -26,7 +26,7 @@ def test_init_with_all_fields():
         'filing_identifier': 'FIL-001',
         'corp_type_code': 'BC'
     }
-    token = PaymentToken.from_dict(data)
+    token = PaymentToken(**data)
 
     assert token.id == 'PAY-12345'
     assert token.status_code == 'COMPLETED'
@@ -39,7 +39,7 @@ def test_init_with_partial_fields():
         'id': 'PAY-999',
         'status_code': 'PENDING'
     }
-    token = PaymentToken.from_dict(data)
+    token = PaymentToken(**data)
 
     assert token.id == 'PAY-999'
     assert token.status_code == 'PENDING'
@@ -54,7 +54,7 @@ def test_init_ignores_invalid_fields():
         'unknown_field': 'should-be-ignored',
         'another_invalid': 12345
     }
-    token = PaymentToken.from_dict(data)
+    token = PaymentToken(**data)
 
     assert token.id == 'PAY-123'
     assert token.status_code == 'COMPLETED'
@@ -78,7 +78,7 @@ def test_init_with_none_values():
         'filing_identifier': None,
         'corp_type_code': 'NRO'
     }
-    token = PaymentToken.from_dict(data)
+    token = PaymentToken(**data)
 
     assert token.id == 'PAY-001'
     assert token.status_code is None
@@ -103,7 +103,7 @@ def test_init_with_integer_id():
         'id': 29590,
         'status_code': 'COMPLETED'
     }
-    token = PaymentToken.from_dict(data)
+    token = PaymentToken(**data)
 
     assert token.id == 29590
     assert token.status_code == 'COMPLETED'

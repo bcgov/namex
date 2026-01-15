@@ -16,12 +16,11 @@
 The entry-point is the **cb_subscription_handler**
 
 """
-import dataclasses
 import time
-from dataclasses import dataclass
 from datetime import timedelta
 from enum import Enum
 from http import HTTPStatus
+from pydantic.dataclasses import dataclasses as pydantic_dataclass
 from typing import Optional
 
 import humps
@@ -96,7 +95,12 @@ def worker():
             return ret # noqa: B012
 
 
-@dataclass
+class PydanticConfig:
+    """Pydantic config to ignore extra fields."""
+    extra = 'ignore'
+
+
+@pydantic_dataclass(config=PydanticConfig)
 class PaymentToken:
     """Payment Token class"""
 
@@ -105,12 +109,6 @@ class PaymentToken:
     filing_identifier: Optional[str] = None
     corp_type_code: Optional[str] = None
 
-    @classmethod
-    def from_dict(cls, data: dict) -> 'PaymentToken':
-        """Create instance from dict, ignoring unknown fields."""
-        valid_fields = {f.name for f in dataclasses.fields(cls)}
-        filtered = {k: v for k, v in data.items() if k in valid_fields}
-        return cls(**filtered)
 
 def get_payment_token(ce: SimpleCloudEvent):
     """Return a PaymentToken if enclosed in the cloud event."""
@@ -120,7 +118,7 @@ def get_payment_token(ce: SimpleCloudEvent):
         and isinstance(data, dict)
     ):
         converted = humps.decamelize(data)
-        pt = PaymentToken.from_dict(converted)
+        pt = PaymentToken(**converted)
         return pt
     return None
 
