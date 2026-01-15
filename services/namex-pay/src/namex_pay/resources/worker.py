@@ -20,7 +20,7 @@ import time
 from datetime import timedelta
 from enum import Enum
 from http import HTTPStatus
-from pydantic.dataclasses import dataclasses as pydantic_dataclass
+from pydantic.dataclasses import dataclass as pydantic_dataclass
 from typing import Optional
 
 import humps
