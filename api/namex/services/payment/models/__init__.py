@@ -151,7 +151,7 @@ class PaymentInvoice(Serializable):
     receipts: list = Field(default_factory=list)
     references: list = Field(default_factory=list)
     details: list = Field(default_factory=list)
-    _links: list = Field(default_factory=list)
+    links: list = Field(default_factory=list, alias="_links")
     paymentAccount: dict = Field(default_factory=dict)
 
 
