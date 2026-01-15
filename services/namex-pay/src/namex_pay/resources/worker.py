@@ -20,7 +20,6 @@ import time
 from datetime import timedelta
 from enum import Enum
 from http import HTTPStatus
-from pydantic.dataclasses import dataclass as pydantic_dataclass
 from typing import Optional
 
 import humps
@@ -29,6 +28,7 @@ from namex.models import Event, Payment, State, User
 from namex.models import Request as RequestDAO  # noqa:I001; import orders
 from namex.services import EventRecorder, queue  # noqa:I005;
 from namex.services.name_request.name_request_state import is_reapplication_eligible
+from pydantic.dataclasses import dataclass as pydantic_dataclass
 from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent
 from sqlalchemy.exc import OperationalError
