@@ -105,12 +105,12 @@ class PaymentToken:
     filing_identifier: Optional[str] = None
     corp_type_code: Optional[str] = None
 
-    def __init__(self, **kwargs):
-        """Set the attributes only if the field is defined."""
-        names = {f.name for f in dataclasses.fields(self)}
-        for k, v in kwargs.items():
-            if k in names:
-                setattr(self, k, v)
+    @classmethod
+    def from_dict(cls, data: dict) -> 'PaymentToken':
+        """Create instance from dict, ignoring unknown fields."""
+        valid_fields = {f.name for f in dataclasses.fields(cls)}
+        filtered = {k: v for k, v in data.items() if k in valid_fields}
+        return cls(**filtered)
 
 def get_payment_token(ce: SimpleCloudEvent):
     """Return a PaymentToken if enclosed in the cloud event."""
@@ -120,7 +120,7 @@ def get_payment_token(ce: SimpleCloudEvent):
         and isinstance(data, dict)
     ):
         converted = humps.decamelize(data)
-        pt = PaymentToken(**converted)
+        pt = PaymentToken.from_dict(converted)
         return pt
     return None
 
