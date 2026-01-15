@@ -14,7 +14,9 @@
 """Tests for PaymentToken dataclass."""
 
 import pytest
+
 from namex_pay.resources.worker import PaymentToken
+
 
 def test_init_with_all_fields():
     """Assert that all valid fields are set correctly."""

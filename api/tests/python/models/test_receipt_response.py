@@ -14,7 +14,9 @@
 """Tests for ReceiptResponse dataclass."""
 
 import pytest
-from namex.services.payment.models import ReceiptResponse, PaymentInvoice
+
+from namex.services.payment.models import PaymentInvoice, ReceiptResponse
+
 
 def test_init_with_valid_fields():
     """Assert that valid fields are set correctly."""
