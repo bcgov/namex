@@ -1,4 +1,6 @@
 from dataclasses import dataclass, field
+from typing import Optional, Union
+
 from pydantic.dataclasses import dataclass as pydantic_dataclass
 from pydantic import Field
 from datetime import date
@@ -151,8 +153,16 @@ class PaymentInvoice(Serializable):
     receipts: list = Field(default_factory=list)
     references: list = Field(default_factory=list)
     details: list = Field(default_factory=list)
-    links: list = Field(default_factory=list, alias="_links")
+    links: list = Field(default_factory=list)
     paymentAccount: dict = Field(default_factory=dict)
+
+    @property
+    def _links(self) -> list:
+        return self.links
+
+    @_links.setter
+    def _links(self, value: list) -> None:
+        self.links = value
 
 
 @dataclass
@@ -174,16 +184,11 @@ class Receipt(Serializable):
     receiptNumber: str = ''
 
 
-class PydanticConfig:
-    """Pydantic config to ignore extra fields."""
-    extra = 'ignore'
-
-
 @pydantic_dataclass(config=PydanticConfig)
 class ReceiptResponse(Serializable):
-    bcOnlineAccountNumber: str = None
-    filingIdentifier: str = None
-    invoice: PaymentInvoice = field(default=PaymentInvoice)
+    bcOnlineAccountNumber: Optional[str] = None
+    filingIdentifier: Optional[str] = None
+    invoice: Optional[Union[PaymentInvoice, dict]] = None
     invoiceNumber: str = ''
     paymentMethod: str = ''
     receiptNumber: str = ''

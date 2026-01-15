@@ -17,12 +17,14 @@ import pytest
 
 from namex.services.payment.models import PaymentInvoice, ReceiptResponse
 
+invoice = {'id': 100, 'total': 30.0, 'paid': 30.0, 'refund': 0.0, 'serviceFees': 1.5}
 
 def test_init_with_valid_fields():
     """Assert that valid fields are set correctly."""
     data = {
         'bcOnlineAccountNumber': 'BC12345',
         'filingIdentifier': 'FIL-001',
+        'invoice': invoice,
         'invoiceNumber': 'INV-100',
         'paymentMethod': 'CC',
         'receiptNumber': 'REC-999',
@@ -40,6 +42,7 @@ def test_init_with_valid_fields():
 def test_init_ignores_invalid_fields():
     """Assert that unknown fields are ignored."""
     data = {
+        'invoice': invoice,
         'receiptNumber': 'REC-123',
         'unknownField': 'should-be-ignored',
         'anotherInvalid': 12345
