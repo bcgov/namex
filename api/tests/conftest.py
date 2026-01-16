@@ -69,16 +69,6 @@ def client_ctx(app):
     with app.test_client() as c:
         yield c
 
-
-def test_print_db_connection_string(app):
-    """Debug test to print the database connection string."""
-    with app.app_context():
-        from namex.models import db
-        print(f"\n\nDatabase URI: {db.engine.url}\n")
-        # Or from config:
-        print(f"Config SQLALCHEMY_DATABASE_URI: {app.config.get('SQLALCHEMY_DATABASE_URI')}\n\n")
-    assert True  # Just to make it a valid test
-
 @pytest.fixture(scope='session')
 def db(app, request):
     """

@@ -589,7 +589,7 @@ def test_create_payment(
             'total': 31.5,
         },
     )
-    
+
     # Mock the get_payment API call that happens during payment completion
     mocker.patch.object(
         SBCPaymentClient,
@@ -608,7 +608,7 @@ def test_create_payment(
             'references': [],
         },
     )
-    
+
     payment = execute_payment(client, jwt, create_payment_request, action)
     assert payment['action'] == action
     if complete_payment:

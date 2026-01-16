@@ -105,5 +105,5 @@ def test_init_with_integer_id():
     }
     token = PaymentToken(**data)
 
-    assert token.id == "29590"
+    assert token.id == '29590'
     assert token.status_code == 'COMPLETED'
