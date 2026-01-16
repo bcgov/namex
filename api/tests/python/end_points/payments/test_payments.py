@@ -589,6 +589,26 @@ def test_create_payment(
             'total': 31.5,
         },
     )
+    
+    # Mock the get_payment API call that happens during payment completion
+    mocker.patch.object(
+        SBCPaymentClient,
+        'get_payment',
+        return_value={
+            'id': 1,
+            'serviceFees': 1.5,
+            'paid': 31.5,
+            'refund': 0.0,
+            'total': 31.5,
+            'isPaymentActionRequired': False,
+            'statusCode': 'CREATED',
+            'businessIdentifier': 'NR L000001',
+            'createdOn': '2021-01-14T23:52:05.531317+00:00',
+            'lineItems': [{'filingTypeCode': 'NM620', 'priority': False, 'waiveFees': False}],
+            'references': [],
+        },
+    )
+    
     payment = execute_payment(client, jwt, create_payment_request, action)
     assert payment['action'] == action
     if complete_payment:
