@@ -32,14 +32,14 @@ def test_init_with_valid_fields():
     }
     invoice = PaymentInvoice(**data)
 
-    assert invoice.id == 12345
-    assert invoice.serviceFees == 1.50
-    assert invoice.paid == 30.0
-    assert invoice.refund == 0.0
-    assert invoice.total == 31.50
-    assert invoice.statusCode == 'COMPLETED'
-    assert invoice.paymentMethod == 'CC'
-    assert invoice.businessIdentifier == 'NR L000001'
+    assert invoice.id == data['id']
+    assert invoice.serviceFees == data['serviceFees']
+    assert invoice.paid == data['paid']
+    assert invoice.refund == data['refund']
+    assert invoice.total == data['total']
+    assert invoice.statusCode == data['statusCode']
+    assert invoice.paymentMethod == data['paymentMethod']
+    assert invoice.businessIdentifier == data['businessIdentifier']
 
 
 def test_init_ignores_invalid_fields():
