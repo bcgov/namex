@@ -1,5 +1,8 @@
-import dataclasses
 from dataclasses import dataclass, field
+from typing import Optional, Union
+
+from pydantic.dataclasses import dataclass as pydantic_dataclass
+from pydantic import Field
 from datetime import date
 
 from .abstract import Serializable
@@ -118,7 +121,13 @@ class PaymentRequest(Serializable):
     details: list = field(default_factory=PaymentDetailItem)
 
 
-@dataclass
+class PydanticConfig:
+    """Pydantic config to ignore extra fields."""
+    extra = 'ignore'
+    underscore_attrs_are_private = False
+
+
+@pydantic_dataclass(config=PydanticConfig)
 class PaymentInvoice(Serializable):
     id: int
     serviceFees: float
@@ -140,25 +149,20 @@ class PaymentInvoice(Serializable):
     routingSlip: str = ''
     datNumber: str = ''
     folioNumber: str = ''
-    lineItems: list = field(default_factory=list)
-    receipts: list = field(default_factory=list)
-    references: list = field(default_factory=list)
-    details: list = field(default_factory=list)
-    _links: list = field(default_factory=list)
-    paymentAccount: dict = field(default_factory=dict)
+    lineItems: list = Field(default_factory=list)
+    receipts: list = Field(default_factory=list)
+    references: list = Field(default_factory=list)
+    details: list = Field(default_factory=list)
+    links: list = Field(default_factory=list)
+    paymentAccount: dict = Field(default_factory=dict)
 
-    def __init__(self, **kwargs):
-        """Set the attributes only if the field is defined."""
-        self.lineItems = []
-        self.receipts = []
-        self.references = []
-        self.details = []
-        self._links = []
-        self.paymentAccount = {}
-        names = {f.name for f in dataclasses.fields(self)}
-        for k, v in kwargs.items():
-            if k in names:
-                setattr(self, k, v)
+    @property
+    def _links(self) -> list:
+        return self.links
+
+    @_links.setter
+    def _links(self, value: list) -> None:
+        self.links = value
 
 
 @dataclass
@@ -180,11 +184,11 @@ class Receipt(Serializable):
     receiptNumber: str = ''
 
 
-@dataclass
+@pydantic_dataclass(config=PydanticConfig)
 class ReceiptResponse(Serializable):
-    bcOnlineAccountNumber: str = None
-    filingIdentifier: str = None
-    invoice: PaymentInvoice = field(default=PaymentInvoice)
+    bcOnlineAccountNumber: Optional[str] = None
+    filingIdentifier: Optional[str] = None
+    invoice: Optional[Union[PaymentInvoice, dict]] = None
     invoiceNumber: str = ''
     paymentMethod: str = ''
     receiptNumber: str = ''
