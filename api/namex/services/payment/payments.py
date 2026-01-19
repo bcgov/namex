@@ -39,7 +39,7 @@ def refund_payment(payment_identifier, model=None):
         api_instance = SBCPaymentClient()
         api_response = api_instance.refund_payment(payment_identifier, data)
         current_app.logger.debug(
-            "services refund_payment response",
+            'services refund_payment response',
             payment_identifier=payment_identifier,
             api_response=api_response,
         )

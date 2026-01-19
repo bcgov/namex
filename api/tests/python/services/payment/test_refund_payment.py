@@ -14,9 +14,10 @@
 """Tests for PaymentRefundInvoice dataclass."""
 
 from decimal import Decimal
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
+
 from namex.services.payment.exceptions import SBCPaymentException
 from namex.services.payment.models import PaymentRefundInvoice
 from namex.services.payment.payments import refund_payment
@@ -31,10 +32,10 @@ def mock_client():
 @pytest.fixture
 def valid_response_data():
     return {
-        "refundId": 1234,
-        "refundAmount": Decimal("100.00"),
-        "message": "Refund processed successfully.",
-        "isPartialRefund": False
+        'refundId': 1234,
+        'refundAmount': Decimal('100.00'),
+        'message': 'Refund processed successfully.',
+        'isPartialRefund': False
     }
 
 
@@ -43,8 +44,8 @@ def test_refund_payment_success(mock_client, valid_response_data):
     mock_client.return_value = mock_instance
     mock_instance.refund_payment.return_value = valid_response_data
 
-    payment_identifier = "valid-payment-id"
-    model = {"reason": "Customer request"}
+    payment_identifier = 'valid-payment-id'
+    model = {'reason': 'Customer request'}
 
     response = refund_payment(payment_identifier, model)
 
@@ -58,8 +59,8 @@ def test_refund_payment_no_response(mock_client):
     mock_client.return_value = mock_instance
     mock_instance.refund_payment.return_value = None
 
-    payment_identifier = "valid-payment-id"
-    model = {"reason": "Customer request"}
+    payment_identifier = 'valid-payment-id'
+    model = {'reason': 'Customer request'}
 
     response = refund_payment(payment_identifier, model)
 
@@ -70,12 +71,12 @@ def test_refund_payment_no_response(mock_client):
 def test_refund_payment_raises_exception(mock_client):
     mock_instance = MagicMock()
     mock_client.return_value = mock_instance
-    mock_instance.refund_payment.side_effect = Exception("SBC Pay API exception.")
+    mock_instance.refund_payment.side_effect = Exception('SBC Pay API exception.')
 
-    payment_identifier = "invalid-payment-id"
-    model = {"reason": "Invalid request"}
+    payment_identifier = 'invalid-payment-id'
+    model = {'reason': 'Invalid request'}
 
-    with pytest.raises(SBCPaymentException, match="SBC Pay API exception."):
+    with pytest.raises(SBCPaymentException, match='SBC Pay API exception.'):
         refund_payment(payment_identifier, model)
     mock_instance.refund_payment.assert_called_once_with(payment_identifier, model)
 
@@ -86,14 +87,14 @@ def test_refund_payment_with_extra_response_data(mock_client, valid_response_dat
 
     response_with_extra_fields = {
         **valid_response_data,
-        "extraField": "should-be-ignored",
-        "anotherUnknownField": 9999,
-        "nestedExtra": {"key": "value"}
+        'extraField': 'should-be-ignored',
+        'anotherUnknownField': 9999,
+        'nestedExtra': {'key': 'value'}
     }
     mock_instance.refund_payment.return_value = response_with_extra_fields
 
-    payment_identifier = "valid-payment-id"
-    model = {"reason": "Customer request"}
+    payment_identifier = 'valid-payment-id'
+    model = {'reason': 'Customer request'}
 
     response = refund_payment(payment_identifier, model)
 
