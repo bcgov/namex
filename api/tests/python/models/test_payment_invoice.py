@@ -14,7 +14,6 @@
 """Tests for PaymentInvoice dataclass."""
 
 import pytest
-from pytest import approx
 
 from namex.services.payment.models import PaymentInvoice
 
@@ -33,18 +32,14 @@ def test_init_with_valid_fields():
     }
     invoice = PaymentInvoice(**data)
 
-    assert invoice.id == 12345
-    assert isinstance(invoice.serviceFees, (int, float))
-    assert isinstance(invoice.paid, (int, float))
-    assert isinstance(invoice.refund, (int, float))
-    assert isinstance(invoice.total, (int, float))
-    assert invoice.serviceFees == approx(1.50)
-    assert invoice.paid == approx(30.0)
-    assert invoice.refund == approx(0.0)
-    assert invoice.total == approx(31.50)
-    assert invoice.statusCode == 'COMPLETED'
-    assert invoice.paymentMethod == 'CC'
-    assert invoice.businessIdentifier == 'NR L000001'
+    assert invoice.id == data['id']
+    assert invoice.serviceFees == data['serviceFees']
+    assert invoice.paid == data['paid']
+    assert invoice.refund == data['refund']
+    assert invoice.total == data['total']
+    assert invoice.statusCode == data['statusCode']
+    assert invoice.paymentMethod == data['paymentMethod']
+    assert invoice.businessIdentifier == data['businessIdentifier']
 
 
 def test_init_ignores_invalid_fields():
