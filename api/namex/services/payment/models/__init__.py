@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Optional, Union
+from decimal import Decimal
 
 from pydantic.dataclasses import dataclass as pydantic_dataclass
 from pydantic import Field
@@ -125,6 +126,14 @@ class PydanticConfig:
     """Pydantic config to ignore extra fields."""
     extra = 'ignore'
     underscore_attrs_are_private = False
+
+
+@pydantic_dataclass(config=PydanticConfig)
+class PaymentRefundInvoice:
+    refundId: int
+    refundAmount: Decimal
+    message: str
+    isPartialRefund: bool
 
 
 @pydantic_dataclass(config=PydanticConfig)
