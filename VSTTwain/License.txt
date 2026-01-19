@@ -1,0 +1,213 @@
+END-USER LICENSE AGREEMENT for VintaSoft Twain .NET SDK.
+
+IMPORTANT-READ CAREFULLY: This License Agreement is a legal Agreement between you (individual or legal entity) and VintaSoft Ltd for VintaSoft Twain .NET SDK. VintaSoft Twain .NET SDK is not for sale, it can be licensed only.
+
+By installing, copying, or otherwise using and testing the VintaSoft Twain .NET SDK, you agree to be bound by the terms and conditions of this agreement. If you do not agree to the terms and conditions of this agreement, do not install or use the VintaSoft Twain .NET SDK.
+
+Any reproduction or redistribution of the VintaSoft Twain .NET SDK not in accordance with this License Agreement is expressly prohibited by law, and may result in severe civil and criminal penalties. Program VintaSoft Twain .NET SDK is protected by copyright law and the laws and international agreements on intellectual property rights.
+
+You may not use VintaSoft Twain .NET SDK and may not accept this Agreement if you are not of legal age to form a binding contract with VintaSoft Ltd, or you are a person barred from using the Software under the laws of any country.
+
+
+
+1. DEFINITIONS.
+
+The following terms have specific meanings in this License Agreement: 
+    - Software is the VintaSoft Twain .NET SDK, which includes its .dll files, documentation, examples, etc.
+    - Application is a computer program which includes the Software, but adds significant functionality besides that provided by the Software.
+    - Non-Web Application is an Application that is not intended to be run in a web browser, for example, a WinForms, WPF or console application, Windows service, etc.
+    - Web Application is an Application that runs in a web browser, for example, an ASP.NET application.
+    - URL is a character string with a reference to a Web Application.
+    - End User is a user for which the Application was built.
+    - Customer is your customer, whom you sell or license your Application.
+    - Developer is defined as a person directly engaged in the development of an Application.
+    - Development Office is defined as an office or a site, may include also remote Developers, where is taking place the development of computer programs using the Software.
+    - Desktop PC is a personal stationary or portable computer, operated by desktop Windows OS, in a form intended for regular use by human, including Remote Desktop.
+    - Server is a non-user physical or virtual computer, operated by Windows Server OS, configured with the intention of multiple users accessing it as a service run as an automated process.
+    - Production Server is a Server that provides End Users access to Application.
+    - Non-Production Server is a Server that does not provide End Users access to Application.
+    - License is the acquisition of (and payment for) the particular rights to use the Software, with rights and obligations described within the scope of this License Agreement.
+
+
+
+2. SOFTWARE EVALUATION.
+
+2.1. You do not need a License for evaluating the Software. 
+
+2.2. You can evaluate the Software during an unlimited period. 
+
+2.3. The evaluation version of the Software has some restrictions of functionality which nevertheless cannot significantly affect the evaluation process. 
+
+2.4. You can use the compiled demo Applications, which are included in the distributive package of the Software, to evaluate the functionality of the Software. 
+
+2.5. You can use evaluation version of the Software to develop test Applications for evaluating the functionality of the Software. 
+
+2.6. You cannot use the evaluation version of the Software in production or for commercial purposes. 
+
+2.7. Distribution of the evaluation version of the Software via Internet is allowed, but VintaSoft Ltd reserves the right to prohibit certain file-sharing Internet resources to re-distribute the Software in case of suspected misuse of this law. After the responsible personnel of the resource receive our official notification by e-mail they must remove the Software from the resource and ban the name "vintasoft" to prevent appearance of unauthorized copies and cracks further. 
+
+
+
+3. SOFTWARE LICENSING.
+
+3.1. You have to acquire a License to use (develop, test and deploy Applications) the Software. 
+
+3.2. A License granted to you under this agreement is for the most current version of the Software. 
+
+3.3. There are 3 types of Licenses issued for the Software:
+
+    1. Developer license.
+
+    - License can be used by only one Developer.
+    - License cannot be transferred between Developers. Therefore, if a company has "x" developers who will use the Software, the company requires "x" Licenses. The same provision applies if, for example, the developers will not be working with the Software at the same time.
+    - Registration data of License
+        - Only the name of Developer, who uses Software, can be specified in registration data of License as License owner.
+
+    - Development and testing
+        - License allows to develop and test Non-Web Applications on any Desktop PC or Server.
+        - License does NOT allow to develop and test Web Applications - for doing this Single URL license is necessary.
+
+    - Deployment
+        - License allows to deploy Non-Web Applications to any Desktop PC or Server.
+        - License does NOT allow to deploy Web Applications - for doing this Single URL license is necessary.
+
+
+    2. Site license.
+
+    - License can be used by any Developer from a single Development Office of one company.
+    - License cannot be transferred between companies.
+    - Registration data of License
+        - The Developer name or company name can be specified in registration data of License as License owner.
+
+    - Development and testing
+        - License allows to develop and test Non-Web Applications on any Desktop PC or Server.
+        - License does NOT allow to develop and test Web Applications - for doing this Single URL license is necessary.
+
+    - Deployment
+        - License allows to deploy Non-Web Applications to any Desktop PC or Server.
+        - License does NOT allow to deploy Web Applications - for doing this Single URL license is necessary.
+
+
+    3. Single URL license.
+
+    - License can be used by any Developer from a single Development Office of one company or by individual Developer.
+    - Registration data of License
+        - The Developer name or company name can be specified in registration data of License as License owner.
+        - Registration data of License contains information about domain URL.
+        - Information about domain URL in registration data of License cannot be changed.
+
+    - Development and testing
+        - License allows to develop and test Web Applications for domain "localhost" on Desktop PC or Server.
+        - License allows to develop and test Web Applications for a single URL on Desktop PC or Server.
+        - License does NOT allow to develop and test Non-Web Applications - for doing this Developer license or Site license is necessary.
+        - License allows to get an additional Single URL license for free, if there is a need to develop and test Web Applications on non-production URL. Such free Single URL license can be requested only for development and test purposes. Production or commercial usage of such license is NOT permitted.
+
+    - Deployment
+        - License allows to deploy Web Applications only to a single URL.
+        - License does NOT allow to deploy Non-Web Applications - for doing this Developer license or Site license is necessary.
+
+
+
+4. SOFTWARE USAGE.
+
+4.1. You cannot modify, decompile, disassemble, crack, otherwise reverse engineer the Software. 
+
+4.2. If you have purchased a License, you can create and deploy commercial Applications. 
+
+4.3. If you have purchased a License, you can create and deploy non-commercial Applications. 
+
+4.4. If you have purchased a License, you can create as many Applications as necessary. 
+
+4.5. If you have purchased a License, you can use source codes of demo Applications, which are included in distributive package of Software, in your Applications. 
+
+4.6. If you have purchased a License, you can distribute the following files of Software with your Application: 
+    - Vintasoft.Twain.dll - license for VintaSoft Twain .NET SDK (Standard edition) is necessary
+    - Vintasoft.WpfTwain.dll - license for VintaSoft Twain .NET SDK (Standard+WPF edition) is necessary
+
+4.7. You cannot include, in your Application, any file of Software except for the files referred to in paragraph 4.6. 
+
+4.8. You cannot use, copy, emulate, clone, rent, lease, sell or transfer the Software, or any subset of the Software, except as provided for in this agreement. 
+
+4.9. You cannot use Software to create a service or utility which exposes the functionality of Software to other users in such a way as to compete, directly or indirectly, with the Software. 
+
+4.10. You cannot create DLLs, or any other derivative tools to be used in design mode in any development tools, which includes Software. 
+
+4.11. You cannot distribute your Application without a written agreement that prohibits reverse engineering, decompilation or disassembly of the Applications. 
+
+4.12. You cannot transfer or assign this Agreement or your License to any third party. 
+
+4.13. You cannot allow further redistribution of our Software by your Customers. 
+
+4.14. If the Software provided to you is an upgrade or revised version of Software previously provided to you under this Agreement or a predecessor agreement, you may not loan, rent, lease, or otherwise transfer the original non-upgraded Software to another user or on separate computer. 
+
+4.15. You cannot use our name, logo or trademarks to market his/her Applications. 
+
+
+
+5. UPDATES AND TECHNICAL SUPPORT OF SOFTWARE.
+
+5.1. Purchased License includes free subscription for 1 year updates and technical support of Software, starting from the purchase date of License. 
+
+5.2. You can renew subscription for 1 year updates and technical support of Software for 50% of the actual License price. 
+
+5.3. You can receive all new versions and updates while your subscription for 1 year updates and technical support is active. 
+
+5.4. We may release future versions of the Software under this agreement or a different agreement. 
+
+5.5. Nothing in this agreement is a commitment to you of compatibility between the Software and any future versions of the Software. 
+
+5.6. We are supporting only the most current version of the Software. 
+
+5.7. You can get priority support while your subscription for 1 year updates and technical support is active. 
+
+5.8. You can receive technical support via email. 
+
+5.9. For receiving technical support you need send us email to address support@vintasoft.com or submit your question or request in our technical support center at address https://www.vintasoft.com/support/. 
+
+
+
+6. LICENSE TERMINATION.
+
+6.1. This Agreement is effective until terminated. 
+
+6.2. Either party may terminate this Agreement for cause upon ten (10) days written and sent via e-mail notice in the event the other party breaches a material provision of this Agreement, which breach is not cured within ten (10) days. 
+
+6.3. In addition, all of your rights to access the Software under this Agreement shall automatically terminate in the event of an unauthorized assignment. 
+
+6.4. Upon any termination of this Agreement, your right to use the Software terminates, but the provisions under "YOU MAY NOT", "NO WARRANTIES", "NO LIABILITY FOR CONSEQUENTIAL DAMAGES", "COPYRIGHT NOTICE" continue to apply to both of us even after termination. 
+
+
+
+7. PUBLICITY.
+
+You (meaning your organization) agrees to be identified as a customer of ours and agree that we may refer to you by name, trade name and trademark, if applicable, and may briefly describe your business in our marketing materials and web site.
+
+
+
+8. NO WARRANTIES.
+
+VintaSoft Ltd expressly disclaims any warranty for the Software.
+
+THE Software AND ANY RELATED DOCUMENTATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OR MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NONINFRINGEMENT.
+
+THE ENTIRE RISK ARISING OUT OF USE OR PERFORMANCE OF the Software REMAINS WITH YOU.
+
+
+
+9. NO LIABILITY FOR CONSEQUENTIAL DAMAGES.
+
+IN NO EVENT SHALL VintaSoft Ltd BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR CONSEQUENTIAL DAMAGES WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF BUSINESS PROFITS, BUSINESS INTERRUPTION, LOSS OF BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE USE OR OF INABILITY TO USE the Software.
+
+
+
+10. COPYRIGHT NOTICE.
+
+Copyright (C) 2007-2016 VintaSoft Ltd. All rights reserved.
+
+Any rights not expressly granted herein are reserved.
+
+
+
+11. CHANGES TO THIS AGREEMENT.
+
+This License Agreement may be periodically updated by VintaSoft Ltd. Up to date one will be immediately published on our web site.

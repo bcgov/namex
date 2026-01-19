@@ -1,0 +1,92 @@
+﻿<Window x:Class="WpfTwainAdvancedDemo.DevCapsWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Name="DevCaps" Title="Device capatibilities"
+    Loaded="Window_Loaded" Closing="Window_Closing"
+    Width="749" Height="681" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Topmost="False">
+    <Grid Margin="8,8,8,8">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="328*" />
+            <ColumnDefinition Width="383*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition MaxHeight="117.863" MinHeight="117.863" />
+            <RowDefinition Height="298.803*" />
+            <RowDefinition MaxHeight="30" MinHeight="30"/>
+        </Grid.RowDefinitions>
+        
+        <StackPanel Name="leftTopStackPanel">
+            <Label Name="deviceManufacturerLabel" Padding="2">Manufacturer:</Label>
+            <Label Name="deviceProductFamilyLabel" Padding="2">Product family:</Label>
+            <Label Name="deviceProductNameLabel" Padding="2">Product name:</Label>
+            <Label Name="driverTwainVersionLabel" Padding="2">TWAIN version:</Label>
+            <Label Name="flatbedPresentLabel" Padding="2">Flatbed present:</Label>
+        </StackPanel>
+        
+        <StackPanel Grid.Column="1" Height="57.983" VerticalAlignment="Bottom">
+            <Label Name="driverTwain2CompatibleLabel" Padding="2" Margin="5,0,0,0">TWAIN 2.0 compatible:</Label>
+            <Label Name="feederPresentLabel" Padding="2" Margin="5,0,0,0">Feeder present:</Label>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="1" Margin="0,0,4,0">
+            <Label Padding="2">Supported capabilities:</Label>
+            <ListBox Height="444" Name="supportedCapabilitiesListBox"  SelectionChanged="supportedCapabilitiesListBox_SelectedIndexChanged" >
+
+            </ListBox>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Grid.Column="1" Margin="5,0,0,0">
+            <StackPanel Grid.Row="1" Grid.Column="1" Margin="0" Width="382">
+                <Label Padding="2">Usage mode:</Label>
+                <TextBox Name="usageModeTextBox" Width="379" Margin="0,0,0,0" HorizontalAlignment="Left"></TextBox>
+            </StackPanel>
+            <WrapPanel Grid.Row="1" Grid.Column="1" Margin="0" Width="382">
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,0">
+                    <Label Padding="2" Margin="0">Operation:</Label>
+                    <ComboBox Height="23" Name="getMethodComboBox" Width="135" Margin="0,0,0,0" SelectionChanged="getMethodComboBox_SelectionChanged" />
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="4,0,0,0">
+                    <Label Padding="2">Container type:</Label>
+                    <TextBox Name="containerTypeTextBox" Width="124" Margin="5,0,0,0"></TextBox>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="4,0,0,0">
+                    <Label Padding="2">Value type:</Label>
+                    <TextBox Name="valueTypeTextBox" Width="102" Margin="5,0,0,0"></TextBox>
+                </StackPanel>
+            </WrapPanel>
+            <StackPanel Grid.Row="1" Grid.Column="1" Margin="0" Width="382">
+                <Label Padding="2">Current value:</Label>
+                <TextBox Name="currentValueTextBox" Width="379" Margin="0,0,0,0" HorizontalAlignment="Left"></TextBox>
+            </StackPanel>
+            <WrapPanel Grid.Row="1" Grid.Column="1" Margin="0" Width="382">
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0" Width="200">
+                    <Label Padding="2">Min value:</Label>
+                    <TextBox Name="minValueTextBox" Width="180" Margin="0,0,0,0" HorizontalAlignment="Left"></TextBox>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0" Width="180">
+                    <Label Padding="2">Max value:</Label>
+                    <TextBox Name="maxValueTextBox" Width="180" Margin="0,0,0,0" HorizontalAlignment="Left"></TextBox>
+                </StackPanel>
+            </WrapPanel>
+            <WrapPanel Grid.Row="1" Grid.Column="1" Margin="0" Width="382">
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0" Width="200">
+                    <Label Padding="2">Default value:</Label>
+                    <TextBox Name="defaultValueTextBox" Width="180" Margin="0,0,0,0" HorizontalAlignment="Left"></TextBox>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0" Width="180">
+                    <Label Padding="2">Step size:</Label>
+                    <TextBox Name="stepSizeTextBox" Width="180" Margin="0,0,0,0" HorizontalAlignment="Left"></TextBox>
+                </StackPanel>
+            </WrapPanel>
+            <Label Padding="2">
+                Supported values:
+            </Label>
+            <ListBox Height="234" Name="supportedValuesListBox" Margin="4,0,0,0" Width="378" HorizontalAlignment="Left">
+            </ListBox>
+            <WrapPanel Height="100" Name="wrapPanel1" Width="200" />
+        </StackPanel>
+        <Button Grid.Row="2" HorizontalAlignment="Right" Width="156" VerticalAlignment="Stretch" Margin="0,0,4,0" Name="copyToClipboardButton" Click="copyToClipboardButton_Click">Copy to clipboard</Button>
+        <Button Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" Width="156" VerticalAlignment="Stretch" Margin="4,0,0,0" Name="closeButton" Click="closeButton_Click">Close</Button>
+    </Grid>
+</Window>
+
+

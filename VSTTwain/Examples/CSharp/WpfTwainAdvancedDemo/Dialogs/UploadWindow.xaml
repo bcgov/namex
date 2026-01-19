@@ -1,0 +1,145 @@
+﻿<Window x:Class="WpfTwainAdvancedDemo.UploadWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Upload image into FTP or HTTP server" Height="352" Width="641" WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+    <StackPanel Height="314">
+        <Grid Margin="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="257*"/>
+                <ColumnDefinition Width="257*"/>
+            </Grid.ColumnDefinitions>
+            <GroupBox Header="FTP">
+                <Grid Margin="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="61"/>
+                        <ColumnDefinition MinWidth="64" Width="64*"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition MinWidth="56" Width="56*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Label>Server:</Label>
+                    <TextBox Name="ftpServerTextBox" Grid.Column="1" Grid.ColumnSpan="3">ftp.test.com</TextBox>
+                    
+                    <Label Grid.Row="1">Port:</Label>
+                    <TextBox Name="ftpServerPortTextBox" Grid.Column="1" Grid.Row="1">21</TextBox>
+                    
+                    <CheckBox Name="flagPassModeCheckBox" Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="1" HorizontalAlignment="Right" Width="129" Margin="0,6.166">Passive mode</CheckBox>
+                    
+                    <Label Grid.Row="2">User:</Label>
+                    <TextBox Name="ftpUserTextBox" Grid.Row="2" Grid.Column="1">guest</TextBox>
+                    
+                    <Label Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" HorizontalAlignment="Right" Width="62">Password:</Label>
+                    <PasswordBox Name="ftpPasswTextBox" Grid.Row="2" Grid.Column="3"></PasswordBox>
+                    
+                    <Label Grid.Row="3">Path:</Label>
+                    <TextBox Name="ftpPathTextBox" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3">/images/</TextBox>
+                    
+                    <Label Grid.Row="4" Grid.ColumnSpan="2" HorizontalAlignment="Left" Width="69">File name:</Label>
+                    <TextBox Name="ftpFileNameTextBox" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3">demo.jpg</TextBox>
+                    
+                    <ProgressBar Grid.Row="5" Grid.ColumnSpan="4" Name="ftpUploadProgressBar" Height="23" Margin="2"/>
+                    
+                    <Label Grid.Row="6">Status:</Label>
+                    <Label Name="ftpStatusLabel" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="3" Height="50" />
+
+                    <StackPanel Grid.Row="7" Grid.ColumnSpan="4" Margin="2" Orientation="Horizontal" HorizontalAlignment="Center" Height="23">
+                        <Button Name="ftpUploadButton" Margin="0,0,5,0" Width="70" Click="ftpUploadButton_Click">
+                            Upload
+                        </Button>
+                        <Button Name="ftpUploadCancelButton" Margin="5,0,0,0" Width="70" Click="ftpUploadCancelButton_Click" IsEnabled="False">
+                            Cancel
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </GroupBox>
+            <GroupBox Grid.Column="1" Header="HTTP">
+                <Grid Margin="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="44"/>
+                        <ColumnDefinition MinWidth="248" Width="248*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition />
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Label VerticalAlignment="Center">
+                        URL:
+                    </Label>
+                    <Label Grid.Row="3" VerticalAlignment="Top">
+                       Status: 
+                    </Label>
+                    <Label Name="httpStatusLabel" VerticalAlignment="Stretch" VerticalContentAlignment="Top" Grid.Row="3" Grid.Column="1" Height="50" />
+                    <TextBox Name="httpUrlTextBox" Grid.Column="1" VerticalAlignment="Stretch" VerticalContentAlignment="Center" >
+                        http://demos.vintasoft.com/WebTwainDemo/ImageUpload.aspx
+                    </TextBox>
+                    <GroupBox Header="Web form parameters" Grid.Row="1" Grid.ColumnSpan="2" Margin="2,2,2,38.433" Grid.RowSpan="2">
+                        <Grid Margin="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="70"/>
+                                <ColumnDefinition MinWidth="80" Width="80*"/>
+                                <ColumnDefinition Width="40"/>
+                                <ColumnDefinition MinWidth="80" Width="80*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Label>
+                                File field:
+                            </Label>
+                            <Label Grid.Row="1">
+                                Text field 1:
+                            </Label>
+                            <Label Grid.Row="2">
+                                Text field 2:
+                            </Label>
+                            <Label Grid.Column="2" HorizontalContentAlignment="Right">
+                                Value:
+                            </Label>
+                            <Label Grid.Column="2" Grid.Row="1" HorizontalContentAlignment="Right">
+                                Value:
+                            </Label>
+                            <Label Grid.Column="2" Grid.Row="2" HorizontalContentAlignment="Right">
+                                Value:
+                            </Label>
+                            <TextBox Name="httpFileFieldTextBox" Grid.Column="1">file</TextBox>
+                            <TextBox Name="httpFileFieldValueTextBox" Grid.Column="3" >demo.jpg</TextBox>
+                            <TextBox Name="httpTextField1TextBox" Grid.Column="1" Grid.Row="1"/>
+                            <TextBox Name="httpTextField1ValueTextBox" Grid.Column="3" Grid.Row="1"/>
+                            <TextBox Name="httpTextField2TextBox" Grid.Column="1" Grid.Row="2"/>
+                            <TextBox Name="httpTextField2ValueTextBox" Grid.Column="3" Grid.Row="2"/>
+                        </Grid>
+                    </GroupBox>
+                    <ProgressBar Name="httpUploadProgressBar" Grid.Row="2" Grid.ColumnSpan="2" Height="23" Margin="4,0,0,5.489" VerticalAlignment="Bottom" />
+                    <StackPanel Margin="2" Grid.Row="4" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Height="23">
+                        <Button Name="httpUploadButton" Margin="0,0,5,0" Width="70" Click="httpUploadButton_Click">
+                            Upload
+                        </Button>
+                        <Button Name="httpUploadCancelButton" Margin="5,0,0,0" Width="70" Click="httpUploadCancelButton_Click" IsEnabled="False" >
+                            Cancel
+                        </Button>
+                    </StackPanel>
+                </Grid>
+                
+            </GroupBox>
+        </Grid>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Margin="2" Name="exitButton" HorizontalAlignment="Center" Width="70" Height="23" Click="exitButton_Click">
+                Exit
+            </Button>
+        </StackPanel>
+    </StackPanel>
+</Window>

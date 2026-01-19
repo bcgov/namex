@@ -1,0 +1,3249 @@
+2026-01-07 9:00:33 AM: Initializing components
+2026-01-07 9:00:33 AM: Reading app settings
+2026-01-07 9:00:33 AM: Initialize twain settings
+2026-01-07 9:00:33 AM: Set database connection
+2026-01-07 9:00:33 AM: Scanning Dashboard Using DRS API
+2026-01-07 9:00:33 AM: Load Lookup lists from API
+2026-01-07 9:00:33 AM: Load Doc Type
+2026-01-07 9:00:34 AM: Load Author Obj
+2026-01-07 9:00:34 AM: Load Owner Type Obj
+2026-01-07 9:00:34 AM: Load Box Obj
+2026-01-07 9:00:41 AM: Done Loading from DB
+2026-01-07 9:00:41 AM: Load New Form
+2026-01-07 9:00:41 AM: Make new scanner form and display it
+2026-01-07 9:06:59 AM: Initializing components
+2026-01-07 9:06:59 AM: Reading app settings
+2026-01-07 9:06:59 AM: Initialize twain settings
+2026-01-07 9:06:59 AM: Set database connection
+2026-01-07 9:06:59 AM: Scanning Dashboard Using DRS API
+2026-01-07 9:06:59 AM: Load Lookup lists from API
+2026-01-07 9:06:59 AM: Load Doc Type
+2026-01-07 9:07:00 AM: Load Author Obj
+2026-01-07 9:07:01 AM: Load Owner Type Obj
+2026-01-07 9:07:01 AM: Load Box Obj
+2026-01-07 9:07:08 AM: Done Loading from DB
+2026-01-07 9:07:08 AM: Load New Form
+2026-01-07 9:07:08 AM: Make new scanner form and display it
+2026-01-07 9:08:04 AM: Initializing components
+2026-01-07 9:08:04 AM: Reading app settings
+2026-01-07 9:08:04 AM: Initialize twain settings
+2026-01-07 9:08:04 AM: Set database connection
+2026-01-07 9:08:04 AM: Scanning Dashboard Using DRS API
+2026-01-07 9:08:04 AM: Load Lookup lists from API
+2026-01-07 9:08:04 AM: Load Doc Type
+2026-01-07 9:08:05 AM: Load Author Obj
+2026-01-07 9:08:05 AM: Load Owner Type Obj
+2026-01-07 9:08:05 AM: Load Box Obj
+2026-01-07 9:08:12 AM: Done Loading from DB
+2026-01-07 9:08:12 AM: Load New Form
+2026-01-07 9:08:12 AM: Make new scanner form and display it
+2026-01-07 9:08:19 AM: Checking for asynchronous scanning...
+2026-01-07 9:08:19 AM: Start image acquisition
+2026-01-07 9:08:25 AM: End of image acquisition
+2026-01-07 9:08:40 AM: ProcessScan: Saving Scan
+2026-01-07 9:08:40 AM: Scan List size: 1
+2026-01-07 9:08:41 AM: Scanning finished
+2026-01-07 9:08:41 AM: Fix Checking for barcode
+2026-01-07 9:08:41 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-07 9:08:41 AM: Fix Current Doc is null
+2026-01-07 9:08:41 AM: Fix barcode found=63598765
+2026-01-07 9:08:41 AM: Fix Set List of Docs
+2026-01-07 9:08:41 AM: Fix Barcode not null
+2026-01-07 9:08:41 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-07 9:08:42 AM: Fix3 API returned docList, Adding docs to list
+2026-01-07 9:08:42 AM: Extract jDoc
+2026-01-07 9:08:42 AM: Fix3 Extract4
+2026-01-07 9:08:42 AM: Extract jDoc
+2026-01-07 9:08:42 AM: Fix3 Extract4
+2026-01-07 9:08:42 AM: Extract jDoc
+2026-01-07 9:08:42 AM: Fix3 Extract4
+2026-01-07 9:08:42 AM: Return Ordered docs
+2026-01-07 9:08:42 AM: Fix Doc found count=3
+2026-01-07 9:08:42 AM: Fix End neos true
+2026-01-07 9:08:42 AM: Fix Set current doc to docs[0]
+2026-01-07 9:08:42 AM: Fix -1
+2026-01-07 9:08:42 AM: Fix Display image
+2026-01-07 9:08:42 AM: Fix SetImageNav
+2026-01-07 9:08:42 AM: Fix End 1
+2026-01-07 9:08:43 AM: Fix End 2
+2026-01-07 9:08:43 AM: Fix End 3
+2026-01-07 9:14:29 AM: Initializing components
+2026-01-07 9:14:29 AM: Reading app settings
+2026-01-07 9:14:29 AM: Initialize twain settings
+2026-01-07 9:14:29 AM: Set database connection
+2026-01-07 9:14:29 AM: Scanning Dashboard Using DRS API
+2026-01-07 9:14:29 AM: Load Lookup lists from API
+2026-01-07 9:14:29 AM: Load Doc Type
+2026-01-07 9:14:30 AM: Load Author Obj
+2026-01-07 9:14:30 AM: Load Owner Type Obj
+2026-01-07 9:14:30 AM: Load Box Obj
+2026-01-07 9:14:37 AM: Done Loading from DB
+2026-01-07 9:14:37 AM: Load New Form
+2026-01-07 9:14:37 AM: Make new scanner form and display it
+2026-01-07 9:14:44 AM: Checking for asynchronous scanning...
+2026-01-07 9:14:44 AM: Start image acquisition
+2026-01-07 9:14:53 AM: End of image acquisition
+2026-01-07 9:15:00 AM: ProcessScan: Saving Scan
+2026-01-07 9:15:00 AM: Scan List size: 1
+2026-01-07 9:15:01 AM: Scanning finished
+2026-01-07 9:15:01 AM: Fix Checking for barcode
+2026-01-07 9:15:01 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-07 9:15:01 AM: Fix Current Doc is null
+2026-01-07 9:15:01 AM: Fix barcode found=63598765
+2026-01-07 9:15:01 AM: Fix Set List of Docs
+2026-01-07 9:15:01 AM: Fix Barcode not null
+2026-01-07 9:15:01 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-07 9:15:02 AM: Fix3 API returned docList, Adding docs to list
+2026-01-07 9:15:02 AM: Extract jDoc
+2026-01-07 9:15:02 AM: Fix3 Extract4
+2026-01-07 9:15:02 AM: Extract jDoc
+2026-01-07 9:15:02 AM: Fix3 Extract4
+2026-01-07 9:15:02 AM: Extract jDoc
+2026-01-07 9:15:02 AM: Fix3 Extract4
+2026-01-07 9:15:02 AM: Return Ordered docs
+2026-01-07 9:15:02 AM: Fix Doc found count=3
+2026-01-07 9:15:02 AM: Fix End neos true
+2026-01-07 9:15:02 AM: Fix Set current doc to docs[0]
+2026-01-07 9:15:02 AM: Fix DS0000188299
+2026-01-07 9:15:03 AM: Fix Display image
+2026-01-07 9:15:03 AM: Fix SetImageNav
+2026-01-07 9:15:03 AM: Fix End 1
+2026-01-07 9:15:03 AM: Fix End 2
+2026-01-07 9:15:03 AM: Fix End 3
+2026-01-07 9:57:33 AM: Initializing components
+2026-01-07 9:57:33 AM: Reading app settings
+2026-01-07 9:57:33 AM: Initialize twain settings
+2026-01-07 9:57:33 AM: Set database connection
+2026-01-07 9:57:33 AM: Scanning Dashboard Using DRS API
+2026-01-07 9:57:33 AM: Load Lookup lists from API
+2026-01-07 9:57:33 AM: Load Doc Type
+2026-01-07 9:57:49 AM: Load Author Obj
+2026-01-07 9:57:49 AM: Load Owner Type Obj
+2026-01-07 9:57:49 AM: Load Box Obj
+2026-01-07 9:57:57 AM: Done Loading from DB
+2026-01-07 9:57:57 AM: Load New Form
+2026-01-07 9:57:57 AM: Make new scanner form and display it
+2026-01-07 10:00:08 AM: Checking for asynchronous scanning...
+2026-01-07 10:00:08 AM: Start image acquisition
+2026-01-07 10:00:38 AM: End of image acquisition
+2026-01-07 10:00:45 AM: ProcessScan: Saving Scan
+2026-01-07 10:00:45 AM: Scan List size: 1
+2026-01-07 10:00:46 AM: Scanning finished
+2026-01-07 10:00:46 AM: Fix Checking for barcode
+2026-01-07 10:00:46 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-07 10:00:46 AM: Fix Current Doc is null
+2026-01-07 10:00:46 AM: add barcode manually
+2026-01-07 10:00:54 AM: Fix3 API returned docList, Adding docs to list
+2026-01-07 10:00:54 AM: Extract jDoc
+2026-01-07 10:00:54 AM: Fix3 Extract4
+2026-01-07 10:38:17 AM: Initializing components
+2026-01-07 10:38:18 AM: Reading app settings
+2026-01-07 10:38:18 AM: Initialize twain settings
+2026-01-07 10:38:18 AM: Set database connection
+2026-01-07 10:38:18 AM: Scanning Dashboard Using DRS API
+2026-01-07 10:38:18 AM: Load Lookup lists from API
+2026-01-07 10:38:18 AM: Load Doc Type
+2026-01-07 10:38:35 AM: Load Author Obj
+2026-01-07 10:38:36 AM: Load Owner Type Obj
+2026-01-07 10:38:36 AM: Load Box Obj
+2026-01-07 10:38:43 AM: Done Loading from DB
+2026-01-07 10:38:43 AM: Load New Form
+2026-01-07 10:38:43 AM: Make new scanner form and display it
+2026-01-07 10:42:41 AM: Initializing components
+2026-01-07 10:42:41 AM: Reading app settings
+2026-01-07 10:42:41 AM: Initialize twain settings
+2026-01-07 10:42:41 AM: Set database connection
+2026-01-07 10:42:41 AM: Scanning Dashboard Using DRS API
+2026-01-07 10:42:41 AM: Load Lookup lists from API
+2026-01-07 10:42:41 AM: Load Doc Type
+2026-01-07 10:42:42 AM: Load Author Obj
+2026-01-07 10:42:42 AM: Load Owner Type Obj
+2026-01-07 10:42:43 AM: Load Box Obj
+2026-01-07 10:42:49 AM: Done Loading from DB
+2026-01-07 10:42:50 AM: Load New Form
+2026-01-07 10:42:50 AM: Make new scanner form and display it
+2026-01-07 10:43:48 AM: Checking for asynchronous scanning...
+2026-01-07 10:43:48 AM: Start image acquisition
+2026-01-07 10:44:01 AM: End of image acquisition
+2026-01-07 10:44:09 AM: ProcessScan: Saving Scan
+2026-01-07 10:44:09 AM: Scan List size: 1
+2026-01-07 10:44:09 AM: Scanning finished
+2026-01-07 10:44:09 AM: Fix Checking for barcode
+2026-01-07 10:44:10 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-07 10:44:10 AM: Fix Current Doc is null
+2026-01-07 10:44:10 AM: add barcode manually
+2026-01-07 10:45:33 AM: Fix3 API returned docList, Adding docs to list
+2026-01-07 10:45:33 AM: Extract jDoc
+2026-01-07 10:45:33 AM: Return Ordered docs
+2026-01-07 10:45:33 AM: Fix Set List of Docs
+2026-01-07 10:45:33 AM: Fix Barcode not null
+2026-01-07 10:45:33 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-07 10:45:34 AM: Fix3 API returned docList, Adding docs to list
+2026-01-07 10:45:34 AM: Extract jDoc
+2026-01-07 10:45:34 AM: Return Ordered docs
+2026-01-07 10:45:34 AM: Fix Doc found count=1
+2026-01-07 10:45:34 AM: Fix End neos true
+2026-01-07 10:45:34 AM: Fix Set current doc to docs[0]
+2026-01-07 10:45:34 AM: Fix DS0000100014
+2026-01-07 10:45:34 AM: Fix Display image
+2026-01-07 10:45:34 AM: Fix SetImageNav
+2026-01-07 10:45:34 AM: Fix End 1
+2026-01-07 10:45:34 AM: Fix End 2
+2026-01-07 10:45:34 AM: Fix End 3
+2026-01-07 10:45:48 AM: 1 btnViewAsPDF_Click Scanner  Objects
+2026-01-07 11:01:12 AM: Initializing components
+2026-01-07 11:01:14 AM: Reading app settings
+2026-01-07 11:01:14 AM: Initialize twain settings
+2026-01-07 11:01:14 AM: Set database connection
+2026-01-07 11:01:14 AM: Scanning Dashboard Using DRS API
+2026-01-07 11:01:14 AM: Load Lookup lists from API
+2026-01-07 11:01:14 AM: Load Doc Type
+2026-01-07 11:01:29 AM: Load Author Obj
+2026-01-07 11:01:30 AM: Load Owner Type Obj
+2026-01-07 11:01:30 AM: Load Box Obj
+2026-01-07 11:01:37 AM: Done Loading from DB
+2026-01-07 11:01:37 AM: Load New Form
+2026-01-07 11:01:37 AM: Make new scanner form and display it
+2026-01-07 11:01:49 AM: Checking for asynchronous scanning...
+2026-01-07 11:01:49 AM: Start image acquisition
+2026-01-07 11:01:55 AM: End of image acquisition
+2026-01-07 11:02:09 AM: ProcessScan: Saving Scan
+2026-01-07 11:02:09 AM: Scan List size: 1
+2026-01-07 11:02:10 AM: Scanning finished
+2026-01-07 11:02:10 AM: Fix Checking for barcode
+2026-01-07 11:02:10 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-07 11:02:10 AM: Fix Current Doc is null
+2026-01-07 11:02:10 AM: add barcode manually
+2026-01-07 11:36:55 AM: Fix3 API returned docList, Adding docs to list
+2026-01-07 11:36:55 AM: Extract jDoc
+2026-01-07 11:36:55 AM: Return Ordered docs
+2026-01-07 11:36:55 AM: Fix Set List of Docs
+2026-01-07 11:36:55 AM: Fix Barcode not null
+2026-01-07 11:36:55 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-07 11:36:56 AM: Fix3 API returned docList, Adding docs to list
+2026-01-07 11:36:56 AM: Extract jDoc
+2026-01-07 11:36:56 AM: Return Ordered docs
+2026-01-07 11:36:56 AM: Fix Doc found count=1
+2026-01-07 11:36:56 AM: Fix End neos true
+2026-01-07 11:36:56 AM: Fix Set current doc to docs[0]
+2026-01-07 11:36:56 AM: Fix DS0000100014
+2026-01-07 11:36:56 AM: Fix Display image
+2026-01-07 11:36:56 AM: Fix SetImageNav
+2026-01-07 11:36:56 AM: Fix End 1
+2026-01-07 11:36:56 AM: Fix End 2
+2026-01-07 11:36:56 AM: Fix End 3
+2026-01-07 11:40:52 AM: Initializing components
+2026-01-07 11:40:52 AM: Reading app settings
+2026-01-07 11:40:52 AM: Initialize twain settings
+2026-01-07 11:40:52 AM: Set database connection
+2026-01-07 11:40:52 AM: Scanning Dashboard Using DRS API
+2026-01-07 11:40:52 AM: Load Lookup lists from API
+2026-01-07 11:40:52 AM: Load Doc Type
+2026-01-07 11:40:53 AM: Load Author Obj
+2026-01-07 11:40:53 AM: Load Owner Type Obj
+2026-01-07 11:40:54 AM: Load Box Obj
+2026-01-07 11:41:01 AM: Done Loading from DB
+2026-01-07 11:41:01 AM: Load New Form
+2026-01-07 11:41:01 AM: Make new scanner form and display it
+2026-01-07 11:41:56 AM: Checking for asynchronous scanning...
+2026-01-07 11:41:56 AM: Start image acquisition
+2026-01-07 11:42:06 AM: End of image acquisition
+2026-01-07 11:42:13 AM: ProcessScan: Saving Scan
+2026-01-07 11:42:13 AM: Scan List size: 1
+2026-01-07 11:42:14 AM: Scanning finished
+2026-01-07 11:42:14 AM: Fix Checking for barcode
+2026-01-07 11:42:14 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-07 11:42:14 AM: Fix Current Doc is null
+2026-01-07 11:42:14 AM: add barcode manually
+2026-01-07 11:48:56 AM: Fix3 API returned docList, Adding docs to list
+2026-01-07 11:48:56 AM: Extract jDoc
+2026-01-07 11:48:56 AM: Return Ordered docs
+2026-01-07 11:48:56 AM: Fix Set List of Docs
+2026-01-07 11:48:56 AM: Fix Barcode not null
+2026-01-07 11:48:56 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-07 11:48:57 AM: Fix3 API returned docList, Adding docs to list
+2026-01-07 11:48:57 AM: Extract jDoc
+2026-01-07 11:48:57 AM: Return Ordered docs
+2026-01-07 11:48:57 AM: Fix Doc found count=1
+2026-01-07 11:48:57 AM: Fix End neos true
+2026-01-07 11:48:57 AM: Fix Set current doc to docs[0]
+2026-01-07 11:48:57 AM: Fix DS0000100014
+2026-01-07 11:48:57 AM: Fix Display image
+2026-01-07 11:48:57 AM: Fix SetImageNav
+2026-01-07 11:48:57 AM: Fix End 1
+2026-01-07 11:48:57 AM: Fix End 2
+2026-01-07 11:48:57 AM: Fix End 3
+2026-01-07 12:27:25 PM: Initializing components
+2026-01-07 12:27:25 PM: Reading app settings
+2026-01-07 12:27:25 PM: Initialize twain settings
+2026-01-07 12:27:25 PM: Set database connection
+2026-01-07 12:27:25 PM: Scanning Dashboard Using DRS API
+2026-01-07 12:27:25 PM: Load Lookup lists from API
+2026-01-07 12:27:25 PM: Load Doc Type
+2026-01-07 12:27:42 PM: Load Author Obj
+2026-01-07 12:27:42 PM: Load Owner Type Obj
+2026-01-07 12:27:43 PM: Load Box Obj
+2026-01-07 12:27:50 PM: Done Loading from DB
+2026-01-07 12:27:50 PM: Load New Form
+2026-01-07 12:27:50 PM: Make new scanner form and display it
+2026-01-07 12:28:05 PM: Checking for asynchronous scanning...
+2026-01-07 12:28:05 PM: Start image acquisition
+2026-01-07 12:28:13 PM: End of image acquisition
+2026-01-07 12:28:19 PM: ProcessScan: Saving Scan
+2026-01-07 12:28:19 PM: Scan List size: 1
+2026-01-07 12:28:20 PM: Scanning finished
+2026-01-07 12:28:20 PM: Fix Checking for barcode
+2026-01-07 12:28:20 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-07 12:28:20 PM: Fix Current Doc is null
+2026-01-07 12:28:20 PM: add barcode manually
+2026-01-07 12:28:37 PM: Fix3 API returned docList, Adding docs to list
+2026-01-07 12:28:37 PM: Extract jDoc
+2026-01-07 12:28:37 PM: Return Ordered docs
+2026-01-07 12:28:37 PM: Fix Set List of Docs
+2026-01-07 12:28:37 PM: Fix Barcode not null
+2026-01-07 12:28:37 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-07 12:28:37 PM: Fix3 API returned docList, Adding docs to list
+2026-01-07 12:28:37 PM: Extract jDoc
+2026-01-07 12:28:37 PM: Return Ordered docs
+2026-01-07 12:28:37 PM: Fix Doc found count=1
+2026-01-07 12:28:37 PM: Fix End neos true
+2026-01-07 12:28:37 PM: Fix Set current doc to docs[0]
+2026-01-07 12:28:37 PM: Fix DS0000100014
+2026-01-07 12:28:37 PM: Fix Display image
+2026-01-07 12:28:37 PM: Fix SetImageNav
+2026-01-07 12:28:37 PM: Fix End 1
+2026-01-07 12:28:37 PM: Fix End 2
+2026-01-07 12:28:37 PM: Fix End 3
+2026-01-07 1:03:20 PM: Initializing components
+2026-01-07 1:03:21 PM: Reading app settings
+2026-01-07 1:03:21 PM: Initialize twain settings
+2026-01-07 1:03:21 PM: Set database connection
+2026-01-07 1:03:21 PM: Scanning Dashboard Using DRS API
+2026-01-07 1:03:21 PM: Load Lookup lists from API
+2026-01-07 1:03:21 PM: Load Doc Type
+2026-01-07 1:03:38 PM: Load Author Obj
+2026-01-07 1:03:39 PM: Load Owner Type Obj
+2026-01-07 1:03:39 PM: Load Box Obj
+2026-01-07 1:03:47 PM: Done Loading from DB
+2026-01-07 1:03:47 PM: Load New Form
+2026-01-07 1:03:47 PM: Make new scanner form and display it
+2026-01-07 1:03:53 PM: Checking for asynchronous scanning...
+2026-01-07 1:03:53 PM: Start image acquisition
+2026-01-07 1:03:59 PM: End of image acquisition
+2026-01-07 1:04:06 PM: ProcessScan: Saving Scan
+2026-01-07 1:04:06 PM: Scan List size: 1
+2026-01-07 1:04:07 PM: Scanning finished
+2026-01-07 1:04:07 PM: Fix Checking for barcode
+2026-01-07 1:04:07 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-07 1:04:07 PM: Fix Current Doc is null
+2026-01-07 1:04:07 PM: Fix barcode found=63598765
+2026-01-07 1:04:07 PM: Fix Set List of Docs
+2026-01-07 1:04:07 PM: Fix Barcode not null
+2026-01-07 1:04:07 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-07 1:04:07 PM: Fix3 API returned docList, Adding docs to list
+2026-01-07 1:04:07 PM: Extract jDoc
+2026-01-07 1:04:08 PM: Extract jDoc
+2026-01-07 1:04:08 PM: Extract jDoc
+2026-01-07 1:04:08 PM: Return Ordered docs
+2026-01-07 1:04:08 PM: Fix Doc found count=3
+2026-01-07 1:04:08 PM: Fix End neos true
+2026-01-07 1:04:08 PM: Fix Set current doc to docs[0]
+2026-01-07 1:04:08 PM: Fix DS0000188299
+2026-01-07 1:04:08 PM: Fix Display image
+2026-01-07 1:04:08 PM: Fix SetImageNav
+2026-01-07 1:04:08 PM: Fix End 1
+2026-01-07 1:04:08 PM: Fix End 2
+2026-01-07 1:04:08 PM: Fix End 3
+2026-01-07 1:04:34 PM: 1 btnViewAsPDF_Click Scanner  Objects
+2026-01-08 6:36:34 AM: Initializing components
+2026-01-08 6:36:34 AM: Reading app settings
+2026-01-08 6:36:34 AM: Initialize twain settings
+2026-01-08 6:36:34 AM: Set database connection
+2026-01-08 6:36:34 AM: Scanning Dashboard Using DRS API
+2026-01-08 6:36:34 AM: Load Lookup lists from API
+2026-01-08 6:36:34 AM: Load Doc Type
+2026-01-08 6:36:54 AM: Load Author Obj
+2026-01-08 6:36:55 AM: Load Owner Type Obj
+2026-01-08 6:36:55 AM: Load Box Obj
+2026-01-08 6:37:01 AM: Done Loading from DB
+2026-01-08 6:37:01 AM: Load New Form
+2026-01-08 6:37:01 AM: Make new scanner form and display it
+2026-01-08 6:39:07 AM: Checking for asynchronous scanning...
+2026-01-08 6:39:07 AM: Start image acquisition
+2026-01-08 6:39:14 AM: End of image acquisition
+2026-01-08 6:39:20 AM: ProcessScan: Saving Scan
+2026-01-08 6:39:20 AM: Scan List size: 1
+2026-01-08 6:39:28 AM: ProcessScan: Saving Scan
+2026-01-08 6:39:28 AM: Scan List size: 2
+2026-01-08 6:39:36 AM: ProcessScan: Saving Scan
+2026-01-08 6:39:36 AM: Scan List size: 3
+2026-01-08 6:39:44 AM: ProcessScan: Saving Scan
+2026-01-08 6:39:44 AM: Scan List size: 4
+2026-01-08 6:39:52 AM: ProcessScan: Saving Scan
+2026-01-08 6:39:52 AM: Scan List size: 5
+2026-01-08 6:40:00 AM: ProcessScan: Saving Scan
+2026-01-08 6:40:00 AM: Scan List size: 6
+2026-01-08 6:40:00 AM: Scanning finished
+2026-01-08 6:40:00 AM: Fix Checking for barcode
+2026-01-08 6:40:01 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 6:40:01 AM: Fix Current Doc is null
+2026-01-08 6:40:01 AM: Fix barcode found=63598765
+2026-01-08 6:40:01 AM: Fix Set List of Docs
+2026-01-08 6:40:01 AM: Fix Barcode not null
+2026-01-08 6:40:01 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 6:40:01 AM: Fix3 API returned docList, Adding docs to list
+2026-01-08 6:40:01 AM: Extract jDoc
+2026-01-08 6:40:02 AM: Extract jDoc
+2026-01-08 6:40:02 AM: Extract jDoc
+2026-01-08 6:40:02 AM: Return Ordered docs
+2026-01-08 6:40:02 AM: Fix Doc found count=3
+2026-01-08 6:40:02 AM: Fix End neos true
+2026-01-08 6:40:02 AM: Fix Set current doc to docs[0]
+2026-01-08 6:40:02 AM: Fix DS0000188299
+2026-01-08 6:40:02 AM: Fix Display image
+2026-01-08 6:40:02 AM: Fix SetImageNav
+2026-01-08 6:40:02 AM: Fix End 1
+2026-01-08 6:40:02 AM: Fix End 2
+2026-01-08 6:40:02 AM: Fix End 3
+2026-01-08 6:40:37 AM: 6 btnSave_Click Scanner  Objects
+2026-01-08 6:43:26 AM: Checking for asynchronous scanning...
+2026-01-08 6:43:26 AM: Start image acquisition
+2026-01-08 6:43:35 AM: End of image acquisition
+2026-01-08 6:43:44 AM: ProcessScan: Saving Scan
+2026-01-08 6:43:44 AM: Scan List size: 7
+2026-01-08 6:43:52 AM: ProcessScan: Saving Scan
+2026-01-08 6:43:52 AM: Scan List size: 8
+2026-01-08 6:44:01 AM: ProcessScan: Saving Scan
+2026-01-08 6:44:01 AM: Scan List size: 9
+2026-01-08 6:44:10 AM: ProcessScan: Saving Scan
+2026-01-08 6:44:10 AM: Scan List size: 10
+2026-01-08 6:44:19 AM: ProcessScan: Saving Scan
+2026-01-08 6:44:19 AM: Scan List size: 11
+2026-01-08 6:44:27 AM: ProcessScan: Saving Scan
+2026-01-08 6:44:27 AM: Scan List size: 12
+2026-01-08 6:44:28 AM: Scanning finished
+2026-01-08 6:44:28 AM: Fix Checking for barcode
+2026-01-08 6:44:28 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 6:44:28 AM: Fix Current Doc is null
+2026-01-08 6:44:28 AM: Fix barcode found=63598765
+2026-01-08 6:44:28 AM: Fix Set List of Docs
+2026-01-08 6:44:28 AM: Fix Barcode not null
+2026-01-08 6:44:28 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 6:44:29 AM: Fix3 API returned docList, Adding docs to list
+2026-01-08 6:44:29 AM: Extract jDoc
+2026-01-08 6:44:29 AM: Extract jDoc
+2026-01-08 6:44:29 AM: Extract jDoc
+2026-01-08 6:44:29 AM: Return Ordered docs
+2026-01-08 6:44:29 AM: Fix Doc found count=3
+2026-01-08 6:44:29 AM: Fix End neos true
+2026-01-08 6:44:29 AM: Fix Set current doc to docs[0]
+2026-01-08 6:44:29 AM: Fix DS0000188299
+2026-01-08 6:44:29 AM: Fix No batchid
+2026-01-08 6:44:29 AM: Fix Display image
+2026-01-08 6:44:29 AM: Fix SetImageNav
+2026-01-08 6:44:29 AM: Fix End 1
+2026-01-08 6:44:29 AM: Fix End 2
+2026-01-08 6:44:29 AM: Fix End 3
+2026-01-08 6:44:38 AM: 12 btnViewAsPDF_Click Scanner  Objects
+2026-01-08 6:45:13 AM: 12 btnSave_Click Scanner  Objects
+2026-01-08 8:15:12 AM: Initializing components
+2026-01-08 8:15:12 AM: Reading app settings
+2026-01-08 8:15:12 AM: Initialize twain settings
+2026-01-08 8:15:12 AM: Set database connection
+2026-01-08 8:15:12 AM: Scanning Dashboard Using DRS API
+2026-01-08 8:15:12 AM: Load Lookup lists from API
+2026-01-08 8:15:12 AM: Load Doc Type
+2026-01-08 8:15:31 AM: Load Author Obj
+2026-01-08 8:15:31 AM: Load Owner Type Obj
+2026-01-08 8:15:31 AM: Load Box Obj
+2026-01-08 8:15:38 AM: Done Loading from DB
+2026-01-08 8:15:38 AM: Load New Form
+2026-01-08 8:15:38 AM: Make new scanner form and display it
+2026-01-08 8:15:52 AM: Checking for asynchronous scanning...
+2026-01-08 8:15:52 AM: Start image acquisition
+2026-01-08 8:16:01 AM: End of image acquisition
+2026-01-08 8:16:10 AM: ProcessScan: Saving Scan
+2026-01-08 8:18:14 AM: Initializing components
+2026-01-08 8:18:15 AM: Reading app settings
+2026-01-08 8:18:15 AM: Initialize twain settings
+2026-01-08 8:18:15 AM: Set database connection
+2026-01-08 8:18:15 AM: Scanning Dashboard Using DRS API
+2026-01-08 8:18:15 AM: Load Lookup lists from API
+2026-01-08 8:18:15 AM: Load Doc Type
+2026-01-08 8:18:15 AM: Load Author Obj
+2026-01-08 8:18:16 AM: Load Owner Type Obj
+2026-01-08 8:18:16 AM: Load Box Obj
+2026-01-08 8:18:23 AM: Done Loading from DB
+2026-01-08 8:18:23 AM: Load New Form
+2026-01-08 8:18:23 AM: Make new scanner form and display it
+2026-01-08 8:18:32 AM: Checking for asynchronous scanning...
+2026-01-08 8:18:32 AM: Start image acquisition
+2026-01-08 8:18:42 AM: End of image acquisition
+2026-01-08 8:18:49 AM: ProcessScan: Saving Scan
+2026-01-08 8:18:49 AM: Scan List size: 1
+2026-01-08 8:18:57 AM: ProcessScan: Saving Scan
+2026-01-08 8:18:57 AM: Scan List size: 2
+2026-01-08 8:19:06 AM: ProcessScan: Saving Scan
+2026-01-08 8:19:06 AM: Scan List size: 3
+2026-01-08 8:19:13 AM: ProcessScan: Saving Scan
+2026-01-08 8:19:14 AM: Scan List size: 4
+2026-01-08 8:19:14 AM: Scanning finished
+2026-01-08 8:19:14 AM: Fix Checking for barcode
+2026-01-08 8:19:14 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 8:19:14 AM: Fix Current Doc is null
+2026-01-08 8:19:14 AM: Fix barcode found=63598765
+2026-01-08 8:19:14 AM: Fix Set List of Docs
+2026-01-08 8:19:14 AM: Fix Barcode not null
+2026-01-08 8:19:14 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 8:19:15 AM: Fix3 API returned docList, Adding docs to list
+2026-01-08 8:19:15 AM: Extract jDoc
+2026-01-08 8:19:15 AM: Extract jDoc
+2026-01-08 8:19:16 AM: Extract jDoc
+2026-01-08 8:19:16 AM: Return Ordered docs
+2026-01-08 8:19:16 AM: Fix Doc found count=3
+2026-01-08 8:19:16 AM: Fix End neos true
+2026-01-08 8:19:16 AM: Fix Set current doc to docs[0]
+2026-01-08 8:19:16 AM: Fix DS0000188299
+2026-01-08 8:19:16 AM: Fix Display image
+2026-01-08 8:19:16 AM: Fix SetImageNav
+2026-01-08 8:19:16 AM: Fix End 1
+2026-01-08 8:19:16 AM: Fix End 2
+2026-01-08 8:19:16 AM: Fix End 3
+2026-01-08 8:19:37 AM: 4 btnViewAsPDF_Click Scanner  Objects
+2026-01-08 8:23:00 AM: 4 btnSave_Click Scanner  Objects
+2026-01-08 8:41:42 AM: Initializing components
+2026-01-08 8:41:42 AM: Reading app settings
+2026-01-08 8:41:42 AM: Initialize twain settings
+2026-01-08 8:41:42 AM: Set database connection
+2026-01-08 8:41:42 AM: Scanning Dashboard Using DRS API
+2026-01-08 8:41:42 AM: Load Lookup lists from API
+2026-01-08 8:41:42 AM: Load Doc Type
+2026-01-08 8:43:11 AM: Initializing components
+2026-01-08 8:43:11 AM: Reading app settings
+2026-01-08 8:43:11 AM: Initialize twain settings
+2026-01-08 8:43:11 AM: Set database connection
+2026-01-08 8:43:11 AM: Scanning Dashboard Using DRS API
+2026-01-08 8:43:11 AM: Load Lookup lists from API
+2026-01-08 8:43:11 AM: Load Doc Type
+2026-01-08 8:44:24 AM: Initializing components
+2026-01-08 8:44:24 AM: Reading app settings
+2026-01-08 8:44:24 AM: Initialize twain settings
+2026-01-08 8:44:24 AM: Set database connection
+2026-01-08 8:44:24 AM: Scanning Dashboard Using DRS API
+2026-01-08 8:44:24 AM: Load Lookup lists from API
+2026-01-08 8:44:24 AM: Load Doc Type
+2026-01-08 8:47:12 AM: Initializing components
+2026-01-08 8:47:12 AM: Reading app settings
+2026-01-08 8:47:12 AM: Initialize twain settings
+2026-01-08 8:47:12 AM: Set database connection
+2026-01-08 8:47:12 AM: Scanning Dashboard Using DRS API
+2026-01-08 8:47:12 AM: Load Lookup lists from API
+2026-01-08 8:47:12 AM: Load Doc Type
+2026-01-08 8:47:13 AM: Load Author Obj
+2026-01-08 8:52:44 AM: Initializing components
+2026-01-08 8:52:44 AM: Reading app settings
+2026-01-08 8:52:44 AM: Initialize twain settings
+2026-01-08 8:52:44 AM: Set database connection
+2026-01-08 8:52:44 AM: Scanning Dashboard Using DRS API
+2026-01-08 8:52:44 AM: Load Lookup lists from API
+2026-01-08 8:52:44 AM: Load Doc Type
+2026-01-08 8:52:45 AM: Load Author Obj
+2026-01-08 8:52:46 AM: Load Owner Type Obj
+2026-01-08 8:53:43 AM: Initializing components
+2026-01-08 8:53:44 AM: Reading app settings
+2026-01-08 8:53:44 AM: Initialize twain settings
+2026-01-08 8:53:44 AM: Set database connection
+2026-01-08 8:53:44 AM: Scanning Dashboard Using DRS API
+2026-01-08 8:53:44 AM: Load Lookup lists from API
+2026-01-08 8:53:44 AM: Load Doc Type
+2026-01-08 8:53:45 AM: Load Author Obj
+2026-01-08 8:53:45 AM: Load Owner Type Obj
+2026-01-08 8:53:46 AM: Load Box Obj
+2026-01-08 8:53:46 AM: Done Loading from DB
+2026-01-08 8:53:46 AM: Load New Form
+2026-01-08 8:53:46 AM: Make new scanner form and display it
+2026-01-08 8:54:08 AM: Checking for asynchronous scanning...
+2026-01-08 8:54:08 AM: Start image acquisition
+2026-01-08 8:54:31 AM: End of image acquisition
+2026-01-08 8:54:38 AM: ProcessScan: Saving Scan
+2026-01-08 8:54:38 AM: Scan List size: 1
+2026-01-08 8:54:38 AM: Scanning finished
+2026-01-08 8:54:38 AM: Fix Checking for barcode
+2026-01-08 8:54:38 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 8:54:38 AM: Fix Current Doc is null
+2026-01-08 8:54:38 AM: Fix barcode found=63598765
+2026-01-08 8:54:38 AM: Fix Set List of Docs
+2026-01-08 8:54:38 AM: Fix Barcode not null
+2026-01-08 8:54:38 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 8:54:39 AM: Return Ordered docs
+2026-01-08 8:54:39 AM: Fix No existing docs, SetImage(image0)
+2026-01-08 8:54:48 AM: Fix End neos true
+2026-01-08 8:54:48 AM: Fix End 2
+2026-01-08 8:54:48 AM: Fix End 3
+2026-01-08 8:54:54 AM: Checking for asynchronous scanning...
+2026-01-08 8:54:54 AM: Start image acquisition
+2026-01-08 8:54:56 AM: End of image acquisition
+2026-01-08 8:54:56 AM: Scanning finished
+2026-01-08 9:13:10 AM: Initializing components
+2026-01-08 9:13:10 AM: Reading app settings
+2026-01-08 9:13:10 AM: Initialize twain settings
+2026-01-08 9:13:10 AM: Set database connection
+2026-01-08 9:13:10 AM: Scanning Dashboard Using DRS API
+2026-01-08 9:13:10 AM: Load Lookup lists from API
+2026-01-08 9:13:10 AM: Load Doc Type
+2026-01-08 9:13:29 AM: Load Author Obj
+2026-01-08 9:13:29 AM: Load Owner Type Obj
+2026-01-08 9:13:30 AM: Load Box Obj
+2026-01-08 9:13:37 AM: Done Loading from DB
+2026-01-08 9:13:37 AM: Load New Form
+2026-01-08 9:13:37 AM: Make new scanner form and display it
+2026-01-08 9:27:31 AM: Initializing components
+2026-01-08 9:27:31 AM: Reading app settings
+2026-01-08 9:27:31 AM: Initialize twain settings
+2026-01-08 9:27:31 AM: Set database connection
+2026-01-08 9:27:31 AM: Scanning Dashboard Using DRS API
+2026-01-08 9:27:31 AM: Load Lookup lists from API
+2026-01-08 9:27:31 AM: Load Doc Type
+2026-01-08 9:27:32 AM: Load Author Obj
+2026-01-08 9:27:32 AM: Load Owner Type Obj
+2026-01-08 9:27:32 AM: Load Box Obj
+2026-01-08 9:27:39 AM: Done Loading from DB
+2026-01-08 9:27:39 AM: Load New Form
+2026-01-08 9:27:39 AM: Make new scanner form and display it
+2026-01-08 9:28:30 AM: Checking for asynchronous scanning...
+2026-01-08 9:28:30 AM: Start image acquisition
+2026-01-08 9:28:36 AM: End of image acquisition
+2026-01-08 9:28:50 AM: ProcessScan: Saving Scan
+2026-01-08 9:28:50 AM: Scan List size: 1
+2026-01-08 9:28:57 AM: ProcessScan: Saving Scan
+2026-01-08 9:28:57 AM: Scan List size: 2
+2026-01-08 9:29:04 AM: ProcessScan: Saving Scan
+2026-01-08 9:29:05 AM: Scan List size: 3
+2026-01-08 9:29:11 AM: ProcessScan: Saving Scan
+2026-01-08 9:29:11 AM: Scan List size: 4
+2026-01-08 9:29:12 AM: Scanning finished
+2026-01-08 9:29:12 AM: Fix Checking for barcode
+2026-01-08 9:29:12 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 9:29:12 AM: Fix Current Doc is null
+2026-01-08 9:29:12 AM: Fix barcode found=63598765
+2026-01-08 9:29:12 AM: Fix Set List of Docs
+2026-01-08 9:29:12 AM: Fix Barcode not null
+2026-01-08 9:29:12 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 9:29:13 AM: Fix3 API returned docList, Adding docs to list
+2026-01-08 9:29:13 AM: Extract jDoc
+2026-01-08 9:29:13 AM: Extract jDoc
+2026-01-08 9:29:13 AM: Extract jDoc
+2026-01-08 9:29:13 AM: Return Ordered docs
+2026-01-08 9:29:13 AM: Fix Doc found count=3
+2026-01-08 9:29:13 AM: Fix End neos true
+2026-01-08 9:29:13 AM: Fix Set current doc to docs[0]
+2026-01-08 9:29:13 AM: Fix DS0000188299
+2026-01-08 9:29:13 AM: Fix Display image
+2026-01-08 9:29:14 AM: Fix SetImageNav
+2026-01-08 9:29:14 AM: Fix End 1
+2026-01-08 9:29:14 AM: Fix End 2
+2026-01-08 9:29:14 AM: Fix End 3
+2026-01-08 9:29:38 AM: 4 btnSave_Click Scanner  Objects
+2026-01-08 9:42:39 AM: Initializing components
+2026-01-08 9:42:39 AM: Reading app settings
+2026-01-08 9:42:39 AM: Initialize twain settings
+2026-01-08 9:42:39 AM: Set database connection
+2026-01-08 9:42:39 AM: Scanning Dashboard Using DRS API
+2026-01-08 9:42:39 AM: Load Lookup lists from API
+2026-01-08 9:42:39 AM: Load Doc Type
+2026-01-08 9:42:40 AM: Load Author Obj
+2026-01-08 9:42:40 AM: Load Owner Type Obj
+2026-01-08 9:42:41 AM: Load Box Obj
+2026-01-08 9:42:48 AM: Done Loading from DB
+2026-01-08 9:42:48 AM: Load New Form
+2026-01-08 9:42:48 AM: Make new scanner form and display it
+2026-01-08 9:43:15 AM: Checking for asynchronous scanning...
+2026-01-08 9:43:15 AM: Start image acquisition
+2026-01-08 9:43:31 AM: End of image acquisition
+2026-01-08 9:43:39 AM: ProcessScan: Saving Scan
+2026-01-08 9:43:39 AM: Scan List size: 1
+2026-01-08 9:43:47 AM: ProcessScan: Saving Scan
+2026-01-08 9:43:47 AM: Scan List size: 2
+2026-01-08 9:43:55 AM: ProcessScan: Saving Scan
+2026-01-08 9:43:55 AM: Scan List size: 3
+2026-01-08 9:44:03 AM: ProcessScan: Saving Scan
+2026-01-08 9:44:03 AM: Scan List size: 4
+2026-01-08 9:44:03 AM: Scanning finished
+2026-01-08 9:44:03 AM: Fix Checking for barcode
+2026-01-08 9:44:04 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 9:44:04 AM: Fix Current Doc is null
+2026-01-08 9:44:04 AM: Fix barcode found=63598765
+2026-01-08 9:44:04 AM: Fix Set List of Docs
+2026-01-08 9:44:04 AM: Fix Barcode not null
+2026-01-08 9:44:04 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 9:44:04 AM: Fix3 API returned docList, Adding docs to list
+2026-01-08 9:44:04 AM: Extract jDoc
+2026-01-08 9:44:05 AM: Extract jDoc
+2026-01-08 9:44:05 AM: Extract jDoc
+2026-01-08 9:44:05 AM: Return Ordered docs
+2026-01-08 9:44:05 AM: Fix Doc found count=3
+2026-01-08 9:44:05 AM: Fix End neos true
+2026-01-08 9:44:05 AM: Fix Set current doc to docs[0]
+2026-01-08 9:44:05 AM: Fix DS0000188299
+2026-01-08 9:44:05 AM: Fix Display image
+2026-01-08 9:44:05 AM: Fix SetImageNav
+2026-01-08 9:44:05 AM: Fix End 1
+2026-01-08 9:44:05 AM: Fix End 2
+2026-01-08 9:44:05 AM: Fix End 3
+2026-01-08 9:44:22 AM: 4 btnSave_Click Scanner  Objects
+2026-01-08 9:46:08 AM: Initializing components
+2026-01-08 9:46:08 AM: Reading app settings
+2026-01-08 9:46:08 AM: Initialize twain settings
+2026-01-08 9:46:08 AM: Set database connection
+2026-01-08 9:46:08 AM: Scanning Dashboard Using DRS API
+2026-01-08 9:46:08 AM: Load Lookup lists from API
+2026-01-08 9:46:08 AM: Load Doc Type
+2026-01-08 9:46:09 AM: Load Author Obj
+2026-01-08 9:46:09 AM: Load Owner Type Obj
+2026-01-08 9:46:09 AM: Load Box Obj
+2026-01-08 9:46:16 AM: Done Loading from DB
+2026-01-08 9:46:16 AM: Load New Form
+2026-01-08 9:46:16 AM: Make new scanner form and display it
+2026-01-08 9:46:25 AM: Checking for asynchronous scanning...
+2026-01-08 9:46:25 AM: Start image acquisition
+2026-01-08 9:46:30 AM: End of image acquisition
+2026-01-08 9:46:38 AM: ProcessScan: Saving Scan
+2026-01-08 9:46:38 AM: Scan List size: 1
+2026-01-08 9:46:39 AM: Scanning finished
+2026-01-08 9:46:39 AM: Fix Checking for barcode
+2026-01-08 9:46:39 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 9:46:39 AM: Fix Current Doc is null
+2026-01-08 9:46:39 AM: Fix barcode found=63598765
+2026-01-08 9:46:39 AM: Fix Set List of Docs
+2026-01-08 9:46:39 AM: Fix Barcode not null
+2026-01-08 9:46:39 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 9:46:40 AM: Fix3 API returned docList, Adding docs to list
+2026-01-08 9:46:40 AM: Extract jDoc
+2026-01-08 9:46:40 AM: Extract jDoc
+2026-01-08 9:46:40 AM: Extract jDoc
+2026-01-08 9:46:40 AM: Return Ordered docs
+2026-01-08 9:46:40 AM: Fix Doc found count=3
+2026-01-08 9:46:40 AM: Fix End neos true
+2026-01-08 9:46:40 AM: Fix Set current doc to docs[0]
+2026-01-08 9:46:40 AM: Fix DS0000188299
+2026-01-08 9:46:40 AM: Fix Display image
+2026-01-08 9:46:40 AM: Fix SetImageNav
+2026-01-08 9:46:40 AM: Fix End 1
+2026-01-08 9:46:40 AM: Fix End 2
+2026-01-08 9:46:40 AM: Fix End 3
+2026-01-08 9:46:48 AM: 1 btnSave_Click Scanner  Objects
+2026-01-08 9:47:15 AM: Initializing components
+2026-01-08 9:47:15 AM: Reading app settings
+2026-01-08 9:47:15 AM: Initialize twain settings
+2026-01-08 9:47:15 AM: Set database connection
+2026-01-08 9:47:15 AM: Scanning Dashboard Using DRS API
+2026-01-08 9:47:15 AM: Load Lookup lists from API
+2026-01-08 9:47:15 AM: Load Doc Type
+2026-01-08 9:47:16 AM: Load Author Obj
+2026-01-08 9:47:16 AM: Load Owner Type Obj
+2026-01-08 9:47:16 AM: Load Box Obj
+2026-01-08 9:47:23 AM: Done Loading from DB
+2026-01-08 9:47:23 AM: Load New Form
+2026-01-08 9:47:23 AM: Make new scanner form and display it
+2026-01-08 9:47:30 AM: Checking for asynchronous scanning...
+2026-01-08 9:47:30 AM: Start image acquisition
+2026-01-08 9:47:35 AM: End of image acquisition
+2026-01-08 9:47:44 AM: ProcessScan: Saving Scan
+2026-01-08 9:47:44 AM: Scan List size: 1
+2026-01-08 9:47:45 AM: Scanning finished
+2026-01-08 9:47:45 AM: Fix Checking for barcode
+2026-01-08 9:47:45 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 9:47:45 AM: Fix Current Doc is null
+2026-01-08 9:47:45 AM: Fix barcode found=63598765
+2026-01-08 9:47:45 AM: Fix Set List of Docs
+2026-01-08 9:47:45 AM: Fix Barcode not null
+2026-01-08 9:47:45 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 9:47:46 AM: Fix3 API returned docList, Adding docs to list
+2026-01-08 9:47:46 AM: Extract jDoc
+2026-01-08 9:47:46 AM: Extract jDoc
+2026-01-08 9:47:46 AM: Extract jDoc
+2026-01-08 9:47:46 AM: Return Ordered docs
+2026-01-08 9:47:46 AM: Fix Doc found count=3
+2026-01-08 9:47:46 AM: Fix End neos true
+2026-01-08 9:47:46 AM: Fix Set current doc to docs[0]
+2026-01-08 9:47:46 AM: Fix DS0000188299
+2026-01-08 9:47:46 AM: Fix Display image
+2026-01-08 9:47:46 AM: Fix SetImageNav
+2026-01-08 9:47:46 AM: Fix End 1
+2026-01-08 9:47:46 AM: Fix End 2
+2026-01-08 9:47:46 AM: Fix End 3
+2026-01-08 9:47:55 AM: 1 btnSave_Click Scanner  Objects
+2026-01-08 11:19:16 AM: Initializing components
+2026-01-08 11:19:16 AM: Reading app settings
+2026-01-08 11:19:16 AM: Initialize twain settings
+2026-01-08 11:19:16 AM: Set database connection
+2026-01-08 11:19:16 AM: Scanning Dashboard Using DRS API
+2026-01-08 11:19:16 AM: Load Lookup lists from API
+2026-01-08 11:19:16 AM: Load Doc Type
+2026-01-08 11:19:35 AM: Load Author Obj
+2026-01-08 11:19:36 AM: Load Owner Type Obj
+2026-01-08 11:19:36 AM: Load Box Obj
+2026-01-08 11:19:44 AM: Done Loading from DB
+2026-01-08 11:19:44 AM: Load New Form
+2026-01-08 11:19:44 AM: Make new scanner form and display it
+2026-01-08 11:19:51 AM: Checking for asynchronous scanning...
+2026-01-08 11:19:51 AM: Start image acquisition
+2026-01-08 11:19:59 AM: End of image acquisition
+2026-01-08 11:20:06 AM: ProcessScan: Saving Scan
+2026-01-08 11:20:06 AM: Scan List size: 1
+2026-01-08 11:20:07 AM: Scanning finished
+2026-01-08 11:20:07 AM: Fix Checking for barcode
+2026-01-08 11:20:07 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 11:20:07 AM: Fix Current Doc is null
+2026-01-08 11:20:07 AM: Fix barcode found=63598765
+2026-01-08 11:20:07 AM: Fix Set List of Docs
+2026-01-08 11:20:07 AM: Fix Barcode not null
+2026-01-08 11:20:07 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 11:20:08 AM: Fix3 API returned docList, Adding docs to list
+2026-01-08 11:20:08 AM: Extract jDoc
+2026-01-08 11:20:08 AM: Extract jDoc
+2026-01-08 11:20:08 AM: Extract jDoc
+2026-01-08 11:20:08 AM: Return Ordered docs
+2026-01-08 11:20:08 AM: Fix Doc found count=3
+2026-01-08 11:20:08 AM: Fix End neos true
+2026-01-08 11:20:08 AM: Fix Set current doc to docs[0]
+2026-01-08 11:20:08 AM: Fix DS0000188299
+2026-01-08 11:20:08 AM: Fix Display image
+2026-01-08 11:20:09 AM: Fix SetImageNav
+2026-01-08 11:20:09 AM: Fix End 1
+2026-01-08 11:20:09 AM: Fix End 2
+2026-01-08 11:20:09 AM: Fix End 3
+2026-01-08 11:20:18 AM: 1 btnSave_Click Scanner  Objects
+2026-01-08 11:45:54 AM: Initializing components
+2026-01-08 11:45:54 AM: Reading app settings
+2026-01-08 11:45:54 AM: Initialize twain settings
+2026-01-08 11:45:54 AM: Set database connection
+2026-01-08 11:45:54 AM: Scanning Dashboard Using DRS API
+2026-01-08 11:45:54 AM: Load Lookup lists from API
+2026-01-08 11:45:54 AM: Load Doc Type
+2026-01-08 11:46:12 AM: Load Author Obj
+2026-01-08 11:46:13 AM: Load Owner Type Obj
+2026-01-08 11:46:13 AM: Load Box Obj
+2026-01-08 11:46:19 AM: Done Loading from DB
+2026-01-08 11:46:19 AM: Load New Form
+2026-01-08 11:46:19 AM: Make new scanner form and display it
+2026-01-08 11:46:32 AM: Checking for asynchronous scanning...
+2026-01-08 11:46:32 AM: Start image acquisition
+2026-01-08 11:46:37 AM: End of image acquisition
+2026-01-08 11:46:44 AM: ProcessScan: Saving Scan
+2026-01-08 11:46:44 AM: Scan List size: 1
+2026-01-08 11:46:45 AM: Scanning finished
+2026-01-08 11:46:45 AM: Fix Checking for barcode
+2026-01-08 11:46:45 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 11:46:45 AM: Fix Current Doc is null
+2026-01-08 11:46:45 AM: Fix barcode found=63598765
+2026-01-08 11:46:45 AM: Fix Set List of Docs
+2026-01-08 11:46:45 AM: Fix Barcode not null
+2026-01-08 11:46:45 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 11:46:46 AM: Fix3 API returned docList, Adding docs to list
+2026-01-08 11:46:46 AM: Extract jDoc
+2026-01-08 11:49:27 AM: Initializing components
+2026-01-08 11:49:27 AM: Reading app settings
+2026-01-08 11:49:27 AM: Initialize twain settings
+2026-01-08 11:49:27 AM: Set database connection
+2026-01-08 11:49:27 AM: Scanning Dashboard Using DRS API
+2026-01-08 11:49:27 AM: Load Lookup lists from API
+2026-01-08 11:49:27 AM: Load Doc Type
+2026-01-08 11:49:28 AM: Load Author Obj
+2026-01-08 11:49:28 AM: Load Owner Type Obj
+2026-01-08 11:49:28 AM: Load Box Obj
+2026-01-08 11:49:35 AM: Done Loading from DB
+2026-01-08 11:49:35 AM: Load New Form
+2026-01-08 11:49:35 AM: Make new scanner form and display it
+2026-01-08 11:50:04 AM: Checking for asynchronous scanning...
+2026-01-08 11:50:04 AM: Start image acquisition
+2026-01-08 11:50:11 AM: End of image acquisition
+2026-01-08 11:50:19 AM: ProcessScan: Saving Scan
+2026-01-08 11:50:19 AM: Scan List size: 1
+2026-01-08 11:50:19 AM: Scanning finished
+2026-01-08 11:50:19 AM: Fix Checking for barcode
+2026-01-08 11:50:20 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 11:50:20 AM: Fix Current Doc is null
+2026-01-08 11:50:20 AM: Fix barcode found=63598765
+2026-01-08 11:50:20 AM: Fix Set List of Docs
+2026-01-08 11:50:20 AM: Fix Barcode not null
+2026-01-08 11:50:20 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 11:50:20 AM: Fix3 API returned docList, Adding docs to list
+2026-01-08 11:50:20 AM: Extract jDoc
+2026-01-08 11:50:25 AM: Extract jDoc
+2026-01-08 11:50:30 AM: Extract jDoc
+2026-01-08 11:50:32 AM: Return Ordered docs
+2026-01-08 11:50:32 AM: Fix Doc found count=3
+2026-01-08 11:50:32 AM: Fix End neos true
+2026-01-08 11:50:32 AM: Fix Set current doc to docs[0]
+2026-01-08 11:50:32 AM: Fix DS0000188299
+2026-01-08 11:50:32 AM: Fix Display image
+2026-01-08 11:50:32 AM: Fix SetImageNav
+2026-01-08 11:50:32 AM: Fix End 1
+2026-01-08 11:50:32 AM: Fix End 2
+2026-01-08 11:50:32 AM: Fix End 3
+2026-01-08 11:51:54 AM: 1 btnSave_Click Scanner  Objects
+2026-01-08 1:11:07 PM: Initializing components
+2026-01-08 1:11:10 PM: Reading app settings
+2026-01-08 1:11:10 PM: Initialize twain settings
+2026-01-08 1:11:10 PM: Set database connection
+2026-01-08 1:11:10 PM: Scanning Dashboard Using DRS API
+2026-01-08 1:11:10 PM: Load Lookup lists from API
+2026-01-08 1:11:10 PM: Load Doc Type
+2026-01-08 1:11:24 PM: Load Author Obj
+2026-01-08 1:11:25 PM: Load Owner Type Obj
+2026-01-08 1:11:25 PM: Load Box Obj
+2026-01-08 1:11:32 PM: Done Loading from DB
+2026-01-08 1:11:32 PM: Load New Form
+2026-01-08 1:11:32 PM: Make new scanner form and display it
+2026-01-08 1:11:40 PM: Checking for asynchronous scanning...
+2026-01-08 1:11:40 PM: Start image acquisition
+2026-01-08 1:11:47 PM: End of image acquisition
+2026-01-08 1:12:02 PM: ProcessScan: Saving Scan
+2026-01-08 1:12:02 PM: Scan List size: 1
+2026-01-08 1:12:03 PM: Scanning finished
+2026-01-08 1:12:03 PM: Fix Checking for barcode
+2026-01-08 1:12:03 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 1:12:03 PM: Fix Current Doc is null
+2026-01-08 1:12:03 PM: Fix barcode found=63598765
+2026-01-08 1:12:03 PM: Fix Set List of Docs
+2026-01-08 1:12:03 PM: Fix Barcode not null
+2026-01-08 1:12:03 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 1:12:03 PM: Fix3 API returned docList, Adding docs to list
+2026-01-08 1:12:03 PM: Extract jDoc
+2026-01-08 1:12:57 PM: Extract jDoc
+2026-01-08 1:13:03 PM: Extract jDoc
+2026-01-08 1:13:04 PM: Return Ordered docs
+2026-01-08 1:13:04 PM: Fix Doc found count=3
+2026-01-08 1:13:04 PM: Fix End neos true
+2026-01-08 1:13:04 PM: Fix Set current doc to docs[0]
+2026-01-08 1:13:04 PM: Fix DS0000188299
+2026-01-08 1:13:05 PM: Fix Display image
+2026-01-08 1:13:05 PM: Fix SetImageNav
+2026-01-08 1:13:05 PM: Fix End 1
+2026-01-08 1:13:05 PM: Fix End 2
+2026-01-08 1:13:05 PM: Fix End 3
+2026-01-08 1:13:19 PM: 1 btnSave_Click Scanner  Objects
+2026-01-08 1:32:04 PM: Initializing components
+2026-01-08 1:32:04 PM: Reading app settings
+2026-01-08 1:32:04 PM: Initialize twain settings
+2026-01-08 1:32:04 PM: Set database connection
+2026-01-08 1:32:04 PM: Scanning Dashboard Using DRS API
+2026-01-08 1:32:04 PM: Load Lookup lists from API
+2026-01-08 1:32:04 PM: Load Doc Type
+2026-01-08 1:32:17 PM: Load Author Obj
+2026-01-08 1:32:17 PM: Load Owner Type Obj
+2026-01-08 1:32:17 PM: Load Box Obj
+2026-01-08 1:32:24 PM: Done Loading from DB
+2026-01-08 1:32:24 PM: Load New Form
+2026-01-08 1:32:24 PM: Make new scanner form and display it
+2026-01-08 1:32:31 PM: Checking for asynchronous scanning...
+2026-01-08 1:32:31 PM: Start image acquisition
+2026-01-08 1:32:40 PM: End of image acquisition
+2026-01-08 1:32:47 PM: ProcessScan: Saving Scan
+2026-01-08 1:32:47 PM: Scan List size: 1
+2026-01-08 1:32:48 PM: Scanning finished
+2026-01-08 1:32:48 PM: Fix Checking for barcode
+2026-01-08 1:32:48 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 1:32:48 PM: Fix Current Doc is null
+2026-01-08 1:32:48 PM: Fix barcode found=63598765
+2026-01-08 1:32:48 PM: Fix Set List of Docs
+2026-01-08 1:32:48 PM: Fix Barcode not null
+2026-01-08 1:32:48 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 1:32:48 PM: Fix3 API returned docList, Adding docs to list
+2026-01-08 1:32:48 PM: Extract jDoc
+2026-01-08 1:32:53 PM: Extract jDoc
+2026-01-08 1:32:54 PM: Extract jDoc
+2026-01-08 1:32:55 PM: Return Ordered docs
+2026-01-08 1:32:55 PM: Fix Doc found count=3
+2026-01-08 1:32:55 PM: Fix End neos true
+2026-01-08 1:32:55 PM: Fix Set current doc to docs[0]
+2026-01-08 1:32:55 PM: Fix DS0000188299
+2026-01-08 1:32:55 PM: Fix Display image
+2026-01-08 1:32:55 PM: Fix SetImageNav
+2026-01-08 1:32:55 PM: Fix End 1
+2026-01-08 1:32:55 PM: Fix End 2
+2026-01-08 1:32:55 PM: Fix End 3
+2026-01-08 1:54:07 PM: 1 btnSave_Click Scanner  Objects
+2026-01-08 1:58:57 PM: Initializing components
+2026-01-08 1:58:57 PM: Reading app settings
+2026-01-08 1:58:57 PM: Initialize twain settings
+2026-01-08 1:58:57 PM: Set database connection
+2026-01-08 1:58:57 PM: Scanning Dashboard Using DRS API
+2026-01-08 1:58:57 PM: Load Lookup lists from API
+2026-01-08 1:58:57 PM: Load Doc Type
+2026-01-08 1:59:16 PM: Load Author Obj
+2026-01-08 1:59:16 PM: Load Owner Type Obj
+2026-01-08 1:59:16 PM: Load Box Obj
+2026-01-08 1:59:24 PM: Done Loading from DB
+2026-01-08 1:59:25 PM: Load New Form
+2026-01-08 1:59:25 PM: Make new scanner form and display it
+2026-01-08 2:00:00 PM: Checking for asynchronous scanning...
+2026-01-08 2:00:00 PM: Start image acquisition
+2026-01-08 2:00:19 PM: End of image acquisition
+2026-01-08 2:00:27 PM: ProcessScan: Saving Scan
+2026-01-08 2:00:27 PM: Scan List size: 1
+2026-01-08 2:00:34 PM: ProcessScan: Saving Scan
+2026-01-08 2:00:34 PM: Scan List size: 2
+2026-01-08 2:00:42 PM: ProcessScan: Saving Scan
+2026-01-08 2:00:42 PM: Scan List size: 3
+2026-01-08 2:00:43 PM: Scanning finished
+2026-01-08 2:00:43 PM: Fix Checking for barcode
+2026-01-08 2:00:43 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 2:00:43 PM: Fix Current Doc is null
+2026-01-08 2:00:43 PM: Fix barcode found=63598765
+2026-01-08 2:00:43 PM: Fix Set List of Docs
+2026-01-08 2:00:43 PM: Fix Barcode not null
+2026-01-08 2:00:43 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 2:00:44 PM: Fix3 API returned docList, Adding docs to list
+2026-01-08 2:00:44 PM: Extract jDoc
+2026-01-08 2:01:14 PM: Extract jDoc
+2026-01-08 2:01:15 PM: Extract jDoc
+2026-01-08 2:01:15 PM: Return Ordered docs
+2026-01-08 2:01:15 PM: Fix Doc found count=3
+2026-01-08 2:01:15 PM: Fix End neos true
+2026-01-08 2:01:15 PM: Fix Set current doc to docs[0]
+2026-01-08 2:01:15 PM: Fix DS0000188299
+2026-01-08 2:01:15 PM: Fix Display image
+2026-01-08 2:01:15 PM: Fix SetImageNav
+2026-01-08 2:01:15 PM: Fix End 1
+2026-01-08 2:01:15 PM: Fix End 2
+2026-01-08 2:01:15 PM: Fix End 3
+2026-01-08 2:01:30 PM: 3 btnSave_Click Scanner  Objects
+2026-01-08 2:04:25 PM: Initializing components
+2026-01-08 2:04:25 PM: Reading app settings
+2026-01-08 2:04:25 PM: Initialize twain settings
+2026-01-08 2:04:25 PM: Set database connection
+2026-01-08 2:04:25 PM: Scanning Dashboard Using DRS API
+2026-01-08 2:04:25 PM: Load Lookup lists from API
+2026-01-08 2:04:25 PM: Load Doc Type
+2026-01-08 2:04:26 PM: Load Author Obj
+2026-01-08 2:04:26 PM: Load Owner Type Obj
+2026-01-08 2:04:26 PM: Load Box Obj
+2026-01-08 2:04:32 PM: Done Loading from DB
+2026-01-08 2:04:32 PM: Load New Form
+2026-01-08 2:04:32 PM: Make new scanner form and display it
+2026-01-08 2:04:41 PM: Checking for asynchronous scanning...
+2026-01-08 2:04:41 PM: Start image acquisition
+2026-01-08 2:04:49 PM: End of image acquisition
+2026-01-08 2:04:56 PM: ProcessScan: Saving Scan
+2026-01-08 2:04:56 PM: Scan List size: 1
+2026-01-08 2:05:04 PM: ProcessScan: Saving Scan
+2026-01-08 2:05:04 PM: Scan List size: 2
+2026-01-08 2:05:12 PM: ProcessScan: Saving Scan
+2026-01-08 2:05:12 PM: Scan List size: 3
+2026-01-08 2:05:13 PM: Scanning finished
+2026-01-08 2:05:13 PM: Fix Checking for barcode
+2026-01-08 2:05:13 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 2:05:13 PM: Fix Current Doc is null
+2026-01-08 2:05:13 PM: Fix barcode found=63598765
+2026-01-08 2:05:13 PM: Fix Set List of Docs
+2026-01-08 2:05:13 PM: Fix Barcode not null
+2026-01-08 2:05:13 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 2:05:14 PM: Fix3 API returned docList, Adding docs to list
+2026-01-08 2:05:14 PM: Extract jDoc
+2026-01-08 2:05:14 PM: Extract jDoc
+2026-01-08 2:05:14 PM: Extract jDoc
+2026-01-08 2:05:14 PM: Return Ordered docs
+2026-01-08 2:05:14 PM: Fix Doc found count=3
+2026-01-08 2:05:14 PM: Fix End neos true
+2026-01-08 2:05:14 PM: Fix Set current doc to docs[0]
+2026-01-08 2:05:14 PM: Fix DS0000188299
+2026-01-08 2:05:15 PM: Fix Display image
+2026-01-08 2:05:15 PM: Fix SetImageNav
+2026-01-08 2:05:15 PM: Fix End 1
+2026-01-08 2:05:15 PM: Fix End 2
+2026-01-08 2:05:15 PM: Fix End 3
+2026-01-08 2:05:20 PM: 3 btnSave_Click Scanner  Objects
+2026-01-08 2:25:54 PM: Initializing components
+2026-01-08 2:25:54 PM: Reading app settings
+2026-01-08 2:25:54 PM: Initialize twain settings
+2026-01-08 2:25:54 PM: Set database connection
+2026-01-08 2:25:54 PM: Scanning Dashboard Using DRS API
+2026-01-08 2:25:54 PM: Load Lookup lists from API
+2026-01-08 2:25:54 PM: Load Doc Type
+2026-01-08 2:26:13 PM: Load Author Obj
+2026-01-08 2:26:13 PM: Load Owner Type Obj
+2026-01-08 2:26:14 PM: Load Box Obj
+2026-01-08 2:26:21 PM: Done Loading from DB
+2026-01-08 2:26:21 PM: Load New Form
+2026-01-08 2:26:21 PM: Make new scanner form and display it
+2026-01-08 2:26:27 PM: Checking for asynchronous scanning...
+2026-01-08 2:26:27 PM: Start image acquisition
+2026-01-08 2:26:44 PM: End of image acquisition
+2026-01-08 2:26:52 PM: ProcessScan: Saving Scan
+2026-01-08 2:26:52 PM: Scan List size: 1
+2026-01-08 2:26:59 PM: ProcessScan: Saving Scan
+2026-01-08 2:26:59 PM: Scan List size: 2
+2026-01-08 2:27:06 PM: ProcessScan: Saving Scan
+2026-01-08 2:27:06 PM: Scan List size: 3
+2026-01-08 2:27:07 PM: Scanning finished
+2026-01-08 2:27:07 PM: Fix Checking for barcode
+2026-01-08 2:27:07 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 2:27:07 PM: Fix Current Doc is null
+2026-01-08 2:27:07 PM: Fix barcode found=63598765
+2026-01-08 2:27:07 PM: Fix Set List of Docs
+2026-01-08 2:27:07 PM: Fix Barcode not null
+2026-01-08 2:27:07 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 2:27:08 PM: Fix3 API returned docList, Adding docs to list
+2026-01-08 2:27:08 PM: Extract jDoc
+2026-01-08 2:27:08 PM: Extract jDoc
+2026-01-08 2:27:08 PM: Extract jDoc
+2026-01-08 2:27:09 PM: Return Ordered docs
+2026-01-08 2:27:09 PM: Fix Doc found count=3
+2026-01-08 2:27:09 PM: Fix End neos true
+2026-01-08 2:27:09 PM: Fix Set current doc to docs[0]
+2026-01-08 2:27:09 PM: Fix DS0000188299
+2026-01-08 2:27:09 PM: Fix Display image
+2026-01-08 2:27:09 PM: Fix SetImageNav
+2026-01-08 2:27:09 PM: Fix End 1
+2026-01-08 2:27:09 PM: Fix End 2
+2026-01-08 2:27:09 PM: Fix End 3
+2026-01-08 2:27:23 PM: 3 btnSave_Click Scanner  Objects
+2026-01-08 2:29:00 PM: Initializing components
+2026-01-08 2:29:00 PM: Reading app settings
+2026-01-08 2:29:00 PM: Initialize twain settings
+2026-01-08 2:29:00 PM: Set database connection
+2026-01-08 2:29:00 PM: Scanning Dashboard Using DRS API
+2026-01-08 2:29:00 PM: Load Lookup lists from API
+2026-01-08 2:29:00 PM: Load Doc Type
+2026-01-08 2:29:01 PM: Load Author Obj
+2026-01-08 2:29:01 PM: Load Owner Type Obj
+2026-01-08 2:29:01 PM: Load Box Obj
+2026-01-08 2:29:09 PM: Done Loading from DB
+2026-01-08 2:29:09 PM: Load New Form
+2026-01-08 2:29:09 PM: Make new scanner form and display it
+2026-01-08 2:29:15 PM: Checking for asynchronous scanning...
+2026-01-08 2:29:15 PM: Start image acquisition
+2026-01-08 2:29:28 PM: End of image acquisition
+2026-01-08 2:29:36 PM: ProcessScan: Saving Scan
+2026-01-08 2:29:36 PM: Scan List size: 1
+2026-01-08 2:29:44 PM: ProcessScan: Saving Scan
+2026-01-08 2:29:44 PM: Scan List size: 2
+2026-01-08 2:29:52 PM: ProcessScan: Saving Scan
+2026-01-08 2:29:52 PM: Scan List size: 3
+2026-01-08 2:29:53 PM: Scanning finished
+2026-01-08 2:29:53 PM: Fix Checking for barcode
+2026-01-08 2:29:53 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 2:29:53 PM: Fix Current Doc is null
+2026-01-08 2:29:53 PM: Fix barcode found=63598765
+2026-01-08 2:29:53 PM: Fix Set List of Docs
+2026-01-08 2:29:53 PM: Fix Barcode not null
+2026-01-08 2:29:53 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 2:29:53 PM: Fix3 API returned docList, Adding docs to list
+2026-01-08 2:29:53 PM: Extract jDoc
+2026-01-08 2:29:54 PM: Extract jDoc
+2026-01-08 2:29:54 PM: Extract jDoc
+2026-01-08 2:29:54 PM: Return Ordered docs
+2026-01-08 2:29:54 PM: Fix Doc found count=3
+2026-01-08 2:29:54 PM: Fix End neos true
+2026-01-08 2:29:54 PM: Fix Set current doc to docs[0]
+2026-01-08 2:29:54 PM: Fix DS0000188299
+2026-01-08 2:29:54 PM: Fix Display image
+2026-01-08 2:29:54 PM: Fix SetImageNav
+2026-01-08 2:29:54 PM: Fix End 1
+2026-01-08 2:29:54 PM: Fix End 2
+2026-01-08 2:29:54 PM: Fix End 3
+2026-01-08 2:29:59 PM: 3 btnSave_Click Scanner  Objects
+2026-01-08 2:31:46 PM: Initializing components
+2026-01-08 2:31:46 PM: Reading app settings
+2026-01-08 2:31:46 PM: Initialize twain settings
+2026-01-08 2:31:46 PM: Set database connection
+2026-01-08 2:31:46 PM: Scanning Dashboard Using DRS API
+2026-01-08 2:31:46 PM: Load Lookup lists from API
+2026-01-08 2:31:46 PM: Load Doc Type
+2026-01-08 2:31:47 PM: Load Author Obj
+2026-01-08 2:31:47 PM: Load Owner Type Obj
+2026-01-08 2:31:47 PM: Load Box Obj
+2026-01-08 2:31:54 PM: Done Loading from DB
+2026-01-08 2:31:55 PM: Load New Form
+2026-01-08 2:31:55 PM: Make new scanner form and display it
+2026-01-08 2:32:00 PM: Checking for asynchronous scanning...
+2026-01-08 2:32:00 PM: Start image acquisition
+2026-01-08 2:32:06 PM: End of image acquisition
+2026-01-08 2:32:13 PM: ProcessScan: Saving Scan
+2026-01-08 2:32:13 PM: Scan List size: 1
+2026-01-08 2:32:22 PM: ProcessScan: Saving Scan
+2026-01-08 2:32:22 PM: Scan List size: 2
+2026-01-08 2:32:30 PM: ProcessScan: Saving Scan
+2026-01-08 2:32:30 PM: Scan List size: 3
+2026-01-08 2:32:30 PM: Scanning finished
+2026-01-08 2:32:30 PM: Fix Checking for barcode
+2026-01-08 2:32:30 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 2:32:30 PM: Fix Current Doc is null
+2026-01-08 2:32:30 PM: Fix barcode found=63598765
+2026-01-08 2:32:30 PM: Fix Set List of Docs
+2026-01-08 2:32:30 PM: Fix Barcode not null
+2026-01-08 2:32:30 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 2:32:31 PM: Fix3 API returned docList, Adding docs to list
+2026-01-08 2:32:31 PM: Extract jDoc
+2026-01-08 2:32:31 PM: Extract jDoc
+2026-01-08 2:32:31 PM: Extract jDoc
+2026-01-08 2:32:32 PM: Return Ordered docs
+2026-01-08 2:32:32 PM: Fix Doc found count=3
+2026-01-08 2:32:32 PM: Fix End neos true
+2026-01-08 2:32:32 PM: Fix Set current doc to docs[0]
+2026-01-08 2:32:32 PM: Fix DS0000188299
+2026-01-08 2:32:32 PM: Fix Display image
+2026-01-08 2:32:32 PM: Fix SetImageNav
+2026-01-08 2:32:32 PM: Fix End 1
+2026-01-08 2:32:32 PM: Fix End 2
+2026-01-08 2:32:32 PM: Fix End 3
+2026-01-08 2:32:45 PM: 3 btnSave_Click Scanner  Objects
+2026-01-08 2:37:41 PM: Initializing components
+2026-01-08 2:37:42 PM: Reading app settings
+2026-01-08 2:37:42 PM: Initialize twain settings
+2026-01-08 2:37:42 PM: Set database connection
+2026-01-08 2:37:42 PM: Scanning Dashboard Using DRS API
+2026-01-08 2:37:42 PM: Load Lookup lists from API
+2026-01-08 2:37:42 PM: Load Doc Type
+2026-01-08 2:37:42 PM: Load Author Obj
+2026-01-08 2:37:43 PM: Load Owner Type Obj
+2026-01-08 2:37:43 PM: Load Box Obj
+2026-01-08 2:37:50 PM: Done Loading from DB
+2026-01-08 2:37:50 PM: Load New Form
+2026-01-08 2:37:50 PM: Make new scanner form and display it
+2026-01-08 2:37:54 PM: Checking for asynchronous scanning...
+2026-01-08 2:37:54 PM: Start image acquisition
+2026-01-08 2:38:00 PM: End of image acquisition
+2026-01-08 2:38:07 PM: ProcessScan: Saving Scan
+2026-01-08 2:38:07 PM: Scan List size: 1
+2026-01-08 2:38:14 PM: ProcessScan: Saving Scan
+2026-01-08 2:38:14 PM: Scan List size: 2
+2026-01-08 2:38:23 PM: ProcessScan: Saving Scan
+2026-01-08 2:38:23 PM: Scan List size: 3
+2026-01-08 2:38:24 PM: Scanning finished
+2026-01-08 2:38:24 PM: Fix Checking for barcode
+2026-01-08 2:38:24 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 2:38:24 PM: Fix Current Doc is null
+2026-01-08 2:38:24 PM: Fix barcode found=63598765
+2026-01-08 2:38:24 PM: Fix Set List of Docs
+2026-01-08 2:38:24 PM: Fix Barcode not null
+2026-01-08 2:38:24 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 2:38:25 PM: Fix3 API returned docList, Adding docs to list
+2026-01-08 2:38:25 PM: Extract jDoc
+2026-01-08 2:38:25 PM: Extract jDoc
+2026-01-08 2:38:25 PM: Extract jDoc
+2026-01-08 2:38:26 PM: Return Ordered docs
+2026-01-08 2:38:26 PM: Fix Doc found count=3
+2026-01-08 2:38:26 PM: Fix End neos true
+2026-01-08 2:38:26 PM: Fix Set current doc to docs[0]
+2026-01-08 2:38:26 PM: Fix DS0000188299
+2026-01-08 2:38:26 PM: Fix Display image
+2026-01-08 2:38:26 PM: Fix SetImageNav
+2026-01-08 2:38:26 PM: Fix End 1
+2026-01-08 2:38:26 PM: Fix End 2
+2026-01-08 2:38:26 PM: Fix End 3
+2026-01-08 2:38:38 PM: 3 btnSave_Click Scanner  Objects
+2026-01-08 2:41:15 PM: Initializing components
+2026-01-08 2:41:15 PM: Reading app settings
+2026-01-08 2:41:15 PM: Initialize twain settings
+2026-01-08 2:41:15 PM: Set database connection
+2026-01-08 2:41:15 PM: Scanning Dashboard Using DRS API
+2026-01-08 2:41:15 PM: Load Lookup lists from API
+2026-01-08 2:41:15 PM: Load Doc Type
+2026-01-08 2:41:16 PM: Load Author Obj
+2026-01-08 2:41:16 PM: Load Owner Type Obj
+2026-01-08 2:41:16 PM: Load Box Obj
+2026-01-08 2:41:22 PM: Done Loading from DB
+2026-01-08 2:41:22 PM: Load New Form
+2026-01-08 2:41:22 PM: Make new scanner form and display it
+2026-01-08 2:41:28 PM: Checking for asynchronous scanning...
+2026-01-08 2:41:28 PM: Start image acquisition
+2026-01-08 2:41:35 PM: End of image acquisition
+2026-01-08 2:41:43 PM: ProcessScan: Saving Scan
+2026-01-08 2:41:43 PM: Scan List size: 1
+2026-01-08 2:41:54 PM: ProcessScan: Saving Scan
+2026-01-08 2:41:54 PM: Scan List size: 2
+2026-01-08 2:42:02 PM: ProcessScan: Saving Scan
+2026-01-08 2:42:02 PM: Scan List size: 3
+2026-01-08 2:42:03 PM: Scanning finished
+2026-01-08 2:42:03 PM: Fix Checking for barcode
+2026-01-08 2:42:03 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 2:42:03 PM: Fix Current Doc is null
+2026-01-08 2:42:03 PM: Fix barcode found=63598765
+2026-01-08 2:42:03 PM: Fix Set List of Docs
+2026-01-08 2:42:03 PM: Fix Barcode not null
+2026-01-08 2:42:03 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 2:42:04 PM: Fix3 API returned docList, Adding docs to list
+2026-01-08 2:42:04 PM: Extract jDoc
+2026-01-08 2:42:04 PM: Extract jDoc
+2026-01-08 2:42:04 PM: Extract jDoc
+2026-01-08 2:42:04 PM: Return Ordered docs
+2026-01-08 2:42:04 PM: Fix Doc found count=3
+2026-01-08 2:42:04 PM: Fix End neos true
+2026-01-08 2:42:04 PM: Fix Set current doc to docs[0]
+2026-01-08 2:42:04 PM: Fix DS0000188299
+2026-01-08 2:42:05 PM: Fix Display image
+2026-01-08 2:42:05 PM: Fix SetImageNav
+2026-01-08 2:42:05 PM: Fix End 1
+2026-01-08 2:42:05 PM: Fix End 2
+2026-01-08 2:42:05 PM: Fix End 3
+2026-01-08 2:42:23 PM: 3 btnSave_Click Scanner  Objects
+2026-01-08 2:43:37 PM: Checking for asynchronous scanning...
+2026-01-08 2:43:37 PM: Start image acquisition
+2026-01-08 2:43:43 PM: End of image acquisition
+2026-01-08 2:43:43 PM: Scanning finished
+2026-01-08 2:43:59 PM: Checking for asynchronous scanning...
+2026-01-08 2:43:59 PM: Start image acquisition
+2026-01-08 2:44:04 PM: End of image acquisition
+2026-01-08 2:44:13 PM: ProcessScan: Saving Scan
+2026-01-08 2:44:13 PM: Scan List size: 1
+2026-01-08 2:44:21 PM: ProcessScan: Saving Scan
+2026-01-08 2:44:21 PM: Scan List size: 2
+2026-01-08 2:44:29 PM: ProcessScan: Saving Scan
+2026-01-08 2:44:29 PM: Scan List size: 3
+2026-01-08 2:44:30 PM: Scanning finished
+2026-01-08 2:44:30 PM: Fix Checking for barcode
+2026-01-08 2:44:30 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 2:44:30 PM: Fix Current Doc is null
+2026-01-08 2:44:30 PM: Fix barcode found=63598765
+2026-01-08 2:44:30 PM: Fix Set List of Docs
+2026-01-08 2:44:30 PM: Fix Barcode not null
+2026-01-08 2:44:30 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 2:44:31 PM: Fix3 API returned docList, Adding docs to list
+2026-01-08 2:44:31 PM: Extract jDoc
+2026-01-08 2:44:31 PM: Extract jDoc
+2026-01-08 2:44:32 PM: Extract jDoc
+2026-01-08 2:44:32 PM: Return Ordered docs
+2026-01-08 2:44:32 PM: Fix Doc found count=3
+2026-01-08 2:44:32 PM: Fix End neos true
+2026-01-08 2:44:32 PM: Fix Set current doc to docs[0]
+2026-01-08 2:44:32 PM: Fix DS0000188299
+2026-01-08 2:44:32 PM: Fix No batchid
+2026-01-08 2:44:32 PM: Fix Display image
+2026-01-08 2:44:32 PM: Fix SetImageNav
+2026-01-08 2:44:32 PM: Fix End 1
+2026-01-08 2:44:32 PM: Fix End 2
+2026-01-08 2:44:32 PM: Fix End 3
+2026-01-08 2:44:37 PM: 3 btnSave_Click Scanner  Objects
+2026-01-08 2:46:54 PM: Initializing components
+2026-01-08 2:46:54 PM: Reading app settings
+2026-01-08 2:46:54 PM: Initialize twain settings
+2026-01-08 2:46:54 PM: Set database connection
+2026-01-08 2:46:54 PM: Scanning Dashboard Using DRS API
+2026-01-08 2:46:54 PM: Load Lookup lists from API
+2026-01-08 2:46:54 PM: Load Doc Type
+2026-01-08 2:46:55 PM: Load Author Obj
+2026-01-08 2:46:55 PM: Load Owner Type Obj
+2026-01-08 2:46:55 PM: Load Box Obj
+2026-01-08 2:47:02 PM: Done Loading from DB
+2026-01-08 2:47:02 PM: Load New Form
+2026-01-08 2:47:02 PM: Make new scanner form and display it
+2026-01-08 2:47:07 PM: Checking for asynchronous scanning...
+2026-01-08 2:47:07 PM: Start image acquisition
+2026-01-08 2:47:13 PM: End of image acquisition
+2026-01-08 2:47:20 PM: ProcessScan: Saving Scan
+2026-01-08 2:47:21 PM: Scan List size: 1
+2026-01-08 2:47:29 PM: ProcessScan: Saving Scan
+2026-01-08 2:47:29 PM: Scan List size: 2
+2026-01-08 2:47:37 PM: ProcessScan: Saving Scan
+2026-01-08 2:47:37 PM: Scan List size: 3
+2026-01-08 2:47:38 PM: Scanning finished
+2026-01-08 2:47:38 PM: Fix Checking for barcode
+2026-01-08 2:47:38 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 2:47:38 PM: Fix Current Doc is null
+2026-01-08 2:47:38 PM: Fix barcode found=63598765
+2026-01-08 2:47:38 PM: Fix Set List of Docs
+2026-01-08 2:47:38 PM: Fix Barcode not null
+2026-01-08 2:47:38 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 2:47:39 PM: Fix3 API returned docList, Adding docs to list
+2026-01-08 2:47:39 PM: Extract jDoc
+2026-01-08 2:47:39 PM: Extract jDoc
+2026-01-08 2:47:39 PM: Extract jDoc
+2026-01-08 2:47:39 PM: Return Ordered docs
+2026-01-08 2:47:39 PM: Fix Doc found count=3
+2026-01-08 2:47:39 PM: Fix End neos true
+2026-01-08 2:47:39 PM: Fix Set current doc to docs[0]
+2026-01-08 2:47:39 PM: Fix DS0000188299
+2026-01-08 2:47:39 PM: Fix Display image
+2026-01-08 2:47:40 PM: Fix SetImageNav
+2026-01-08 2:47:40 PM: Fix End 1
+2026-01-08 2:47:40 PM: Fix End 2
+2026-01-08 2:47:40 PM: Fix End 3
+2026-01-08 2:47:44 PM: 3 btnSave_Click Scanner  Objects
+2026-01-08 2:51:52 PM: Initializing components
+2026-01-08 2:51:52 PM: Reading app settings
+2026-01-08 2:51:52 PM: Initialize twain settings
+2026-01-08 2:51:52 PM: Set database connection
+2026-01-08 2:51:52 PM: Scanning Dashboard Using DRS API
+2026-01-08 2:51:52 PM: Load Lookup lists from API
+2026-01-08 2:51:52 PM: Load Doc Type
+2026-01-08 2:51:53 PM: Load Author Obj
+2026-01-08 2:51:53 PM: Load Owner Type Obj
+2026-01-08 2:51:53 PM: Load Box Obj
+2026-01-08 2:52:00 PM: Done Loading from DB
+2026-01-08 2:52:00 PM: Load New Form
+2026-01-08 2:52:00 PM: Make new scanner form and display it
+2026-01-08 2:52:04 PM: Checking for asynchronous scanning...
+2026-01-08 2:52:04 PM: Start image acquisition
+2026-01-08 2:52:10 PM: End of image acquisition
+2026-01-08 2:52:18 PM: ProcessScan: Saving Scan
+2026-01-08 2:52:18 PM: Scan List size: 1
+2026-01-08 2:52:26 PM: ProcessScan: Saving Scan
+2026-01-08 2:52:26 PM: Scan List size: 2
+2026-01-08 2:52:36 PM: ProcessScan: Saving Scan
+2026-01-08 2:52:36 PM: Scan List size: 3
+2026-01-08 2:52:36 PM: Scanning finished
+2026-01-08 2:52:36 PM: Fix Checking for barcode
+2026-01-08 2:52:37 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-08 2:52:37 PM: Fix Current Doc is null
+2026-01-08 2:52:37 PM: Fix barcode found=63598765
+2026-01-08 2:52:37 PM: Fix Set List of Docs
+2026-01-08 2:52:37 PM: Fix Barcode not null
+2026-01-08 2:52:37 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-08 2:52:37 PM: Fix3 API returned docList, Adding docs to list
+2026-01-08 2:52:37 PM: Extract jDoc
+2026-01-08 2:52:38 PM: Extract jDoc
+2026-01-08 2:52:38 PM: Extract jDoc
+2026-01-08 2:52:38 PM: Return Ordered docs
+2026-01-08 2:52:38 PM: Fix Doc found count=3
+2026-01-08 2:52:38 PM: Fix End neos true
+2026-01-08 2:52:38 PM: Fix Set current doc to docs[0]
+2026-01-08 2:52:38 PM: Fix DS0000188299
+2026-01-08 2:52:38 PM: Fix Display image
+2026-01-08 2:52:38 PM: Fix SetImageNav
+2026-01-08 2:52:38 PM: Fix End 1
+2026-01-08 2:52:38 PM: Fix End 2
+2026-01-08 2:52:38 PM: Fix End 3
+2026-01-08 2:52:41 PM: 3 btnSave_Click Scanner  Objects
+2026-01-09 7:19:34 AM: Initializing components
+2026-01-09 7:19:34 AM: Reading app settings
+2026-01-09 7:19:34 AM: Initialize twain settings
+2026-01-09 7:19:34 AM: Set database connection
+2026-01-09 7:19:34 AM: Scanning Dashboard Using DRS API
+2026-01-09 7:19:34 AM: Load Lookup lists from API
+2026-01-09 7:19:34 AM: Load Doc Type
+2026-01-09 7:19:53 AM: Load Author Obj
+2026-01-09 7:19:53 AM: Load Owner Type Obj
+2026-01-09 7:19:53 AM: Load Box Obj
+2026-01-09 7:20:01 AM: Done Loading from DB
+2026-01-09 7:20:01 AM: Load New Form
+2026-01-09 7:20:01 AM: Make new scanner form and display it
+2026-01-09 7:20:05 AM: Create new device manager using vintasoft twain
+2026-01-09 7:20:05 AM: Open Manager
+2026-01-09 7:20:05 AM: Show default device selection dialog (choose scanner)
+2026-01-09 7:20:09 AM: Close manager after dialog
+2026-01-09 7:20:09 AM: Create new device manager based on scanner selection
+2026-01-09 7:20:59 AM: Initializing components
+2026-01-09 7:20:59 AM: Reading app settings
+2026-01-09 7:20:59 AM: Initialize twain settings
+2026-01-09 7:20:59 AM: Set database connection
+2026-01-09 7:20:59 AM: Scanning Dashboard Using DRS API
+2026-01-09 7:20:59 AM: Load Lookup lists from API
+2026-01-09 7:20:59 AM: Load Doc Type
+2026-01-09 7:21:00 AM: Load Author Obj
+2026-01-09 7:21:00 AM: Load Owner Type Obj
+2026-01-09 7:21:00 AM: Load Box Obj
+2026-01-09 7:21:07 AM: Done Loading from DB
+2026-01-09 7:21:07 AM: Load New Form
+2026-01-09 7:21:07 AM: Make new scanner form and display it
+2026-01-09 7:21:18 AM: Create new device manager using vintasoft twain
+2026-01-09 7:21:18 AM: Open Manager
+2026-01-09 7:21:18 AM: Show default device selection dialog (choose scanner)
+2026-01-09 7:21:20 AM: Close manager after dialog
+2026-01-09 7:21:20 AM: Create new device manager based on scanner selection
+2026-01-09 7:53:40 AM: Initializing components
+2026-01-09 7:53:40 AM: Reading app settings
+2026-01-09 7:53:40 AM: Initialize twain settings
+2026-01-09 7:53:40 AM: Set database connection
+2026-01-09 7:53:40 AM: Scanning Dashboard Using DRS API
+2026-01-09 7:53:40 AM: Load Lookup lists from API
+2026-01-09 7:53:40 AM: Load Doc Type
+2026-01-09 7:53:56 AM: Load Author Obj
+2026-01-09 7:53:56 AM: Load Owner Type Obj
+2026-01-09 7:53:57 AM: Load Box Obj
+2026-01-09 7:54:03 AM: Done Loading from DB
+2026-01-09 7:54:03 AM: Load New Form
+2026-01-09 7:54:03 AM: Make new scanner form and display it
+2026-01-09 7:54:14 AM: Create new device manager using vintasoft twain
+2026-01-09 7:54:14 AM: Open Manager
+2026-01-09 7:54:14 AM: Show default device selection dialog (choose scanner)
+2026-01-09 7:54:17 AM: Close manager after dialog
+2026-01-09 7:54:17 AM: Create new device manager based on scanner selection
+2026-01-09 7:57:52 AM: Initializing components
+2026-01-09 7:57:52 AM: Reading app settings
+2026-01-09 7:57:52 AM: Initialize twain settings
+2026-01-09 7:57:52 AM: Set database connection
+2026-01-09 7:57:52 AM: Scanning Dashboard Using DRS API
+2026-01-09 7:57:52 AM: Load Lookup lists from API
+2026-01-09 7:57:52 AM: Load Doc Type
+2026-01-09 7:57:53 AM: Load Author Obj
+2026-01-09 7:57:53 AM: Load Owner Type Obj
+2026-01-09 7:57:53 AM: Load Box Obj
+2026-01-09 7:58:00 AM: Done Loading from DB
+2026-01-09 7:58:00 AM: Load New Form
+2026-01-09 7:58:00 AM: Make new scanner form and display it
+2026-01-09 8:00:05 AM: Initializing components
+2026-01-09 8:00:05 AM: Reading app settings
+2026-01-09 8:00:05 AM: Initialize twain settings
+2026-01-09 8:00:05 AM: Set database connection
+2026-01-09 8:00:05 AM: Scanning Dashboard Using DRS API
+2026-01-09 8:00:05 AM: Load Lookup lists from API
+2026-01-09 8:00:05 AM: Load Doc Type
+2026-01-09 8:00:06 AM: Load Author Obj
+2026-01-09 8:00:07 AM: Load Owner Type Obj
+2026-01-09 8:00:07 AM: Load Box Obj
+2026-01-09 8:00:14 AM: Done Loading from DB
+2026-01-09 8:00:14 AM: Load New Form
+2026-01-09 8:00:14 AM: Make new scanner form and display it
+2026-01-09 8:00:51 AM: Initializing components
+2026-01-09 8:00:51 AM: Reading app settings
+2026-01-09 8:00:51 AM: Initialize twain settings
+2026-01-09 8:00:51 AM: Set database connection
+2026-01-09 8:00:51 AM: Scanning Dashboard Using DRS API
+2026-01-09 8:00:51 AM: Load Lookup lists from API
+2026-01-09 8:00:51 AM: Load Doc Type
+2026-01-09 8:00:52 AM: Load Author Obj
+2026-01-09 8:00:52 AM: Load Owner Type Obj
+2026-01-09 8:00:52 AM: Load Box Obj
+2026-01-09 8:00:59 AM: Done Loading from DB
+2026-01-09 8:00:59 AM: Load New Form
+2026-01-09 8:00:59 AM: Make new scanner form and display it
+2026-01-09 8:01:03 AM: Create new device manager using vintasoft twain
+2026-01-09 8:01:03 AM: Open Manager
+2026-01-09 8:01:03 AM: Show default device selection dialog (choose scanner)
+2026-01-09 8:01:07 AM: Close manager after dialog
+2026-01-09 8:01:07 AM: Create new device manager based on scanner selection
+2026-01-09 8:01:14 AM: Create new device manager using vintasoft twain
+2026-01-09 8:01:14 AM: Open Manager
+2026-01-09 8:01:14 AM: Show default device selection dialog (choose scanner)
+2026-01-09 8:01:17 AM: Close manager after dialog
+2026-01-09 8:01:17 AM: Create new device manager based on scanner selection
+2026-01-09 8:01:27 AM: Checking for asynchronous scanning...
+2026-01-09 8:01:27 AM: Start image acquisition
+2026-01-09 8:01:34 AM: End of image acquisition
+2026-01-09 8:01:48 AM: ProcessScan: Saving Scan
+2026-01-09 8:01:48 AM: Scan List size: 1
+2026-01-09 8:01:56 AM: ProcessScan: Saving Scan
+2026-01-09 8:01:56 AM: Scan List size: 2
+2026-01-09 8:02:04 AM: ProcessScan: Saving Scan
+2026-01-09 8:02:04 AM: Scan List size: 3
+2026-01-09 8:02:05 AM: Scanning finished
+2026-01-09 8:02:05 AM: Fix Checking for barcode
+2026-01-09 8:02:05 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-09 8:02:05 AM: Fix Current Doc is null
+2026-01-09 8:02:05 AM: Fix barcode found=63598765
+2026-01-09 8:02:05 AM: Fix Set List of Docs
+2026-01-09 8:02:05 AM: Fix Barcode not null
+2026-01-09 8:02:05 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-09 8:02:06 AM: Fix3 API returned docList, Adding docs to list
+2026-01-09 8:02:06 AM: Extract jDoc
+2026-01-09 8:02:06 AM: Extract jDoc
+2026-01-09 8:02:07 AM: Extract jDoc
+2026-01-09 8:02:07 AM: Return Ordered docs
+2026-01-09 8:02:07 AM: Fix Doc found count=3
+2026-01-09 8:02:07 AM: Fix End neos true
+2026-01-09 8:02:07 AM: Fix Set current doc to docs[0]
+2026-01-09 8:02:07 AM: Fix DS0000188299
+2026-01-09 8:02:07 AM: Fix Display image
+2026-01-09 8:02:07 AM: Fix SetImageNav
+2026-01-09 8:02:07 AM: Fix End 1
+2026-01-09 8:02:07 AM: Fix End 2
+2026-01-09 8:02:07 AM: Fix End 3
+2026-01-09 12:21:22 PM: Initializing components
+2026-01-09 12:21:22 PM: Reading app settings
+2026-01-09 12:21:22 PM: Initialize twain settings
+2026-01-09 12:21:22 PM: Set database connection
+2026-01-09 12:21:22 PM: Scanning Dashboard Using DRS API
+2026-01-09 12:21:22 PM: Load Lookup lists from API
+2026-01-09 12:21:22 PM: Load Doc Type
+2026-01-09 12:21:41 PM: Load Author Obj
+2026-01-09 12:21:41 PM: Load Owner Type Obj
+2026-01-09 12:21:41 PM: Load Box Obj
+2026-01-09 12:21:50 PM: Done Loading from DB
+2026-01-09 12:21:50 PM: Load New Form
+2026-01-09 12:21:50 PM: Make new scanner form and display it
+2026-01-09 12:22:03 PM: Checking for asynchronous scanning...
+2026-01-09 12:22:03 PM: Start image acquisition
+2026-01-09 12:22:09 PM: End of image acquisition
+2026-01-09 12:22:27 PM: ProcessScan: Saving Scan
+2026-01-09 12:22:27 PM: Scan List size: 1
+2026-01-09 12:22:36 PM: ProcessScan: Saving Scan
+2026-01-09 12:22:36 PM: Scan List size: 2
+2026-01-09 12:22:44 PM: ProcessScan: Saving Scan
+2026-01-09 12:22:44 PM: Scan List size: 3
+2026-01-09 12:22:44 PM: Scanning finished
+2026-01-09 12:22:44 PM: Fix Checking for barcode
+2026-01-09 12:22:45 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-09 12:22:45 PM: Fix Current Doc is null
+2026-01-09 12:22:45 PM: Fix barcode found=63598765
+2026-01-09 12:22:45 PM: Fix Set List of Docs
+2026-01-09 12:22:45 PM: Fix Barcode not null
+2026-01-09 12:22:45 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-09 12:22:45 PM: Fix3 API returned docList, Adding docs to list
+2026-01-09 12:22:45 PM: Extract jDoc
+2026-01-09 12:22:46 PM: Extract jDoc
+2026-01-09 12:22:46 PM: Extract jDoc
+2026-01-09 12:22:46 PM: Return Ordered docs
+2026-01-09 12:22:46 PM: Fix Doc found count=3
+2026-01-09 12:22:46 PM: Fix End neos true
+2026-01-09 12:22:46 PM: Fix Set current doc to docs[0]
+2026-01-09 12:22:46 PM: Fix DS0000188299
+2026-01-09 12:22:46 PM: Fix Display image
+2026-01-09 12:22:46 PM: Fix SetImageNav
+2026-01-09 12:22:46 PM: Fix End 1
+2026-01-09 12:22:46 PM: Fix End 2
+2026-01-09 12:22:46 PM: Fix End 3
+2026-01-09 12:58:40 PM: Initializing components
+2026-01-09 12:58:40 PM: Reading app settings
+2026-01-09 12:58:40 PM: Initialize twain settings
+2026-01-09 12:58:40 PM: Set database connection
+2026-01-09 12:58:40 PM: Scanning Dashboard Using DRS API
+2026-01-09 12:58:40 PM: Load Lookup lists from API
+2026-01-09 12:58:40 PM: Load Doc Type
+2026-01-09 12:58:59 PM: Load Author Obj
+2026-01-09 12:59:00 PM: Load Owner Type Obj
+2026-01-09 12:59:00 PM: Load Box Obj
+2026-01-09 12:59:08 PM: Done Loading from DB
+2026-01-09 12:59:08 PM: Load New Form
+2026-01-09 12:59:08 PM: Make new scanner form and display it
+2026-01-09 12:59:17 PM: Checking for asynchronous scanning...
+2026-01-09 12:59:17 PM: Start image acquisition
+2026-01-09 12:59:26 PM: End of image acquisition
+2026-01-09 12:59:54 PM: ProcessScan: Saving Scan
+2026-01-09 1:00:20 PM: Scan List size: 1
+2026-01-09 1:00:47 PM: ProcessScan: Saving Scan
+2026-01-09 1:00:57 PM: Scan List size: 2
+2026-01-09 1:01:22 PM: ProcessScan: Saving Scan
+2026-01-09 1:01:25 PM: Scan List size: 3
+2026-01-09 1:01:45 PM: Scanning finished
+2026-01-09 1:01:49 PM: Fix Checking for barcode
+2026-01-09 1:01:58 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-09 1:02:03 PM: Fix Current Doc is null
+2026-01-09 1:02:10 PM: Fix barcode found=63598765
+2026-01-09 1:02:31 PM: Fix Set List of Docs
+2026-01-09 1:02:42 PM: Fix Barcode not null
+2026-01-09 1:02:54 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-09 1:03:00 PM: Fix3 API returned docList, Adding docs to list
+2026-01-09 1:03:00 PM: Extract jDoc
+2026-01-09 1:03:00 PM: Extract jDoc
+2026-01-09 1:03:00 PM: Extract jDoc
+2026-01-09 1:03:00 PM: Return Ordered docs
+2026-01-12 7:19:40 AM: Initializing components
+2026-01-12 7:19:40 AM: Reading app settings
+2026-01-12 7:19:40 AM: Initialize twain settings
+2026-01-12 7:19:40 AM: Set database connection
+2026-01-12 7:19:40 AM: Scanning Dashboard Using DRS API
+2026-01-12 7:19:40 AM: Load Lookup lists from API
+2026-01-12 7:19:40 AM: Load Doc Type
+2026-01-12 7:20:00 AM: Load Author Obj
+2026-01-12 7:20:00 AM: Load Owner Type Obj
+2026-01-12 7:20:00 AM: Load Box Obj
+2026-01-12 7:20:07 AM: Done Loading from DB
+2026-01-12 7:20:07 AM: Load New Form
+2026-01-12 7:20:07 AM: Make new scanner form and display it
+2026-01-12 7:57:05 AM: Checking for asynchronous scanning...
+2026-01-12 7:57:05 AM: Start image acquisition
+2026-01-12 7:57:14 AM: End of image acquisition
+2026-01-12 7:57:15 AM: Scanning finished
+2026-01-12 7:57:43 AM: Checking for asynchronous scanning...
+2026-01-12 7:57:43 AM: Start image acquisition
+2026-01-12 7:57:51 AM: End of image acquisition
+2026-01-12 7:58:19 AM: ProcessScan: Saving Scan
+2026-01-12 7:58:24 AM: Scan List size: 1
+2026-01-12 8:07:49 AM: ProcessScan: Saving Scan
+2026-01-12 8:07:49 AM: Scan List size: 2
+2026-01-12 8:08:06 AM: ProcessScan: Saving Scan
+2026-01-12 8:08:06 AM: Scan List size: 3
+2026-01-12 8:08:07 AM: Scanning finished
+2026-01-12 8:08:07 AM: Fix Checking for barcode
+2026-01-12 8:08:07 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-12 8:08:07 AM: Fix Current Doc is null
+2026-01-12 8:08:07 AM: Fix barcode found=63598765
+2026-01-12 8:08:07 AM: Fix Set List of Docs
+2026-01-12 8:08:07 AM: Fix Barcode not null
+2026-01-12 8:08:07 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-12 8:08:24 AM: Fix3 API returned docList, Adding docs to list
+2026-01-12 8:08:24 AM: Extract jDoc
+2026-01-12 8:08:25 AM: Extract jDoc
+2026-01-12 8:08:25 AM: Extract jDoc
+2026-01-12 8:08:25 AM: Return Ordered docs
+2026-01-12 8:08:25 AM: Fix Doc found count=3
+2026-01-12 8:08:25 AM: Fix End neos true
+2026-01-12 8:08:25 AM: Fix Set current doc to docs[0]
+2026-01-12 8:08:25 AM: Fix DS0000188299
+2026-01-12 8:08:25 AM: Fix Display image
+2026-01-12 8:08:25 AM: Fix SetImageNav
+2026-01-12 8:08:25 AM: Fix End 1
+2026-01-12 8:08:25 AM: Fix End 2
+2026-01-12 8:08:25 AM: Fix End 3
+2026-01-12 10:16:46 AM: Initializing components
+2026-01-12 10:16:46 AM: Reading app settings
+2026-01-12 10:16:46 AM: Initialize twain settings
+2026-01-12 10:16:46 AM: Set database connection
+2026-01-12 10:16:46 AM: Scanning Dashboard Using DRS API
+2026-01-12 10:16:46 AM: Load Lookup lists from API
+2026-01-12 10:16:46 AM: Load Doc Type
+2026-01-12 10:17:05 AM: Load Author Obj
+2026-01-12 10:17:05 AM: Load Owner Type Obj
+2026-01-12 10:17:06 AM: Load Box Obj
+2026-01-12 10:17:13 AM: Done Loading from DB
+2026-01-12 10:17:13 AM: Load New Form
+2026-01-12 10:17:13 AM: Make new scanner form and display it
+2026-01-12 10:17:24 AM: Checking for asynchronous scanning...
+2026-01-12 10:17:24 AM: Start image acquisition
+2026-01-12 10:17:32 AM: End of image acquisition
+2026-01-12 10:17:51 AM: ProcessScan: Saving Scan
+2026-01-12 10:17:51 AM: Scan List size: 1
+2026-01-12 10:18:22 AM: ProcessScan: Saving Scan
+2026-01-12 10:18:22 AM: Scan List size: 2
+2026-01-12 10:18:32 AM: ProcessScan: Saving Scan
+2026-01-12 10:18:32 AM: Scan List size: 3
+2026-01-12 10:18:33 AM: Scanning finished
+2026-01-12 10:18:33 AM: Fix Checking for barcode
+2026-01-12 10:18:33 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-12 10:18:33 AM: Fix Current Doc is null
+2026-01-12 10:18:33 AM: Fix barcode found=63598765
+2026-01-12 10:18:33 AM: Fix Set List of Docs
+2026-01-12 10:18:33 AM: Fix Barcode not null
+2026-01-12 10:18:33 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-12 10:18:34 AM: Fix3 API returned docList, Adding docs to list
+2026-01-12 10:18:34 AM: Extract jDoc
+2026-01-12 10:18:34 AM: Extract jDoc
+2026-01-12 10:18:34 AM: Extract jDoc
+2026-01-12 10:18:34 AM: Return Ordered docs
+2026-01-12 10:18:34 AM: Fix Doc found count=3
+2026-01-12 10:18:34 AM: Fix End neos true
+2026-01-12 10:18:34 AM: Fix Set current doc to docs[0]
+2026-01-12 10:18:34 AM: Fix DS0000188299
+2026-01-12 10:18:34 AM: Fix Doc scanned twice
+2026-01-12 10:20:22 AM: Fix End 1
+2026-01-12 10:20:22 AM: Fix End 2
+2026-01-12 10:20:22 AM: Fix End 3
+2026-01-12 10:23:07 AM: Checking for asynchronous scanning...
+2026-01-12 10:23:07 AM: Start image acquisition
+2026-01-12 10:23:15 AM: End of image acquisition
+2026-01-12 10:23:23 AM: ProcessScan: Saving Scan
+2026-01-12 10:23:23 AM: Scan List size: 1
+2026-01-12 10:23:30 AM: ProcessScan: Saving Scan
+2026-01-12 10:23:30 AM: Scan List size: 2
+2026-01-12 10:23:38 AM: ProcessScan: Saving Scan
+2026-01-12 10:23:38 AM: Scan List size: 3
+2026-01-12 10:23:39 AM: Scanning finished
+2026-01-12 10:23:39 AM: Fix Checking for barcode
+2026-01-12 10:23:39 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-12 10:23:39 AM: Fix Current Doc is null
+2026-01-12 10:23:39 AM: Fix barcode found=63598765
+2026-01-12 10:23:39 AM: Fix Set List of Docs
+2026-01-12 10:23:39 AM: Fix Barcode not null
+2026-01-12 10:23:39 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-12 10:23:40 AM: Fix3 API returned docList, Adding docs to list
+2026-01-12 10:23:40 AM: Extract jDoc
+2026-01-12 10:23:40 AM: Extract jDoc
+2026-01-12 10:23:40 AM: Extract jDoc
+2026-01-12 10:23:40 AM: Return Ordered docs
+2026-01-12 10:23:40 AM: Fix Doc found count=3
+2026-01-12 10:23:40 AM: Fix End neos true
+2026-01-12 10:23:40 AM: Fix Set current doc to docs[0]
+2026-01-12 10:23:40 AM: Fix DS0000188299
+2026-01-12 10:23:40 AM: Fix Doc scanned twice
+2026-01-12 11:04:26 AM: Initializing components
+2026-01-12 11:04:27 AM: Reading app settings
+2026-01-12 11:04:27 AM: Initialize twain settings
+2026-01-12 11:04:27 AM: Set database connection
+2026-01-12 11:04:27 AM: Scanning Dashboard Using DRS API
+2026-01-12 11:04:27 AM: Load Lookup lists from API
+2026-01-12 11:04:27 AM: Load Doc Type
+2026-01-12 11:04:46 AM: Load Author Obj
+2026-01-12 11:04:46 AM: Load Owner Type Obj
+2026-01-12 11:04:47 AM: Load Box Obj
+2026-01-12 11:04:54 AM: Done Loading from DB
+2026-01-12 11:04:54 AM: Load New Form
+2026-01-12 11:04:54 AM: Make new scanner form and display it
+2026-01-12 11:05:05 AM: Checking for asynchronous scanning...
+2026-01-12 11:05:05 AM: Start image acquisition
+2026-01-12 11:05:14 AM: End of image acquisition
+2026-01-12 11:05:26 AM: ProcessScan: Saving Scan
+2026-01-12 11:05:26 AM: Scan List size: 1
+2026-01-12 11:05:35 AM: ProcessScan: Saving Scan
+2026-01-12 11:05:35 AM: Scan List size: 2
+2026-01-12 11:05:44 AM: ProcessScan: Saving Scan
+2026-01-12 11:05:44 AM: Scan List size: 3
+2026-01-12 11:05:45 AM: Scanning finished
+2026-01-12 11:05:45 AM: Fix Checking for barcode
+2026-01-12 11:05:45 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-12 11:05:45 AM: Fix Current Doc is null
+2026-01-12 11:05:45 AM: Fix barcode found=63598765
+2026-01-12 11:05:45 AM: Fix Set List of Docs
+2026-01-12 11:05:45 AM: Fix Barcode not null
+2026-01-12 11:05:45 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-12 11:05:46 AM: Fix3 API returned docList, Adding docs to list
+2026-01-12 11:05:46 AM: Extract jDoc
+2026-01-12 11:05:46 AM: Extract jDoc
+2026-01-12 11:05:46 AM: Extract jDoc
+2026-01-12 11:05:47 AM: Return Ordered docs
+2026-01-12 11:05:47 AM: Fix Doc found count=3
+2026-01-12 11:05:47 AM: Fix End neos true
+2026-01-12 11:05:47 AM: Fix Set current doc to docs[0]
+2026-01-12 11:05:47 AM: Fix DS0000188299
+2026-01-12 11:05:47 AM: Fix Doc scanned twice
+2026-01-12 12:02:21 PM: Initializing components
+2026-01-12 12:02:22 PM: Reading app settings
+2026-01-12 12:02:22 PM: Initialize twain settings
+2026-01-12 12:02:22 PM: Set database connection
+2026-01-12 12:02:22 PM: Scanning Dashboard Using DRS API
+2026-01-12 12:02:22 PM: Load Lookup lists from API
+2026-01-12 12:02:22 PM: Load Doc Type
+2026-01-12 12:02:23 PM: Load Author Obj
+2026-01-12 12:02:23 PM: Load Owner Type Obj
+2026-01-12 12:09:19 PM: Initializing components
+2026-01-12 12:09:19 PM: Reading app settings
+2026-01-12 12:09:19 PM: Initialize twain settings
+2026-01-12 12:09:19 PM: Set database connection
+2026-01-12 12:09:19 PM: Scanning Dashboard Using DRS API
+2026-01-12 12:09:19 PM: Load Lookup lists from API
+2026-01-12 12:09:19 PM: Load Doc Type
+2026-01-12 12:09:20 PM: Load Author Obj
+2026-01-12 12:09:20 PM: Load Owner Type Obj
+2026-01-12 12:09:21 PM: Load Box Obj
+2026-01-12 12:09:27 PM: Done Loading from DB
+2026-01-12 12:09:28 PM: Load New Form
+2026-01-12 12:09:28 PM: Make new scanner form and display it
+2026-01-12 12:09:35 PM: Checking for asynchronous scanning...
+2026-01-12 12:09:35 PM: Start image acquisition
+2026-01-12 12:09:45 PM: End of image acquisition
+2026-01-12 12:09:46 PM: Scanning finished
+2026-01-12 12:10:07 PM: Checking for asynchronous scanning...
+2026-01-12 12:10:07 PM: Start image acquisition
+2026-01-12 12:10:14 PM: End of image acquisition
+2026-01-12 12:10:22 PM: ProcessScan: Saving Scan
+2026-01-12 12:10:22 PM: Scan List size: 1
+2026-01-12 12:10:30 PM: ProcessScan: Saving Scan
+2026-01-12 12:10:30 PM: Scan List size: 2
+2026-01-12 12:10:39 PM: ProcessScan: Saving Scan
+2026-01-12 12:10:39 PM: Scan List size: 3
+2026-01-12 12:10:39 PM: Scanning finished
+2026-01-12 12:10:39 PM: Fix Checking for barcode
+2026-01-12 12:10:40 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-12 12:10:40 PM: Fix Current Doc is null
+2026-01-12 12:10:40 PM: Fix barcode found=63598765
+2026-01-12 12:10:40 PM: Fix Set List of Docs
+2026-01-12 12:10:40 PM: Fix Barcode not null
+2026-01-12 12:10:40 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-12 12:10:41 PM: Fix3 API returned docList, Adding docs to list
+2026-01-12 12:10:41 PM: Extract jDoc
+2026-01-12 12:10:41 PM: Extract jDoc
+2026-01-12 12:10:41 PM: Extract jDoc
+2026-01-12 12:10:41 PM: Return Ordered docs
+2026-01-12 12:10:41 PM: Fix Doc found count=3
+2026-01-12 12:10:41 PM: Fix End neos true
+2026-01-12 12:10:41 PM: Fix Set current doc to docs[0]
+2026-01-12 12:10:41 PM: Fix DS0000188299
+2026-01-12 12:10:41 PM: Fix Doc scanned twice
+2026-01-12 12:24:16 PM: Initializing components
+2026-01-12 12:24:16 PM: Reading app settings
+2026-01-12 12:24:16 PM: Initialize twain settings
+2026-01-12 12:24:16 PM: Set database connection
+2026-01-12 12:24:16 PM: Scanning Dashboard Using DRS API
+2026-01-12 12:24:16 PM: Load Lookup lists from API
+2026-01-12 12:24:16 PM: Load Doc Type
+2026-01-12 12:24:17 PM: Load Author Obj
+2026-01-12 12:24:17 PM: Load Owner Type Obj
+2026-01-12 12:24:18 PM: Load Box Obj
+2026-01-12 12:24:25 PM: Done Loading from DB
+2026-01-12 12:24:25 PM: Load New Form
+2026-01-12 12:24:25 PM: Make new scanner form and display it
+2026-01-12 12:24:42 PM: Checking for asynchronous scanning...
+2026-01-12 12:24:42 PM: Start image acquisition
+2026-01-12 12:24:59 PM: End of image acquisition
+2026-01-12 12:25:07 PM: ProcessScan: Saving Scan
+2026-01-12 12:25:07 PM: Scan List size: 1
+2026-01-12 12:25:07 PM: Scanning finished
+2026-01-12 12:25:07 PM: Fix Checking for barcode
+2026-01-12 12:25:08 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-12 12:25:08 PM: Fix Current Doc is null
+2026-01-12 12:25:08 PM: Fix barcode found=63598765
+2026-01-12 12:25:08 PM: Fix Set List of Docs
+2026-01-12 12:25:08 PM: Fix Barcode not null
+2026-01-12 12:25:08 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-12 12:25:08 PM: Fix3 API returned docList, Adding docs to list
+2026-01-12 12:25:08 PM: Extract jDoc
+2026-01-12 12:25:08 PM: Extract jDoc
+2026-01-12 12:25:09 PM: Extract jDoc
+2026-01-12 12:25:09 PM: Return Ordered docs
+2026-01-12 12:25:09 PM: Fix Doc found count=3
+2026-01-12 12:25:09 PM: Fix End neos true
+2026-01-12 12:25:09 PM: Fix Set current doc to docs[0]
+2026-01-12 12:25:09 PM: Fix DS0000188299
+2026-01-12 12:25:09 PM: Fix Doc scanned twice
+2026-01-12 12:26:25 PM: Initializing components
+2026-01-12 12:26:25 PM: Reading app settings
+2026-01-12 12:26:25 PM: Initialize twain settings
+2026-01-12 12:26:25 PM: Set database connection
+2026-01-12 12:26:25 PM: Scanning Dashboard Using DRS API
+2026-01-12 12:26:25 PM: Load Lookup lists from API
+2026-01-12 12:26:25 PM: Load Doc Type
+2026-01-12 12:26:25 PM: Load Author Obj
+2026-01-12 12:26:26 PM: Load Owner Type Obj
+2026-01-12 12:26:26 PM: Load Box Obj
+2026-01-12 12:26:33 PM: Done Loading from DB
+2026-01-12 12:26:33 PM: Load New Form
+2026-01-12 12:26:33 PM: Make new scanner form and display it
+2026-01-12 12:26:48 PM: Checking for asynchronous scanning...
+2026-01-12 12:26:48 PM: Start image acquisition
+2026-01-12 12:26:55 PM: End of image acquisition
+2026-01-12 12:27:04 PM: ProcessScan: Saving Scan
+2026-01-12 12:27:04 PM: Scan List size: 1
+2026-01-12 12:27:13 PM: ProcessScan: Saving Scan
+2026-01-12 12:27:13 PM: Scan List size: 2
+2026-01-12 12:27:23 PM: ProcessScan: Saving Scan
+2026-01-12 12:27:23 PM: Scan List size: 3
+2026-01-12 12:27:24 PM: Scanning finished
+2026-01-12 12:27:24 PM: Fix Checking for barcode
+2026-01-12 12:27:24 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-12 12:27:24 PM: Fix Current Doc is null
+2026-01-12 12:27:24 PM: Fix barcode found=63598765
+2026-01-12 12:27:24 PM: Fix Set List of Docs
+2026-01-12 12:27:24 PM: Fix Barcode not null
+2026-01-12 12:27:24 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-12 12:27:25 PM: Fix3 API returned docList, Adding docs to list
+2026-01-12 12:27:25 PM: Extract jDoc
+2026-01-12 12:27:25 PM: Extract jDoc
+2026-01-12 12:27:25 PM: Extract jDoc
+2026-01-12 12:27:26 PM: Return Ordered docs
+2026-01-12 12:27:26 PM: Fix Doc found count=3
+2026-01-12 12:27:26 PM: Fix End neos true
+2026-01-12 12:27:26 PM: Fix Set current doc to docs[0]
+2026-01-12 12:27:26 PM: Fix DS0000188299
+2026-01-12 12:27:26 PM: Fix Doc scanned twice
+2026-01-12 12:50:24 PM: Initializing components
+2026-01-12 12:50:25 PM: Reading app settings
+2026-01-12 12:50:25 PM: Initialize twain settings
+2026-01-12 12:50:25 PM: Set database connection
+2026-01-12 12:50:25 PM: Scanning Dashboard Using DRS API
+2026-01-12 12:50:25 PM: Load Lookup lists from API
+2026-01-12 12:50:25 PM: Load Doc Type
+2026-01-12 12:50:44 PM: Load Author Obj
+2026-01-12 12:50:44 PM: Load Owner Type Obj
+2026-01-12 12:50:44 PM: Load Box Obj
+2026-01-12 12:50:52 PM: Done Loading from DB
+2026-01-12 12:50:52 PM: Load New Form
+2026-01-12 12:50:52 PM: Make new scanner form and display it
+2026-01-12 12:50:58 PM: Checking for asynchronous scanning...
+2026-01-12 12:50:58 PM: Start image acquisition
+2026-01-12 12:51:05 PM: End of image acquisition
+2026-01-12 12:51:13 PM: ProcessScan: Saving Scan
+2026-01-12 12:51:13 PM: Scan List size: 1
+2026-01-12 12:51:21 PM: ProcessScan: Saving Scan
+2026-01-12 12:51:21 PM: Scan List size: 2
+2026-01-12 12:51:30 PM: ProcessScan: Saving Scan
+2026-01-12 12:51:30 PM: Scan List size: 3
+2026-01-12 12:51:30 PM: Scanning finished
+2026-01-12 12:51:30 PM: Fix Checking for barcode
+2026-01-12 12:51:31 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-12 12:51:31 PM: Fix Current Doc is null
+2026-01-12 12:51:31 PM: Fix barcode found=63598765
+2026-01-12 12:51:31 PM: Fix Set List of Docs
+2026-01-12 12:51:31 PM: Fix Barcode not null
+2026-01-12 12:51:31 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-12 12:51:31 PM: Fix3 API returned docList, Adding docs to list
+2026-01-12 12:51:31 PM: Extract jDoc
+2026-01-12 12:51:32 PM: Extract jDoc
+2026-01-12 12:51:32 PM: Extract jDoc
+2026-01-12 12:51:32 PM: Return Ordered docs
+2026-01-12 12:51:32 PM: Fix Doc found count=3
+2026-01-12 12:51:32 PM: Fix End neos true
+2026-01-12 12:51:32 PM: Fix Set current doc to docs[0]
+2026-01-12 12:51:32 PM: Fix DS0000188299
+2026-01-12 12:51:32 PM: Fix Doc scanned twice
+2026-01-12 12:55:24 PM: Initializing components
+2026-01-12 12:55:24 PM: Reading app settings
+2026-01-12 12:55:24 PM: Initialize twain settings
+2026-01-12 12:55:24 PM: Set database connection
+2026-01-12 12:55:24 PM: Scanning Dashboard Using DRS API
+2026-01-12 12:55:24 PM: Load Lookup lists from API
+2026-01-12 12:55:24 PM: Load Doc Type
+2026-01-12 12:55:25 PM: Load Author Obj
+2026-01-12 12:55:25 PM: Load Owner Type Obj
+2026-01-12 12:55:25 PM: Load Box Obj
+2026-01-12 12:55:32 PM: Done Loading from DB
+2026-01-12 12:55:32 PM: Load New Form
+2026-01-12 12:55:32 PM: Make new scanner form and display it
+2026-01-12 12:57:02 PM: Initializing components
+2026-01-12 12:57:02 PM: Reading app settings
+2026-01-12 12:57:02 PM: Initialize twain settings
+2026-01-12 12:57:02 PM: Set database connection
+2026-01-12 12:57:02 PM: Scanning Dashboard Using DRS API
+2026-01-12 12:57:02 PM: Load Lookup lists from API
+2026-01-12 12:57:02 PM: Load Doc Type
+2026-01-12 12:57:03 PM: Load Author Obj
+2026-01-12 12:57:04 PM: Load Owner Type Obj
+2026-01-12 12:57:04 PM: Load Box Obj
+2026-01-12 12:57:10 PM: Done Loading from DB
+2026-01-12 12:57:11 PM: Load New Form
+2026-01-12 12:57:11 PM: Make new scanner form and display it
+2026-01-12 12:57:17 PM: Checking for asynchronous scanning...
+2026-01-12 12:57:17 PM: Start image acquisition
+2026-01-12 12:57:23 PM: End of image acquisition
+2026-01-12 12:57:31 PM: ProcessScan: Saving Scan
+2026-01-12 12:57:32 PM: Scan List size: 1
+2026-01-12 12:57:39 PM: ProcessScan: Saving Scan
+2026-01-12 12:57:39 PM: Scan List size: 2
+2026-01-12 12:57:48 PM: ProcessScan: Saving Scan
+2026-01-12 12:57:48 PM: Scan List size: 3
+2026-01-12 12:57:49 PM: Scanning finished
+2026-01-12 12:57:49 PM: Fix Checking for barcode
+2026-01-12 12:57:49 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-12 12:57:49 PM: Fix Current Doc is null
+2026-01-12 12:57:49 PM: Fix barcode found=63598765
+2026-01-12 12:57:49 PM: Fix Set List of Docs
+2026-01-12 12:57:49 PM: Fix Barcode not null
+2026-01-12 12:57:49 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-12 12:57:50 PM: Fix3 API returned docList, Adding docs to list
+2026-01-12 12:57:50 PM: Extract jDoc
+2026-01-12 12:57:50 PM: Extract jDoc
+2026-01-12 12:57:50 PM: Extract jDoc
+2026-01-12 12:57:50 PM: Return Ordered docs
+2026-01-12 12:57:50 PM: Fix Doc found count=3
+2026-01-12 12:57:50 PM: Fix End neos true
+2026-01-12 12:57:50 PM: Fix Set current doc to docs[0]
+2026-01-12 12:57:50 PM: Fix DS0000188299
+2026-01-12 12:57:50 PM: Fix Doc scanned twice
+2026-01-12 1:06:18 PM: Initializing components
+2026-01-12 1:06:18 PM: Reading app settings
+2026-01-12 1:06:18 PM: Initialize twain settings
+2026-01-12 1:06:18 PM: Set database connection
+2026-01-12 1:06:18 PM: Scanning Dashboard Using DRS API
+2026-01-12 1:06:18 PM: Load Lookup lists from API
+2026-01-12 1:06:18 PM: Load Doc Type
+2026-01-12 1:06:20 PM: Load Author Obj
+2026-01-12 1:06:20 PM: Load Owner Type Obj
+2026-01-12 1:06:20 PM: Load Box Obj
+2026-01-12 1:06:27 PM: Done Loading from DB
+2026-01-12 1:06:27 PM: Load New Form
+2026-01-12 1:06:27 PM: Make new scanner form and display it
+2026-01-12 1:06:51 PM: Checking for asynchronous scanning...
+2026-01-12 1:06:51 PM: Start image acquisition
+2026-01-12 1:11:31 PM: End of image acquisition
+2026-01-12 1:11:48 PM: ProcessScan: Saving Scan
+2026-01-12 1:11:48 PM: Scan List size: 1
+2026-01-12 1:12:01 PM: ProcessScan: Saving Scan
+2026-01-12 1:12:01 PM: Scan List size: 2
+2026-01-12 1:12:12 PM: ProcessScan: Saving Scan
+2026-01-12 1:12:12 PM: Scan List size: 3
+2026-01-12 1:12:13 PM: Scanning finished
+2026-01-12 1:12:13 PM: Fix Checking for barcode
+2026-01-12 1:12:13 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-12 1:12:13 PM: Fix Current Doc is null
+2026-01-12 1:12:13 PM: Fix barcode found=63598765
+2026-01-12 1:12:13 PM: Fix Set List of Docs
+2026-01-12 1:12:13 PM: Fix Barcode not null
+2026-01-12 1:12:13 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-12 1:12:14 PM: Fix3 API returned docList, Adding docs to list
+2026-01-12 1:12:14 PM: Extract jDoc
+2026-01-12 1:12:14 PM: Extract jDoc
+2026-01-12 1:12:15 PM: Extract jDoc
+2026-01-12 1:12:15 PM: Return Ordered docs
+2026-01-12 1:12:15 PM: Fix Doc found count=3
+2026-01-12 1:12:15 PM: Fix End neos true
+2026-01-12 1:12:15 PM: Fix Set current doc to docs[0]
+2026-01-12 1:12:15 PM: Fix DS0000188299
+2026-01-12 1:12:15 PM: Fix Doc scanned twice
+2026-01-12 1:40:52 PM: Fix Display image
+2026-01-12 1:41:39 PM: Fix SetImageNav
+2026-01-12 1:41:43 PM: Fix End 1
+2026-01-12 1:41:45 PM: Fix End 2
+2026-01-12 1:41:49 PM: Fix End 3
+2026-01-12 1:42:23 PM: 3 btnViewAsPDF_Click Scanner  Objects
+2026-01-13 6:57:43 AM: Initializing components
+2026-01-13 6:57:43 AM: Reading app settings
+2026-01-13 6:57:43 AM: Initialize twain settings
+2026-01-13 6:57:43 AM: Set database connection
+2026-01-13 6:57:43 AM: Scanning Dashboard Using DRS API
+2026-01-13 6:57:43 AM: Load Lookup lists from API
+2026-01-13 6:57:43 AM: Load Doc Type
+2026-01-13 6:57:59 AM: Load Author Obj
+2026-01-13 6:58:00 AM: Load Owner Type Obj
+2026-01-13 6:58:00 AM: Load Box Obj
+2026-01-13 6:58:06 AM: Done Loading from DB
+2026-01-13 6:58:07 AM: Load New Form
+2026-01-13 6:58:07 AM: Make new scanner form and display it
+2026-01-13 6:58:24 AM: Checking for asynchronous scanning...
+2026-01-13 6:58:24 AM: Start image acquisition
+2026-01-13 6:58:30 AM: End of image acquisition
+2026-01-13 6:58:42 AM: ProcessScan: Saving Scan
+2026-01-13 6:58:42 AM: Scan List size: 1
+2026-01-13 6:58:51 AM: ProcessScan: Saving Scan
+2026-01-13 6:58:51 AM: Scan List size: 2
+2026-01-13 6:59:01 AM: ProcessScan: Saving Scan
+2026-01-13 6:59:01 AM: Scan List size: 3
+2026-01-13 6:59:02 AM: Scanning finished
+2026-01-13 6:59:02 AM: Fix Checking for barcode
+2026-01-13 6:59:02 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-13 6:59:02 AM: Fix Current Doc is null
+2026-01-13 6:59:02 AM: Fix barcode found=63598765
+2026-01-13 6:59:02 AM: Fix Set List of Docs
+2026-01-13 6:59:02 AM: Fix Barcode not null
+2026-01-13 6:59:02 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-13 6:59:02 AM: Fix3 API returned docList, Adding docs to list
+2026-01-13 6:59:02 AM: Extract jDoc
+2026-01-13 6:59:03 AM: Extract jDoc
+2026-01-13 6:59:03 AM: Extract jDoc
+2026-01-13 6:59:03 AM: Return Ordered docs
+2026-01-13 6:59:03 AM: Fix Doc found count=3
+2026-01-13 6:59:03 AM: Fix End neos true
+2026-01-13 6:59:03 AM: Fix Set current doc to docs[0]
+2026-01-13 6:59:03 AM: Fix DS0000188299
+2026-01-13 6:59:03 AM: Fix Doc scanned twice
+2026-01-13 7:00:39 AM: Fix Display image
+2026-01-13 7:01:02 AM: Fix SetImageNav
+2026-01-13 7:01:14 AM: Fix End 1
+2026-01-13 7:01:16 AM: Fix End 2
+2026-01-13 7:01:20 AM: Fix End 3
+2026-01-13 8:58:54 AM: Initializing components
+2026-01-13 8:58:55 AM: Reading app settings
+2026-01-13 8:58:55 AM: Initialize twain settings
+2026-01-13 8:58:55 AM: Set database connection
+2026-01-13 8:58:55 AM: Scanning Dashboard Using DRS API
+2026-01-13 8:58:55 AM: Load Lookup lists from API
+2026-01-13 8:58:55 AM: Load Doc Type
+2026-01-13 8:59:13 AM: Load Author Obj
+2026-01-13 8:59:14 AM: Load Owner Type Obj
+2026-01-13 8:59:14 AM: Load Box Obj
+2026-01-13 8:59:22 AM: Done Loading from DB
+2026-01-13 8:59:22 AM: Load New Form
+2026-01-13 8:59:22 AM: Make new scanner form and display it
+2026-01-13 9:01:15 AM: Checking for asynchronous scanning...
+2026-01-13 9:01:15 AM: Start image acquisition
+2026-01-13 9:01:27 AM: End of image acquisition
+2026-01-13 9:01:36 AM: ProcessScan: Saving Scan
+2026-01-13 9:01:36 AM: Scan List size: 1
+2026-01-13 9:01:44 AM: ProcessScan: Saving Scan
+2026-01-13 9:01:44 AM: Scan List size: 2
+2026-01-13 9:01:53 AM: ProcessScan: Saving Scan
+2026-01-13 9:01:53 AM: Scan List size: 3
+2026-01-13 9:01:54 AM: Scanning finished
+2026-01-13 9:01:54 AM: Fix Checking for barcode
+2026-01-13 9:01:54 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-13 9:01:54 AM: Fix Current Doc is null
+2026-01-13 9:01:54 AM: Fix barcode found=63598765
+2026-01-13 9:01:54 AM: Fix Set List of Docs
+2026-01-13 9:01:54 AM: Fix Barcode not null
+2026-01-13 9:01:54 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-13 9:01:55 AM: Fix3 API returned docList, Adding docs to list
+2026-01-13 9:01:55 AM: Extract jDoc
+2026-01-13 9:01:56 AM: Extract jDoc
+2026-01-13 9:01:56 AM: Extract jDoc
+2026-01-13 9:01:56 AM: Return Ordered docs
+2026-01-13 9:01:56 AM: Fix Set current doc to docs[0]
+2026-01-13 9:01:56 AM: Fix Doc scanned twice
+2026-01-13 9:02:28 AM: Fix Display image
+2026-01-13 9:02:28 AM: Fix SetImageNav
+2026-01-13 9:06:53 AM: 3 btnSave_Click Scanner  Objects
+2026-01-13 12:11:54 PM: Initializing components
+2026-01-13 12:11:56 PM: Reading app settings
+2026-01-13 12:11:56 PM: Initialize twain settings
+2026-01-13 12:11:56 PM: Set database connection
+2026-01-13 12:11:56 PM: Scanning Dashboard Using DRS API
+2026-01-13 12:11:56 PM: Load Lookup lists from API
+2026-01-13 12:11:56 PM: Load Doc Type
+2026-01-13 12:12:15 PM: Load Author Obj
+2026-01-13 12:12:15 PM: Load Owner Type Obj
+2026-01-13 12:12:16 PM: Load Box Obj
+2026-01-13 12:12:22 PM: Done Loading from DB
+2026-01-13 12:12:23 PM: Load New Form
+2026-01-13 12:12:23 PM: Make new scanner form and display it
+2026-01-13 12:12:36 PM: Checking for asynchronous scanning...
+2026-01-13 12:12:36 PM: Start image acquisition
+2026-01-13 12:12:42 PM: End of image acquisition
+2026-01-13 12:12:42 PM: Scanning finished
+2026-01-13 12:13:02 PM: Checking for asynchronous scanning...
+2026-01-13 12:13:02 PM: Start image acquisition
+2026-01-13 12:13:08 PM: End of image acquisition
+2026-01-13 12:13:21 PM: ProcessScan: Saving Scan
+2026-01-13 12:13:22 PM: Scan List size: 1
+2026-01-13 12:13:22 PM: Scanning finished
+2026-01-13 12:13:22 PM: Fix Checking for barcode
+2026-01-13 12:13:22 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-13 12:13:22 PM: Fix Current Doc is null
+2026-01-13 12:13:22 PM: Fix barcode found=63598765
+2026-01-13 12:13:22 PM: Fix Set List of Docs
+2026-01-13 12:13:22 PM: Fix Barcode not null
+2026-01-13 12:13:22 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-13 12:13:23 PM: Fix3 API returned docList, Adding docs to list
+2026-01-13 12:13:23 PM: Extract jDoc
+2026-01-13 12:13:23 PM: Extract jDoc
+2026-01-13 12:13:23 PM: Extract jDoc
+2026-01-13 12:13:23 PM: Return Ordered docs
+2026-01-13 12:13:23 PM: Fix Set current doc to docs[0]
+2026-01-13 12:13:23 PM: Fix Doc scanned twice
+2026-01-13 12:14:03 PM: Fix Display image
+2026-01-13 12:14:03 PM: Fix SetImageNav
+2026-01-13 12:16:06 PM: 1 btnSave_Click Scanner  Objects
+2026-01-13 12:17:26 PM: Checking for asynchronous scanning...
+2026-01-13 12:17:26 PM: Start image acquisition
+2026-01-13 12:17:30 PM: End of image acquisition
+2026-01-13 12:17:36 PM: Scanning finished
+2026-01-13 12:17:50 PM: Checking for asynchronous scanning...
+2026-01-13 12:17:50 PM: Start image acquisition
+2026-01-13 12:17:57 PM: End of image acquisition
+2026-01-13 12:18:11 PM: ProcessScan: Saving Scan
+2026-01-13 12:18:11 PM: Scan List size: 1
+2026-01-13 12:18:22 PM: ProcessScan: Saving Scan
+2026-01-13 12:18:22 PM: Scan List size: 2
+2026-01-13 12:18:34 PM: ProcessScan: Saving Scan
+2026-01-13 12:18:34 PM: Scan List size: 3
+2026-01-13 12:18:35 PM: Scanning finished
+2026-01-13 12:18:35 PM: Fix Checking for barcode
+2026-01-13 12:18:35 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-13 12:18:35 PM: Fix Current Doc is null
+2026-01-13 12:18:35 PM: Fix barcode found=63598765
+2026-01-13 12:18:35 PM: Fix Set List of Docs
+2026-01-13 12:18:35 PM: Fix Barcode not null
+2026-01-13 12:18:35 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-13 12:18:36 PM: Fix3 API returned docList, Adding docs to list
+2026-01-13 12:18:36 PM: Extract jDoc
+2026-01-13 12:18:36 PM: Extract jDoc
+2026-01-13 12:18:36 PM: Extract jDoc
+2026-01-13 12:18:37 PM: Return Ordered docs
+2026-01-13 12:18:37 PM: Fix Set current doc to docs[0]
+2026-01-13 12:18:37 PM: Fix Doc scanned twice
+2026-01-13 12:18:48 PM: Fix No batchid
+2026-01-13 12:18:48 PM: Fix Display image
+2026-01-13 12:18:48 PM: Fix SetImageNav
+2026-01-13 12:19:01 PM: 3 btnSave_Click Scanner  Objects
+2026-01-13 12:28:54 PM: Initializing components
+2026-01-13 12:28:54 PM: Reading app settings
+2026-01-13 12:28:54 PM: Initialize twain settings
+2026-01-13 12:28:54 PM: Set database connection
+2026-01-13 12:28:54 PM: Scanning Dashboard Using DRS API
+2026-01-13 12:28:54 PM: Load Lookup lists from API
+2026-01-13 12:28:54 PM: Load Doc Type
+2026-01-13 12:28:55 PM: Load Author Obj
+2026-01-13 12:28:55 PM: Load Owner Type Obj
+2026-01-13 12:28:55 PM: Load Box Obj
+2026-01-13 12:29:03 PM: Done Loading from DB
+2026-01-13 12:29:03 PM: Load New Form
+2026-01-13 12:29:03 PM: Make new scanner form and display it
+2026-01-13 12:29:22 PM: Checking for asynchronous scanning...
+2026-01-13 12:29:22 PM: Start image acquisition
+2026-01-13 12:29:28 PM: End of image acquisition
+2026-01-13 12:29:40 PM: ProcessScan: Saving Scan
+2026-01-13 12:29:40 PM: Scan List size: 1
+2026-01-13 12:29:53 PM: ProcessScan: Saving Scan
+2026-01-13 12:29:53 PM: Scan List size: 2
+2026-01-13 12:30:04 PM: ProcessScan: Saving Scan
+2026-01-13 12:30:04 PM: Scan List size: 3
+2026-01-13 12:30:05 PM: Scanning finished
+2026-01-13 12:30:05 PM: Fix Checking for barcode
+2026-01-13 12:30:05 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-13 12:30:05 PM: Fix Current Doc is null
+2026-01-13 12:30:05 PM: Fix barcode found=63598765
+2026-01-13 12:30:05 PM: Fix Set List of Docs
+2026-01-13 12:30:05 PM: Fix Barcode not null
+2026-01-13 12:30:05 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-13 12:30:06 PM: Fix3 API returned docList, Adding docs to list
+2026-01-13 12:30:06 PM: Extract jDoc
+2026-01-13 12:30:06 PM: Extract jDoc
+2026-01-13 12:30:07 PM: Extract jDoc
+2026-01-13 12:30:07 PM: Return Ordered docs
+2026-01-13 12:30:07 PM: Fix Set current doc to docs[0]
+2026-01-13 12:30:07 PM: Fix Doc scanned twice
+2026-01-13 12:30:18 PM: Fix Display image
+2026-01-13 12:30:18 PM: Fix SetImageNav
+2026-01-13 12:30:39 PM: 3 btnSave_Click Scanner  Objects
+2026-01-13 12:36:34 PM: Initializing components
+2026-01-13 12:36:34 PM: Reading app settings
+2026-01-13 12:36:34 PM: Initialize twain settings
+2026-01-13 12:36:34 PM: Set database connection
+2026-01-13 12:36:34 PM: Scanning Dashboard Using DRS API
+2026-01-13 12:36:34 PM: Load Lookup lists from API
+2026-01-13 12:36:34 PM: Load Doc Type
+2026-01-13 12:36:35 PM: Load Author Obj
+2026-01-13 12:36:35 PM: Load Owner Type Obj
+2026-01-13 12:36:35 PM: Load Box Obj
+2026-01-13 12:36:43 PM: Done Loading from DB
+2026-01-13 12:36:43 PM: Load New Form
+2026-01-13 12:36:43 PM: Make new scanner form and display it
+2026-01-13 12:40:29 PM: Initializing components
+2026-01-13 12:40:29 PM: Reading app settings
+2026-01-13 12:40:29 PM: Initialize twain settings
+2026-01-13 12:40:29 PM: Set database connection
+2026-01-13 12:40:29 PM: Scanning Dashboard Using DRS API
+2026-01-13 12:40:29 PM: Load Lookup lists from API
+2026-01-13 12:40:29 PM: Load Doc Type
+2026-01-13 12:40:30 PM: Load Author Obj
+2026-01-13 12:40:30 PM: Load Owner Type Obj
+2026-01-13 12:40:30 PM: Load Box Obj
+2026-01-13 12:40:37 PM: Done Loading from DB
+2026-01-13 12:40:37 PM: Load New Form
+2026-01-13 12:40:37 PM: Make new scanner form and display it
+2026-01-13 12:43:03 PM: Checking for asynchronous scanning...
+2026-01-13 12:43:03 PM: Start image acquisition
+2026-01-13 12:43:15 PM: End of image acquisition
+2026-01-13 12:43:31 PM: ProcessScan: Saving Scan
+2026-01-13 12:43:32 PM: Scan List size: 1
+2026-01-13 12:43:42 PM: ProcessScan: Saving Scan
+2026-01-13 12:43:42 PM: Scan List size: 2
+2026-01-13 12:43:51 PM: ProcessScan: Saving Scan
+2026-01-13 12:43:51 PM: Scan List size: 3
+2026-01-13 12:43:52 PM: Scanning finished
+2026-01-13 12:43:52 PM: Fix Checking for barcode
+2026-01-13 12:43:52 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-13 12:43:52 PM: Fix Current Doc is null
+2026-01-13 12:43:52 PM: Fix barcode found=63598765
+2026-01-13 12:43:52 PM: Fix Set List of Docs
+2026-01-13 12:43:52 PM: Fix Barcode not null
+2026-01-13 12:43:52 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-13 12:43:54 PM: Fix3 API returned docList, Adding docs to list
+2026-01-13 12:43:54 PM: Extract jDoc
+2026-01-13 12:43:54 PM: Extract jDoc
+2026-01-13 12:43:54 PM: Extract jDoc
+2026-01-13 12:43:54 PM: Return Ordered docs
+2026-01-13 12:43:54 PM: Fix Set current doc to docs[0]
+2026-01-13 12:43:54 PM: Fix Doc scanned twice
+2026-01-13 12:44:05 PM: Fix Display image
+2026-01-13 12:44:05 PM: Fix SetImageNav
+2026-01-13 12:44:10 PM: 3 btnSave_Click Scanner  Objects
+2026-01-13 12:52:07 PM: Initializing components
+2026-01-13 12:52:07 PM: Reading app settings
+2026-01-13 12:52:07 PM: Initialize twain settings
+2026-01-13 12:52:07 PM: Set database connection
+2026-01-13 12:52:07 PM: Scanning Dashboard Using DRS API
+2026-01-13 12:52:07 PM: Load Lookup lists from API
+2026-01-13 12:52:07 PM: Load Doc Type
+2026-01-13 12:52:08 PM: Load Author Obj
+2026-01-13 12:52:08 PM: Load Owner Type Obj
+2026-01-13 12:52:09 PM: Load Box Obj
+2026-01-13 12:52:15 PM: Done Loading from DB
+2026-01-13 12:52:15 PM: Load New Form
+2026-01-13 12:52:15 PM: Make new scanner form and display it
+2026-01-13 12:52:21 PM: Checking for asynchronous scanning...
+2026-01-13 12:52:21 PM: Start image acquisition
+2026-01-13 12:52:29 PM: End of image acquisition
+2026-01-13 12:52:40 PM: ProcessScan: Saving Scan
+2026-01-13 12:52:41 PM: Scan List size: 1
+2026-01-13 12:52:50 PM: ProcessScan: Saving Scan
+2026-01-13 12:52:50 PM: Scan List size: 2
+2026-01-13 12:53:00 PM: ProcessScan: Saving Scan
+2026-01-13 12:53:00 PM: Scan List size: 3
+2026-01-13 12:53:01 PM: Scanning finished
+2026-01-13 12:53:01 PM: Fix Checking for barcode
+2026-01-13 12:53:01 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-13 12:53:01 PM: Fix Current Doc is null
+2026-01-13 12:53:01 PM: Fix barcode found=63598765
+2026-01-13 12:53:01 PM: Fix Set List of Docs
+2026-01-13 12:53:01 PM: Fix Barcode not null
+2026-01-13 12:53:01 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-13 12:53:01 PM: Fix3 API returned docList, Adding docs to list
+2026-01-13 12:53:01 PM: Extract jDoc
+2026-01-13 12:53:02 PM: Extract jDoc
+2026-01-13 12:53:02 PM: Extract jDoc
+2026-01-13 12:53:02 PM: Return Ordered docs
+2026-01-13 12:53:02 PM: Fix Set current doc to docs[0]
+2026-01-13 12:53:02 PM: Fix Doc scanned twice
+2026-01-13 12:54:29 PM: Initializing components
+2026-01-13 12:54:29 PM: Reading app settings
+2026-01-13 12:54:29 PM: Initialize twain settings
+2026-01-13 12:54:29 PM: Set database connection
+2026-01-13 12:54:29 PM: Scanning Dashboard Using DRS API
+2026-01-13 12:54:29 PM: Load Lookup lists from API
+2026-01-13 12:54:29 PM: Load Doc Type
+2026-01-13 12:54:30 PM: Load Author Obj
+2026-01-13 12:54:30 PM: Load Owner Type Obj
+2026-01-13 12:54:30 PM: Load Box Obj
+2026-01-13 12:54:37 PM: Done Loading from DB
+2026-01-13 12:54:37 PM: Load New Form
+2026-01-13 12:54:37 PM: Make new scanner form and display it
+2026-01-13 12:55:59 PM: Checking for asynchronous scanning...
+2026-01-13 12:55:59 PM: Start image acquisition
+2026-01-13 12:56:07 PM: End of image acquisition
+2026-01-13 12:56:18 PM: ProcessScan: Saving Scan
+2026-01-13 12:56:18 PM: Scan List size: 1
+2026-01-13 12:56:29 PM: ProcessScan: Saving Scan
+2026-01-13 12:56:29 PM: Scan List size: 2
+2026-01-13 12:56:38 PM: ProcessScan: Saving Scan
+2026-01-13 12:56:38 PM: Scan List size: 3
+2026-01-13 12:56:39 PM: Scanning finished
+2026-01-13 12:56:39 PM: Fix Checking for barcode
+2026-01-13 12:56:39 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-13 12:56:39 PM: Fix Current Doc is null
+2026-01-13 12:56:39 PM: Fix barcode found=63598765
+2026-01-13 12:56:39 PM: Fix Set List of Docs
+2026-01-13 12:56:39 PM: Fix Barcode not null
+2026-01-13 12:56:39 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-13 12:56:40 PM: Fix3 API returned docList, Adding docs to list
+2026-01-13 12:56:40 PM: Extract jDoc
+2026-01-13 12:56:41 PM: Extract jDoc
+2026-01-13 12:56:41 PM: Extract jDoc
+2026-01-13 12:56:41 PM: Return Ordered docs
+2026-01-13 12:56:41 PM: Fix Set current doc to docs[0]
+2026-01-13 1:14:04 PM: Fix Doc scanned twice
+2026-01-14 11:23:13 AM: Initializing components
+2026-01-14 11:23:14 AM: Reading app settings
+2026-01-14 11:23:14 AM: Initialize twain settings
+2026-01-14 11:23:14 AM: Set database connection
+2026-01-14 11:23:14 AM: Scanning Dashboard Using DRS API
+2026-01-14 11:23:14 AM: Load Lookup lists from API
+2026-01-14 11:23:14 AM: Load Doc Type
+2026-01-14 11:23:32 AM: Load Author Obj
+2026-01-14 11:23:32 AM: Load Owner Type Obj
+2026-01-14 11:23:32 AM: Load Box Obj
+2026-01-14 11:23:39 AM: Done Loading from DB
+2026-01-14 11:23:39 AM: Load New Form
+2026-01-14 11:23:39 AM: Make new scanner form and display it
+2026-01-14 11:45:48 AM: Checking for asynchronous scanning...
+2026-01-14 11:45:48 AM: Start image acquisition
+2026-01-14 11:45:57 AM: End of image acquisition
+2026-01-14 11:46:18 AM: ProcessScan: Saving Scan
+2026-01-14 11:46:18 AM: Scan List size: 1
+2026-01-14 11:46:24 AM: ProcessScan: Saving Scan
+2026-01-14 11:46:24 AM: Scan List size: 2
+2026-01-14 11:46:33 AM: ProcessScan: Saving Scan
+2026-01-14 11:46:33 AM: Scan List size: 3
+2026-01-14 11:46:34 AM: Scanning finished
+2026-01-14 11:46:34 AM: Fix Checking for barcode
+2026-01-14 11:46:34 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-14 11:46:34 AM: Fix Current Doc is null
+2026-01-14 11:46:34 AM: Fix barcode found=63598765
+2026-01-14 11:46:34 AM: Fix Set List of Docs
+2026-01-14 11:46:34 AM: Fix Barcode not null
+2026-01-14 11:46:34 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-14 11:46:53 AM: Fix3 API returned docList, Adding docs to list
+2026-01-14 11:46:53 AM: Extract jDoc
+2026-01-14 11:46:53 AM: Extract jDoc
+2026-01-14 11:46:54 AM: Extract jDoc
+2026-01-14 11:46:54 AM: Return Ordered docs
+2026-01-14 11:46:54 AM: Fix Set current doc to docs[0]
+2026-01-14 11:46:54 AM: Document barcode already exists.
+2026-01-14 11:47:13 AM: Fix Display image
+2026-01-14 11:47:13 AM: Fix SetImageNav
+2026-01-14 12:01:34 PM: Initializing components
+2026-01-14 12:01:34 PM: Reading app settings
+2026-01-14 12:01:34 PM: Initialize twain settings
+2026-01-14 12:01:34 PM: Set database connection
+2026-01-14 12:01:34 PM: Scanning Dashboard Using DRS API
+2026-01-14 12:01:34 PM: Load Lookup lists from API
+2026-01-14 12:01:34 PM: Load Doc Type
+2026-01-14 12:01:36 PM: Load Author Obj
+2026-01-14 12:01:36 PM: Load Owner Type Obj
+2026-01-14 12:01:36 PM: Load Box Obj
+2026-01-14 12:01:43 PM: Done Loading from DB
+2026-01-14 12:01:43 PM: Load New Form
+2026-01-14 12:01:43 PM: Make new scanner form and display it
+2026-01-14 12:01:54 PM: Checking for asynchronous scanning...
+2026-01-14 12:01:54 PM: Start image acquisition
+2026-01-14 12:02:00 PM: End of image acquisition
+2026-01-14 12:02:07 PM: ProcessScan: Saving Scan
+2026-01-14 12:02:07 PM: Scan List size: 1
+2026-01-14 12:02:15 PM: ProcessScan: Saving Scan
+2026-01-14 12:02:15 PM: Scan List size: 2
+2026-01-14 12:02:22 PM: ProcessScan: Saving Scan
+2026-01-14 12:02:22 PM: Scan List size: 3
+2026-01-14 12:02:23 PM: Scanning finished
+2026-01-14 12:02:23 PM: Fix Checking for barcode
+2026-01-14 12:02:23 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-14 12:02:23 PM: Fix Current Doc is null
+2026-01-14 12:02:23 PM: Fix barcode found=63598765
+2026-01-14 12:02:23 PM: Fix Set List of Docs
+2026-01-14 12:02:23 PM: Fix Barcode not null
+2026-01-14 12:02:23 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-14 12:02:23 PM: Fix3 API returned docList, Adding docs to list
+2026-01-14 12:02:23 PM: Extract jDoc
+2026-01-14 12:02:24 PM: Extract jDoc
+2026-01-14 12:02:24 PM: Extract jDoc
+2026-01-14 12:02:24 PM: Return Ordered docs
+2026-01-14 12:02:24 PM: Fix Set current doc to docs[0]
+2026-01-14 12:02:24 PM: Document barcode already exists.
+2026-01-14 12:02:37 PM: Fix Display image
+2026-01-14 12:02:37 PM: Fix SetImageNav
+2026-01-14 12:02:43 PM: 3 btnSave_Click Scanner  Objects
+2026-01-14 12:44:42 PM: Initializing components
+2026-01-14 12:44:42 PM: Reading app settings
+2026-01-14 12:44:42 PM: Initialize twain settings
+2026-01-14 12:44:42 PM: Set database connection
+2026-01-14 12:44:42 PM: Scanning Dashboard Using DRS API
+2026-01-14 12:44:42 PM: Load Lookup lists from API
+2026-01-14 12:44:42 PM: Load Doc Type
+2026-01-14 12:45:01 PM: Load Author Obj
+2026-01-14 12:45:02 PM: Load Owner Type Obj
+2026-01-14 12:45:02 PM: Load Box Obj
+2026-01-14 12:45:08 PM: Done Loading from DB
+2026-01-14 12:45:08 PM: Load New Form
+2026-01-14 12:45:08 PM: Make new scanner form and display it
+2026-01-14 12:45:20 PM: Checking for asynchronous scanning...
+2026-01-14 12:45:20 PM: Start image acquisition
+2026-01-14 12:45:27 PM: End of image acquisition
+2026-01-14 12:45:35 PM: ProcessScan: Saving Scan
+2026-01-14 12:45:36 PM: Scan List size: 1
+2026-01-14 12:45:43 PM: ProcessScan: Saving Scan
+2026-01-14 12:45:43 PM: Scan List size: 2
+2026-01-14 12:45:50 PM: ProcessScan: Saving Scan
+2026-01-14 12:45:50 PM: Scan List size: 3
+2026-01-14 12:45:52 PM: Scanning finished
+2026-01-14 12:45:52 PM: Fix Checking for barcode
+2026-01-14 12:45:52 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-14 12:45:52 PM: Fix Current Doc is null
+2026-01-14 12:45:52 PM: Fix barcode found=63598765
+2026-01-14 12:45:52 PM: Fix Set List of Docs
+2026-01-14 12:45:52 PM: Fix Barcode not null
+2026-01-14 12:45:52 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-14 12:45:52 PM: Fix3 API returned docList, Adding docs to list
+2026-01-14 12:45:52 PM: Extract jDoc
+2026-01-14 12:45:53 PM: Extract jDoc
+2026-01-14 12:45:53 PM: Extract jDoc
+2026-01-14 12:45:53 PM: Return Ordered docs
+2026-01-14 12:45:53 PM: Fix Set current doc to docs[0]
+2026-01-14 12:45:53 PM: Document barcode already exists.
+2026-01-14 12:46:05 PM: Fix Display image
+2026-01-14 12:46:05 PM: Fix SetImageNav
+2026-01-14 12:46:12 PM: 3 btnSave_Click Scanner  Objects
+2026-01-14 1:15:27 PM: Initializing components
+2026-01-14 1:15:27 PM: Reading app settings
+2026-01-14 1:15:27 PM: Initialize twain settings
+2026-01-14 1:15:27 PM: Set database connection
+2026-01-14 1:15:27 PM: Scanning Dashboard Using DRS API
+2026-01-14 1:15:27 PM: Load Lookup lists from API
+2026-01-14 1:15:27 PM: Load Doc Type
+2026-01-14 1:15:29 PM: Load Author Obj
+2026-01-14 1:15:29 PM: Load Owner Type Obj
+2026-01-14 1:15:29 PM: Load Box Obj
+2026-01-14 1:15:38 PM: Done Loading from DB
+2026-01-14 1:15:38 PM: Load New Form
+2026-01-14 1:15:38 PM: Make new scanner form and display it
+2026-01-14 1:15:54 PM: Checking for asynchronous scanning...
+2026-01-14 1:15:54 PM: Start image acquisition
+2026-01-14 1:16:14 PM: End of image acquisition
+2026-01-14 1:16:22 PM: ProcessScan: Saving Scan
+2026-01-14 1:16:22 PM: Scan List size: 1
+2026-01-14 1:16:31 PM: ProcessScan: Saving Scan
+2026-01-14 1:16:31 PM: Scan List size: 2
+2026-01-14 1:16:43 PM: Scanning finished
+2026-01-14 1:16:43 PM: Fix Checking for barcode
+2026-01-14 1:16:43 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-14 1:16:43 PM: Fix Current Doc is null
+2026-01-14 1:16:43 PM: Fix barcode found=63511493
+2026-01-14 1:16:43 PM: Fix Set List of Docs
+2026-01-14 1:16:43 PM: Fix Barcode not null
+2026-01-14 1:16:43 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-14 1:16:44 PM: Fix3 API returned docList, Adding docs to list
+2026-01-14 1:16:44 PM: Extract jDoc
+2026-01-14 1:16:44 PM: Return Ordered docs
+2026-01-14 1:16:44 PM: Fix Set current doc to docs[0]
+2026-01-14 1:16:44 PM: Fix Display image
+2026-01-14 1:16:44 PM: Fix SetImageNav
+2026-01-14 1:18:49 PM: 2 btnSave_Click Scanner  Objects
+2026-01-14 1:24:59 PM: Initializing components
+2026-01-14 1:24:59 PM: Reading app settings
+2026-01-14 1:24:59 PM: Initialize twain settings
+2026-01-14 1:24:59 PM: Set database connection
+2026-01-14 1:24:59 PM: Scanning Dashboard Using DRS API
+2026-01-14 1:24:59 PM: Load Lookup lists from API
+2026-01-14 1:24:59 PM: Load Doc Type
+2026-01-14 1:25:00 PM: Load Author Obj
+2026-01-14 1:25:00 PM: Load Owner Type Obj
+2026-01-14 1:25:00 PM: Load Box Obj
+2026-01-14 1:25:09 PM: Done Loading from DB
+2026-01-14 1:25:09 PM: Load New Form
+2026-01-14 1:25:09 PM: Make new scanner form and display it
+2026-01-14 1:25:25 PM: Checking for asynchronous scanning...
+2026-01-14 1:25:25 PM: Start image acquisition
+2026-01-14 1:25:32 PM: End of image acquisition
+2026-01-14 1:25:41 PM: ProcessScan: Saving Scan
+2026-01-14 1:25:41 PM: Scan List size: 1
+2026-01-14 1:25:50 PM: ProcessScan: Saving Scan
+2026-01-14 1:25:50 PM: Scan List size: 2
+2026-01-14 1:25:51 PM: Scanning finished
+2026-01-14 1:25:51 PM: Fix Checking for barcode
+2026-01-14 1:25:51 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-14 1:25:51 PM: Fix Current Doc is null
+2026-01-14 1:25:51 PM: Fix barcode found=63511493
+2026-01-14 1:25:51 PM: Fix Set List of Docs
+2026-01-14 1:25:51 PM: Fix Barcode not null
+2026-01-14 1:25:51 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-14 1:25:51 PM: Fix3 API returned docList, Adding docs to list
+2026-01-14 1:25:51 PM: Extract jDoc
+2026-01-14 1:25:51 PM: Return Ordered docs
+2026-01-14 1:25:51 PM: Fix Set current doc to docs[0]
+2026-01-14 1:25:52 PM: Fix Display image
+2026-01-14 1:25:52 PM: Fix SetImageNav
+2026-01-14 1:32:09 PM: 2 btnSave_Click Scanner  Objects
+2026-01-14 1:33:56 PM: Checking for asynchronous scanning...
+2026-01-14 1:33:56 PM: Start image acquisition
+2026-01-14 1:34:10 PM: End of image acquisition
+2026-01-14 1:34:19 PM: ProcessScan: Saving Scan
+2026-01-14 1:34:19 PM: Scan List size: 1
+2026-01-14 1:34:28 PM: ProcessScan: Saving Scan
+2026-01-14 1:34:28 PM: Scan List size: 2
+2026-01-14 1:34:29 PM: Scanning finished
+2026-01-14 1:34:29 PM: Fix Checking for barcode
+2026-01-14 1:34:29 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-14 1:34:29 PM: Fix Current Doc is null
+2026-01-14 1:34:29 PM: Fix barcode found=63511493
+2026-01-14 1:34:29 PM: Fix Set List of Docs
+2026-01-14 1:34:29 PM: Fix Barcode not null
+2026-01-14 1:34:29 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-14 1:34:29 PM: Fix3 API returned docList, Adding docs to list
+2026-01-14 1:34:29 PM: Extract jDoc
+2026-01-14 1:34:29 PM: Return Ordered docs
+2026-01-14 1:34:29 PM: Fix Set current doc to docs[0]
+2026-01-14 1:34:29 PM: Fix No batchid
+2026-01-14 1:34:29 PM: Fix Display image
+2026-01-14 1:34:29 PM: Fix SetImageNav
+2026-01-14 1:45:19 PM: Initializing components
+2026-01-14 1:45:19 PM: Reading app settings
+2026-01-14 1:45:19 PM: Initialize twain settings
+2026-01-14 1:45:19 PM: Set database connection
+2026-01-14 1:45:19 PM: Scanning Dashboard Using DRS API
+2026-01-14 1:45:19 PM: Load Lookup lists from API
+2026-01-14 1:45:19 PM: Load Doc Type
+2026-01-14 1:45:20 PM: Load Author Obj
+2026-01-14 1:45:20 PM: Load Owner Type Obj
+2026-01-14 1:45:20 PM: Load Box Obj
+2026-01-14 1:45:27 PM: Done Loading from DB
+2026-01-14 1:45:27 PM: Load New Form
+2026-01-14 1:45:27 PM: Make new scanner form and display it
+2026-01-14 1:46:46 PM: Checking for asynchronous scanning...
+2026-01-14 1:46:46 PM: Start image acquisition
+2026-01-14 1:46:54 PM: End of image acquisition
+2026-01-14 1:47:02 PM: ProcessScan: Saving Scan
+2026-01-14 1:47:02 PM: Scan List size: 1
+2026-01-14 1:47:11 PM: ProcessScan: Saving Scan
+2026-01-14 1:47:11 PM: Scan List size: 2
+2026-01-14 1:47:12 PM: Scanning finished
+2026-01-14 1:47:12 PM: Fix Checking for barcode
+2026-01-14 1:47:12 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-14 1:47:12 PM: Fix Current Doc is null
+2026-01-14 1:47:12 PM: Fix barcode found=AT
+2026-01-14 1:47:12 PM: Fix Set List of Docs
+2026-01-14 1:47:12 PM: Fix Barcode not null
+2026-01-14 1:47:12 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-14 1:47:12 PM: Return Ordered docs
+2026-01-14 1:47:12 PM: Fix No existing docs, SetImage(image0)
+2026-01-14 1:48:21 PM: Fix3 API returned docList, Adding docs to list
+2026-01-14 1:48:21 PM: Extract jDoc
+2026-01-14 1:48:21 PM: Return Ordered docs
+2026-01-14 1:48:21 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-14 1:48:21 PM: Fix3 API returned docList, Adding docs to list
+2026-01-14 1:48:21 PM: Extract jDoc
+2026-01-14 1:48:21 PM: Return Ordered docs
+2026-01-14 1:48:21 PM: Fix Set current doc to docs[0]
+2026-01-14 1:48:21 PM: Fix Display image
+2026-01-14 1:48:22 PM: Fix SetImageNav
+2026-01-15 8:33:30 AM: Initializing components
+2026-01-15 8:33:30 AM: Reading app settings
+2026-01-15 8:33:30 AM: Initialize twain settings
+2026-01-15 8:33:30 AM: Set database connection
+2026-01-15 8:33:30 AM: Scanning Dashboard Using DRS API
+2026-01-15 8:33:30 AM: Load Lookup lists from API
+2026-01-15 8:33:30 AM: Load Doc Type
+2026-01-15 8:33:49 AM: Load Author Obj
+2026-01-15 8:33:49 AM: Load Owner Type Obj
+2026-01-15 8:33:50 AM: Load Box Obj
+2026-01-15 8:33:56 AM: Done Loading from DB
+2026-01-15 8:33:56 AM: Load New Form
+2026-01-15 8:33:56 AM: Make new scanner form and display it
+2026-01-15 8:34:13 AM: Checking for asynchronous scanning...
+2026-01-15 8:34:13 AM: Start image acquisition
+2026-01-15 8:34:21 AM: End of image acquisition
+2026-01-15 8:34:28 AM: ProcessScan: Saving Scan
+2026-01-15 8:34:29 AM: Scan List size: 1
+2026-01-15 8:34:29 AM: Scanning finished
+2026-01-15 8:34:29 AM: Fix Checking for barcode
+2026-01-15 8:34:29 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-15 8:34:29 AM: Fix Current Doc is null
+2026-01-15 8:34:29 AM: add barcode manually
+2026-01-15 8:34:59 AM: Fix3 API returned docList, Adding docs to list
+2026-01-15 8:34:59 AM: Extract jDoc
+2026-01-15 8:34:59 AM: Return Ordered docs
+2026-01-15 8:34:59 AM: Fix Set List of Docs
+2026-01-15 8:34:59 AM: Fix Barcode not null
+2026-01-15 8:34:59 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-15 8:35:00 AM: Fix3 API returned docList, Adding docs to list
+2026-01-15 8:35:00 AM: Extract jDoc
+2026-01-15 8:35:00 AM: Return Ordered docs
+2026-01-15 8:35:00 AM: Fix Set current doc to docs[0]
+2026-01-15 8:35:00 AM: Fix Display image
+2026-01-15 8:35:00 AM: Fix SetImageNav
+2026-01-15 8:56:50 AM: Initializing components
+2026-01-15 8:56:50 AM: Reading app settings
+2026-01-15 8:56:50 AM: Initialize twain settings
+2026-01-15 8:56:50 AM: Set database connection
+2026-01-15 8:56:50 AM: Scanning Dashboard Using DRS API
+2026-01-15 8:56:50 AM: Load Lookup lists from API
+2026-01-15 8:56:50 AM: Load Doc Type
+2026-01-15 8:56:51 AM: Load Author Obj
+2026-01-15 8:56:52 AM: Load Owner Type Obj
+2026-01-15 8:56:52 AM: Load Box Obj
+2026-01-15 8:57:00 AM: Done Loading from DB
+2026-01-15 8:57:00 AM: Load New Form
+2026-01-15 8:57:00 AM: Make new scanner form and display it
+2026-01-15 8:57:31 AM: Checking for asynchronous scanning...
+2026-01-15 8:57:31 AM: Start image acquisition
+2026-01-15 8:57:37 AM: End of image acquisition
+2026-01-15 8:57:45 AM: ProcessScan: Saving Scan
+2026-01-15 8:57:45 AM: Scan List size: 1
+2026-01-15 8:57:45 AM: Scanning finished
+2026-01-15 8:57:45 AM: Fix Checking for barcode
+2026-01-15 8:57:45 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-15 8:57:45 AM: Fix Current Doc is null
+2026-01-15 8:57:45 AM: add barcode manually
+2026-01-15 8:58:00 AM: Fix3 API returned docList, Adding docs to list
+2026-01-15 8:58:00 AM: Extract jDoc
+2026-01-15 8:58:00 AM: Return Ordered docs
+2026-01-15 8:58:00 AM: Fix Set List of Docs
+2026-01-15 8:58:00 AM: Fix Barcode not null
+2026-01-15 8:58:00 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-15 8:58:00 AM: Fix3 API returned docList, Adding docs to list
+2026-01-15 8:58:00 AM: Extract jDoc
+2026-01-15 8:58:00 AM: Return Ordered docs
+2026-01-15 8:58:00 AM: Fix Set current doc to docs[0]
+2026-01-15 8:58:00 AM: Fix Display image
+2026-01-15 8:58:00 AM: Fix SetImageNav
+2026-01-15 9:42:12 AM: Initializing components
+2026-01-15 9:42:12 AM: Reading app settings
+2026-01-15 9:42:12 AM: Initialize twain settings
+2026-01-15 9:42:12 AM: Set database connection
+2026-01-15 9:42:12 AM: Scanning Dashboard Using DRS API
+2026-01-15 9:42:12 AM: Load Lookup lists from API
+2026-01-15 9:42:12 AM: Load Doc Type
+2026-01-15 9:42:30 AM: Load Author Obj
+2026-01-15 9:42:30 AM: Load Owner Type Obj
+2026-01-15 9:42:30 AM: Load Box Obj
+2026-01-15 9:47:39 AM: Initializing components
+2026-01-15 9:47:39 AM: Reading app settings
+2026-01-15 9:47:39 AM: Initialize twain settings
+2026-01-15 9:47:39 AM: Set database connection
+2026-01-15 9:47:39 AM: Scanning Dashboard Using DRS API
+2026-01-15 9:47:39 AM: Load Lookup lists from API
+2026-01-15 9:47:39 AM: Load Doc Type
+2026-01-15 9:47:40 AM: Load Author Obj
+2026-01-15 9:47:40 AM: Load Owner Type Obj
+2026-01-15 9:47:41 AM: Load Box Obj
+2026-01-15 9:47:50 AM: Done Loading from DB
+2026-01-15 9:47:50 AM: Load New Form
+2026-01-15 9:47:50 AM: Make new scanner form and display it
+2026-01-15 9:48:06 AM: Checking for asynchronous scanning...
+2026-01-15 9:48:06 AM: Start image acquisition
+2026-01-15 9:48:14 AM: End of image acquisition
+2026-01-15 9:48:21 AM: ProcessScan: Saving Scan
+2026-01-15 9:48:21 AM: Scan List size: 1
+2026-01-15 9:48:22 AM: Scanning finished
+2026-01-15 9:48:22 AM: Fix Checking for barcode
+2026-01-15 9:48:22 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-15 9:48:22 AM: Fix Current Doc is null
+2026-01-15 9:48:22 AM: add barcode manually
+2026-01-15 9:48:35 AM: Fix3 API returned docList, Adding docs to list
+2026-01-15 9:48:35 AM: Extract jDoc
+2026-01-15 9:48:35 AM: Return Ordered docs
+2026-01-15 9:48:35 AM: Fix Set List of Docs
+2026-01-15 9:48:35 AM: Fix Barcode not null
+2026-01-15 9:48:35 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-15 9:48:35 AM: Fix3 API returned docList, Adding docs to list
+2026-01-15 9:48:35 AM: Extract jDoc
+2026-01-15 9:48:35 AM: Return Ordered docs
+2026-01-15 9:48:35 AM: Fix Set current doc to docs[0]
+2026-01-15 9:48:35 AM: Fix Display image
+2026-01-15 9:48:35 AM: Fix SetImageNav
+2026-01-15 11:11:06 AM: Checking for asynchronous scanning...
+2026-01-15 11:11:06 AM: Start image acquisition
+2026-01-15 11:11:11 AM: End of image acquisition
+2026-01-15 11:11:24 AM: ProcessScan: Saving Scan
+2026-01-15 11:11:24 AM: Scan List size: 1
+2026-01-15 11:11:25 AM: Scanning finished
+2026-01-15 11:11:25 AM: Fix Checking for barcode
+2026-01-15 11:11:25 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-15 11:11:25 AM: Fix Current Doc is null
+2026-01-15 11:11:25 AM: Fix barcode found=63598765
+2026-01-15 11:11:25 AM: Fix Set List of Docs
+2026-01-15 11:11:25 AM: Fix Barcode not null
+2026-01-15 11:11:25 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-15 11:11:44 AM: Fix3 API returned docList, Adding docs to list
+2026-01-15 11:11:44 AM: Extract jDoc
+2026-01-15 11:11:45 AM: Extract jDoc
+2026-01-15 11:11:45 AM: Extract jDoc
+2026-01-15 11:11:46 AM: Return Ordered docs
+2026-01-15 11:11:46 AM: Fix Set current doc to docs[0]
+2026-01-15 11:11:46 AM: Document barcode already exists.
+2026-01-15 11:12:02 AM: Fix No batchid
+2026-01-15 11:12:03 AM: Fix Display image
+2026-01-15 11:12:03 AM: Fix SetImageNav
+2026-01-15 11:56:26 AM: Checking for asynchronous scanning...
+2026-01-15 11:56:26 AM: Start image acquisition
+2026-01-15 11:56:57 AM: End of image acquisition
+2026-01-15 11:57:05 AM: ProcessScan: Saving Scan
+2026-01-15 11:57:05 AM: Scan List size: 1
+2026-01-15 11:57:05 AM: Scanning finished
+2026-01-15 11:57:05 AM: Fix Checking for barcode
+2026-01-15 11:57:05 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-15 11:57:05 AM: Fix Current Doc is null
+2026-01-15 11:57:05 AM: add barcode manually
+2026-01-15 11:57:46 AM: Fix3 API returned docList, Adding docs to list
+2026-01-15 11:57:46 AM: Extract jDoc
+2026-01-15 11:57:46 AM: Return Ordered docs
+2026-01-15 11:57:46 AM: Fix Set List of Docs
+2026-01-15 11:57:46 AM: Fix Barcode not null
+2026-01-15 11:57:46 AM: Fix neos=true Searching for doc with associated barcode
+2026-01-15 11:57:46 AM: Fix3 API returned docList, Adding docs to list
+2026-01-15 11:57:46 AM: Extract jDoc
+2026-01-15 11:57:46 AM: Return Ordered docs
+2026-01-15 11:57:46 AM: Fix Set current doc to docs[0]
+2026-01-15 11:57:46 AM: Fix No batchid
+2026-01-15 11:57:46 AM: Fix Display image
+2026-01-15 11:57:46 AM: Fix SetImageNav
+2026-01-15 12:01:33 PM: Initializing components
+2026-01-15 12:01:36 PM: Reading app settings
+2026-01-15 12:01:36 PM: Initialize twain settings
+2026-01-15 12:01:36 PM: Set database connection
+2026-01-15 12:01:36 PM: Scanning Dashboard Using DRS API
+2026-01-15 12:01:36 PM: Load Lookup lists from API
+2026-01-15 12:01:36 PM: Load Doc Type
+2026-01-15 12:01:37 PM: Load Author Obj
+2026-01-15 12:01:37 PM: Load Owner Type Obj
+2026-01-15 12:01:37 PM: Load Box Obj
+2026-01-15 12:12:20 PM: Done Loading from DB
+2026-01-15 12:12:20 PM: Load New Form
+2026-01-15 12:12:20 PM: Make new scanner form and display it
+2026-01-15 12:12:37 PM: Checking for asynchronous scanning...
+2026-01-15 12:12:37 PM: Start image acquisition
+2026-01-15 12:12:43 PM: End of image acquisition
+2026-01-15 12:12:51 PM: ProcessScan: Saving Scan
+2026-01-15 12:12:51 PM: Scan List size: 1
+2026-01-15 12:12:51 PM: Scanning finished
+2026-01-15 12:12:51 PM: Fix Checking for barcode
+2026-01-15 12:12:52 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-15 12:12:52 PM: Fix Current Doc is null
+2026-01-15 12:12:52 PM: add barcode manually
+2026-01-15 12:13:07 PM: Fix3 API returned docList, Adding docs to list
+2026-01-15 12:13:07 PM: Extract jDoc
+2026-01-15 12:13:07 PM: Return Ordered docs
+2026-01-15 12:13:07 PM: Fix Set List of Docs
+2026-01-15 12:13:07 PM: Fix Barcode not null
+2026-01-15 12:13:07 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-15 12:13:07 PM: Fix3 API returned docList, Adding docs to list
+2026-01-15 12:13:07 PM: Extract jDoc
+2026-01-15 12:13:07 PM: Return Ordered docs
+2026-01-15 12:13:07 PM: Fix Set current doc to docs[0]
+2026-01-15 12:13:07 PM: Fix Display image
+2026-01-15 12:13:07 PM: Fix SetImageNav
+2026-01-15 12:55:21 PM: Initializing components
+2026-01-15 12:55:21 PM: Reading app settings
+2026-01-15 12:55:21 PM: Initialize twain settings
+2026-01-15 12:55:21 PM: Set database connection
+2026-01-15 12:55:21 PM: Scanning Dashboard Using DRS API
+2026-01-15 12:55:21 PM: Load Lookup lists from API
+2026-01-15 12:55:21 PM: Load Doc Type
+2026-01-15 12:55:22 PM: Load Author Obj
+2026-01-15 12:55:22 PM: Load Owner Type Obj
+2026-01-15 12:55:22 PM: Load Box Obj
+2026-01-15 12:55:33 PM: Done Loading from DB
+2026-01-15 12:55:33 PM: Load New Form
+2026-01-15 12:55:33 PM: Make new scanner form and display it
+2026-01-15 12:55:41 PM: Checking for asynchronous scanning...
+2026-01-15 12:55:41 PM: Start image acquisition
+2026-01-15 12:55:59 PM: End of image acquisition
+2026-01-15 12:56:06 PM: ProcessScan: Saving Scan
+2026-01-15 12:56:06 PM: Scan List size: 1
+2026-01-15 12:56:06 PM: Scanning finished
+2026-01-15 12:56:06 PM: Fix Checking for barcode
+2026-01-15 12:56:07 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-15 12:56:07 PM: Fix Current Doc is null
+2026-01-15 12:56:07 PM: add barcode manually
+2026-01-15 12:57:09 PM: Fix3 API returned docList, Adding docs to list
+2026-01-15 12:57:09 PM: Extract jDoc
+2026-01-15 12:57:09 PM: Return Ordered docs
+2026-01-15 12:57:15 PM: Fix Set List of Docs
+2026-01-15 12:57:30 PM: Fix Barcode not null
+2026-01-15 12:57:40 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-15 12:57:45 PM: Fix3 API returned docList, Adding docs to list
+2026-01-15 12:57:45 PM: Extract jDoc
+2026-01-15 12:57:45 PM: Return Ordered docs
+2026-01-15 12:59:21 PM: Fix Set current doc to docs[0]
+2026-01-15 1:12:10 PM: Initializing components
+2026-01-15 1:12:10 PM: Reading app settings
+2026-01-15 1:12:10 PM: Initialize twain settings
+2026-01-15 1:12:10 PM: Set database connection
+2026-01-15 1:12:10 PM: Scanning Dashboard Using DRS API
+2026-01-15 1:12:10 PM: Load Lookup lists from API
+2026-01-15 1:12:10 PM: Load Doc Type
+2026-01-15 1:12:11 PM: Load Author Obj
+2026-01-15 1:12:12 PM: Load Owner Type Obj
+2026-01-15 1:12:12 PM: Load Box Obj
+2026-01-15 1:12:27 PM: Done Loading from DB
+2026-01-15 1:12:27 PM: Load New Form
+2026-01-15 1:12:27 PM: Make new scanner form and display it
+2026-01-15 1:12:33 PM: Checking for asynchronous scanning...
+2026-01-15 1:12:33 PM: Start image acquisition
+2026-01-15 1:12:40 PM: End of image acquisition
+2026-01-15 1:12:48 PM: ProcessScan: Saving Scan
+2026-01-15 1:12:48 PM: Scan List size: 1
+2026-01-15 1:12:49 PM: Scanning finished
+2026-01-15 1:12:49 PM: Fix Checking for barcode
+2026-01-15 1:12:49 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-15 1:12:49 PM: Fix Current Doc is null
+2026-01-15 1:12:49 PM: add barcode manually
+2026-01-15 1:13:50 PM: Fix3 API returned docList, Adding docs to list
+2026-01-15 1:14:24 PM: Extract jDoc
+2026-01-15 1:14:29 PM: Return Ordered docs
+2026-01-15 1:15:15 PM: Fix Set List of Docs
+2026-01-15 1:15:27 PM: Fix Barcode not null
+2026-01-15 1:15:33 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-15 1:15:56 PM: Fix3 API returned docList, Adding docs to list
+2026-01-15 1:15:57 PM: Extract jDoc
+2026-01-15 1:15:58 PM: Return Ordered docs
+2026-01-15 1:16:14 PM: Fix Set current doc to docs[0]
+2026-01-15 1:19:52 PM: Initializing components
+2026-01-15 1:19:52 PM: Reading app settings
+2026-01-15 1:19:52 PM: Initialize twain settings
+2026-01-15 1:19:52 PM: Set database connection
+2026-01-15 1:19:52 PM: Scanning Dashboard Using DRS API
+2026-01-15 1:19:52 PM: Load Lookup lists from API
+2026-01-15 1:19:52 PM: Load Doc Type
+2026-01-15 1:19:53 PM: Load Author Obj
+2026-01-15 1:19:54 PM: Load Owner Type Obj
+2026-01-15 1:19:54 PM: Load Box Obj
+2026-01-15 1:20:02 PM: Done Loading from DB
+2026-01-15 1:20:02 PM: Load New Form
+2026-01-15 1:20:02 PM: Make new scanner form and display it
+2026-01-15 1:20:07 PM: Checking for asynchronous scanning...
+2026-01-15 1:20:07 PM: Start image acquisition
+2026-01-15 1:20:14 PM: End of image acquisition
+2026-01-15 1:20:22 PM: ProcessScan: Saving Scan
+2026-01-15 1:20:22 PM: Scan List size: 1
+2026-01-15 1:20:22 PM: Scanning finished
+2026-01-15 1:20:22 PM: Fix Checking for barcode
+2026-01-15 1:20:23 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-15 1:20:23 PM: Fix Current Doc is null
+2026-01-15 1:20:23 PM: add barcode manually
+2026-01-15 1:20:41 PM: Fix3 API returned docList, Adding docs to list
+2026-01-15 1:20:47 PM: Extract jDoc
+2026-01-15 1:20:49 PM: Return Ordered docs
+2026-01-15 1:21:08 PM: Fix Set List of Docs
+2026-01-15 1:21:15 PM: Fix Barcode not null
+2026-01-15 1:21:20 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-15 1:21:42 PM: Fix3 API returned docList, Adding docs to list
+2026-01-15 1:21:44 PM: Extract jDoc
+2026-01-15 1:21:45 PM: Return Ordered docs
+2026-01-15 1:22:00 PM: Fix Set current doc to docs[0]
+2026-01-15 1:32:30 PM: Initializing components
+2026-01-15 1:32:30 PM: Reading app settings
+2026-01-15 1:32:30 PM: Initialize twain settings
+2026-01-15 1:32:30 PM: Set database connection
+2026-01-15 1:32:30 PM: Scanning Dashboard Using DRS API
+2026-01-15 1:32:30 PM: Load Lookup lists from API
+2026-01-15 1:32:30 PM: Load Doc Type
+2026-01-15 1:32:31 PM: Load Author Obj
+2026-01-15 1:32:31 PM: Load Owner Type Obj
+2026-01-15 1:32:32 PM: Load Box Obj
+2026-01-15 1:32:43 PM: Done Loading from DB
+2026-01-15 1:32:43 PM: Load New Form
+2026-01-15 1:32:43 PM: Make new scanner form and display it
+2026-01-15 1:38:49 PM: Checking for asynchronous scanning...
+2026-01-15 1:38:49 PM: Start image acquisition
+2026-01-15 1:38:56 PM: End of image acquisition
+2026-01-15 1:39:11 PM: ProcessScan: Saving Scan
+2026-01-15 1:39:11 PM: Scan List size: 1
+2026-01-15 1:39:11 PM: Scanning finished
+2026-01-15 1:39:11 PM: Fix Checking for barcode
+2026-01-15 1:39:12 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-15 1:39:12 PM: Fix Current Doc is null
+2026-01-15 1:39:12 PM: add barcode manually
+2026-01-15 1:39:34 PM: Fix3 API returned docList, Adding docs to list
+2026-01-15 1:39:34 PM: Extract jDoc
+2026-01-15 1:39:34 PM: Extract scanning information
+2026-01-15 1:39:45 PM: Return Ordered docs
+2026-01-15 1:39:47 PM: Fix Set List of Docs
+2026-01-15 1:39:47 PM: Fix Barcode not null
+2026-01-15 1:39:47 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-15 1:39:49 PM: Fix3 API returned docList, Adding docs to list
+2026-01-15 1:39:49 PM: Extract jDoc
+2026-01-15 1:39:49 PM: Extract scanning information
+2026-01-15 1:40:02 PM: Return Ordered docs
+2026-01-15 1:40:02 PM: Fix Set current doc to docs[0]
+2026-01-15 1:40:02 PM: Document barcode already exists.
+2026-01-15 1:40:30 PM: Fix Display image
+2026-01-15 1:40:30 PM: Fix SetImageNav
+2026-01-16 11:07:25 AM: Initializing components
+2026-01-16 11:07:25 AM: Reading app settings
+2026-01-16 11:07:25 AM: Initialize twain settings
+2026-01-16 11:07:25 AM: Set database connection
+2026-01-16 11:07:25 AM: Scanning Dashboard Using DRS API
+2026-01-16 11:07:25 AM: Load Lookup lists from API
+2026-01-16 11:07:25 AM: Load Doc Type
+2026-01-16 11:07:43 AM: Load Author Obj
+2026-01-16 11:07:43 AM: Load Owner Type Obj
+2026-01-16 11:07:43 AM: Load Box Obj
+2026-01-16 11:08:25 AM: Done Loading from DB
+2026-01-16 11:08:25 AM: Load New Form
+2026-01-16 11:08:25 AM: Make new scanner form and display it
+2026-01-16 11:09:39 AM: Initializing components
+2026-01-16 11:09:39 AM: Reading app settings
+2026-01-16 11:09:39 AM: Initialize twain settings
+2026-01-16 11:09:39 AM: Set database connection
+2026-01-16 11:09:39 AM: Scanning Dashboard Using DRS API
+2026-01-16 11:09:39 AM: Load Lookup lists from API
+2026-01-16 11:09:39 AM: Load Doc Type
+2026-01-16 11:09:40 AM: Load Author Obj
+2026-01-16 11:09:40 AM: Load Owner Type Obj
+2026-01-16 11:09:40 AM: Load Box Obj
+2026-01-16 11:09:52 AM: Done Loading from DB
+2026-01-16 11:09:52 AM: Load New Form
+2026-01-16 11:09:52 AM: Make new scanner form and display it
+2026-01-16 11:10:00 AM: Checking for asynchronous scanning...
+2026-01-16 11:10:00 AM: Start image acquisition
+2026-01-16 11:10:17 AM: End of image acquisition
+2026-01-16 11:10:36 AM: ProcessScan: Saving Scan
+2026-01-16 11:10:36 AM: Scan List size: 1
+2026-01-16 11:10:37 AM: Scanning finished
+2026-01-16 11:10:37 AM: Fix Checking for barcode
+2026-01-16 11:10:37 AM: Fix Barcodes =System.Collections.ArrayList
+2026-01-16 11:10:37 AM: Fix Current Doc is null
+2026-01-16 11:10:37 AM: add barcode manually
+2026-01-16 11:15:35 AM: Fix3 API returned docList, Adding docs to list
+2026-01-16 11:15:37 AM: Extract jDoc
+2026-01-16 12:14:21 PM: Initializing components
+2026-01-16 12:14:22 PM: Reading app settings
+2026-01-16 12:14:22 PM: Initialize twain settings
+2026-01-16 12:14:22 PM: Set database connection
+2026-01-16 12:14:22 PM: Scanning Dashboard Using DRS API
+2026-01-16 12:14:22 PM: Load Lookup lists from API
+2026-01-16 12:14:22 PM: Load Doc Type
+2026-01-16 12:14:39 PM: Load Author Obj
+2026-01-16 12:14:40 PM: Load Owner Type Obj
+2026-01-16 12:14:40 PM: Load Box Obj
+2026-01-16 12:14:49 PM: Done Loading from DB
+2026-01-16 12:14:50 PM: Load New Form
+2026-01-16 12:14:50 PM: Make new scanner form and display it
+2026-01-16 12:15:01 PM: Checking for asynchronous scanning...
+2026-01-16 12:15:01 PM: Start image acquisition
+2026-01-16 12:15:07 PM: End of image acquisition
+2026-01-16 12:15:15 PM: ProcessScan: Saving Scan
+2026-01-16 12:15:15 PM: Scan List size: 1
+2026-01-16 12:15:15 PM: Scanning finished
+2026-01-16 12:15:15 PM: Fix Checking for barcode
+2026-01-16 12:15:16 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-16 12:15:16 PM: Fix Current Doc is null
+2026-01-16 12:15:16 PM: add barcode manually
+2026-01-16 12:16:08 PM: Fix3 API returned docList, Adding docs to list
+2026-01-16 12:16:18 PM: Extract jDoc
+2026-01-16 12:16:35 PM: Extract scanning information
+2026-01-16 12:23:50 PM: Initializing components
+2026-01-16 12:23:51 PM: Reading app settings
+2026-01-16 12:23:51 PM: Initialize twain settings
+2026-01-16 12:23:51 PM: Set database connection
+2026-01-16 12:23:51 PM: Scanning Dashboard Using DRS API
+2026-01-16 12:23:51 PM: Load Lookup lists from API
+2026-01-16 12:23:51 PM: Load Doc Type
+2026-01-16 12:23:51 PM: Load Author Obj
+2026-01-16 12:23:52 PM: Load Owner Type Obj
+2026-01-16 12:23:52 PM: Load Box Obj
+2026-01-16 12:24:01 PM: Done Loading from DB
+2026-01-16 12:24:01 PM: Load New Form
+2026-01-16 12:24:01 PM: Make new scanner form and display it
+2026-01-16 12:24:09 PM: Checking for asynchronous scanning...
+2026-01-16 12:24:09 PM: Start image acquisition
+2026-01-16 12:24:18 PM: End of image acquisition
+2026-01-16 12:24:26 PM: ProcessScan: Saving Scan
+2026-01-16 12:24:26 PM: Scan List size: 1
+2026-01-16 12:24:27 PM: Scanning finished
+2026-01-16 12:24:27 PM: Fix Checking for barcode
+2026-01-16 12:24:27 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-16 12:24:27 PM: Fix Current Doc is null
+2026-01-16 12:24:27 PM: add barcode manually
+2026-01-16 12:24:51 PM: Fix3 API returned docList, Adding docs to list
+2026-01-16 12:24:57 PM: Extract jDoc
+2026-01-16 12:26:00 PM: Initializing components
+2026-01-16 12:26:00 PM: Reading app settings
+2026-01-16 12:26:00 PM: Initialize twain settings
+2026-01-16 12:26:00 PM: Set database connection
+2026-01-16 12:26:00 PM: Scanning Dashboard Using DRS API
+2026-01-16 12:26:00 PM: Load Lookup lists from API
+2026-01-16 12:26:00 PM: Load Doc Type
+2026-01-16 12:26:01 PM: Load Author Obj
+2026-01-16 12:26:01 PM: Load Owner Type Obj
+2026-01-16 12:26:01 PM: Load Box Obj
+2026-01-16 12:26:11 PM: Done Loading from DB
+2026-01-16 12:26:11 PM: Load New Form
+2026-01-16 12:26:11 PM: Make new scanner form and display it
+2026-01-16 12:26:15 PM: Checking for asynchronous scanning...
+2026-01-16 12:26:15 PM: Start image acquisition
+2026-01-16 12:26:23 PM: End of image acquisition
+2026-01-16 12:26:31 PM: ProcessScan: Saving Scan
+2026-01-16 12:26:31 PM: Scan List size: 1
+2026-01-16 12:26:32 PM: Scanning finished
+2026-01-16 12:26:32 PM: Fix Checking for barcode
+2026-01-16 12:26:32 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-16 12:26:32 PM: Fix Current Doc is null
+2026-01-16 12:26:32 PM: add barcode manually
+2026-01-16 12:26:58 PM: Fix3 API returned docList, Adding docs to list
+2026-01-16 12:27:10 PM: Extract jDoc
+2026-01-16 12:31:36 PM: Initializing components
+2026-01-16 12:31:36 PM: Reading app settings
+2026-01-16 12:31:36 PM: Initialize twain settings
+2026-01-16 12:31:36 PM: Set database connection
+2026-01-16 12:31:36 PM: Scanning Dashboard Using DRS API
+2026-01-16 12:31:36 PM: Load Lookup lists from API
+2026-01-16 12:31:36 PM: Load Doc Type
+2026-01-16 12:31:37 PM: Load Author Obj
+2026-01-16 12:31:37 PM: Load Owner Type Obj
+2026-01-16 12:31:38 PM: Load Box Obj
+2026-01-16 12:31:47 PM: Done Loading from DB
+2026-01-16 12:31:47 PM: Load New Form
+2026-01-16 12:31:47 PM: Make new scanner form and display it
+2026-01-16 12:31:51 PM: Checking for asynchronous scanning...
+2026-01-16 12:31:51 PM: Start image acquisition
+2026-01-16 12:31:56 PM: End of image acquisition
+2026-01-16 12:32:05 PM: ProcessScan: Saving Scan
+2026-01-16 12:32:05 PM: Scan List size: 1
+2026-01-16 12:32:05 PM: Scanning finished
+2026-01-16 12:32:05 PM: Fix Checking for barcode
+2026-01-16 12:32:06 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-16 12:32:06 PM: Fix Current Doc is null
+2026-01-16 12:32:06 PM: add barcode manually
+2026-01-16 12:32:18 PM: Fix3 API returned docList, Adding docs to list
+2026-01-16 12:32:23 PM: Extract jDoc
+2026-01-16 12:34:39 PM: Initializing components
+2026-01-16 12:34:39 PM: Reading app settings
+2026-01-16 12:34:39 PM: Initialize twain settings
+2026-01-16 12:34:39 PM: Set database connection
+2026-01-16 12:34:39 PM: Scanning Dashboard Using DRS API
+2026-01-16 12:34:39 PM: Load Lookup lists from API
+2026-01-16 12:34:39 PM: Load Doc Type
+2026-01-16 12:34:40 PM: Load Author Obj
+2026-01-16 12:34:40 PM: Load Owner Type Obj
+2026-01-16 12:34:40 PM: Load Box Obj
+2026-01-16 12:34:48 PM: Done Loading from DB
+2026-01-16 12:34:48 PM: Load New Form
+2026-01-16 12:34:48 PM: Make new scanner form and display it
+2026-01-16 12:34:52 PM: Checking for asynchronous scanning...
+2026-01-16 12:34:52 PM: Start image acquisition
+2026-01-16 12:34:59 PM: End of image acquisition
+2026-01-16 12:35:07 PM: ProcessScan: Saving Scan
+2026-01-16 12:35:07 PM: Scan List size: 1
+2026-01-16 12:35:08 PM: Scanning finished
+2026-01-16 12:35:08 PM: Fix Checking for barcode
+2026-01-16 12:35:08 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-16 12:35:08 PM: Fix Current Doc is null
+2026-01-16 12:35:08 PM: add barcode manually
+2026-01-16 12:35:20 PM: Fix3 API returned docList, Adding docs to list
+2026-01-16 12:35:23 PM: Extract jDoc
+2026-01-16 12:36:29 PM: Initializing components
+2026-01-16 12:36:29 PM: Reading app settings
+2026-01-16 12:36:29 PM: Initialize twain settings
+2026-01-16 12:36:29 PM: Set database connection
+2026-01-16 12:36:29 PM: Scanning Dashboard Using DRS API
+2026-01-16 12:36:29 PM: Load Lookup lists from API
+2026-01-16 12:36:29 PM: Load Doc Type
+2026-01-16 12:36:29 PM: Load Author Obj
+2026-01-16 12:36:30 PM: Load Owner Type Obj
+2026-01-16 12:36:30 PM: Load Box Obj
+2026-01-16 12:36:37 PM: Done Loading from DB
+2026-01-16 12:36:37 PM: Load New Form
+2026-01-16 12:36:37 PM: Make new scanner form and display it
+2026-01-16 12:36:45 PM: Checking for asynchronous scanning...
+2026-01-16 12:36:45 PM: Start image acquisition
+2026-01-16 12:36:52 PM: End of image acquisition
+2026-01-16 12:36:59 PM: ProcessScan: Saving Scan
+2026-01-16 12:36:59 PM: Scan List size: 1
+2026-01-16 12:37:00 PM: Scanning finished
+2026-01-16 12:37:00 PM: Fix Checking for barcode
+2026-01-16 12:37:00 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-16 12:37:00 PM: Fix Current Doc is null
+2026-01-16 12:37:00 PM: add barcode manually
+2026-01-16 12:37:16 PM: Fix3 API returned docList, Adding docs to list
+2026-01-16 12:37:17 PM: Extract jDoc
+2026-01-16 12:39:13 PM: Initializing components
+2026-01-16 12:39:13 PM: Reading app settings
+2026-01-16 12:39:13 PM: Initialize twain settings
+2026-01-16 12:39:13 PM: Set database connection
+2026-01-16 12:39:13 PM: Scanning Dashboard Using DRS API
+2026-01-16 12:39:13 PM: Load Lookup lists from API
+2026-01-16 12:39:13 PM: Load Doc Type
+2026-01-16 12:39:14 PM: Load Author Obj
+2026-01-16 12:39:14 PM: Load Owner Type Obj
+2026-01-16 12:39:14 PM: Load Box Obj
+2026-01-16 12:39:23 PM: Done Loading from DB
+2026-01-16 12:39:23 PM: Load New Form
+2026-01-16 12:39:23 PM: Make new scanner form and display it
+2026-01-16 12:39:34 PM: Checking for asynchronous scanning...
+2026-01-16 12:39:34 PM: Start image acquisition
+2026-01-16 12:39:40 PM: End of image acquisition
+2026-01-16 12:39:47 PM: ProcessScan: Saving Scan
+2026-01-16 12:39:47 PM: Scan List size: 1
+2026-01-16 12:39:48 PM: Scanning finished
+2026-01-16 12:39:48 PM: Fix Checking for barcode
+2026-01-16 12:39:48 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-16 12:39:48 PM: Fix Current Doc is null
+2026-01-16 12:39:48 PM: add barcode manually
+2026-01-16 12:40:06 PM: Fix3 API returned docList, Adding docs to list
+2026-01-16 12:40:31 PM: Extract jDoc
+2026-01-16 12:46:56 PM: Extract scanning information
+2026-01-16 1:00:05 PM: Initializing components
+2026-01-16 1:00:05 PM: Reading app settings
+2026-01-16 1:00:05 PM: Initialize twain settings
+2026-01-16 1:00:05 PM: Set database connection
+2026-01-16 1:00:05 PM: Scanning Dashboard Using DRS API
+2026-01-16 1:00:05 PM: Load Lookup lists from API
+2026-01-16 1:00:05 PM: Load Doc Type
+2026-01-16 1:00:21 PM: Load Author Obj
+2026-01-16 1:00:21 PM: Load Owner Type Obj
+2026-01-16 1:00:22 PM: Load Box Obj
+2026-01-16 1:00:33 PM: Done Loading from DB
+2026-01-16 1:00:33 PM: Load New Form
+2026-01-16 1:00:33 PM: Make new scanner form and display it
+2026-01-16 1:00:42 PM: Checking for asynchronous scanning...
+2026-01-16 1:00:42 PM: Start image acquisition
+2026-01-16 1:00:48 PM: End of image acquisition
+2026-01-16 1:00:55 PM: ProcessScan: Saving Scan
+2026-01-16 1:00:55 PM: Scan List size: 1
+2026-01-16 1:00:56 PM: Scanning finished
+2026-01-16 1:00:56 PM: Fix Checking for barcode
+2026-01-16 1:00:56 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-16 1:00:56 PM: Fix Current Doc is null
+2026-01-16 1:00:56 PM: add barcode manually
+2026-01-16 1:01:17 PM: Fix3 API returned docList, Adding docs to list
+2026-01-16 1:01:27 PM: Extract jDoc
+2026-01-16 1:01:54 PM: Extract scanning information
+2026-01-16 1:01:54 PM: Return Ordered docs
+2026-01-16 1:01:56 PM: Fix Set List of Docs
+2026-01-16 1:01:56 PM: Fix Barcode not null
+2026-01-16 1:01:56 PM: Fix neos=true Searching for doc with associated barcode
+2026-01-16 1:01:59 PM: Fix3 API returned docList, Adding docs to list
+2026-01-16 1:01:59 PM: Extract jDoc
+2026-01-16 1:02:02 PM: Extract scanning information
+2026-01-16 1:02:02 PM: Return Ordered docs
+2026-01-16 1:02:02 PM: Fix Set current doc to docs[0]
+2026-01-16 1:02:02 PM: Fix Display image
+2026-01-16 1:02:02 PM: Fix SetImageNav
+2026-01-16 1:02:26 PM: Checking for asynchronous scanning...
+2026-01-16 1:02:26 PM: Start image acquisition
+2026-01-16 1:02:34 PM: End of image acquisition
+2026-01-16 1:02:34 PM: Scanning finished
+2026-01-16 1:03:20 PM: Checking for asynchronous scanning...
+2026-01-16 1:03:20 PM: Start image acquisition
+2026-01-16 1:03:43 PM: End of image acquisition
+2026-01-16 1:03:50 PM: ProcessScan: Saving Scan
+2026-01-16 1:03:50 PM: Scan List size: 1
+2026-01-16 1:03:50 PM: Scanning finished
+2026-01-16 1:03:50 PM: Fix Checking for barcode
+2026-01-16 1:03:50 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-16 1:03:50 PM: Fix Current Doc is null
+2026-01-16 1:03:50 PM: add barcode manually
+2026-01-16 1:04:05 PM: Fix3 API returned docList, Adding docs to list
+2026-01-16 1:04:05 PM: Extract jDoc
+2026-01-16 1:05:58 PM: Initializing components
+2026-01-16 1:05:58 PM: Reading app settings
+2026-01-16 1:05:58 PM: Initialize twain settings
+2026-01-16 1:05:58 PM: Set database connection
+2026-01-16 1:05:58 PM: Scanning Dashboard Using DRS API
+2026-01-16 1:05:58 PM: Load Lookup lists from API
+2026-01-16 1:05:58 PM: Load Doc Type
+2026-01-16 1:05:58 PM: Load Author Obj
+2026-01-16 1:05:59 PM: Load Owner Type Obj
+2026-01-16 1:05:59 PM: Load Box Obj
+2026-01-16 1:06:07 PM: Done Loading from DB
+2026-01-16 1:06:07 PM: Load New Form
+2026-01-16 1:06:07 PM: Make new scanner form and display it
+2026-01-16 1:06:11 PM: Checking for asynchronous scanning...
+2026-01-16 1:06:11 PM: Start image acquisition
+2026-01-16 1:06:16 PM: End of image acquisition
+2026-01-16 1:06:24 PM: ProcessScan: Saving Scan
+2026-01-16 1:06:24 PM: Scan List size: 1
+2026-01-16 1:06:25 PM: Scanning finished
+2026-01-16 1:06:25 PM: Fix Checking for barcode
+2026-01-16 1:06:25 PM: Fix Barcodes =System.Collections.ArrayList
+2026-01-16 1:06:25 PM: Fix Current Doc is null
+2026-01-16 1:06:25 PM: add barcode manually
+2026-01-16 1:06:34 PM: Fix3 API returned docList, Adding docs to list
+2026-01-16 1:06:34 PM: Extract jDoc

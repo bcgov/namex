@@ -1,0 +1,14 @@
+﻿
+VintaSoft Twain .NET SDK allows to control work of flatbed and ADF scanners, 
+web and digital cameras and any other TWAIN specification compatible devices 
+from .NET and WPF environment. 
+
+The SDK was tested in and has examples of use for: MS VB.NET, MS C#.NET, ASP.NET.
+
+================================================================================
+
+VintaSoft Twain .NET SDK - позволяет управлять работой сканеров, веб и цифровых 
+камер, а также любых других TWAIN совместимых устройств из среды .NET и WPF.
+
+SDK был протестирован в и имеет примеры использования для:
+MS VB.NET, MS C#.NET, ASP.NET.

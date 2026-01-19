@@ -1,0 +1,373 @@
+2019-06-06 7:45:52 AM: Initializing components
+2019-06-06 7:45:52 AM: Reaading app settings
+2019-06-06 7:45:52 AM: Initialize twain settings
+2019-06-06 7:45:52 AM: Set database connection
+2019-06-06 7:45:52 AM: Scanning Dashboard Using Database Test
+2019-06-06 7:45:52 AM: Load Lookup lists from DB
+2019-06-06 7:45:52 AM: Load Doc Type
+2019-06-06 7:46:07 AM: 0 Doc Types
+2019-06-06 7:46:07 AM: Load Author Obj
+2019-06-06 7:46:22 AM: 0 Author Objects
+2019-06-06 7:46:22 AM: Load Owner Type Obj
+2019-06-06 7:46:37 AM: 0 Owner Objects
+2019-06-06 7:46:37 AM: Load Box Obj
+2019-06-06 7:46:52 AM: 0 Box Objects
+2019-06-06 7:46:52 AM: Done Loading from DB
+2019-06-06 7:46:52 AM: Load New Form
+2019-06-06 7:46:52 AM: Make new scanner form and display it
+2019-06-06 7:47:34 AM: Checking for asynchronous scanning...
+2019-06-06 7:47:34 AM: Start image acquisition
+2019-06-06 7:47:40 AM: End of image acquisition
+2019-06-06 7:48:00 AM: ProcessScan: Saving Scan
+2019-06-06 7:48:00 AM: Scan List size: 1
+2019-06-06 7:48:19 AM: ProcessScan: Saving Scan
+2019-06-06 7:48:19 AM: Scan List size: 2
+2019-06-06 7:48:38 AM: ProcessScan: Saving Scan
+2019-06-06 7:48:38 AM: Scan List size: 3
+2019-06-06 7:48:57 AM: ProcessScan: Saving Scan
+2019-06-06 7:48:57 AM: Scan List size: 4
+2019-06-06 7:49:17 AM: ProcessScan: Saving Scan
+2019-06-06 7:49:17 AM: Scan List size: 5
+2019-06-06 7:49:36 AM: ProcessScan: Saving Scan
+2019-06-06 7:49:36 AM: Scan List size: 6
+2019-06-06 7:50:03 AM: ProcessScan: Saving Scan
+2019-06-06 7:50:03 AM: Scan List size: 7
+2019-06-06 7:50:31 AM: ProcessScan: Saving Scan
+2019-06-06 7:50:31 AM: Scan List size: 8
+2019-06-06 7:50:55 AM: ProcessScan: Saving Scan
+2019-06-06 7:50:55 AM: Scan List size: 9
+2019-06-06 7:51:15 AM: ProcessScan: Saving Scan
+2019-06-06 7:51:15 AM: Scan List size: 10
+2019-06-06 7:51:35 AM: ProcessScan: Saving Scan
+2019-06-06 7:51:35 AM: Scan List size: 11
+2019-06-06 7:51:54 AM: ProcessScan: Saving Scan
+2019-06-06 7:51:54 AM: Scan List size: 12
+2019-06-06 7:52:13 AM: ProcessScan: Saving Scan
+2019-06-06 7:52:13 AM: Scan List size: 13
+2019-06-06 7:52:32 AM: ProcessScan: Saving Scan
+2019-06-06 7:52:32 AM: Scan List size: 14
+2019-06-06 7:52:51 AM: ProcessScan: Saving Scan
+2019-06-06 7:52:51 AM: Scan List size: 15
+2019-06-06 8:36:36 AM: Initializing components
+2019-06-06 8:36:36 AM: Reaading app settings
+2019-06-06 8:36:36 AM: Initialize twain settings
+2019-06-06 8:36:36 AM: Set database connection
+2019-06-06 8:36:36 AM: Scanning Dashboard Using Database Test
+2019-06-06 8:36:36 AM: Load Lookup lists from DB
+2019-06-06 8:36:36 AM: Load Doc Type
+2019-06-06 8:36:53 AM: 0 Doc Types
+2019-06-06 8:36:53 AM: Load Author Obj
+2019-06-06 8:37:08 AM: 0 Author Objects
+2019-06-06 8:37:08 AM: Load Owner Type Obj
+2019-06-06 8:37:23 AM: 0 Owner Objects
+2019-06-06 8:37:23 AM: Load Box Obj
+2019-06-06 8:37:38 AM: 0 Box Objects
+2019-06-06 8:37:38 AM: Done Loading from DB
+2019-06-06 8:37:38 AM: Load New Form
+2019-06-06 8:37:38 AM: Make new scanner form and display it
+2019-06-06 9:10:54 AM: Initializing components
+2019-06-06 9:10:54 AM: Reaading app settings
+2019-06-06 9:10:54 AM: Initialize twain settings
+2019-06-06 9:10:54 AM: Set database connection
+2019-06-06 9:10:54 AM: Scanning Dashboard Using Database Test
+2019-06-06 9:10:54 AM: Load Lookup lists from DB
+2019-06-06 9:10:54 AM: Load Doc Type
+2019-06-06 9:11:09 AM: 0 Doc Types
+2019-06-06 9:11:09 AM: Load Author Obj
+2019-06-06 9:11:24 AM: 0 Author Objects
+2019-06-06 9:11:24 AM: Load Owner Type Obj
+2019-06-06 9:11:39 AM: 0 Owner Objects
+2019-06-06 9:11:39 AM: Load Box Obj
+2019-06-06 9:11:54 AM: 0 Box Objects
+2019-06-06 9:11:54 AM: Done Loading from DB
+2019-06-06 9:11:54 AM: Load New Form
+2019-06-06 9:11:54 AM: Make new scanner form and display it
+2019-06-07 6:25:51 AM: Initializing components
+2019-06-07 6:25:51 AM: Reaading app settings
+2019-06-07 6:25:51 AM: Initialize twain settings
+2019-06-07 6:25:51 AM: Set database connection
+2019-06-07 6:25:51 AM: Scanning Dashboard Using Database Test
+2019-06-07 6:25:51 AM: Load Lookup lists from DB
+2019-06-07 6:25:51 AM: Load Doc Type
+2019-06-07 6:26:06 AM: 0 Doc Types
+2019-06-07 6:26:06 AM: Load Author Obj
+2019-06-07 6:26:21 AM: 0 Author Objects
+2019-06-07 6:26:21 AM: Load Owner Type Obj
+2019-06-07 6:26:36 AM: 0 Owner Objects
+2019-06-07 6:26:36 AM: Load Box Obj
+2019-06-07 6:26:51 AM: 0 Box Objects
+2019-06-07 6:26:51 AM: Done Loading from DB
+2019-06-07 6:26:51 AM: Load New Form
+2019-06-07 6:26:51 AM: Make new scanner form and display it
+2019-06-07 7:05:48 AM: Initializing components
+2019-06-07 7:05:48 AM: Reaading app settings
+2019-06-07 7:05:48 AM: Initialize twain settings
+2019-06-07 7:05:48 AM: Set database connection
+2019-06-07 7:05:48 AM: Scanning Dashboard Using Database Test
+2019-06-07 7:05:48 AM: Load Lookup lists from DB
+2019-06-07 7:05:48 AM: Load Doc Type
+2019-06-07 7:06:04 AM: 0 Doc Types
+2019-06-07 7:06:04 AM: Load Author Obj
+2019-06-07 7:06:19 AM: 0 Author Objects
+2019-06-07 7:06:19 AM: Load Owner Type Obj
+2019-06-07 7:06:34 AM: 0 Owner Objects
+2019-06-07 7:06:34 AM: Load Box Obj
+2019-06-07 7:06:49 AM: 0 Box Objects
+2019-06-07 7:06:49 AM: Done Loading from DB
+2019-06-07 7:06:49 AM: Load New Form
+2019-06-07 7:06:49 AM: Make new scanner form and display it
+2019-06-07 7:16:34 AM: Initializing components
+2019-06-07 7:16:34 AM: Reaading app settings
+2019-06-07 7:16:34 AM: Initialize twain settings
+2019-06-07 7:16:34 AM: Set database connection
+2019-06-07 7:16:34 AM: Scanning Dashboard Using Database Test
+2019-06-07 7:16:34 AM: Load Lookup lists from DB
+2019-06-07 7:16:34 AM: Load Doc Type
+2019-06-07 7:16:49 AM: 0 Doc Types
+2019-06-07 7:16:49 AM: Load Author Obj
+2019-06-07 7:17:04 AM: 0 Author Objects
+2019-06-07 7:17:04 AM: Load Owner Type Obj
+2019-06-07 7:17:20 AM: 0 Owner Objects
+2019-06-07 7:17:20 AM: Load Box Obj
+2019-06-07 7:17:35 AM: 0 Box Objects
+2019-06-07 7:17:35 AM: Done Loading from DB
+2019-06-07 7:17:35 AM: Load New Form
+2019-06-07 7:17:35 AM: Make new scanner form and display it
+2019-06-07 7:43:43 AM: Initializing components
+2019-06-07 7:43:43 AM: Reaading app settings
+2019-06-07 7:43:43 AM: Initialize twain settings
+2019-06-07 7:43:43 AM: Set database connection
+2019-06-07 7:43:43 AM: Scanning Dashboard Using Database Test
+2019-06-07 7:43:43 AM: Load Lookup lists from DB
+2019-06-07 7:43:43 AM: Load Doc Type
+2019-06-07 7:43:59 AM: 0 Doc Types
+2019-06-07 7:43:59 AM: Load Author Obj
+2019-06-07 7:44:14 AM: 0 Author Objects
+2019-06-07 7:44:14 AM: Load Owner Type Obj
+2019-06-07 7:44:29 AM: 0 Owner Objects
+2019-06-07 7:44:29 AM: Load Box Obj
+2019-06-07 7:44:44 AM: 0 Box Objects
+2019-06-07 7:44:44 AM: Done Loading from DB
+2019-06-07 7:44:44 AM: Load New Form
+2019-06-07 7:44:44 AM: Make new scanner form and display it
+2019-06-07 7:48:00 AM: Initializing components
+2019-06-07 7:48:00 AM: Reaading app settings
+2019-06-07 7:48:00 AM: Initialize twain settings
+2019-06-07 7:48:00 AM: Set database connection
+2019-06-07 7:48:00 AM: Scanning Dashboard Using Database Test
+2019-06-07 7:48:00 AM: Load Lookup lists from DB
+2019-06-07 7:48:00 AM: Load Doc Type
+2019-06-07 7:48:15 AM: 0 Doc Types
+2019-06-07 7:48:15 AM: Load Author Obj
+2019-06-07 7:48:30 AM: 0 Author Objects
+2019-06-07 7:48:30 AM: Load Owner Type Obj
+2019-06-07 7:48:45 AM: 0 Owner Objects
+2019-06-07 7:48:45 AM: Load Box Obj
+2019-06-07 7:49:00 AM: 0 Box Objects
+2019-06-07 7:49:00 AM: Done Loading from DB
+2019-06-07 7:49:01 AM: Load New Form
+2019-06-07 7:49:01 AM: Make new scanner form and display it
+2019-06-07 7:57:34 AM: Initializing components
+2019-06-07 7:57:34 AM: Reaading app settings
+2019-06-07 7:57:34 AM: Initialize twain settings
+2019-06-07 7:57:34 AM: Set database connection
+2019-06-07 7:57:35 AM: Scanning Dashboard Using Database Test
+2019-06-07 7:57:35 AM: Load Lookup lists from DB
+2019-06-07 7:57:35 AM: Load Doc Type
+2019-06-07 7:57:51 AM: 0 Doc Types
+2019-06-07 7:57:51 AM: Load Author Obj
+2019-06-07 7:58:06 AM: 0 Author Objects
+2019-06-07 7:58:06 AM: Load Owner Type Obj
+2019-06-07 7:58:21 AM: 0 Owner Objects
+2019-06-07 7:58:21 AM: Load Box Obj
+2019-06-07 7:58:36 AM: 0 Box Objects
+2019-06-07 7:58:36 AM: Done Loading from DB
+2019-06-07 7:58:36 AM: Load New Form
+2019-06-07 7:58:36 AM: Make new scanner form and display it
+2019-06-07 8:01:38 AM: Initializing components
+2019-06-07 8:01:38 AM: Reaading app settings
+2019-06-07 8:01:38 AM: Initialize twain settings
+2019-06-07 8:01:38 AM: Set database connection
+2019-06-07 8:01:38 AM: Scanning Dashboard Using Database Test
+2019-06-07 8:01:38 AM: Load Lookup lists from DB
+2019-06-07 8:01:38 AM: Load Doc Type
+2019-06-07 8:01:53 AM: 0 Doc Types
+2019-06-07 8:01:53 AM: Load Author Obj
+2019-06-07 8:02:08 AM: 0 Author Objects
+2019-06-07 8:02:08 AM: Load Owner Type Obj
+2019-06-07 8:02:23 AM: 0 Owner Objects
+2019-06-07 8:02:23 AM: Load Box Obj
+2019-06-07 8:02:38 AM: 0 Box Objects
+2019-06-07 8:02:38 AM: Done Loading from DB
+2019-06-07 8:02:38 AM: Load New Form
+2019-06-07 8:02:38 AM: Make new scanner form and display it
+2019-06-07 8:07:17 AM: Initializing components
+2019-06-07 8:07:17 AM: Reaading app settings
+2019-06-07 8:07:17 AM: Initialize twain settings
+2019-06-07 8:07:17 AM: Set database connection
+2019-06-07 8:07:17 AM: Scanning Dashboard Using Database Test
+2019-06-07 8:07:17 AM: Load Lookup lists from DB
+2019-06-07 8:07:17 AM: Load Doc Type
+2019-06-07 8:07:33 AM: 0 Doc Types
+2019-06-07 8:07:33 AM: Load Author Obj
+2019-06-07 8:07:48 AM: 0 Author Objects
+2019-06-07 8:07:48 AM: Load Owner Type Obj
+2019-06-07 8:08:03 AM: 0 Owner Objects
+2019-06-07 8:08:03 AM: Load Box Obj
+2019-06-07 8:08:18 AM: 0 Box Objects
+2019-06-07 8:08:18 AM: Done Loading from DB
+2019-06-07 8:08:18 AM: Load New Form
+2019-06-07 8:08:18 AM: Make new scanner form and display it
+2019-06-07 8:17:23 AM: Initializing components
+2019-06-07 8:17:24 AM: Reaading app settings
+2019-06-07 8:17:24 AM: Initialize twain settings
+2019-06-07 8:17:24 AM: Set database connection
+2019-06-07 8:17:24 AM: Scanning Dashboard Using Database Test
+2019-06-07 8:17:24 AM: Load Lookup lists from DB
+2019-06-07 8:17:24 AM: Load Doc Type
+2019-06-07 8:17:40 AM: 0 Doc Types
+2019-06-07 8:17:40 AM: Load Author Obj
+2019-06-07 8:17:55 AM: 0 Author Objects
+2019-06-07 8:17:55 AM: Load Owner Type Obj
+2019-06-07 8:18:10 AM: 0 Owner Objects
+2019-06-07 8:18:10 AM: Load Box Obj
+2019-06-07 8:18:25 AM: 0 Box Objects
+2019-06-07 8:18:25 AM: Done Loading from DB
+2019-06-07 8:18:26 AM: Load New Form
+2019-06-07 8:18:26 AM: Make new scanner form and display it
+2019-06-10 7:06:07 AM: Initializing components
+2019-06-10 7:06:07 AM: Reaading app settings
+2019-06-10 7:06:07 AM: Initialize twain settings
+2019-06-10 7:06:07 AM: Set database connection
+2019-06-10 7:06:07 AM: Scanning Dashboard Using Database Test
+2019-06-10 7:06:07 AM: Load Lookup lists from DB
+2019-06-10 7:06:07 AM: Load Doc Type
+2019-06-10 7:06:23 AM: 0 Doc Types
+2019-06-10 7:06:23 AM: Load Author Obj
+2019-06-10 7:06:38 AM: 0 Author Objects
+2019-06-10 7:06:38 AM: Load Owner Type Obj
+2019-06-10 7:06:53 AM: 0 Owner Objects
+2019-06-10 7:06:53 AM: Load Box Obj
+2019-06-10 7:07:08 AM: 0 Box Objects
+2019-06-10 7:07:08 AM: Done Loading from DB
+2019-06-10 7:07:08 AM: Load New Form
+2019-06-10 7:07:08 AM: Make new scanner form and display it
+2019-06-10 7:43:50 AM: Initializing components
+2019-06-10 7:43:51 AM: Reaading app settings
+2019-06-10 7:43:51 AM: Initialize twain settings
+2019-06-10 7:43:51 AM: Set database connection
+2019-06-10 7:43:51 AM: Scanning Dashboard Using Database Test
+2019-06-10 7:43:51 AM: Load Lookup lists from DB
+2019-06-10 7:43:51 AM: Load Doc Type
+2019-06-10 7:43:52 AM: 0 Doc Types
+2019-06-10 7:43:52 AM: Load Author Obj
+2019-06-10 7:43:52 AM: 0 Author Objects
+2019-06-10 7:43:52 AM: Load Owner Type Obj
+2019-06-10 7:43:52 AM: 0 Owner Objects
+2019-06-10 7:43:52 AM: Load Box Obj
+2019-06-10 7:43:52 AM: 0 Box Objects
+2019-06-10 7:43:52 AM: Done Loading from DB
+2019-06-10 7:43:53 AM: Load New Form
+2019-06-10 7:43:53 AM: Make new scanner form and display it
+2019-06-11 7:18:13 AM: Initializing components
+2019-06-11 7:18:13 AM: Reaading app settings
+2019-06-11 7:18:13 AM: Initialize twain settings
+2019-06-11 7:18:14 AM: Set database connection
+2019-06-11 7:18:14 AM: Scanning Dashboard Using Database Test
+2019-06-11 7:18:14 AM: Load Lookup lists from DB
+2019-06-11 7:18:14 AM: Load Doc Type
+2019-06-11 7:18:16 AM: 116 Doc Types
+2019-06-11 7:18:16 AM: Load Author Obj
+2019-06-11 7:18:16 AM: 73 Author Objects
+2019-06-11 7:18:16 AM: Load Owner Type Obj
+2019-06-11 7:18:16 AM: 14 Owner Objects
+2019-06-11 7:18:16 AM: Load Box Obj
+2019-06-11 7:18:16 AM: 36 Box Objects
+2019-06-11 7:18:16 AM: Done Loading from DB
+2019-06-11 7:18:16 AM: Load New Form
+2019-06-11 7:18:16 AM: Make new scanner form and display it
+2019-06-11 8:34:31 AM: Initializing components
+2019-06-11 8:34:31 AM: Reaading app settings
+2019-06-11 8:34:31 AM: Initialize twain settings
+2019-06-11 8:34:31 AM: Set database connection
+2019-06-11 8:34:31 AM: Scanning Dashboard Using Database Test
+2019-06-11 8:34:31 AM: Load Lookup lists from DB
+2019-06-11 8:34:31 AM: Load Doc Type
+2019-06-11 8:34:33 AM: 116 Doc Types
+2019-06-11 8:34:33 AM: Load Author Obj
+2019-06-11 8:34:33 AM: 73 Author Objects
+2019-06-11 8:34:33 AM: Load Owner Type Obj
+2019-06-11 8:34:33 AM: 14 Owner Objects
+2019-06-11 8:34:33 AM: Load Box Obj
+2019-06-11 8:34:34 AM: 36 Box Objects
+2019-06-11 8:34:34 AM: Done Loading from DB
+2019-06-11 8:34:34 AM: Load New Form
+2019-06-11 8:34:34 AM: Make new scanner form and display it
+2019-06-12 7:02:38 AM: Initializing components
+2019-06-12 7:02:38 AM: Reaading app settings
+2019-06-12 7:02:38 AM: Initialize twain settings
+2019-06-12 7:02:38 AM: Set database connection
+2019-06-12 7:02:38 AM: Scanning Dashboard Using Database Test
+2019-06-12 7:02:38 AM: Load Lookup lists from DB
+2019-06-12 7:02:38 AM: Load Doc Type
+2019-06-12 7:02:39 AM: 116 Doc Types
+2019-06-12 7:02:39 AM: Load Author Obj
+2019-06-12 7:02:39 AM: 73 Author Objects
+2019-06-12 7:02:39 AM: Load Owner Type Obj
+2019-06-12 7:02:39 AM: 14 Owner Objects
+2019-06-12 7:02:39 AM: Load Box Obj
+2019-06-12 7:02:39 AM: 36 Box Objects
+2019-06-12 7:02:39 AM: Done Loading from DB
+2019-06-12 7:02:39 AM: Load New Form
+2019-06-12 7:02:39 AM: Make new scanner form and display it
+2019-06-12 7:12:28 AM: Initializing components
+2019-06-12 7:12:28 AM: Reaading app settings
+2019-06-12 7:12:28 AM: Initialize twain settings
+2019-06-12 7:12:28 AM: Set database connection
+2019-06-12 7:12:28 AM: Scanning Dashboard Using Database Test
+2019-06-12 7:12:28 AM: Load Lookup lists from DB
+2019-06-12 7:12:28 AM: Load Doc Type
+2019-06-12 7:12:28 AM: 0 Doc Types
+2019-06-12 7:12:28 AM: Load Author Obj
+2019-06-12 7:12:28 AM: 0 Author Objects
+2019-06-12 7:12:28 AM: Load Owner Type Obj
+2019-06-12 7:12:28 AM: 0 Owner Objects
+2019-06-12 7:12:28 AM: Load Box Obj
+2019-06-12 7:12:28 AM: 0 Box Objects
+2019-06-12 7:12:28 AM: Done Loading from DB
+2019-06-12 7:12:28 AM: Load New Form
+2019-06-12 7:12:28 AM: Make new scanner form and display it
+2019-06-12 7:12:57 AM: Initializing components
+2019-06-12 7:12:57 AM: Reaading app settings
+2019-06-12 7:12:57 AM: Initialize twain settings
+2019-06-12 7:12:57 AM: Set database connection
+2019-06-12 7:12:57 AM: Scanning Dashboard Using Database Test
+2019-06-12 7:12:57 AM: Load Lookup lists from DB
+2019-06-12 7:12:57 AM: Load Doc Type
+2019-06-12 7:12:58 AM: 0 Doc Types
+2019-06-12 7:12:58 AM: Load Author Obj
+2019-06-12 7:12:58 AM: 0 Author Objects
+2019-06-12 7:12:58 AM: Load Owner Type Obj
+2019-06-12 7:12:58 AM: 0 Owner Objects
+2019-06-12 7:12:58 AM: Load Box Obj
+2019-06-12 7:12:58 AM: 0 Box Objects
+2019-06-12 7:12:58 AM: Done Loading from DB
+2019-06-12 7:12:58 AM: Load New Form
+2019-06-12 7:12:58 AM: Make new scanner form and display it
+2019-06-12 7:19:57 AM: Initializing components
+2019-06-12 7:19:58 AM: Reaading app settings
+2019-06-12 7:19:58 AM: Initialize twain settings
+2019-06-12 7:19:58 AM: Set database connection
+2019-06-12 7:19:58 AM: Scanning Dashboard Using Database Test
+2019-06-12 7:19:58 AM: Load Lookup lists from DB
+2019-06-12 7:19:58 AM: Load Doc Type
+2019-06-12 7:19:58 AM: 0 Doc Types
+2019-06-12 7:19:58 AM: Load Author Obj
+2019-06-12 7:19:58 AM: 0 Author Objects
+2019-06-12 7:19:58 AM: Load Owner Type Obj
+2019-06-12 7:19:58 AM: 0 Owner Objects
+2019-06-12 7:19:58 AM: Load Box Obj
+2019-06-12 7:19:58 AM: 0 Box Objects
+2019-06-12 7:19:58 AM: Done Loading from DB
+2019-06-12 7:19:58 AM: Load New Form
+2019-06-12 7:19:58 AM: Make new scanner form and display it

@@ -1,0 +1,16 @@
+C:\Data\Projects\Scanner\NewGit\BarCodeScanner\bin\Debug\BarCodeScanner.dll
+C:\Data\Projects\Scanner\NewGit\BarCodeScanner\bin\Debug\BarCodeScanner.pdb
+C:\Data\Projects\Scanner\NewGit\BarCodeScanner\obj\Debug\BarCodeScanner.dll
+C:\Data\Projects\Scanner\NewGit\BarCodeScanner\obj\Debug\BarCodeScanner.pdb
+C:\data\Projects\data\Scanner\Scanner\BarCodeScanner\bin\Debug\BarCodeScanner.dll
+C:\data\Projects\data\Scanner\Scanner\BarCodeScanner\bin\Debug\BarCodeScanner.pdb
+C:\data\Projects\data\Scanner\Scanner\BarCodeScanner\obj\Debug\BarCodeScanner.csproj.AssemblyReference.cache
+C:\data\Projects\data\Scanner\Scanner\BarCodeScanner\obj\Debug\BarCodeScanner.csproj.CoreCompileInputs.cache
+C:\data\Projects\data\Scanner\Scanner\BarCodeScanner\obj\Debug\BarCodeScanner.dll
+C:\data\Projects\data\Scanner\Scanner\BarCodeScanner\obj\Debug\BarCodeScanner.pdb
+C:\data\_Scanner\Scanner25\BarCodeScanner\bin\Debug\BarCodeScanner.dll
+C:\data\_Scanner\Scanner25\BarCodeScanner\bin\Debug\BarCodeScanner.pdb
+C:\data\_Scanner\Scanner25\BarCodeScanner\obj\Debug\BarCodeScanner.csproj.AssemblyReference.cache
+C:\data\_Scanner\Scanner25\BarCodeScanner\obj\Debug\BarCodeScanner.csproj.CoreCompileInputs.cache
+C:\data\_Scanner\Scanner25\BarCodeScanner\obj\Debug\BarCodeScanner.dll
+C:\data\_Scanner\Scanner25\BarCodeScanner\obj\Debug\BarCodeScanner.pdb

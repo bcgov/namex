@@ -1,0 +1,13 @@
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\TwainAdvancedDemo\bin\TwainAdvanced.exe
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\TwainAdvancedDemo\bin\TwainAdvanced.pdb
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\TwainAdvancedDemo\obj\Debug\TwainAdvancedDemo.DevCapsForm.resources
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\TwainAdvancedDemo\obj\Debug\TwainAdvancedDemo.ImageProcessingForm.resources
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\TwainAdvancedDemo\obj\Debug\TwainAdvancedDemo.JpegSaveSettingsForm.resources
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\TwainAdvancedDemo\obj\Debug\TwainAdvancedDemo.PdfSaveSettingsForm.resources
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\TwainAdvancedDemo\obj\Debug\TwainAdvancedDemo.TiffSaveSettingsForm.resources
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\TwainAdvancedDemo\obj\Debug\TwainAdvancedDemo.UploadForm.resources
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\TwainAdvancedDemo\obj\Debug\TwainAdvancedDemo.MainForm.resources
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\TwainAdvancedDemo\obj\Debug\TwainAdvancedDemo.Properties.Resources.resources
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\TwainAdvancedDemo\obj\Debug\TwainAdvancedDemo.VS2015.csproj.GenerateResource.Cache
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\TwainAdvancedDemo\obj\Debug\TwainAdvanced.exe
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\TwainAdvancedDemo\obj\Debug\TwainAdvanced.pdb

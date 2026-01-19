@@ -1,0 +1,34 @@
+﻿<Window x:Class="MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="VintaSoft TWAIN Extended Image Info Demo" Height="661" Width="761"
+    Loaded="Window_Loaded" Closing="Window_Closing">
+    <Grid>
+        <DockPanel LastChildFill="True" Margin="10">
+            <WrapPanel DockPanel.Dock="Top">
+                <Button Name="acquireImageButton" Width="210" Height="47" Click="acquireImageButton_Click" HorizontalContentAlignment="Center">Acquire image</Button>
+            </WrapPanel>
+
+            <DockPanel DockPanel.Dock="Left" Margin="0,10,0,0">
+                <DockPanel Margin="0,0,10,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <GroupBox Header="Extended Image Info to retrieve" Name="groupBox1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <DockPanel LastChildFill="True">
+                            <Button Name="selectAllExtendedImageInfoButton" Width="270" Margin="4" DockPanel.Dock="Top" Click="selectAllExtendedImageInfoButton_Click">Select all</Button>
+                            <ScrollViewer Margin="5" VerticalScrollBarVisibility="Auto" DockPanel.Dock="Bottom">
+                                <StackPanel Name="extendedImageInfoToRetrievePanel" />
+                            </ScrollViewer>
+                        </DockPanel>
+                    </GroupBox>
+                </DockPanel>
+
+                <DockPanel>
+                    <GroupBox Header="Extended Image Info about acquired image(s)" Name="groupBox2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <ScrollViewer Margin="5" VerticalScrollBarVisibility="Auto" DockPanel.Dock="Bottom">
+                            <TextBox Name="extendedImageInfoAboutAcquiredImageTextBox"></TextBox>
+                        </ScrollViewer>
+                    </GroupBox>
+                </DockPanel>
+            </DockPanel>
+        </DockPanel>
+    </Grid>
+</Window>

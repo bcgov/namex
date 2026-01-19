@@ -1,0 +1,44 @@
+﻿<Window x:Class="WpfTwainAdvancedDemo.ImageProcessingWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:uc="clr-namespace:CustomControls"
+    Title="Image Processing" Height="580" Width="750"
+    Loaded="Window_Loaded">
+    <Grid>
+        <DockPanel LastChildFill="True" Margin="10" >
+            <StackPanel Orientation="Vertical" Margin="10,0,0,0" DockPanel.Dock="Right" >
+                <CheckBox Name="chkStretchImage" HorizontalAlignment="Left" Checked="chkStretchImage_Checked" Unchecked="chkStretchImage_Checked" IsChecked="True">Stretch Image</CheckBox>
+                <GroupBox Header="Processing Command" Width="200" Margin="0,10,0,0" Height="402">
+                    <StackPanel Orientation="Vertical">
+                        <ComboBox Name="commandsComboBox" Width="180" Height="23" Margin="0,5,0,0" SelectionChanged="commandsComboBox_SelectionChanged" />
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Label Name="param1Label" Width="115" Visibility="Hidden">Param1:</Label>
+                            <uc:NumericUpDown x:Name="param1NumericUpDown" Width="70" Value="-1" Minimum="0" Maximum="100" Visibility="Hidden" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <Label Name="param2Label" Width="115" Visibility="Hidden">Param2:</Label>
+                            <uc:NumericUpDown x:Name="param2NumericUpDown" Width="70" Value="-1" Minimum="0" Maximum="100" Visibility="Hidden" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <Label Name="param3Label" Width="115" Visibility="Hidden">Param3:</Label>
+                            <uc:NumericUpDown x:Name="param3NumericUpDown" Width="70" Value="-1" Minimum="0" Maximum="100" Visibility="Hidden" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <Label Name="param4Label" Width="115" Visibility="Hidden">Param4:</Label>
+                            <uc:NumericUpDown x:Name="param4NumericUpDown" Width="70" Value="-1" Minimum="0" Maximum="100" Visibility="Hidden" />
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="0,10,0,0">
+                            <Button Name="runCommandButton" Width="180" Height="30" Click="runCommandButton_Click">Run command</Button>
+                            <ProgressBar Name="processingCommandProgressBar" Width="180" Height="20" Margin="0,5,0,0"></ProgressBar>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+            <Border Name="imageScrollViewerBorder" BorderThickness="1" BorderBrush="Black">
+                <ScrollViewer Name="imageScrollViewer" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" ScrollChanged="imageScrollViewer_ScrollChanged">
+                    <Image Name="pictureBox1" Stretch="Fill"></Image>
+                </ScrollViewer>
+            </Border>
+        </DockPanel>
+    </Grid>
+</Window>

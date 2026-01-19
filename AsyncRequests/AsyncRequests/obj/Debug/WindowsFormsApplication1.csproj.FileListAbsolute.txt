@@ -1,0 +1,14 @@
+C:\data\_Scanner\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe.config
+C:\data\_Scanner\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe
+C:\data\_Scanner\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.pdb
+C:\data\_Scanner\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\Json.dll
+C:\data\_Scanner\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\RestSharp.dll
+C:\data\_Scanner\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\Json.pdb
+C:\data\_Scanner\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.Form1.resources
+C:\data\_Scanner\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.Properties.Resources.resources
+C:\data\_Scanner\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csproj.GenerateResource.Cache
+C:\data\_Scanner\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.exe
+C:\data\_Scanner\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.pdb
+C:\data\_Scanner\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csproj.AssemblyReference.cache
+C:\data\_Scanner\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csproj.CoreCompileInputs.cache
+C:\data\_Scanner\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsF.C2CC1009.Up2Date

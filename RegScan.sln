@@ -1,0 +1,56 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35327.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegScan", "RegScan\RegScan.csproj", "{6ACEC33B-9155-4CCE-AFC7-1A106114D6FB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2AA594F5-08A2-40E3-B733-B28B4527250B} = {2AA594F5-08A2-40E3-B733-B28B4527250B}
+		{2BB8B401-F03A-404E-B96A-0CBE1BE48DEF} = {2BB8B401-F03A-404E-B96A-0CBE1BE48DEF}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BarCodeScanner", "BarCodeScanner\BarCodeScanner.csproj", "{BD27739D-F7B8-4B24-9373-FAFDA26703C6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfSharp", "PdfSharp\PdfSharp.csproj", "{5384CE57-1F94-4D22-860D-2E9C1AC12DDF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiScanner", "ApiScanner\ApiScanner.csproj", "{2BB8B401-F03A-404E-B96A-0CBE1BE48DEF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2AA594F5-08A2-40E3-B733-B28B4527250B} = {2AA594F5-08A2-40E3-B733-B28B4527250B}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncRequests", "AsyncRequests\AsyncRequests\AsyncRequests.csproj", "{2AA594F5-08A2-40E3-B733-B28B4527250B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6ACEC33B-9155-4CCE-AFC7-1A106114D6FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6ACEC33B-9155-4CCE-AFC7-1A106114D6FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6ACEC33B-9155-4CCE-AFC7-1A106114D6FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6ACEC33B-9155-4CCE-AFC7-1A106114D6FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD27739D-F7B8-4B24-9373-FAFDA26703C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD27739D-F7B8-4B24-9373-FAFDA26703C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD27739D-F7B8-4B24-9373-FAFDA26703C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD27739D-F7B8-4B24-9373-FAFDA26703C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5384CE57-1F94-4D22-860D-2E9C1AC12DDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5384CE57-1F94-4D22-860D-2E9C1AC12DDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5384CE57-1F94-4D22-860D-2E9C1AC12DDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5384CE57-1F94-4D22-860D-2E9C1AC12DDF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BB8B401-F03A-404E-B96A-0CBE1BE48DEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BB8B401-F03A-404E-B96A-0CBE1BE48DEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BB8B401-F03A-404E-B96A-0CBE1BE48DEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BB8B401-F03A-404E-B96A-0CBE1BE48DEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2AA594F5-08A2-40E3-B733-B28B4527250B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AA594F5-08A2-40E3-B733-B28B4527250B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AA594F5-08A2-40E3-B733-B28B4527250B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AA594F5-08A2-40E3-B733-B28B4527250B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3C434FBD-1A32-43BA-879C-E64AAA8EF94B}
+	EndGlobalSection
+EndGlobal

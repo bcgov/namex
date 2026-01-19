@@ -1,0 +1,182 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\data\\_Scanner\\registries-scanner\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{2BB8B401-F03A-404E-B96A-0CBE1BE48DEF}|ApiScanner\\ApiScanner.csproj|C:\\data\\_Scanner\\registries-scanner\\apiscanner\\documentapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2BB8B401-F03A-404E-B96A-0CBE1BE48DEF}|ApiScanner\\ApiScanner.csproj|solutionrelative:apiscanner\\documentapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6ACEC33B-9155-4CCE-AFC7-1A106114D6FB}|RegScan\\RegScan.csproj|c:\\data\\_scanner\\registries-scanner\\regscan\\documentobj.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6ACEC33B-9155-4CCE-AFC7-1A106114D6FB}|RegScan\\RegScan.csproj|solutionrelative:regscan\\documentobj.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6ACEC33B-9155-4CCE-AFC7-1A106114D6FB}|RegScan\\RegScan.csproj|C:\\data\\_Scanner\\registries-scanner\\regscan\\boxobj.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6ACEC33B-9155-4CCE-AFC7-1A106114D6FB}|RegScan\\RegScan.csproj|solutionrelative:regscan\\boxobj.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6ACEC33B-9155-4CCE-AFC7-1A106114D6FB}|RegScan\\RegScan.csproj|C:\\data\\_Scanner\\registries-scanner\\regscan\\frmscannerdocument.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6ACEC33B-9155-4CCE-AFC7-1A106114D6FB}|RegScan\\RegScan.csproj|solutionrelative:regscan\\frmscannerdocument.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6ACEC33B-9155-4CCE-AFC7-1A106114D6FB}|RegScan\\RegScan.csproj|C:\\data\\_Scanner\\registries-scanner\\regscan\\utilityobj.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6ACEC33B-9155-4CCE-AFC7-1A106114D6FB}|RegScan\\RegScan.csproj|solutionrelative:regscan\\utilityobj.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2BB8B401-F03A-404E-B96A-0CBE1BE48DEF}|ApiScanner\\ApiScanner.csproj|C:\\data\\_Scanner\\registries-scanner\\apiscanner\\scanninginformationapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2BB8B401-F03A-404E-B96A-0CBE1BE48DEF}|ApiScanner\\ApiScanner.csproj|solutionrelative:apiscanner\\scanninginformationapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6ACEC33B-9155-4CCE-AFC7-1A106114D6FB}|RegScan\\RegScan.csproj|C:\\data\\_Scanner\\registries-scanner\\regscan\\scanninginfoobj.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6ACEC33B-9155-4CCE-AFC7-1A106114D6FB}|RegScan\\RegScan.csproj|solutionrelative:regscan\\scanninginfoobj.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2AA594F5-08A2-40E3-B733-B28B4527250B}|AsyncRequests\\AsyncRequests\\AsyncRequests.csproj|C:\\data\\_Scanner\\registries-scanner\\asyncrequests\\asyncrequests\\apirequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2AA594F5-08A2-40E3-B733-B28B4527250B}|AsyncRequests\\AsyncRequests\\AsyncRequests.csproj|solutionrelative:asyncrequests\\asyncrequests\\apirequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6ACEC33B-9155-4CCE-AFC7-1A106114D6FB}|RegScan\\RegScan.csproj|C:\\data\\_Scanner\\registries-scanner\\regscan\\authorobj.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6ACEC33B-9155-4CCE-AFC7-1A106114D6FB}|RegScan\\RegScan.csproj|solutionrelative:regscan\\authorobj.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 10,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{7f40df72-066b-4810-a08b-c0fbed76c948}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:2:0:{7f40df72-066b-4810-a08b-c0fbed76c948}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "ScanningInfoObj.cs",
+              "DocumentMoniker": "C:\\data\\_Scanner\\registries-scanner\\RegScan\\ScanningInfoObj.cs",
+              "RelativeDocumentMoniker": "RegScan\\ScanningInfoObj.cs",
+              "ToolTip": "C:\\data\\_Scanner\\registries-scanner\\RegScan\\ScanningInfoObj.cs",
+              "RelativeToolTip": "RegScan\\ScanningInfoObj.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAALAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-16T19:19:03.619Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "BoxObj.cs",
+              "DocumentMoniker": "C:\\data\\_Scanner\\registries-scanner\\RegScan\\BoxObj.cs",
+              "RelativeDocumentMoniker": "RegScan\\BoxObj.cs",
+              "ToolTip": "C:\\data\\_Scanner\\registries-scanner\\RegScan\\BoxObj.cs",
+              "RelativeToolTip": "RegScan\\BoxObj.cs",
+              "ViewState": "AgIAAGABAAAAAAAAAAAkwG8BAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-14T22:30:42.889Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ScanningInformationApi.cs",
+              "DocumentMoniker": "C:\\data\\_Scanner\\registries-scanner\\ApiScanner\\ScanningInformationApi.cs",
+              "RelativeDocumentMoniker": "ApiScanner\\ScanningInformationApi.cs",
+              "ToolTip": "C:\\data\\_Scanner\\registries-scanner\\ApiScanner\\ScanningInformationApi.cs",
+              "RelativeToolTip": "ApiScanner\\ScanningInformationApi.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAABOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-14T20:17:48.015Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "APIRequest.cs",
+              "DocumentMoniker": "C:\\data\\_Scanner\\registries-scanner\\AsyncRequests\\AsyncRequests\\APIRequest.cs",
+              "RelativeDocumentMoniker": "AsyncRequests\\AsyncRequests\\APIRequest.cs",
+              "ToolTip": "C:\\data\\_Scanner\\registries-scanner\\AsyncRequests\\AsyncRequests\\APIRequest.cs",
+              "RelativeToolTip": "AsyncRequests\\AsyncRequests\\APIRequest.cs",
+              "ViewState": "AgIAAD0AAAAAAAAAAAAAwEsAAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-14T20:03:17.4Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "AuthorObj.cs",
+              "DocumentMoniker": "C:\\data\\_Scanner\\registries-scanner\\RegScan\\AuthorObj.cs",
+              "RelativeDocumentMoniker": "RegScan\\AuthorObj.cs",
+              "ToolTip": "C:\\data\\_Scanner\\registries-scanner\\RegScan\\AuthorObj.cs",
+              "RelativeToolTip": "RegScan\\AuthorObj.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-14T19:09:13.344Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "UtilityObj.cs",
+              "DocumentMoniker": "C:\\data\\_Scanner\\registries-scanner\\RegScan\\UtilityObj.cs",
+              "RelativeDocumentMoniker": "RegScan\\UtilityObj.cs",
+              "ToolTip": "C:\\data\\_Scanner\\registries-scanner\\RegScan\\UtilityObj.cs",
+              "RelativeToolTip": "RegScan\\UtilityObj.cs",
+              "ViewState": "AgIAAC0AAAAAAAAAAAAkwEAAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-14T18:56:09.188Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "DocumentApi.cs",
+              "DocumentMoniker": "C:\\data\\_Scanner\\registries-scanner\\ApiScanner\\DocumentApi.cs",
+              "RelativeDocumentMoniker": "ApiScanner\\DocumentApi.cs",
+              "ToolTip": "C:\\data\\_Scanner\\registries-scanner\\ApiScanner\\DocumentApi.cs",
+              "RelativeToolTip": "ApiScanner\\DocumentApi.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFwAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-13T22:29:49.959Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "DocumentObj.cs",
+              "DocumentMoniker": "C:\\data\\_Scanner\\registries-scanner\\RegScan\\DocumentObj.cs",
+              "RelativeDocumentMoniker": "RegScan\\DocumentObj.cs",
+              "ToolTip": "C:\\data\\_Scanner\\registries-scanner\\RegScan\\DocumentObj.cs",
+              "RelativeToolTip": "RegScan\\DocumentObj.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAM8AAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-13T22:29:05.212Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "frmScannerDocument.cs",
+              "DocumentMoniker": "C:\\data\\_Scanner\\registries-scanner\\RegScan\\frmScannerDocument.cs",
+              "RelativeDocumentMoniker": "RegScan\\frmScannerDocument.cs",
+              "ToolTip": "C:\\data\\_Scanner\\registries-scanner\\RegScan\\frmScannerDocument.cs",
+              "RelativeToolTip": "RegScan\\frmScannerDocument.cs",
+              "ViewState": "AgIAAMMAAAAAAAAAAAAkwNIAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-13T22:28:14.205Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

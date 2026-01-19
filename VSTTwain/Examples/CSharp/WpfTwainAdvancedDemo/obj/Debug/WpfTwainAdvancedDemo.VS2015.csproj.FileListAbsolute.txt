@@ -1,0 +1,16 @@
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\WpfTwainAdvancedDemo\obj\Debug\WpfTwainAdvancedDemo.VS2015.csprojResolveAssemblyReference.cache
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\WpfTwainAdvancedDemo\obj\Debug\CustomControls\NumericUpDown.baml
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\WpfTwainAdvancedDemo\obj\Debug\Dialogs\DevCapsWindow.baml
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\WpfTwainAdvancedDemo\obj\Debug\Dialogs\UploadWindow.baml
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\WpfTwainAdvancedDemo\obj\Debug\CustomControls\NumericUpDown.g.cs
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\WpfTwainAdvancedDemo\obj\Debug\Dialogs\DevCapsWindow.g.cs
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\WpfTwainAdvancedDemo\obj\Debug\Dialogs\ImageProcessing\ImageProcessingWindow.g.cs
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\WpfTwainAdvancedDemo\obj\Debug\Dialogs\SaveSettings\JpegSaveSettingsWindow.g.cs
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\WpfTwainAdvancedDemo\obj\Debug\Dialogs\SaveSettings\PdfSaveSettingsWindow.g.cs
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\WpfTwainAdvancedDemo\obj\Debug\Dialogs\SaveSettings\TiffSaveSettingsWindow.g.cs
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\WpfTwainAdvancedDemo\obj\Debug\Dialogs\UploadWindow.g.cs
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\WpfTwainAdvancedDemo\obj\Debug\MainWindow.g.cs
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\WpfTwainAdvancedDemo\obj\Debug\App.g.cs
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\WpfTwainAdvancedDemo\obj\Debug\GeneratedInternalTypeHelper.g.cs
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\WpfTwainAdvancedDemo\obj\Debug\WpfTwainAdvance_MarkupCompile.cache
+C:\Data\Projects\Scanner\NewGit\VSTTwain\Examples\CSharp\WpfTwainAdvancedDemo\obj\Debug\WpfTwainAdvance_MarkupCompile.lref
