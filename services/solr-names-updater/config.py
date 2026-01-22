@@ -20,10 +20,8 @@ Flask config, rather than reading environment variables directly
 or by accessing this configuration directly.
 """
 import os
-import random
 
 from dotenv import find_dotenv, load_dotenv
-
 
 # this will load all the envars from a .env file located in the project root (api)
 load_dotenv(find_dotenv())
@@ -60,28 +58,30 @@ class Config():  # pylint: disable=too-few-public-methods
 
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
-    SECRET_KEY = 'a secret'
+    SECRET_KEY = 'a secret' # noqa: S105
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # POSTGRESQL
-    DB_USER = os.getenv('DATABASE_USERNAME', '')
-    DB_PASSWORD = os.getenv('DATABASE_PASSWORD', '')
-    DB_NAME = os.getenv('DATABASE_NAME', '')
-    DB_HOST = os.getenv('DATABASE_HOST', '')
-    DB_PORT = os.getenv('DATABASE_PORT', '5432')
-    if DB_UNIX_SOCKET := os.getenv('DATABASE_UNIX_SOCKET', None):
-        SQLALCHEMY_DATABASE_URI = f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@/{DB_NAME}?host={DB_UNIX_SOCKET}'
-    else:
-        SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
+    DB_USER = os.getenv('DATABASE_USERNAME', 'postgres')
+    DB_PASSWORD = os.getenv('DATABASE_PASSWORD', 'postgres')
+    DB_NAME = os.getenv('DATABASE_NAME', 'unittesting')
+    DB_HOST = os.getenv('DATABASE_HOST', 'localhost')
+    DB_PORT = int(os.getenv('DATABASE_PORT', '5432'))
 
-    GCP_AUTH_KEY = os.getenv('BUSINESS_GCP_AUTH_KEY', None)
+    DB_SCHEMA = os.getenv('DATABASE_SCHEMA', 'public')
+    DB_IP_TYPE = os.getenv('DATABASE_IP_TYPE', 'private')
+    DB_OWNER = os.getenv('DATABASE_OWNER', 'postgres')
+
+    if DB_INSTANCE_CONNECTION_NAME := os.getenv('DATABASE_INSTANCE_CONNECTION_NAME', None):
+        SQLALCHEMY_DATABASE_URI = 'postgresql+pg8000://'
+    else:
+        SQLALCHEMY_DATABASE_URI = f'postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+
     EMAILER_TOPIC = os.getenv('NAMEX_MAILER_TOPIC', '')
     AUDIENCE = os.getenv('AUDIENCE', 'https://pubsub.googleapis.com/google.pubsub.v1.Subscriber')
     PUBLISHER_AUDIENCE = os.getenv('PUBLISHER_AUDIENCE', 'https://pubsub.googleapis.com/google.pubsub.v1.Publisher')
     DEBUG_REQUEST = os.getenv('DEBUG_REQUEST', False)
-    SUB_AUDIENCE = os.getenv('SOLR_SUB_AUDIENCE', '')
-    SUB_SERVICE_ACCOUNT = os.getenv('BUSINESS_SERVICE_ACCOUNT', '')
 
     SOLR_FEEDER_API_URL = os.getenv('SOLR_FEEDER_API_URL', None)
 
@@ -118,22 +118,18 @@ class TestConfig(Config):  # pylint: disable=too-few-public-methods
 
     DEBUG = True
     TESTING = True
+
     # POSTGRESQL
     DB_USER = os.getenv('DATABASE_TEST_USERNAME', 'postgres')
     DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD', 'postgres')
-    DB_NAME = os.getenv('DATABASE_TEST_NAME', 'namex_pay')
-    DB_HOST = os.getenv('DATABASE_TEST_HOST', '127.0.0.1')
+    DB_NAME = os.getenv('DATABASE_TEST_NAME', 'unittesting')
+    DB_HOST = os.getenv('DATABASE_TEST_HOST', 'localhost')
     DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
     # Set this in your .env to debug SQL Alchemy queries (for local development)
     # pylint: disable=invalid-envvar-default
     SQLALCHEMY_ECHO = 'debug' if os.getenv('DEBUG_SQL_QUERIES', False) else False
-    SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
-        user=DB_USER,
-        password=DB_PASSWORD,
-        host=DB_HOST,
-        port=int(DB_PORT),
-        name=DB_NAME,
-    )
+    SQLALCHEMY_DATABASE_URI = f'postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
+
     SOLR_FEEDER_API_URL = os.getenv('SOLR_FEEDER_API_URL', 'https://mock-solr-feeder/api/v1')
 
     # JWT OIDC settings
@@ -197,3 +193,9 @@ class ProdConfig(Config):  # pylint: disable=too-few-public-methods
 
     TESTING = False
     DEBUG = False
+
+class MigrationConfig(Config):
+    """Config for db migration."""
+
+    TESTING = False
+    DEBUG = True

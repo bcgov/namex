@@ -13,9 +13,8 @@ nro_job_seq (sequence)
 The table generation code is auto-generated but the sequence is manually added.
 
 """
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = '21b272432e62'
@@ -41,7 +40,7 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
 
-    op.execute(sa.schema.CreateSequence(sa.schema.Sequence("nro_job_seq")))
+    op.execute(sa.schema.CreateSequence(sa.schema.Sequence("nro_job_seq"), if_not_exists=True))
 
     # ### end Alembic commands ###
 

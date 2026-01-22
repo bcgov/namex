@@ -18,13 +18,16 @@ Supply version and commit hash info.
 When deployed in OKD, it adds the last commit hash onto the version info.
 """
 import os
-from namex_pay.version import __version__
 import time as _time
 from datetime import (  # pylint: disable=unused-import # noqa: F401, I001, I005
-     datetime as _datetime,  # pylint: disable=unused-import # noqa: F401, I001, I005
-     timezone,  # pylint: disable=unused-import # noqa: F401, I001, I005
-     timedelta
+    datetime as _datetime,  # pylint: disable=unused-import # noqa: F401, I001, I005
 )  # noqa: F401, I001, I005
+from datetime import (
+    timezone,  # pylint: disable=unused-import # noqa: F401, I001, I005
+)
+
+from namex_pay.version import __version__
+
 # pylint: disable=unused-import # noqa: F401, I001, I003, I005
 
 

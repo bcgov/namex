@@ -210,7 +210,7 @@ def test_worker_handles_reset_event_and_cancels_tasks(client, monkeypatch):
 
     monkeypatch.setattr(
         "namex_emailer.resources.worker.queue.get_simple_cloud_event",
-        lambda req: ce,
+        lambda req, **kwargs: ce,
     )
     monkeypatch.setattr(
         "namex_emailer.resources.worker.cancel_any_in_flight_email_tasks",

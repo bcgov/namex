@@ -31,7 +31,7 @@ from namex_pay import db as _db
 
 from . import FROZEN_DATETIME
 
-DB_TEST_NAME: Final = os.getenv("DATABASE_TEST_NAME")
+DB_TEST_NAME: Final = os.getenv('DATABASE_TEST_NAME')
 
 @pytest.fixture
 def create_mock_coro(mocker, monkeypatch):
@@ -73,9 +73,8 @@ def queue_publish(monkeypatch):
         msg[:] = payload
         return {}
 
-    monkeypatch.setattr(GcpQueue, "publish", mock_publish)
+    monkeypatch.setattr(GcpQueue, 'publish', mock_publish)
     return locals()
-
 
 # fixture to freeze utcnow to a fixed date-time
 @pytest.fixture
@@ -89,7 +88,7 @@ def freeze_datetime_utcnow(monkeypatch):
     monkeypatch.setattr(datetime, 'datetime', _Datetime)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def app():
     """Return a session-wide application configured in TEST mode."""
     _app = create_app(TestConfig)
@@ -125,37 +124,20 @@ def client_id():
     return f'client-{_id}'
 
 
-
 @pytest.fixture(scope='function')
 def db(app):  # pylint: disable=redefined-outer-name, invalid-name
     """Return a session-wide initialised database.
 
-    Drops all existing tables - Meta follows Postgres FKs
+    Drops all existing tables
     """
     with app.app_context():
-        # Clear out any existing tables
-        metadata = MetaData(_db.engine)
-        metadata.reflect()
-        for table in metadata.tables.values():
-            for fk in table.foreign_keys:  # pylint: disable=invalid-name
-                _db.engine.execute(DropConstraint(fk.constraint))
-        with suppress(Exception):
-            metadata.drop_all()
-        with suppress(Exception):
-            _db.drop_all()
-
-        sequence_sql = """SELECT sequence_name FROM information_schema.sequences
-                          WHERE sequence_schema='public'
-                       """
-
-        sess = _db.session()
-        for seq in [name for (name,) in sess.execute(text(sequence_sql))]:
-            try:
-                sess.execute(text('DROP SEQUENCE public.%s ;' % seq))
-                print('DROP SEQUENCE public.%s ' % seq)
-            except Exception as err:  # pylint: disable=broad-except
-                print(f'Error: {err}')
-        sess.commit()
+        with _db.engine.connect() as conn:
+            # Drop all tables first with CASCADE to handle dependencies
+            conn.execute(text('DROP SCHEMA public CASCADE;'))
+            conn.execute(text('CREATE SCHEMA public;'))
+            conn.execute(text('GRANT ALL ON SCHEMA public TO postgres;'))
+            conn.execute(text('GRANT ALL ON SCHEMA public TO public;'))
+            conn.commit()
 
         # ##############################################
         # There are 2 approaches, an empty database, or the same one that the app will use
@@ -174,7 +156,7 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
         return _db
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(scope='function', autouse=True)
 def session(app, db):
     """yields a SQLAlchemy connection which is rollbacked after the test"""
     with app.app_context():
@@ -196,11 +178,5 @@ def session(app, db):
 @pytest.fixture(autouse=True)
 def mock_publish(mocker):
     """Mock pubsub publish events."""
-    mocker.patch("namex.utils.queue_util.send_name_request_state_msg")
-    mocker.patch("namex.utils.queue_util.publish_email_notification")
-
-
-@pytest.fixture(autouse=True)
-def mock_queue_auth(mocker):
-    """Mock queue authorization."""
-    mocker.patch('gcp_queue.gcp_auth.verify_jwt', return_value='')
+    mocker.patch('namex.utils.queue_util.send_name_request_state_msg')
+    mocker.patch('namex.utils.queue_util.publish_email_notification')

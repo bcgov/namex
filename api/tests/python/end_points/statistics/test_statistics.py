@@ -59,13 +59,16 @@ def test_get_statistics_wait_time(client, jwt, app, oldest_draft_nr_date, todays
     cache.clear()
 
     # Mock out Request.get_waiting_time to simulate wait time calculation for regular and priority queues
-    with patch.object(Request, 'get_oldest_draft') as mock_get_oldest_draft, \
-        patch.object(Request, 'get_waiting_time') as mock_get_waiting_time:
+    with (
+        patch.object(Request, 'get_oldest_draft') as mock_get_oldest_draft,
+        patch.object(Request, 'get_waiting_time') as mock_get_waiting_time,
+    ):
         mock_get_oldest_draft.return_value = MagicMock(submittedDate=oldest_draft_nr_dt)
         mock_get_waiting_time.side_effect = lambda priority_queue: expected_wait_days if not priority_queue else 0
         response = client.get(request_uri)
         payload = json.loads(response.data)
         assert payload
         assert isinstance(payload.get('regular_wait_time'), int)
-        assert payload['regular_wait_time'] == expected_wait_days, \
-            f"[ASSERT FAILED] Expected {expected_wait_days} but got {payload['regular_wait_time']}"
+        assert payload['regular_wait_time'] == expected_wait_days, (
+            f'[ASSERT FAILED] Expected {expected_wait_days} but got {payload["regular_wait_time"]}'
+        )

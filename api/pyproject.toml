@@ -8,12 +8,13 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
-gcp_queue = { git = "https://github.com/bcgov/namex.git", subdirectory = "services/pubsub" }
+gcp_queue = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/gcp-queue", branch = "main" }
 swagger_client = { git = "https://github.com/bcgov/namex-synonyms-api-py-client.git" }
-simple_cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py" }
 flask-jwt-oidc = { git = "https://github.com/seeker25/flask-jwt-oidc.git" }
 sbc-common-components = { git = "https://github.com/bcgov/sbc-common-components.git", subdirectory = "python" }
 structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", rev = "7f1cc0ea4a374310ac558ff435fa6b7ea7bb2f8b", subdirectory = "python/structured-logging" }
+cloud-sql-connector = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/cloud-sql-connector", branch = "main" }
+
 
 gunicorn = "^20.1.0"
 flask-cors = "^4.0.0"
@@ -29,10 +30,8 @@ markupSafe = "^2.1.1"
 itsdangerous = "^2.1.2"
 werkzeug = "^3.0.0"
 protobuf = "^3.20.1"
-SQLAlchemy = "^1.4.18"
 marshmallow-sqlalchemy = "^0.28.1"
 marshmallow = "^3.18.0"
-pandas = "^1.5.0"
 inflect = "^6.0.0"
 Mako = "^1.1.4"
 alembic = "^1.5.8"
@@ -60,7 +59,6 @@ numpy = "^1.26.4"
 packaging = "^21.3"
 pkgutil_resolve_name = "^1.3.10"
 pronouncing = "^0.2.0"
-psycopg2-binary = "^2.9.4"
 pyasn1 = "^0.4.8"
 pycountry = "^22.3.5"
 pydantic = "^1.10.2"

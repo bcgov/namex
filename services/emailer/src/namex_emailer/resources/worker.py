@@ -37,9 +37,9 @@
 from http import HTTPStatus
 
 from flask import Blueprint, request
-from gcp_queue.logging import structured_log
 from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent
+from structured_logging import StructuredLogging
 
 import namex_emailer.services.helpers
 from namex_emailer.constants.notification_options import DECISION_OPTIONS, NOTIFICATION_OPTIONS, Option
@@ -55,13 +55,15 @@ from namex_emailer.services.email_scheduler import (
 
 bp = Blueprint("worker", __name__)
 
+logger = StructuredLogging.get_logger()
+
 
 @bp.route("/", methods=("POST",))
 def worker():
     """Process the incoming cloud event"""
-    structured_log(request, "INFO", f"Incoming raw msg: {request.data}")
+    logger.info(f"Incoming raw msg: {request.data}")
 
-    if not (ce := queue.get_simple_cloud_event(request)):
+    if not (ce := queue.get_simple_cloud_event(request, wrapped=True)):
         #
         # Decision here is to return a 200,
         # so the event is removed from the Queue
@@ -70,7 +72,7 @@ def worker():
     item = ce_cache.get(ce.id, None)
 
     if item is not None:
-        structured_log(request, "INFO", f"skipping duplicate ce: {str(ce)}")
+        logger.info(f"skipping duplicate ce: {str(ce)}")
         return {}, HTTPStatus.OK
 
     # Check if it's a resend
@@ -78,7 +80,7 @@ def worker():
     if resend_event_id:
         return process_resend_email(resend_event_id)
 
-    structured_log(request, "INFO", f"received ce: {str(ce)}")
+    logger.info(f"received ce: {str(ce)}")
 
     # Check if it's a reset
     if is_reset(ce):
@@ -87,7 +89,7 @@ def worker():
             ce_cache[ce.id] = ce
             return {}, HTTPStatus.OK
         except Exception as err:
-            structured_log(request, "WARNING", f"Error cancelling cloud task from reset: {err}")
+            logger.warning(f"Error cancelling cloud task from reset: {err}")
 
     # If approved, conditional, or rejected - schedule a cloud task to send the email in 5 minutes
     if is_schedulable(ce):
@@ -96,31 +98,29 @@ def worker():
             ce_cache[ce.id] = ce
             return {}, HTTPStatus.OK
         except Exception as err:
-            structured_log(request, "WARNING", f"Scheduling failed, falling back to immediate send: {err}")
+            logger.warning(f"Scheduling failed, falling back to immediate send: {err}")
 
     token = namex_emailer.services.helpers.get_bearer_token()
     if not (email := process_email(ce)):
         # no email to send, take off queue
-        structured_log(request, "INFO", f"No email to send for: {ce}")
+        logger.info(f"No email to send for: {ce}")
         return {}, HTTPStatus.OK
 
     if not email or "recipients" not in email or "content" not in email or "body" not in email["content"]:
         # email object(s) is empty, take off queue
-        structured_log(request, "INFO", "Send email: email object(s) is empty")
+        logger.info("Send email: email object(s) is empty")
         return {}, HTTPStatus.OK
 
     if not email["recipients"] or not email["content"] or not email["content"]["body"]:
         # email object(s) is missing, take off queue
-        structured_log(request, "INFO", "Send email: email object(s) is missing")
+        logger.info("Send email: email object(s) is missing")
         return {}, HTTPStatus.OK
 
     resp = namex_emailer.services.helpers.send_email(email, token)
 
     if resp.status_code != HTTPStatus.OK:
         # log the error and put the email msg back on the queue
-        structured_log(
-            request,
-            "ERROR",
+        logger.error(
             f"Queue Error - email failed to send: {str(ce)}"
             "\n\nThis message has been put back on the queue for reprocessing.",
         )
@@ -129,7 +129,7 @@ def worker():
 
     namex_emailer.services.helpers.write_to_events(ce, email)
 
-    structured_log(request, "INFO", f"completed ce: {str(ce)}")
+    logger.info(f"completed ce: {str(ce)}")
 
     return {}, HTTPStatus.OK
 
@@ -137,7 +137,7 @@ def worker():
 def process_email(email_msg: SimpleCloudEvent):
     """Process the email contained in the submission."""
 
-    structured_log(request, "DEBUG", f"Attempting to process email: {email_msg}")
+    logger.debug(f"Attempting to process email: {email_msg}")
     etype = email_msg.type
     if etype and etype == QueueMessageTypes.NAMES_MESSAGE_TYPE.value:
         option = email_msg.data.get("request", {}).get("option", None)
@@ -146,7 +146,7 @@ def process_email(email_msg: SimpleCloudEvent):
         elif option and Option(option) in DECISION_OPTIONS:
             email = nr_result.email_report(email_msg)
         elif option and option in [
-            nr_notification.Option.CONSENT_RECEIVED.value,
+            Option.CONSENT_RECEIVED.value,
         ]:
             email = nr_result.email_consent_letter(email_msg)
         else:

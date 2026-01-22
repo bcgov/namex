@@ -16,7 +16,9 @@ MSG_COULD_NOT_FIND_CORP = 'Error: Could not find corporation details'
 
 
 # Register a local namespace for the NR reserve
-colin_api = Namespace('Colin Info', description='Fetch business, office, and party details from Corporate Online (Colin)')
+colin_api = Namespace(
+    'Colin Info', description='Fetch business, office, and party details from Corporate Online (Colin)'
+)
 
 
 @cors_preflight('GET')

@@ -12,23 +12,6 @@ from namex.utils.common import parse_dict_of_lists
 from . import porter
 
 
-# TODO: Fix caps and stuff...
-def data_frame_to_list(df):
-    df_dist = df.loc[df.word_classification == DataFrameFields.DISTINCTIVE.value]
-    df_desc = df.loc[df.word_classification == DataFrameFields.DESCRIPTIVE.value]
-    df_none = df.loc[df.word_classification == DataFrameFields.UNCLASSIFIED.value]
-
-    list_dist = list(df_dist.word)
-    list_desc = list(df_desc.word)
-    list_none = list(df_none.word)
-
-    return list_dist, list_desc, list_none
-
-
-def get_dataframe_list(df, field):
-    return df[field].str.split(',').tolist()
-
-
 def get_flat_list(lst):
     subs_list = [item for sublist in lst for item in sublist]
     return [x.strip() for x in subs_list]

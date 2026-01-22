@@ -36,7 +36,7 @@ def publish_resend_email_notification(nr_num: str, option: str, resend_event_id:
         'request': {
             'nrNum': nr_num,
             'option': option,
-            'resendEventId': resend_event_id  # Include the resend event ID
+            'resendEventId': resend_event_id,  # Include the resend event ID
         }
     }
 
@@ -51,7 +51,9 @@ def publish_resend_email_notification(nr_num: str, option: str, resend_event_id:
 
     email_topic = current_app.config.get('EMAILER_TOPIC', 'mailer')
     payload = queue.to_queue_message(ce)
-    current_app.logger.debug('About to publish resend email for %s nrNum=%s, resendEventId=%s', option, nr_num, resend_event_id)
+    current_app.logger.debug(
+        'About to publish resend email for %s nrNum=%s, resendEventId=%s', option, nr_num, resend_event_id
+    )
     queue.publish(topic=email_topic, payload=payload)
 
 

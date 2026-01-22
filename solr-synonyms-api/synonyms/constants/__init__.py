@@ -17,63 +17,63 @@ class AbstractEnum(Enum):
 
 # TODO: I have copied this over to new name processing service, hoping I can get rid of this here...
 class DataFrameFields(Enum):
-    FIELD_SYNONYMS = 'synonyms_text'
-    FIELD_SPECIAL_WORDS = 'rc_words'
-    DESCRIPTIVE = 'DESC'
-    DISTINCTIVE = 'DIST'
-    UNCLASSIFIED = 'NONE'
+    FIELD_SYNONYMS = "synonyms_text"
+    FIELD_SPECIAL_WORDS = "rc_words"
+    DESCRIPTIVE = "DESC"
+    DISTINCTIVE = "DIST"
+    UNCLASSIFIED = "NONE"
 
 
 class DesignationPositionCodes(AbstractEnum):
-    START = 'start'
-    END = 'end'
-    ANY = 'any'
+    START = "start"
+    END = "end"
+    ANY = "any"
 
 
 class ValidLocations(AbstractEnum):
-    CA_BC = 'BC'
-    CA_NOT_BC = 'CA'
+    CA_BC = "BC"
+    CA_NOT_BC = "CA"
     # CA = 'CA',
-    INTL = 'IN'
+    INTL = "IN"
 
 
-'''
-We use the full name in the Enum code KEY so there is always context to what the code type represents, 
+"""
+We use the full name in the Enum code KEY so there is always context to what the code type represents,
 so we don't always have to refer to the Enum description, documentation, or this file.
 
 The Enum code VALUE (str) is the actual mapping value for the Enum code type
-'''
+"""
 
 
 class EntityTypes(AbstractEnum):
     # BC Types
-    CORPORATION = 'CR'
-    UNLIMITED_LIABILITY_COMPANY = 'UL'
-    SOLE_PROPRIETORSHIP = 'FR'
-    GENERAL_PARTNERSHIP = 'GP'
-    DOING_BUSINESS_AS = 'DBA'
-    LIMITED_PARTNERSHIP = 'LP'
-    LIMITED_LIABILITY_PARTNERSHIP = 'LL'
-    COOPERATIVE = 'CP'
-    BENEFIT_COMPANY = 'BC'
-    COMMUNITY_CONTRIBUTION_COMPANY = 'CC'
-    SOCIETY = 'SO'
-    PRIVATE_ACT = 'PA'
-    FINANCIAL_INSTITUTION = 'FI'
-    PARISH = 'PAR'
+    CORPORATION = "CR"
+    UNLIMITED_LIABILITY_COMPANY = "UL"
+    SOLE_PROPRIETORSHIP = "FR"
+    GENERAL_PARTNERSHIP = "GP"
+    DOING_BUSINESS_AS = "DBA"
+    LIMITED_PARTNERSHIP = "LP"
+    LIMITED_LIABILITY_PARTNERSHIP = "LL"
+    COOPERATIVE = "CP"
+    BENEFIT_COMPANY = "BC"
+    COMMUNITY_CONTRIBUTION_COMPANY = "CC"
+    SOCIETY = "SO"
+    PRIVATE_ACT = "PA"
+    FINANCIAL_INSTITUTION = "FI"
+    PARISH = "PAR"
     # XPRO and Foreign Types
-    XPRO_CORPORATION = 'XCR'
-    XPRO_UNLIMITED_LIABILITY_COMPANY = 'XUL'
-    XPRO_LIMITED_LIABILITY_COMPANY = 'RLC'
-    XPRO_LIMITED_PARTNERSHIP = 'XLP'
-    XPRO_LIMITED_LIABILITY_PARTNERSHIP = 'XLL'
-    XPRO_COOPERATIVE = 'XCP'
-    XPRO_SOCIETY = 'XSO'
+    XPRO_CORPORATION = "XCR"
+    XPRO_UNLIMITED_LIABILITY_COMPANY = "XUL"
+    XPRO_LIMITED_LIABILITY_COMPANY = "RLC"
+    XPRO_LIMITED_PARTNERSHIP = "XLP"
+    XPRO_LIMITED_LIABILITY_PARTNERSHIP = "XLL"
+    XPRO_COOPERATIVE = "XCP"
+    XPRO_SOCIETY = "XSO"
     # Used for mapping back to legacy oracle codes
-    FIRM = 'FIRM'
+    FIRM = "FIRM"
 
 
-'''
+"""
 Sole Proprietorship
 Doing Business As
 Corporation
@@ -84,7 +84,7 @@ Limited Partnership
 Limited Liability Partnership
 Co-operative
 Community Contribution Co.
-'''
+"""
 
 
 class BCProtectedNameEntityTypes(AbstractEnum):

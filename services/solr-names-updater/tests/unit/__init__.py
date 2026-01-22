@@ -121,12 +121,12 @@ def helper_create_cloud_event(
     new_state,
     prev_state,
     cloud_event_id: str = None,
-    source: str = "/requests/NR 6724165",
-    subject: str = "fake-subject",
+    source: str = '/requests/NR 6724165',
+    subject: str = 'fake-subject',
     type: str = QueueMessageTypes.NAMES_EVENT.value,
     data: dict = {},
-    pubsub_project_id: str = "PUBSUB_PROJECT_ID",
-    subscription_id: str = "SUBSCRIPTION_ID",
+    pubsub_project_id: str = 'PUBSUB_PROJECT_ID',
+    subscription_id: str = 'SUBSCRIPTION_ID',
     message_id: int = 1,
     envelope_id: int = 1,
     attributes: dict = {}
@@ -144,12 +144,12 @@ def helper_create_cloud_event(
     # This needs to mimic the envelope created by GCP PubSb when call a resource
     #
     envelope = {
-        "subscription": f"projects/{pubsub_project_id}/subscriptions/{subscription_id}",
-        "message": {
-            "data": base64.b64encode(to_queue_message(ce)).decode("UTF-8"),
-            "messageId": str(message_id),
-            "attributes": attributes,
+        'subscription': f'projects/{pubsub_project_id}/subscriptions/{subscription_id}',
+        'message': {
+            'data': base64.b64encode(to_queue_message(ce)).decode('UTF-8'),
+            'messageId': str(message_id),
+            'attributes': attributes,
         },
-        "id": envelope_id,
+        'id': envelope_id,
     }
     return envelope

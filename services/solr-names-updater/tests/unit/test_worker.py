@@ -48,14 +48,14 @@ def test_sp_gp_names_not_processed_to_solr(
         nr_entity,
         assert_value):
     """Assert that names are added to solr."""
-    queue_util.send_name_request_state_msg = mock.Mock(return_value="True")
+    queue_util.send_name_request_state_msg = mock.Mock(return_value='True')
 
     data_json = json.loads(base64.b64decode(message_payload['message']['data']).decode('utf-8'))
     nr_num = data_json['data']['request']['nrNum']
 
     nr_new_state = data_json['data']['request']['newState']
     create_nr(nr_num, nr_new_state, ['TEST NAME 1'], ['APPROVED'], nr_entity)
-    
+
     with patch.object(worker, 'process_names_event_message', return_value=True) as mock_process_names_evt_func:
-        rv = client.post("/", json=message_payload)
+        rv = client.post('/', json=message_payload)
         assert mock_process_names_evt_func.called == assert_value

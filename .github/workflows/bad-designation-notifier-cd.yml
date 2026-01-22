@@ -17,14 +17,22 @@ on:
           - test
           - sandbox
           - prod
+      redeploy:
+        description: "Redeploy Application"
+        required: true
+        type: choice
+        options:
+          - "false"
+          - "true"
 
 jobs:
-  namex-bad-desi-notifier-cd:
+  namex-bad-designation-notifier-cd:
     uses: bcgov/bcregistry-sre/.github/workflows/backend-job-cd.yaml@main
     with:
       target: ${{ inputs.target }}
-      app_name: "bad-desn-notify"
+      app_name: "namex-bad-designation-notifier"
       working_directory: "./jobs/bad-designation-notifier"
+      redeploy: ${{ inputs.redeploy }}
     secrets:
       WORKLOAD_IDENTIFY_POOLS_PROVIDER: ${{ secrets.WORKLOAD_IDENTIFY_POOLS_PROVIDER }}
       GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
