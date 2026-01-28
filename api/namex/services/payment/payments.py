@@ -4,7 +4,7 @@ from flask import current_app
 
 from .client import SBCPaymentClient
 from .exceptions import SBCPaymentException
-from .models import PaymentInvoice
+from .models import PaymentInvoice, PaymentRefundInvoice
 
 
 def get_payment(payment_identifier):
@@ -38,8 +38,12 @@ def refund_payment(payment_identifier, model=None):
         data = model
         api_instance = SBCPaymentClient()
         api_response = api_instance.refund_payment(payment_identifier, data)
-        current_app.logger.debug(api_response)
-        return PaymentInvoice(**api_response) if api_response else None
+        current_app.logger.debug(
+            "services refund_payment response",
+            payment_identifier=payment_identifier,
+            api_response=api_response,
+        )
+        return PaymentRefundInvoice(**api_response) if api_response else None
 
     except Exception as err:
         raise SBCPaymentException(err)
