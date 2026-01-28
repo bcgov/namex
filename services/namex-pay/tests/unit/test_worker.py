@@ -87,7 +87,7 @@ def test_get_payment_token():
     ce = SimpleCloudEvent(**ce_dict)
     payment_token = get_payment_token(ce)
     assert payment_token
-    assert payment_token.id == ce_dict['data']['id']
+    assert payment_token.id == str(ce_dict['data']['id'])
 
     # wrong type
     ce_dict = deepcopy(CLOUD_EVENT_TEMPLATE)

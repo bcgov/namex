@@ -17,7 +17,6 @@ The entry-point is the **cb_subscription_handler**
 
 """
 import time
-from dataclasses import dataclass
 from datetime import timedelta
 from enum import Enum
 from http import HTTPStatus
@@ -29,6 +28,7 @@ from namex.models import Event, Payment, State, User
 from namex.models import Request as RequestDAO  # noqa:I001; import orders
 from namex.services import EventRecorder, queue  # noqa:I005;
 from namex.services.name_request.name_request_state import is_reapplication_eligible
+from pydantic.dataclasses import dataclass as pydantic_dataclass
 from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent
 from sqlalchemy.exc import OperationalError
@@ -95,7 +95,12 @@ def worker():
             return ret # noqa: B012
 
 
-@dataclass
+class PydanticConfig:
+    """Pydantic config to ignore extra fields."""
+    extra = 'ignore'
+
+
+@pydantic_dataclass(config=PydanticConfig)
 class PaymentToken:
     """Payment Token class"""
 

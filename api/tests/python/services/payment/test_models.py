@@ -21,6 +21,7 @@ def test_payment_invoice_model(session):
         'corpTypeCode': 'NRO',
         'id': 11801,
         'paid': 0.0,
+        'refund': 0.0,
         'paymentAccount': {'accountId': '2698', 'accountName': 'online banking 13.1'},
         'paymentMethod': 'ONLINE_BANKING',
         'serviceFees': 1.5,
