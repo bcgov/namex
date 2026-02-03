@@ -32,7 +32,7 @@ If you have a BC Registries Account:
 3. Click “Incorporate”
 
 If you don’t have a BC Registries account:
-1. [Create an account]({{BUSINESS_URL}}) and then come back to this email 
+1. [Create an account]({{DECIDE_BUSINESS_URL}}) and then come back to this email 
 2. Click on this link: [BC Registries Business Dashboard]({{MAGIC_LINK}})
 3. If you’re not signed in, log in with your BC Registries Account
 4. Click “Incorporate”
