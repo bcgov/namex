@@ -1,4 +1,5 @@
 import os
+import pytest
 
 from hamcrest import *
 from solr_admin.services.get_stems import get_stems, get_stems_url
