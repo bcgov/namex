@@ -71,6 +71,7 @@ def process(email_info: SimpleCloudEvent, option) -> dict:
 
     name_request_url = current_app.config.get("NAME_REQUEST_URL")
     decide_business_url = current_app.config.get("DECIDE_BUSINESS_URL")
+    registry_account_create_url = current_app.config.get("REGISTRY_ACCOUNT_CREATE_URL")
     corp_online_url = current_app.config.get("COLIN_URL")
     form_page_url = current_app.config.get("CORP_FORMS_URL")
     societies_url = current_app.config.get("SOCIETIES_URL")
@@ -102,6 +103,7 @@ def process(email_info: SimpleCloudEvent, option) -> dict:
         refund_value=refund_value,
         name_request_url=name_request_url,
         decide_business_url=decide_business_url,
+        registry_account_create_url=registry_account_create_url,
         corp_online_url=corp_online_url,
         form_page_url=form_page_url,
         societies_url=societies_url,

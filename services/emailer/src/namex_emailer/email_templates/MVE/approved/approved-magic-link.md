@@ -27,7 +27,7 @@ Complete your application using BC Registries and Online Services, if the follow
 
 If you have a BC Registries account, [complete your application]({{MAGIC_LINK}}) now.
 
-If you don’t have a BC Registries account, [create an account]({{DECIDE_BUSINESS_URL}}) and then [complete your application]({{MAGIC_LINK}}).
+If you don’t have a BC Registries account, [create an account]({{REGISTRY_ACCOUNT_CREATE_URL}}) and then [complete your application]({{MAGIC_LINK}}).
 
 ---
 
