@@ -37,7 +37,7 @@ If you have a BC Registries Account:
 If you don’t have a BC Registries account:
 1. Send in your consent letter to [BCRegistries@gov.bc.ca](BCRegistries@gov.bc.ca)
 2. Receive confirmation that the consent letter has been accepted
-3. [Create an account]({{BUSINESS_URL}}) and then come back to this email 
+3. [Create an account]({{REGISTRY_ACCOUNT_CREATE_URL}}) and then come back to this email 
 4. Go to your [BC Registries Business Dashboard]({{MAGIC_LINK}})
 5. Log in to your BC Registries account, if you’re not signed in
 6. Click “Begin Continuation”
