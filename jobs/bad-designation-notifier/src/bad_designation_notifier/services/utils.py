@@ -1,11 +1,10 @@
 """Utility functions for database queries, date handling, and API requests."""
 
 from datetime import datetime, timedelta
-
 from json import JSONDecodeError
+
 import pytz
 import requests
-
 from cachetools import TTLCache, cached
 from flask import current_app
 

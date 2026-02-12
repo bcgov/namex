@@ -4,8 +4,10 @@ from flask import Flask, current_app
 from structured_logging import StructuredLogging
 
 from bad_designation_notifier.config import get_named_config
-from bad_designation_notifier.services.database_service import get_bad_designations
-from bad_designation_notifier.services.email_service import send_email_notification
+from bad_designation_notifier.services.database_service import \
+    get_bad_designations
+from bad_designation_notifier.services.email_service import \
+    send_email_notification
 
 
 def create_app(config_name="default"):

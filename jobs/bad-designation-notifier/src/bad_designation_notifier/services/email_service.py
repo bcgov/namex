@@ -5,7 +5,8 @@ from http import HTTPStatus
 import requests
 from flask import current_app
 
-from .utils import column_headers, column_keys, get_bearer_token, get_yesterday_str
+from .utils import (column_headers, column_keys, get_bearer_token,
+                    get_yesterday_str)
 
 
 def load_recipients():
