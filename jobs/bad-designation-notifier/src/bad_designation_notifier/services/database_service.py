@@ -8,8 +8,10 @@ from .utils import column_keys, get_yesterday_str
 
 # Map entity type codes to human-readable names
 entity_type_lookup = {
-    v.value: k.replace("_", " ").title() for k, v in EntityTypes.__members__.items()
-}
+    v.value: k.replace(
+        "_",
+        " ").title() for k,
+    v in EntityTypes.__members__.items()}
 
 
 def getconn():
@@ -49,7 +51,7 @@ def get_bad_designations():
             n.corp_num AS consumed_by
         FROM requests r
         JOIN names n ON r.id = n.nr_id
-        WHERE to_char(r.last_update AT TIME ZONE 'America/Vancouver', 
+        WHERE to_char(r.last_update AT TIME ZONE 'America/Vancouver',
                      'yyyy-mm-dd') = '{yesterday_pacific}'
         AND r.request_type_cd IN ('FR','LL','LP','XLL','XLP')
         AND r.state_cd NOT IN ('CANCELLED','EXPIRED','PENDING_DELETION','REJECTED')

@@ -12,7 +12,8 @@ from .utils import (column_headers, column_keys, get_bearer_token,
 def load_recipients():
     """Load recipients dynamically from an environment variable."""
     recipients = current_app.config["EMAIL_RECIPIENTS"]
-    return [r.strip("[]") for r in recipients] if isinstance(recipients, list) else []
+    return [r.strip("[]")
+            for r in recipients] if isinstance(recipients, list) else []
 
 
 def send_email(email: dict, token: str):
@@ -60,8 +61,9 @@ def send_email_notification(formatted_result):
         current_app.logger.info(f"Email sent successfully to: {recipients}")
     else:
         current_app.logger.error(
-            f"Failed to send email. Status Code: {resp.status_code}, Response: {resp.text}"
-        )
+            f"Failed to send email. Status Code: {
+                resp.status_code}, Response: {
+                resp.text}")
 
 
 def format_email_body(formatted_result):

@@ -34,8 +34,7 @@ class Config:
         SQLALCHEMY_DATABASE_URI = "postgresql+pg8000://"
     else:
         SQLALCHEMY_DATABASE_URI = (
-            f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-        )
+            f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
 
     # Email Configuration
     EMAIL_RECIPIENTS = os.getenv("EMAIL_RECIPIENTS", "").split(",")
