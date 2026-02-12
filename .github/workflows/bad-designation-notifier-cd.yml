@@ -25,6 +25,10 @@ on:
           - "false"
           - "true"
 
+permissions:
+  id-token: write
+  contents: read
+  
 jobs:
   namex-bad-designation-notifier-cd:
     uses: bcgov/bcregistry-sre/.github/workflows/backend-job-cd.yaml@main
