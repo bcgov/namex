@@ -1,0 +1,8 @@
+[flake8]
+max-line-length = 80
+extend-ignore = E501
+exclude =
+    .venv,
+    .git,
+    migrations,
+    tests
