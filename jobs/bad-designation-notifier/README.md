@@ -19,7 +19,7 @@ Bad-designation-Notifier is a Python application designed to identify designatio
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-repo/bad-designation-notifier.git
+   git clone https://github.com/your-repo/namex.git
    cd bad-designation-notifier
 
 2 ### Install the dependencies
