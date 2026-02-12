@@ -1,34 +1,38 @@
-from cloud_sql_connector import DBConfig, getconn
+"""Database service module for querying bad corporate designations."""
+
 from flask import current_app
+from google.cloud.sql.connector import Connector
 from namex.constants import EntityTypes
 
 from .utils import column_keys, get_yesterday_str
 
 # Map entity type codes to human-readable names
 entity_type_lookup = {
-    v.value: k.replace("_", " ").title()
-    for k, v in EntityTypes.__members__.items()
+    v.value: k.replace("_", " ").title() for k, v in EntityTypes.__members__.items()
 }
+
+
+def getconn():
+    """Create and return a database connection using Cloud SQL Connector.
+        Returns:
+            tuple: A tuple containing (connection, connector instance).
+    """
+    connector = Connector()
+    conn = connector.connect(
+        current_app.config.get("DB_INSTANCE_CONNECTION_NAME"),
+        "pg8000",  # driver
+        user=current_app.config.get("DB_USER"),
+        db=current_app.config.get("DB_NAME"),
+        ip_type=current_app.config.get("DB_IP_TYPE", "private"),
+        enable_iam_auth=True,  # 🔥 REQUIRED
+    )
+    return conn, connector
 
 
 def get_bad_designations():
     """Fetch bad names from the database and return as list of dicts."""
-    schema = current_app.config.get("DB_SCHEMA", "public")
 
-    db_config = DBConfig(
-        instance_name=current_app.config.get("DB_INSTANCE_CONNECTION_NAME"),
-        database=current_app.config.get("DB_NAME"),
-        user=current_app.config.get("DB_USER"),
-        ip_type=current_app.config.get("DB_IP_TYPE", "private"),
-        schema=schema,
-        pool_recycle=300,
-    )
-
-    # Make sure required fields are set
-    if not all([db_config.instance_name, db_config.database, db_config.user]):
-        raise ValueError("DBConfig fields instance_name, database, and user must be set")
-
-    conn = getconn(db_config)
+    conn, connector = getconn()
     cursor = conn.cursor()
 
     yesterday_pacific = get_yesterday_str()
@@ -45,7 +49,8 @@ def get_bad_designations():
             n.corp_num AS consumed_by
         FROM requests r
         JOIN names n ON r.id = n.nr_id
-        WHERE to_char(r.last_update AT TIME ZONE 'America/Vancouver', 'yyyy-mm-dd') = '{yesterday_pacific}'
+        WHERE to_char(r.last_update AT TIME ZONE 'America/Vancouver', 
+                     'yyyy-mm-dd') = '{yesterday_pacific}'
         AND r.request_type_cd IN ('FR','LL','LP','XLL','XLP')
         AND r.state_cd NOT IN ('CANCELLED','EXPIRED','PENDING_DELETION','REJECTED')
         AND (
@@ -90,3 +95,4 @@ def get_bad_designations():
     finally:
         cursor.close()
         conn.close()
+        connector.close()
