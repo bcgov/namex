@@ -18,10 +18,10 @@ class Config:
     PROJECT_ROOT = BASE_DIR
 
     # Database Configuration
-    DB_USER = os.getenv("DATABASE_USERNAME", "postgres")
-    DB_PASSWORD = os.getenv("DATABASE_PASSWORD", "postgres")
-    DB_NAME = os.getenv("DATABASE_NAME", "unittesting")
-    DB_HOST = os.getenv("DATABASE_HOST", "localhost")
+    DB_USER = os.getenv("DATABASE_USERNAME", "")
+    DB_PASSWORD = os.getenv("DATABASE_PASSWORD", "")
+    DB_NAME = os.getenv("DATABASE_NAME", "")
+    DB_HOST = os.getenv("DATABASE_HOST", "")
     DB_PORT = os.getenv("DATABASE_PORT", "5432")
 
     DB_SCHEMA = os.getenv("DATABASE_SCHEMA", "public")
