@@ -10,6 +10,10 @@ defaults:
     shell: bash
     working-directory: ./jobs/bad-designation-notifier
 
+permissions:
+  id-token: write
+  contents: write
+
 jobs:
   namex-bad-designation-notifier-ci:
     uses: bcgov/bcregistry-sre/.github/workflows/backend-ci.yaml@main
