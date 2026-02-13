@@ -27,7 +27,7 @@ on:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
   
 jobs:
   namex-bad-designation-notifier-cd:
