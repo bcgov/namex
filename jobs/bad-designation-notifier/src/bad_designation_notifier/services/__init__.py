@@ -1,3 +1,4 @@
+"""Service layer package for bad designation notifier."""
 # services/__init__.py
 
 from .database_service import get_bad_designations

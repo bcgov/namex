@@ -5,8 +5,32 @@ description = "An app to detect and notify about bad designations."
 authors = ["Eve Deng <eve.deng@gov.bc.ca>"]
 license = "Apache-2.0"
 readme = "README.md"
-packages = [{include = "bad-designation-notifier", from = "src"}]
+packages = [{ include = "bad_designation_notifier", from = "src" }]
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
 namex = { git = "https://github.com/bcgov/namex.git", subdirectory = "api", branch = "main" }
+cachetools = "^7.0.0"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.4"
+pytest-cov = "^5.0.0"
+pytest-mock = "^3.14.0"
+
+[tool.poetry.group.dev.dependencies]
+pylint = "^3.3.1"
+flake8 = "^7.1.1"
+isort = "^5.13.2"
+autopep8 = "^2.3.2"
+
+[tool.coverage.run]
+branch = true
+source = [
+   "namex_solr_importer",
+]
+omit = [
+    "*/.venv/*",
+   "*/__init__.py",
+   "*/bad_designation_notifier/app.py",
+   "*/bad_designation_notifier/services/*",
+]
