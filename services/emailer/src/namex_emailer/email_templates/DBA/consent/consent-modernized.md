@@ -13,7 +13,7 @@ Follow these steps to complete your application using this name:
 4. Complete and submit the form along with any required documentation and payment
 
 
-If you don\'t have a BC Registries Account, [create one here]({{BUSINESS_URL}}).
+If you don\'t have a BC Registries Account, [create one here]({{REGISTRY_ACCOUNT_CREATE_URL}}).
 
 If you were not signed into your BC Registries Account when this Name Request was created, you will need to affiliate the two together. Follow these steps to affiliate a Name Request with your BC Registries Account.
 
