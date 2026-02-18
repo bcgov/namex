@@ -1,15 +1,61 @@
 [tool.poetry]
 name = "bad-name-notifier"
-version = "0.2.0"
+version = "0.3.0"
 description = "An app to detect and notify about bad names."
 authors = ["Your Name <your.email@example.com>"]
 license = "Apache-2.0"
 readme = "README.md"
-packages = [
-    { include = "services", from = "src" },
-    { include = "src" }
-]
+packages = [{ include = "*", from = "src" }]
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
 namex = { git = "https://github.com/bcgov/namex.git", subdirectory = "api", branch = "main" }
+
+[tool.poetry.group.dev.dependencies]
+pylint = "^3.3.1"
+flake8 = "^7.1.1"
+isort = "^5.13.2"
+autopep8 = "^2.3.2"
+ruff = "^0.11.4"
+pytest = "^8.3.5"
+pytest-cov = "^7.0.0"
+freezegun = "^1.5.1"
+testcontainers = "^4.10.0"
+google-cloud-datastore = "^2.20.2"
+hypothesis = "^6.131.0"
+pytest-mock = "^3.14.0"
+requests-mock = "^1.12.1"
+
+[tool.coverage.run]
+branch = true
+source = [
+   "src",
+]
+omit = [
+    "*/.venv/*",
+   "*/__init__.py",
+   "*/app.py",
+   "*/services/*",
+]
+
+[tool.pytest.ini_options]
+minversion = "2.0"
+testpaths = [
+   "tests",
+]
+addopts = "--verbose --strict -p no:warnings --cov=src --cov-report html:htmlcov --cov-report xml:coverage.xml"
+python_files = [
+   "test*.py"
+]
+norecursedirs = [
+   ".git", ".tox", "venv*", "requirements*", "build",
+]
+log_cli = true
+log_cli_level = "1"
+filterwarnings = [
+   "ignore::UserWarning"
+]
+markers = [
+   "slow",
+   "serial",
+]
