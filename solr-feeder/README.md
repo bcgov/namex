@@ -38,5 +38,5 @@ C:\> oc create secret generic solr-feeder --from-literal=flask-secret-key=[big_l
 1. Change the solr.update_core log statement from debug to info
 1. Set the host in app.py to 0.0.0.0 but link in PyCharm doesn't work (use localhost)
 1. Add version numbers to requirements.txt
-1. Fix the warning for the dotenv import in config.py
+~~1. Fix the warning for the dotenv import in config.py~~
 1. Fix desktop to run on port 8080, not 5000
