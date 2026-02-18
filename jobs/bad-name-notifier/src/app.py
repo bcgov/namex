@@ -1,21 +1,26 @@
-from config import APP_CONFIG
+"""Application factory and configuration setup for the Bad Name Notifier service."""
+
 from flask import Flask, current_app
+from structured_logging import StructuredLogging
+
+from config import get_named_config
 from services.database_service import get_bad_names
 from services.email_service import send_email_notification
-from structured_logging import StructuredLogging
+
 
 def create_app(config_name="default"):
     """Creates and configures the Flask app."""
 
-    app = Flask(__name__) # NOSONAR
-    app.config.from_object(APP_CONFIG[config_name])
+    flask_app = Flask(__name__)  # NOSONAR
+    flask_app.config.from_object(get_named_config(config_name))
 
     # Configure Structured Logging
     structured_logger = StructuredLogging()
-    structured_logger.init_app(app)
-    app.logger = structured_logger.get_logger()
+    structured_logger.init_app(flask_app)
+    flask_app.logger = structured_logger.get_logger()
 
-    return app
+    return flask_app
+
 
 def run_task():
     """Executes the task to query bad names and send an email."""
@@ -26,8 +31,9 @@ def run_task():
         # Step 2: Send email
         send_email_notification(bad_names)
         current_app.logger.info("Notification sent successfully.")
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-exception-caught
         current_app.logger.error(f"An error occurred: {e}")
+
 
 if __name__ == "__main__":
     app = create_app()

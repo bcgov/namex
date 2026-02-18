@@ -18,5 +18,33 @@ Bad-Name-Notifier is a Python application designed to identify names with specia
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-repo/bad-name-notifier.git
-   cd bad-name-notifier
+   git clone https://github.com/your-repo/namex.git
+   cd jobs/bad-name-notifier
+
+2 ### Install the dependencies
+```bash
+poetry install
+```
+
+3 ### Configure the .env
+(see .env.sample)
+
+```bash
+eval $(poetry env activate)
+```
+
+4 ### Run the job
+```bash
+python src/bad_name_notifier/app.py
+OR: ./run.sh
+```
+
+5 ### Run Linting
+```bash
+poetry run ruff check --fix
+```
+
+6 ### Run unit tests
+```bash
+poetry run pytest
+```

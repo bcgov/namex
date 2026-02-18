@@ -1,7 +1,26 @@
-from cloud_sql_connector import DBConfig, getconn
+"""Database service for retrieving bad names from the data source."""
+
 from flask import current_app
+from google.cloud.sql.connector import Connector
 
 from .utils import get_yesterday_utc_range
+
+
+def getconn():
+    """Create and return a database connection using Cloud SQL Connector.
+    Returns:
+        tuple: A tuple containing (connection, connector instance).
+    """
+    connector = Connector()
+    conn = connector.connect(
+        current_app.config.get("DB_INSTANCE_CONNECTION_NAME"),
+        "pg8000",  # driver
+        user=current_app.config.get("DB_USER"),
+        db=current_app.config.get("DB_NAME"),
+        ip_type=current_app.config.get("DB_IP_TYPE", "private"),
+        enable_iam_auth=True,  # 🔥 REQUIRED
+    )
+    return conn, connector
 
 
 def get_bad_names() -> list[dict]:
@@ -14,22 +33,7 @@ def get_bad_names() -> list[dict]:
       - Contains non-standard ASCII characters
       - Event occurred after the start of yesterday UTC
     """
-    schema = current_app.config.get("DB_SCHEMA", "public")
-
-    db_config = DBConfig(
-        instance_name=current_app.config.get("DB_INSTANCE_CONNECTION_NAME"),
-        database=current_app.config.get("DB_NAME"),
-        user=current_app.config.get("DB_USER"),
-        ip_type=current_app.config.get("DB_IP_TYPE", "private"),
-        schema=schema,
-        pool_recycle=300,
-    )
-
-    # Ensure required fields are set
-    if not all([db_config.instance_name, db_config.database, db_config.user]):
-        raise ValueError("DBConfig fields instance_name, database, and user must be set")
-
-    conn = getconn(db_config)
+    conn, connector = getconn()
     cursor = conn.cursor()
 
     start_of_yesterday_utc, start_of_today_utc = get_yesterday_utc_range()
@@ -73,3 +77,4 @@ def get_bad_names() -> list[dict]:
     finally:
         cursor.close()
         conn.close()
+        connector.close()
