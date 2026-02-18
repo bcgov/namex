@@ -112,6 +112,7 @@ class Config:
     CORP_FORMS_URL = os.getenv("CORP_FORMS_URL", "")
     SOCIETIES_URL = os.getenv("SOCIETIES_URL", "")
     AUTH_WEB_URL = os.getenv("AUTH_WEB_URL", "")
+    REGISTRY_ACCOUNT_CREATE_URL = os.getenv("REGISTRY_ACCOUNT_CREATE_URL", "")
     BUSINESS_REGISTRY_URL = os.getenv("BUSINESS_REGISTRY_URL", "https://business-registry-dev.web.app/en-CA/")
     STEPS_TO_RESTORE_URL = os.getenv("STEPS_TO_RESTORE_URL", "")
 

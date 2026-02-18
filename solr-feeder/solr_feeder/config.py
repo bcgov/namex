@@ -22,8 +22,12 @@ or by accessing this configuration directly.
 """
 import os
 
+from dotenv import load_dotenv
 
-class Config():  # pylint: disable=too-few-public-methods;
+load_dotenv()
+
+
+class Config:  # pylint: disable=too-few-public-methods;
     """Base class configuration that should set reasonable defaults.
 
     Used as the base for all the other configurations.
@@ -34,12 +38,14 @@ class Config():  # pylint: disable=too-few-public-methods;
     POD_NAMESPACE = os.getenv('POD_NAMESPACE', 'unknown')
 
     COLIN_API_URL = os.getenv('COLIN_API_URL', 'http://') + \
-        os.getenv('COLIN_API_VERSION', '/api/v1')
+                    os.getenv('COLIN_API_VERSION', '/api/v1')
 
     SEARCH_API_URL = os.getenv('REGISTRIES_SEARCH_API_INTERNAL_URL', 'http://')
 
-    BOR_API_URL = os.getenv('BOR_API_INTERNAL_URL', '') \
-        + os.getenv('BOR_API_VERSION', '')
+    BOR_API_URL = os.getenv('BOR_API_INTERNAL_URL', '') + \
+                  os.getenv('BOR_API_VERSION', '')
+
+    SOLR_API_URL = os.getenv('SOLR_API_URL', '')
 
     # External API Timeouts
     try:
@@ -67,6 +73,9 @@ class Config():  # pylint: disable=too-few-public-methods;
     KEYCLOAK_AUTH_TOKEN_URL = os.getenv('KEYCLOAK_AUTH_TOKEN_URL')
     KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('NDS_SERVICE_ACCOUNT_CLIENT_ID')
     KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('NDS_SERVICE_ACCOUNT_SECRET')
+
+    ACCOUNT_SVC_CLIENT_ID = os.getenv('ACCOUNT_SVC_CLIENT_ID')
+    ACCOUNT_SVC_CLIENT_SECRET = os.getenv('ACCOUNT_SVC_CLIENT_SECRET')
 
     DEBUG = False
     TESTING = False

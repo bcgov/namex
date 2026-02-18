@@ -82,4 +82,5 @@ serialPipeline:
       cloudsql-instances: "a083gt-prod:northamerica-northeast1:namex-db-prod"
       resources-cpu: 4000m
       resources-memory: 8Gi
-      container-concurrency: "8"
+      max-scale: "60"
+      container-concurrency: "20"

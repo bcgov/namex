@@ -131,6 +131,7 @@ def _build_email_body(template: str, nr_model):
         "{{NAMEREQUEST_NUMBER}}": nr_model["nrNum"],
         "{{BUSINESS_URL}}": current_app.config.get("BUSINESS_URL"),
         "{{DECIDE_BUSINESS_URL}}": current_app.config.get("DECIDE_BUSINESS_URL"),
+        "{{REGISTRY_ACCOUNT_CREATE_URL}}": current_app.config.get("REGISTRY_ACCOUNT_CREATE_URL"),
         "{{CORP_ONLINE_URL}}": current_app.config.get("COLIN_URL"),
         "{{CORP_FORMS_URL}}": current_app.config.get("CORP_FORMS_URL"),
         "{{SOCIETIES_URL}}": current_app.config.get("SOCIETIES_URL"),

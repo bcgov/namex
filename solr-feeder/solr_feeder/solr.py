@@ -17,9 +17,10 @@ import os
 import requests
 from flask import current_app
 
+from solr_feeder.services.auth import get_search_bearer_token
+from solr_feeder.utilities.converters import convert_solr_doc
 
 __all__ = ['update_core']
-
 
 _SOLR_INSTANCE = os.getenv('SOLR_FEEDER_SOLR_INSTANCE', 'http://localhost:8393/solr')
 _SOLR_URL = _SOLR_INSTANCE + '/{}/update/json'
@@ -29,18 +30,28 @@ def update_core(core_name: str, json_string: str):
     """Update the core with the given data."""
     current_app.logger.debug('json Solr command: %s', json_string)
 
-    response = requests.post(_SOLR_URL.format(core_name),
-                             data=json_string,
-                             timeout=current_app.config['NAMEX_SOLR_TIMEOUT'])
+    converted_request = convert_solr_doc(json_string)
 
-    # By the way, if your request is mangled, Solr will sometimes happily return a 200 with a responseHeader['status']
-    # value of 0 (meaning all is good).
-    if response.status_code != 200:
-        current_app.logger.error('%s core: %s', core_name, response.json())
+    bearer_token, token_err = get_search_bearer_token()
+    headers = {
+        'Authorization': f'Bearer {bearer_token}',
+        'Content-Type': 'application/json',
+    }
+
+    solr_api_url = current_app.config['SOLR_API_URL'].rstrip('/') + '/internal/solr/update'
+
+    resp = requests.put(solr_api_url,
+                        json=converted_request,
+                        headers=headers
+                        )
+
+    if resp.status_code > 299:
+        current_app.logger.error('Solr update for ' + json_string + ' failed.')
+        current_app.logger.error('Failed to update solr', resp.json())
 
         return {
-            'message': f"{core_name} core: {response.json()['error']['msg']}",
-            'status_code': response.status_code
+            'message': f"{core_name} core: {resp.json()['error']['msg']}",
+            'status_code': resp.status_code
         }
 
     return None
