@@ -70,6 +70,11 @@ class SolrClient:
         }
 
         token = cls._get_bearer_token()
+
+        print('*' * 120)
+        print(f'Request JSON: {request_json}')
+        print(f'Solr URL: {cls._get_solr_api_url()}/search/possible-conflict-names')
+
         resp = requests.post(
             url=f'{cls._get_solr_api_url()}/search/possible-conflict-names',
             json=request_json,
