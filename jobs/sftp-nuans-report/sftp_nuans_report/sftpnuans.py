@@ -8,14 +8,15 @@ import traceback
 from datetime import datetime, timezone
 
 import papermill as pm
-from config import Config
 from flask import Flask, current_app
-from services.email import EmailService
-from services.sftp import SftpService
 from structured_logging import StructuredLogging
 
+from sftp_nuans_report.config import Config
+from sftp_nuans_report.services.email import EmailService
+from sftp_nuans_report.services.sftp import SftpService
+
 # Suppress verbose papermill logging
-logging.getLogger("papermill").setLevel(logging.ERROR)
+logging.getLogger('papermill').setLevel(logging.ERROR)
 
 # Notebook Scheduler
 # ---------------------------------------
@@ -50,26 +51,29 @@ def processnotebooks(notebookdirectory, data_dir):
     current_app.logger.info('Start processing directory: %s', notebookdirectory)
 
     try:
-        pm.execute_notebook(os.path.join(notebookdirectory, 'generate_files.ipynb'),
-                            data_dir + 'temp.ipynb', parameters=None)
-        os.remove(data_dir+'temp.ipynb')
+        pm.execute_notebook(
+            os.path.join(notebookdirectory, 'generate_files.ipynb'),
+            data_dir + 'temp.ipynb',
+            parameters=None,
+        )
+        os.remove(data_dir + 'temp.ipynb')
 
         SftpService.send_to_ocp_sftp_relay(data_dir)
 
         status = True
-    except Exception as e:  # noqa: B902
+    except Exception as e:  # pylint: disable=broad-exception-caught
         current_app.logger.error(
-            "Error processing notebook %s. Traceback:\n%s",
+            'Error processing notebook %s. Traceback:\n%s',
             notebookdirectory,
-            traceback.format_exc()
+            traceback.format_exc(),
         )
         EmailService.send_email_to_notify_api(notebookdirectory, str(e))
     return status
 
 
 if __name__ == '__main__':
-    app = create_app(Config)
-    app.app_context().push()
+    app_m = create_app(Config)
+    app_m.app_context().push()
     start_time = datetime.now(timezone.utc)
 
     temp_dir = os.path.join(os.getcwd(), r'sftp_nuans_report/data/')
@@ -80,5 +84,7 @@ if __name__ == '__main__':
     # shutil.rmtree(temp_dir)
 
     end_time = datetime.now(timezone.utc)
-    current_app.logger.info('job - jupyter notebook report completed in: %s', end_time - start_time)
+    current_app.logger.info(
+        'job - jupyter notebook report completed in: %s', end_time - start_time
+    )
     sys.exit()
