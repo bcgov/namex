@@ -22,8 +22,8 @@ class Config:
     DB_HOST = os.getenv("DATABASE_HOST", "")
     DB_PORT = os.getenv("DATABASE_PORT", "5432")
 
-    DB_SCHEMA = os.getenv("DATABASE_SCHEMA", "")
-    DB_IP_TYPE = os.getenv("DATABASE_IP_TYPE", "")
+    DB_SCHEMA = os.getenv("DATABASE_SCHEMA", "public")
+    DB_IP_TYPE = os.getenv("DATABASE_IP_TYPE", "private")
     DB_OWNER = os.getenv("DATABASE_OWNER", "")
 
     if DB_INSTANCE_CONNECTION_NAME := os.getenv(
