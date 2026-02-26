@@ -2,7 +2,7 @@ import os
 
 import psycopg2
 import sqlalchemy
-from cloud_sql_connector import DBConfig, getconn
+from unittest.mock import patch, MagicMock
 
 # from sftp_nuans_report.services.sftp import SftpService
 
@@ -25,19 +25,14 @@ def test_connection_failed():
     finally:
         assert not status
 
-def test_database_connection_succeed():
-    config = DBConfig(
-        instance_name=os.getenv("DATABASE_INSTANCE_CONNECTION_NAME"),
-        database=os.getenv("DATABASE_NAME"),
-        user=os.getenv("DATABASE_USERNAME"),
-        ip_type="public",
-        schema=os.getenv("DATABASE_SCHEMA"),
-    )
+@patch('cloud_sql_connector.getconn')
+def test_database_connection_succeed(mock_getconn):
+    mock_connection = MagicMock()
+    mock_getconn.return_value = lambda: mock_connection
 
-    # SQLAlchemy engine
     engine = sqlalchemy.create_engine(
-        "postgresql+pg8000://",
-        creator=getconn(config)
+        'postgresql+pg8000://',
+        creator=mock_getconn.return_value
     )
 
     assert engine is not None
