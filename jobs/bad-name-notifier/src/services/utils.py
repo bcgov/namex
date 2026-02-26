@@ -21,7 +21,7 @@ def get_yesterday_str():
 
 def get_yesterday_utc_range():
     """Calculate the start of today and yesterday in Pacific Time"""
-    pacific = pytz.timezone("America/Los_Angeles")
+    pacific = pytz.timezone("America/Vancouver")
 
     start_of_today_pacific = pacific.localize(
         datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)

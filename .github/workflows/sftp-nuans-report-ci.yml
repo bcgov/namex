@@ -17,5 +17,3 @@ jobs:
       app_name: "nuans-report"
       working_directory: "./jobs/sftp-nuans-report"
       codecov_flag: "namexnuansreport"
-      skip_isort: "true"
-      skip_black: "true"
