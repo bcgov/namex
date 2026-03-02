@@ -48,6 +48,8 @@ from namex.services.solr.solr_helpers import SolrHlpers
 from namex.utils import queue_util
 from namex.utils.auth import cors_preflight
 from namex.utils.common import convert_to_ascii, convert_to_utc_max_date_time, convert_to_utc_min_date_time
+from namex.utils.nr_query import get_nr_num_from_query
+from namex.services.name_request.name_request import get_nrs_like_nr_num, get_nrs_like_names
 
 from .utils import DateUtils
 
@@ -111,7 +113,7 @@ class RequestsQueue(Resource):
     @jwt.requires_roles([User.APPROVER])
     @api.doc(
         description='Fetches the next draft name request from the queue and assigns it to the current user. '
-        'If the user already has an in-progress NR, that one is returned instead.',
+                    'If the user already has an in-progress NR, that one is returned instead.',
         params={'priorityQueue': 'Set to true to fetch from the priority queue'},
         responses={
             200: 'Name request assigned successfully',
@@ -504,6 +506,7 @@ class RequestSearch(Resource):
 
         try:
             results = SolrClient.search_nrs(query, start, rows)
+            existing_nrs = set(nr['nr_num'] for nr in results['searchResults']['results'])
             data.extend(
                 [
                     {
@@ -513,6 +516,33 @@ class RequestSearch(Resource):
                     for nr in results['searchResults']['results']
                 ]
             )
+            nr_num = get_nr_num_from_query(query)
+            if nr_num:
+                nrs = get_nrs_like_nr_num(nr_num)
+                data.extend(
+                    [
+                        {
+                            'nrNum': nr.nrNum,
+                            'names': [n.name for n in nr.names]
+                        }
+                        for nr in nrs
+                        if nr.nrNum not in existing_nrs
+                    ]
+                )
+            else:
+                # above, we returned nothing if query was empty
+                nrs = get_nrs_like_names(query)
+                data.extend(
+                    [
+                        {
+                            'nrNum': nr.nrNum,
+                            'names': [n.name for n in nr.names]
+                        }
+                        for nr in nrs
+                        if nr.nrNum not in existing_nrs
+                    ]
+                )
+
             return make_response(jsonify(data), 200)
         except Exception:
             current_app.logger.error(f'Error when searching for {query}\n{traceback.format_exc()}')
@@ -835,7 +865,8 @@ class Request(Resource):
             return make_response(jsonify(message='Internal server error'), 500)
 
         if 'warnings' in locals() and warnings:  # noqa: F821
-            return make_response(jsonify(message='Request:{} - patched'.format(nr), warnings=warnings), 206)  # noqa: F821
+            return make_response(jsonify(message='Request:{} - patched'.format(nr), warnings=warnings),
+                                 206)  # noqa: F821
 
         if state in [State.APPROVED, State.CONDITIONAL, State.REJECTED]:
             queue_util.publish_email_notification(nrd.nrNum, state)
