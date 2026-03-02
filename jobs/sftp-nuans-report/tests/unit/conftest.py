@@ -1,12 +1,10 @@
 import pytest
-from flask import current_app
 
-from sftpnuans import create_app
-
-from config import Config
+from sftp_nuans_report.config import Config
+from sftp_nuans_report.sftpnuans import create_app
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def app(request):
     """
     Returns session-wide application.
@@ -16,7 +14,7 @@ def app(request):
     return app
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def client_ctx(app):
     """
     Returns session-wide Flask test client.

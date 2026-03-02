@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sftp-nuans-report"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
@@ -59,7 +59,61 @@ flake8-docstrings = "^1.7.0"
 flake8-isort = "^6.1.2"
 flake8-quotes = "^3.4.0"
 pep8-naming = "^0.14.1"
+psycopg2-binary = "^2.9.11"
+pytest-cov = "^7.0.0"
+ruff = "^0.11.4"
+freezegun = "^1.5.1"
+testcontainers = "^4.10.0"
+google-cloud-datastore = "^2.20.2"
+hypothesis = "^6.131.0"
+pytest-mock = "^3.14.0"
+requests-mock = "^1.12.1"
+
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "Q"]
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "single"
+
+[tool.coverage.run]
+branch = true
+source = [
+   "sftp_nuans_report",
+]
+omit = [
+    "*/.venv/*",
+   "*/__init__.py",
+   "*/sftpnuans.py",
+   "*/services/*",
+   "*/util/*",
+]
+
+[tool.pytest.ini_options]
+minversion = "2.0"
+testpaths = [
+   "tests",
+]
+addopts = "--verbose --strict -p no:warnings --cov=sftp_nuans_report --cov-report html:htmlcov --cov-report xml:coverage.xml"
+python_files = [
+   "test*.py"
+]
+norecursedirs = [
+   ".git", ".tox", "venv*", "requirements*", "build",
+]
+log_cli = true
+log_cli_level = "1"
+filterwarnings = [
+   "ignore::UserWarning"
+]
+markers = [
+   "slow",
+   "serial",
+]

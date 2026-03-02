@@ -19,18 +19,48 @@ to setup your local development environment.
 
    this will print the public key. Store the string after ssh-rsa to the SFTP_HOST_KEY configurations on openshift.
 
-## Running Notebook Report
 
-1. Run `. venv/bin/activate` to change to `venv` environment.
-2. Run notebook with `python sftpnuans.py`
+## Installation
 
-## Added permission to run.sh file if it is needed
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-repo/namex.git
+   cd jobs/sftp-nuans-report
 
+2 ### Install the dependencies
+```bash
+poetry install
+```
+
+3 ### Configure the .env
+(see .env.sample)
+
+```bash
+eval $(poetry env activate)
+```
+
+4 ### Added permission to run.sh file if it is needed
+
+```bash
 git add --chmod=+x path/to/file
+```
 
-## Running Unit Tests
+5 ### Run the job
+```bash
+python sftp_nuans_report/sftpnuans.py
+OR: ./run.sh
+```
 
-1. Run `python -m pytest` or `pytest` command.
+6 ### Run Linting
+```bash
+poetry run ruff check --fix
+```
+
+7 ### Run unit tests
+```bash
+poetry run pytest
+```
+
 
 ### Build API - can be done in VS Code
 

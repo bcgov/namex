@@ -1,6 +1,10 @@
+"""Token utility module for retrieving authentication bearer tokens."""
+
 import requests
 from cachetools import TTLCache, cached
-from config import Config
+
+from sftp_nuans_report.config import Config
+
 
 @staticmethod
 @cached(cache=TTLCache(maxsize=1, ttl=180))
@@ -13,8 +17,9 @@ def get_bearer_token() -> str:
     # get service account token
     res = requests.post(
         url=token_url,
-        data="grant_type=client_credentials",
-        headers={"content-type": "application/x-www-form-urlencoded"},
+        data='grant_type=client_credentials',
+        headers={'content-type': 'application/x-www-form-urlencoded'},
         auth=(client_id, client_secret),
+        timeout=(5, 15),  # ✅ FIX: connect timeout, read timeout
     )
-    return res.json().get("access_token")
+    return res.json().get('access_token')
