@@ -1,5 +1,6 @@
 import time
 from hamcrest import *
+from selenium.webdriver.common.by import By
 
 
 class DecisionReasonCreationPage:
@@ -11,15 +12,15 @@ class DecisionReasonCreationPage:
 
     def refresh(self):
         self.browser.get(self.base_url + '/admin/decisionreason')
-        assert_that(self.browser.find_element_by_tag_name('body').text, contains_string('Namex Administration'))
+        assert_that(self.browser.find_element(By.TAG_NAME, 'body').text, contains_string('Namex Administration'))
         self.browser.find_element_by_link_text('Decision Reason').click()
         self.browser.find_element_by_link_text('Create').click()
 
     def fill(self, id, value):
-        cell = self.browser.find_element_by_css_selector('input#'+id)
+        cell = self.browser.find_element(By.CSS_SELECTOR,'input#'+id)
         cell.send_keys(value)
 
     def save(self):
-        form = self.browser.find_element_by_css_selector('form')
+        form = self.browser.find_element(By.CSS_SELECTOR,'form')
         form.submit()
         time.sleep(1)

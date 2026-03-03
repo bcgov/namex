@@ -1,0 +1,17 @@
+Dockerfile
+__pycache__
+coverage.xml
+.devcontainer
+.dockerignore
+.pytest_cache
+.venv
+venv
+.env
+.env*
+.eggs
+.history
+.vscode
+Makefile
+requirements
+poetry.toml
+tests

@@ -1,5 +1,7 @@
 from behave import fixture, given, when, then, step
 from hamcrest import *
+from selenium.webdriver.common.by import By
+
 from solr_admin.models.synonym import Synonym
 
 
@@ -13,7 +15,7 @@ def seed(context):
 @when(u'I access the synonym list')
 def synonym_list(context):
     context.browser.get(context.base_url + '/')
-    context.browser.find_element_by_tag_name('a').click()
+    context.browser.find_element(By.TAG_NAME,'a').click()
     context.browser.find_element_by_link_text('Synonym').click()
 
 

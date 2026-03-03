@@ -1,3 +1,5 @@
+"""Database service for retrieving bad names from the data source."""
+
 from cloud_sql_connector import DBConfig, getconn
 from flask import current_app
 
@@ -27,7 +29,9 @@ def get_bad_names() -> list[dict]:
 
     # Ensure required fields are set
     if not all([db_config.instance_name, db_config.database, db_config.user]):
-        raise ValueError("DBConfig fields instance_name, database, and user must be set")
+        raise ValueError(
+            "DBConfig fields instance_name, database, and user must be set"
+        )
 
     conn = getconn(db_config)
     cursor = conn.cursor()

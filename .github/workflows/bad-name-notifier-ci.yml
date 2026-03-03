@@ -10,12 +10,14 @@ defaults:
     shell: bash
     working-directory: ./jobs/bad-name-notifier
 
+permissions:
+  id-token: write
+  contents: write
+
 jobs:
   namex-bad-name-notifier-ci:
     uses: bcgov/bcregistry-sre/.github/workflows/backend-ci.yaml@main
     with:
       app_name: "namex-bad-name-notifier"
       working_directory: "./jobs/bad-name-notifier"
-      codecov_flag: "namexbadnamenotifier"
-      skip_isort: "true"
-      skip_black: "true"
+      codecov_flag: "namex-bad-name-notifier"
