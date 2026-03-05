@@ -1,8 +1,8 @@
 # match whole/start/end string  NR 1234567, NR1234567
 import re
 
-nr_num_regex = r'(^(NR( |)[0-9]+)$)|(^(NR( |)[0-9]+)\s)|(\s(NR( |)[0-9]+)$)'
-nr_num_fallback_regex = r'(^[0-9]+$)|(^[0-9]+\s)|(\s[0-9]+$)'  # 1234567
+nr_num_regex = r'(^(NR( |)\d+)$)|(^(NR( |)\d+)\s)|(\s(NR( |)\d+)$)'
+nr_num_fallback_regex = r'(^\d+$)|(^\d+\s)|(\s\d+$)'  # 1234567
 
 
 def get_nr_num_from_query(value) -> str | None:
