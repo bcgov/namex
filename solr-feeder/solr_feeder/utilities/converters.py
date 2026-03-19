@@ -51,6 +51,7 @@ def _convert_nr_doc(doc: dict) -> dict:
         'jurisdiction': doc.get('jurisdiction', ''),
         'state': doc.get('state_type_cd', ''),
         'type': 'NR',
+        'sub_type': doc.get('sub_type', '-'),
         'names': [
             {
                 'choice': doc.get('choice', -1),
