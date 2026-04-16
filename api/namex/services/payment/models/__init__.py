@@ -3,7 +3,7 @@ from typing import Optional, Union
 from decimal import Decimal
 
 from pydantic.dataclasses import dataclass as pydantic_dataclass
-from pydantic import Field
+from pydantic import ConfigDict, Field
 from datetime import date
 
 from .abstract import Serializable
@@ -122,13 +122,10 @@ class PaymentRequest(Serializable):
     details: list = field(default_factory=PaymentDetailItem)
 
 
-class PydanticConfig:
-    """Pydantic config to ignore extra fields."""
-    extra = 'ignore'
-    underscore_attrs_are_private = False
+_pydantic_config = ConfigDict(extra='ignore')
 
 
-@pydantic_dataclass(config=PydanticConfig)
+@pydantic_dataclass(config=_pydantic_config)
 class PaymentRefundInvoice:
     refundId: int
     refundAmount: Decimal
@@ -136,7 +133,7 @@ class PaymentRefundInvoice:
     isPartialRefund: bool
 
 
-@pydantic_dataclass(config=PydanticConfig)
+@pydantic_dataclass(config=_pydantic_config)
 class PaymentInvoice(Serializable):
     id: int
     serviceFees: float
@@ -193,7 +190,7 @@ class Receipt(Serializable):
     receiptNumber: str = ''
 
 
-@pydantic_dataclass(config=PydanticConfig)
+@pydantic_dataclass(config=_pydantic_config)
 class ReceiptResponse(Serializable):
     bcOnlineAccountNumber: Optional[str] = None
     filingIdentifier: Optional[str] = None
