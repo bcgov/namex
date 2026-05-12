@@ -1,6 +1,6 @@
 import base64
 import traceback
-from datetime import datetime
+from datetime import datetime, timedelta
 from http import HTTPStatus
 
 from flask import current_app
@@ -50,8 +50,14 @@ def email_consent_letter(email_info: SimpleCloudEvent):
             for applicant in applicants:
                 recipient_emails.append(applicant["emailAddress"])
                 recipient_phones.append(applicant["phoneNumber"])
-        if not nr_model["expirationDate"]:
+
+        if nr_model['expirationDate']:
+            tz_aware_date = datetime.fromisoformat(nr_model['expirationDate'])
+            localized_date = tz_aware_date - timedelta(hours=8)
+            nr_model['expirationDate'] = localized_date.strftime(DATE_FORMAT)
+        else:
             ReportResource._add_expiry_date(nr_model)
+
         recipients = ",".join(recipient_emails)
         file_name = "consent"
         legal_type = nr_model["entity_type_cd"]

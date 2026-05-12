@@ -1,6 +1,6 @@
 import base64
 import json
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from http import HTTPStatus
 from pathlib import Path
 
@@ -177,8 +177,8 @@ class ReportResource(Resource):
         if isXPRO and nr_report_json['nrStateDescription'] == 'Rejected':
             nr_report_json['nrStateDescription'] = 'Not Approved'
         if nr_report_json['expirationDate']:
-            tz_aware_date = datetime.fromisoformat(nr_model['expirationDate']).replace(tzinfo=timezone('UTC'))
-            localized_date = tz_aware_date.astimezone(timezone('US/Pacific'))
+            tz_aware_date = datetime.fromisoformat(nr_model['expirationDate'])
+            localized_date = tz_aware_date - timedelta(hours=8)
             nr_report_json['expirationDate'] = localized_date.strftime(DATE_FORMAT)
         else:
             ReportResource._add_expiry_date(nr_model)

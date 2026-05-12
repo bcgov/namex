@@ -1,5 +1,5 @@
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from urllib.parse import urlencode
 
 import pytz
@@ -38,7 +38,7 @@ def get_bearer_token():
 @staticmethod
 def as_legislation_timezone(date_time: datetime) -> datetime:
     """Return a datetime adjusted to the legislation timezone."""
-    return date_time.astimezone(pytz.timezone(current_app.config.get("LEGISLATIVE_TIMEZONE")))
+    return date_time.astimezone(timezone(timedelta(hours=-8)))
 
 
 @staticmethod
@@ -96,7 +96,6 @@ def query_nr_number(identifier: str):
     namex_url = current_app.config.get("NAMEX_SVC_URL")
 
     token = get_bearer_token()
-
     nr_response = requests.get(namex_url + "/requests/" + identifier, headers=get_headers(token))
 
     return nr_response
