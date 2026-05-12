@@ -60,6 +60,8 @@ def email_consent_letter(email_info: SimpleCloudEvent):
         instruction_group = ReportResource._get_instruction_group(legal_type, request_action, corp_num)
         if instruction_group:
             file_name = f"{file_name}-{instruction_group}.md"
+        else:
+            file_name = f"{file_name}.md"
         email_template = get_main_template(request_action, file_name, "consent")
         email_body = _build_email_body(email_template, nr_model)
         email = {"recipients": recipients, "content": {"subject": report_name, "body": email_body, "attachments": []}}
