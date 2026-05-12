@@ -2,6 +2,7 @@ import pytest
 from hamcrest import *
 from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
 
 from tests.conftest import get_browser, connect_with, gecko_driver
 import os
@@ -35,7 +36,8 @@ def new_browser(new_server, second_base_url):
 def get_browser():
     options = Options()
     options.headless = True
-    browser = WebDriver(options=options, executable_path=(gecko_driver()))
+    service = Service(executable_path=gecko_driver())
+    browser = WebDriver(options=options, service=service)
 
     return browser
 
