@@ -40,7 +40,7 @@ from __future__ import annotations
 
 from flask import Flask
 from flask_restx import Api
-from namex import DBConfig, setup_search_path_event_listener
+from namex import DBConfig, setup_pg8000_close_event_listener, setup_search_path_event_listener
 from namex.models import db
 from namex.resources.ops import api as nr_ops
 from namex.services import queue
@@ -75,6 +75,7 @@ def create_app(environment: Config = ProdConfig, **kwargs) -> Flask:
         with app.app_context():
             engine = db.engine
             setup_search_path_event_listener(engine, schema)
+            setup_pg8000_close_event_listener(engine)
 
     queue.init_app(app)
     register_endpoints(app)
