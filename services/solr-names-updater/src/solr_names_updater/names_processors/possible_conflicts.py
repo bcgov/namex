@@ -39,11 +39,16 @@ def process_add_to_solr(state_change_msg: dict):  # pylint: disable=too-many-loc
 
 
 def process_delete_from_solr(state_change_msg: dict):  # pylint: disable=too-many-locals, , too-many-branches
-    """Process possible conflicts update via Solr feeder api."""
-    logger.info(f'Processing delete from solr for state_change_msg: {state_change_msg}') # noqa: S608
+    """Process possible conflicts state update via Solr feeder api.
+
+    The new Solr does not support deleting documents. Instead of removing the record,
+    the NR state is updated so the conflict search excludes it (only ACTIVE/APPROVED/
+    CONDITION are returned as conflicts).
+    """
+    logger.info(f'Processing state update from solr for state_change_msg: {state_change_msg}') # noqa: S608
     nr_num = state_change_msg.get('nrNum')
     nr = RequestDAO.find_by_nr(nr_num)
-    send_to_solr_delete(nr)
+    send_to_solr_state_update(nr)
 
 
 def send_to_solr_add(nr: RequestDAO):
@@ -59,25 +64,35 @@ def send_to_solr_add(nr: RequestDAO):
         logger.error(f'failed to add possible conflict to solr for {nr.nrNum}, status code: {resp.status_code}, error reason: {resp.reason}, error details: {resp.text}')
 
 
-def send_to_solr_delete(nr: RequestDAO):
-    """Send json payload to delete possible conflict from solr for NR."""
-    payload_dict = {
-        'solr_core': 'possible.conflicts',
-        'request': {
-            'delete': [nr.nrNum],
-            'commit': {}
-        }
-    }
+def send_to_solr_state_update(nr: RequestDAO):
+    """Send json payload to update the possible conflict NR state in solr.
 
-    request_str = json.dumps(payload_dict['request'])
-    payload_dict['request'] = request_str
+    The new Solr does not support deleting documents, so a delete is converted to a
+    state update. The NR's current state (e.g. CANCELLED, EXPIRED, CONSUMED, RESET) is
+    sent so the conflict search filters the record out based on its state.
+    """
+    name_states = [NameState.APPROVED.value, NameState.CONDITION.value]  # pylint: disable=no-member
+    names = find_name_by_name_states(nr.id, name_states)
+    if not names:
+        logger.info(f'no approved/condition name found for {nr.nrNum}, skipping solr state update')
+        return
+
+    name = names[0]
+    jur = nr.xproJurisdiction if nr.xproJurisdiction else 'BC'
+    payload_dict = construct_payload_dict(nr, name, jur, nr.stateCd)
+
     resp = post_to_solr_feeder(payload_dict)
     if resp.status_code != 200:
-        logger.error(f'failed to delete possible conflict from solr for {nr.nrNum}, status code: {resp.status_code}, error reason: {resp.reason}, error details: {resp.text}')
+        logger.error(f'failed to update possible conflict state in solr for {nr.nrNum}, status code: {resp.status_code}, error reason: {resp.reason}, error details: {resp.text}')
 
 
-def construct_payload_dict(nr: RequestDAO, name, jur):
-    """Construct json payload used to invoke solr feeder endpoint for adding possible conflicts for a given NR."""
+def construct_payload_dict(nr: RequestDAO, name, jur, state_type_cd=None):
+    """Construct json payload used to invoke solr feeder endpoint for a given NR.
+
+    When state_type_cd is provided it overrides the name state. This is used to update
+    the NR state for records that were previously deleted in the old Solr (e.g. on
+    cancel/expire/consume/reset); otherwise the name state is used (add/approve flow).
+    """
     payload_dict = {'solr_core': 'possible.conflicts'}
     payload_request = {}
     start_date = convert_to_solr_conformant_datetime_str(nr.submittedDate)
@@ -86,7 +101,7 @@ def construct_payload_dict(nr: RequestDAO, name, jur):
             'id': nr.nrNum,
             'sub_type': nr.requestTypeCd,
             'name': name.name,
-            'state_type_cd': name.state,
+            'state_type_cd': state_type_cd if state_type_cd else name.state,
             'source': nr.source,
             'start_date': start_date,
             'jurisdiction': jur
