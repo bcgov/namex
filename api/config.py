@@ -106,6 +106,10 @@ permits-licences/businesses-incorporated-companies/approval-business-name',
 
     DISABLE_NAMEREQUEST_SOLR_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0))
 
+    # Enables test-only endpoints (e.g. force NR state without notifying Solr).
+    # Set in dev/test/sandbox only - never in production.
+    ALLOW_TEST_ENDPOINT = os.getenv('ALLOW_TEST_ENDPOINT', 'false').lower() == 'true'
+
     NAMEX_NR_STATE_TOPIC = os.getenv('NAMEX_NR_STATE_TOPIC', '')
     EMAILER_TOPIC = os.getenv('NAMEX_MAILER_TOPIC', '')
 
