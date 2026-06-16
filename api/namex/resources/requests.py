@@ -953,8 +953,12 @@ class Request(Resource):
                     expirationDateStr = json_input['expirationDate']
                     expirationDate = DateUtils.parse_date(expirationDateStr)
                     # Convert the UTC datetime object to the end of day in pacific time without milliseconds
-                    pacific_time = expirationDate.astimezone(timezone('US/Pacific'))
-                    end_of_day_pacific = pacific_time.replace(hour=23, minute=59, second=0, microsecond=0)
+                    pacific_tz = timezone('US/Pacific')
+                    pacific_time = expirationDate.astimezone(pacific_tz)
+                    # Re-verify and normalize the offset after the hour replacement
+                    end_of_day_pacific = pacific_tz.normalize(
+                        pacific_time.replace(hour=23, minute=59, second=0, microsecond=0)
+                    )
                     json_input['expirationDate'] = end_of_day_pacific.strftime('%Y-%m-%d %H:%M:%S%z')
                 except Exception as e:
                     current_app.logger.debug(f'Error parsing expirationDate: {str(e)}')

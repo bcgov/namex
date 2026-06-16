@@ -7,7 +7,7 @@ import os
 import flask
 from flask import Flask
 from flask_jwt_oidc import JwtManager
-from namex import DBConfig, setup_search_path_event_listener
+from namex import DBConfig, setup_pg8000_close_event_listener, setup_search_path_event_listener
 from structured_logging import StructuredLogging
 
 from config import CONFIGURATION
@@ -56,6 +56,7 @@ def create_app(run_mode=None):
         with app.app_context():
             engine = db.engine
             setup_search_path_event_listener(engine, schema)
+            setup_pg8000_close_event_listener(engine)
 
     # Initialize Marshmallow with handling for SQLAlchemy auto-detection issues
     try:
