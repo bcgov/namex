@@ -31,7 +31,7 @@ class Config(object):
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    SOLR_BASE_URL = os.getenv('SOLR_BASE_URL', None)
+    SOLR_API_URL = f'{os.getenv('SOLR_API_URL', None)}{os.getenv('SOLR_API_VERSION', None)}'
 
     SOLR_SYNONYMS_API_URL = f'{os.getenv("SOLR_SYNONYMS_API_URL", None)}{os.getenv("SOLR_SYNONYMS_API_VERSION", None)}'
 
@@ -100,7 +100,15 @@ permits-licences/businesses-incorporated-companies/approval-business-name',
     PAYMENT_SVC_AUTH_CLIENT_ID = os.getenv('NAME_REQUEST_SERVICE_ACCOUNT_CLIENT_ID', '')
     PAYMENT_SVC_CLIENT_SECRET = os.getenv('NAME_REQUEST_SERVICE_ACCOUNT_CLIENT_SECRET', '')
 
+    SOLR_SVC_AUTH_URL = os.getenv('KEYCLOAK_AUTH_TOKEN_URL', '')
+    SOLR_API_SERVICE_ACCOUNT_CLIENT_ID = os.getenv('SOLR_API_SERVICE_ACCOUNT_CLIENT_ID', '')
+    SOLR_API_SERVICE_ACCOUNT_CLIENT_SECRET = os.getenv('SOLR_API_SERVICE_ACCOUNT_CLIENT_SECRET', '')
+
     DISABLE_NAMEREQUEST_SOLR_UPDATES = int(os.getenv('DISABLE_NAMEREQUEST_SOLR_UPDATES', 0))
+
+    # Enables test-only endpoints (e.g. force NR state without notifying Solr).
+    # Set in dev/test/sandbox only - never in production.
+    ALLOW_TEST_ENDPOINT = os.getenv('ALLOW_TEST_ENDPOINT', 'false').lower() == 'true'
 
     NAMEX_NR_STATE_TOPIC = os.getenv('NAMEX_NR_STATE_TOPIC', '')
     EMAILER_TOPIC = os.getenv('NAMEX_MAILER_TOPIC', '')

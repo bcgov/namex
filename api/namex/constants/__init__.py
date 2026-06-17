@@ -799,3 +799,57 @@ class RequestPriority(AbstractEnum):
 class ExpiryDays(str, AbstractEnum):
     NAME_REQUEST_LIFESPAN_DAYS = 56
     NAME_REQUEST_REH_REN_LIFESPAN_DAYS = 421
+
+class Designations(AbstractEnum):
+    """
+    Designations used for filtering name for solr conflict matching.
+
+    NOTE:
+    - The designation words below are collected from the Name Request project.
+    - This list is duplicated here for use in the NameX API.
+    - In the future, consider implementing a shared source or service for designation data
+      to avoid duplication and ensure consistency across projects.
+    """
+    CORP = 'CORP.'
+    CORPORATION = 'CORPORATION'
+    INC = 'INC.'
+    INCORPORATED = 'INCORPORATED'
+    LIMITED = 'LIMITED'
+    LTD = 'LTD.'
+    INCORPOREE = 'INCORPOREE'
+    LIMITEE = 'LIMITEE'
+    LTEE = 'LTEE'
+    CO_OP = 'CO-OP'
+    CO_OPERATIVE = 'CO-OPERATIVE'
+    COOP = 'COOP'
+    COOPERATIVE = 'COOPERATIVE'
+    CCC = 'CCC'
+    COMMUNITY_CONTRIBUTION_COMPANY = 'COMMUNITY CONTRIBUTION COMPANY'
+    ULC = 'ULC'
+    UNLIMITED_LIABILITY_COMPANY = 'UNLIMITED LIABILITY COMPANY'
+    LIMITED_LIABILITY_PARTNERSHIP = 'LIMITED LIABILITY PARTNERSHIP'
+    LLP = 'LLP'
+    SENCRL = 'SENCRL'
+    SRL = 'SRL'
+    SOCIETE_A_RESPONSABILITE_LIMITEE = 'SOCIETE A RESPONSABILITE LIMITEE'
+    SOCIETE_EN_NOM_COLLECTIF_A_RESPONSABILITE_LIMITEE = 'SOCIETE EN NOM COLLECTIF A RESPONSABILITE LIMITEE'
+    LIMITED_PARTNERSHIP = 'LIMITED PARTNERSHIP'
+    L_L_C = 'L.L.C.'
+    LIMITED_LIABILITY_CO = 'LIMITED LIABILITY CO.'
+    LIMITED_LIABILITY_COMPANY = 'LIMITED LIABILITY COMPANY'
+    LLC = 'LLC'
+    ASSOCIATION = 'ASSOCIATION'
+    ASSN = 'ASSN.'
+    CHAMBER_OF_COMMERCE = 'CHAMBER OF COMMERCE'
+    CHURCH = 'CHURCH'
+    EGLISE = 'EGLISE'
+    CLUB = 'CLUB'
+    CHRISTIAN_SCHOOL = 'CHRISTIAN SCHOOL'
+    FELLOWSHIP = 'FELLOWSHIP'
+    FOUNDATION = 'FOUNDATION'
+    FONDATION = 'FONDATION'
+    GUILD = 'GUILD'
+    PARISH = 'PARISH'
+    SOCIETY = 'SOCIETY'
+    SOCIETE = 'SOCIETE'
+    WATERSHED = 'WATERSHED'

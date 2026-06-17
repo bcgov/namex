@@ -27,6 +27,19 @@ def get_bearer_token() -> tuple[str, dict]:
     client_secret = current_app.config.get('KEYCLOAK_SERVICE_ACCOUNT_SECRET')
     auth_api_timeout = current_app.config.get('AUTH_API_TIMEOUT')
 
+    return _get_bearer_token(token_url, client_id, client_secret, auth_api_timeout)
+
+
+def get_search_bearer_token() -> tuple[str, dict]:
+    """Get a valid Bearer token for the search service to use."""
+    token_url = current_app.config.get('KEYCLOAK_AUTH_TOKEN_URL')
+    client_id = current_app.config.get('ACCOUNT_SVC_CLIENT_ID')
+    client_secret = current_app.config.get('ACCOUNT_SVC_CLIENT_SECRET')
+    auth_api_timeout = current_app.config.get('AUTH_API_TIMEOUT')
+
+    return _get_bearer_token(token_url, client_id, client_secret, auth_api_timeout)
+
+def _get_bearer_token(token_url, client_id, client_secret, timeout) -> tuple[str | None, dict | None]:
     data = 'grant_type=client_credentials'
 
     # get service account token
@@ -35,7 +48,7 @@ def get_bearer_token() -> tuple[str, dict]:
                             data=data,
                             headers={'content-type': 'application/x-www-form-urlencoded'},
                             auth=(client_id, client_secret),
-                            timeout=auth_api_timeout)
+                            timeout=timeout)
         if res.status_code != HTTPStatus.OK:
             return None, {'message': res.json(), 'status_code': res.status_code}
 

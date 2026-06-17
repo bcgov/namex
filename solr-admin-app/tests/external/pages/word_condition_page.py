@@ -12,7 +12,7 @@ class WordConditionListPage:
 
     def refresh(self):
         self.browser.get(self.base_url + '/admin/virtualwordcondition')
-        assert_that(self.browser.find_element_by_tag_name('body').text, contains_string('Namex Administration'))
+        assert_that(self.browser.find_element(By.TAG_NAME, 'body').text, contains_string('Namex Administration'))
         self.browser.find_element_by_link_text('Restricted Word Condition').click()
 
     def list_size(self):
@@ -33,7 +33,7 @@ class WordConditionListPage:
 
     def element(self, what, index):
         selector = self.row(index) + what
-        cell = self.browser.find_element_by_css_selector(selector)
+        cell = self.browser.find_element(By.CSS_SELECTOR,selector)
 
         return cell
 
@@ -50,10 +50,10 @@ class WordConditionListPage:
         return self.element('td.col-rc_instructions ', index)
 
     def update_with_value(self, cell, value):
-        cell.find_element_by_css_selector('a').click()
-        cell.find_element_by_css_selector('input').clear()
-        cell.find_element_by_css_selector('input').send_keys(value)
-        cell.find_element_by_css_selector('button.editable-submit').click()
+        cell.find_element(By.CSS_SELECTOR,'a').click()
+        cell.find_element(By.CSS_SELECTOR,'input').clear()
+        cell.find_element(By.CSS_SELECTOR,'input').send_keys(value)
+        cell.find_element(By.CSS_SELECTOR,'button.editable-submit').click()
 
     def update(self, cell, value):
         self.update_with_value(cell, value)

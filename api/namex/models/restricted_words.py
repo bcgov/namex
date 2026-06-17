@@ -5,9 +5,6 @@ from namex.models import db
 
 
 class RestrictedWords(object):
-    RESTRICTED_WORDS = 'restricted_words'
-    VALID_QUERIES = [RESTRICTED_WORDS]
-
     @staticmethod
     def get_restricted_words_conditions(content):
         """Finds all restricted words and their conditions of the given string

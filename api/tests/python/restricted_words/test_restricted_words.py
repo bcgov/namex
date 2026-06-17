@@ -1,4 +1,4 @@
-from namex.analytics.restricted_words import RestrictedWords
+from namex.models.restricted_words import RestrictedWords
 
 
 def test_get_restricted_short():

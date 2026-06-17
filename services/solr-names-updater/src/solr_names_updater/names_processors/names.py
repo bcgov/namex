@@ -95,6 +95,7 @@ def construct_payload_dict(nr: RequestDAO, names, jur):
         payload_request[key] = {
             'doc': {
                 'id': doc_id,
+                'sub_type': nr.requestTypeCd,
                 'name': name.name,
                 'nr_num': nr.nrNum,
                 'submit_count': nr.submitCount,

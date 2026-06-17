@@ -183,7 +183,7 @@ def test_should_add_possible_conflicts_to_solr(
         )
     ]
 )
-def test_should_delete_possible_conflict_from_solr(
+def test_should_update_possible_conflict_state_in_solr(
         app,
         db,
         session,
@@ -194,7 +194,11 @@ def test_should_delete_possible_conflict_from_solr(
         previous_nr_state,
         names: list,
         name_states: list):
-    """Assert that possible conflicts are deleted from Solr."""
+    """Assert that possible conflict NR state is updated in Solr instead of deleted.
+
+    The new Solr does not support deletes; a delete is converted to a state update so
+    the conflict search filters the record out based on its (non-conflict) state.
+    """
 
     queue_util.send_name_request_state_msg = mock.Mock(return_value='True')
     queue_util.send_name_state_msg = mock.Mock(return_value='True')
@@ -215,4 +219,10 @@ def test_should_delete_possible_conflict_from_solr(
             assert post_json['solr_core'] == 'possible.conflicts'
 
             request_json = post_json['request']
-            assert f'"delete": ["{mock_nr.nrNum}"]' in request_json
+            # the record is updated (add), not deleted
+            assert '"delete"' not in request_json
+            assert '"add"' in request_json
+            # the previously approved/condition name is included in the update
+            assert 'TEST NAME 1' in request_json
+            # the NR's new state is set so the conflict search filters it out
+            assert f'"state_type_cd": "{new_nr_state}"' in request_json

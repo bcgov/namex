@@ -3,6 +3,7 @@
 TODO: Fill in a larger description once the API is defined for V1
 """
 
+import traceback
 from datetime import datetime
 
 from flask import current_app, g, jsonify, make_response, request
@@ -16,8 +17,6 @@ from sqlalchemy.orm import joinedload, lazyload, load_only
 from sqlalchemy.orm.exc import NoResultFound
 
 from namex import jwt
-from namex.analytics import VALID_ANALYSIS as ANALYTICS_VALID_ANALYSIS
-from namex.analytics import RestrictedWords, SolrQueries
 from namex.constants import DATE_TIME_FORMAT_SQL, NameState
 from namex.exceptions import BusinessException
 from namex.models import (
@@ -39,20 +38,23 @@ from namex.models import (
 )
 from namex.models import Request as RequestDAO
 from namex.models.request import AffiliationInvitationSearchDetails, RequestsAuthSearchSchema
+from namex.models.restricted_words import RestrictedWords
 from namex.services import EventRecorder, MessageServices, ServicesError
 from namex.services.lookup import nr_filing_actions
 from namex.services.name_request import NameRequestService
 from namex.services.name_request.utils import check_ownership, get_or_create_user_by_jwt, valid_state_transition
+from namex.services.solr.solr_client import SolrClient
+from namex.services.solr.solr_helpers import SolrHlpers
 from namex.utils import queue_util
 from namex.utils.auth import cors_preflight
 from namex.utils.common import convert_to_ascii, convert_to_utc_max_date_time, convert_to_utc_min_date_time
+from namex.utils.nr_query import get_nr_num_from_query
+from namex.services.name_request.name_request import get_nrs_like_nr_num, get_nrs_like_names
 
 from .utils import DateUtils
 
 # Register a local namespace for the requests
-api = Namespace(
-    'Name Examination', description='Staff-facing name request operations for state, analysis, and name editing'
-)
+api = Namespace('Name Examination', description='Staff-facing name request operations for state, analysis, and name editing')
 
 # Marshmallow schemas
 request_schema = RequestsSchema(many=False)
@@ -111,7 +113,7 @@ class RequestsQueue(Resource):
     @jwt.requires_roles([User.APPROVER])
     @api.doc(
         description='Fetches the next draft name request from the queue and assigns it to the current user. '
-        'If the user already has an in-progress NR, that one is returned instead.',
+                    'If the user already has an in-progress NR, that one is returned instead.',
         params={'priorityQueue': 'Set to true to fetch from the priority queue'},
         responses={
             200: 'Name request assigned successfully',
@@ -473,29 +475,11 @@ class Requests(Resource):
 
         return make_response(jsonify(rep), 200)
 
-    # @api.errorhandler(AuthError)
-    # def handle_auth_error(ex):
-    #     response = jsonify(ex.error)
-    #     response.status_code = ex.status_code
-    # return response, 401
-    # return {}, 401
-
-    # noinspection PyUnusedLocal,PyUnusedLocal
-    @api.hide
-    @api.expect(a_request)
-    @jwt.requires_auth
-    def post(self, *args, **kwargs):
-        current_app.logger.info('Someone is trying to post a new request')
-        return make_response(jsonify({'message': 'Not Implemented'}), 501)
-
-
-# For sbc-auth - My Business Registry page.
-
 
 @cors_preflight('GET, POST')
 @api.route('/search', methods=['GET', 'POST', 'OPTIONS'])
 class RequestSearch(Resource):
-    """Search for NR's by NR number or associated name."""
+    """Search for NR's by NR number or associated name. Used by My Business Registry page."""
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -503,13 +487,12 @@ class RequestSearch(Resource):
     @api.doc(
         description='Searches name requests by partially matching NR number or business name using query parameters',
         params={
-            'query': 'NR number or business name to search (e.g., "NR1234567" or "abcd")',
-            'start': 'Result offset for pagination (default: 0)',
-            'rows': 'Number of results to return (default: 10)',
+            'query': 'NR number or business name (e.g., "NR1234567" or "Acme Holdings")',
+            'start': 'Offset (default: 0)',
+            'rows': 'Page size (default: 10)',
         },
         responses={
             200: 'Search results fetched successfully',
-            400: 'Invalid search parameters',
             500: 'Internal server error',
         },
     )
@@ -522,107 +505,48 @@ class RequestSearch(Resource):
             return make_response(jsonify(data), 200)
 
         try:
-            solr_query, nr_number, nr_name = SolrQueries.get_parsed_query_name_nr_search(query)
-            condition = ''
-            if nr_number:
-                condition = f"requests.nr_num ILIKE '%{nr_number}%'"
-            if nr_name:
-                nr_name = nr_name.replace("'", "''")
-                if condition:
-                    condition += ' OR '
-                name_condition = "requests.name_search ILIKE '%"
-                name_condition += "%' AND requests.name_search ILIKE '%".join(nr_name.split())
-                name_condition += "%'"
-
-                condition += f'({name_condition})'
-
-            results = (
-                RequestDAO.query.filter(
-                    RequestDAO.stateCd.in_([State.DRAFT, State.INPROGRESS, State.REFUND_REQUESTED]),
-                    text(f'({condition})'),
-                )
-                .options(
-                    lazyload('*'),
-                    joinedload(RequestDAO.names).load_only(Name.name),
-                    load_only(RequestDAO.id, RequestDAO.nrNum),
-                )
-                .order_by(RequestDAO.submittedDate.desc())
-                .limit(rows)
-                .all()
-            )
-
+            results = SolrClient.search_nrs(query, start, rows)
+            existing_nrs = set(nr['nr_num'] for nr in results['searchResults']['results'])
             data.extend(
                 [
                     {
-                        # 'id': nr.id,
-                        'nrNum': nr.nrNum,
-                        'names': [n.name for n in nr.names],
+                        'nrNum': nr['nr_num'],
+                        'names': [name['name'] for name in nr['names']]
                     }
-                    for nr in results
+                    for nr in results['searchResults']['results']
                 ]
             )
-
-            while len(data) < rows:
-                if start < rows:
-                    # Check if the search length is less than 7 digits. If so, patch it with zero at the end to increase rows number.
-                    # After this, the search cycles to solr will be reduced a lot.
-                    # Otherwise, the rows is too small and it will take long time (many times solr calling) to search in solr and get timeout exception.
-                    # So the less of search length, the bigger of rows will be.
-                    temp_rows = str(rows)
-                    if nr_number and len(nr_number) < 7:
-                        temp_rows = str(rows).ljust(9 - len(nr_number), '0')
-                    if nr_name and len(nr_name) < 7:
-                        temp_rows = str(rows).ljust(9 - len(nr_name), '0')
-
-                    rows = int(temp_rows)
-
-                nr_data, have_more_data = RequestSearch._get_next_set_from_solr(solr_query, start, rows)
-                nr_data = nr_data[: (rows - len(data))]
+            nr_num = get_nr_num_from_query(query)
+            if nr_num:
+                nrs = get_nrs_like_nr_num(nr_num)
                 data.extend(
                     [
                         {
-                            # 'id': nr.id,
                             'nrNum': nr.nrNum,
-                            'names': [n.name for n in nr.names],
+                            'names': [n.name for n in nr.names]
                         }
-                        for nr in nr_data
+                        for nr in nrs
+                        if nr.nrNum not in existing_nrs
+                    ]
+                )
+            else:
+                # above, we returned nothing if query was empty
+                nrs = get_nrs_like_names(query)
+                data.extend(
+                    [
+                        {
+                            'nrNum': nr.nrNum,
+                            'names': [n.name for n in nr.names]
+                        }
+                        for nr in nrs
+                        if nr.nrNum not in existing_nrs
                     ]
                 )
 
-                if not have_more_data:
-                    break  # no more data in solr
-                start += rows
-
             return make_response(jsonify(data), 200)
-        except Exception as e:
-            current_app.logger.error(f'Error in /search, {e}')
+        except Exception:
+            current_app.logger.error(f'Error when searching for {query}\n{traceback.format_exc()}')
             return make_response(jsonify({'message': 'Internal server error'}), 500)
-
-    @staticmethod
-    def _get_next_set_from_solr(solr_query, start, rows):
-        results, msg, code = SolrQueries.get_name_nr_search_results(solr_query, start, rows)
-        if code:
-            raise Exception(msg)
-        elif len(results['names']) > 0:
-            have_more_data = results['response']['numFound'] > (start + rows)
-            identifiers = [name['nr_num'] for name in results['names']]
-            return RequestDAO.query.filter(
-                RequestDAO.nrNum.in_(identifiers),
-                RequestDAO.stateCd != State.CANCELLED,
-                or_(
-                    RequestDAO.stateCd != State.EXPIRED,
-                    text(
-                        f"(requests.state_cd = '{State.EXPIRED}' AND CAST(requests.expiration_date AS DATE) + "
-                        "interval '60 day' >= CAST(now() AS DATE))"
-                    ),
-                ),
-            ).options(
-                lazyload('*'),
-                joinedload(RequestDAO.names).load_only(Name.name),
-                load_only(RequestDAO.id, RequestDAO.nrNum),
-            ).all(), have_more_data
-
-        return [], False
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -794,7 +718,7 @@ class Request(Resource):
     )
     @api.doc(
         description=(
-            "Updates a name request's state, records the previous state, optionally adds comments, assigns a corpNum if consumption state, "
+            'Updates a name request\'s state, records the previous state, optionally adds comments, assigns a corpNum if consumption state, '
             'and calculates expiration if approval state. Only users with APPROVER, EDITOR, or SYSTEM roles may update state, '
             'and certain transitions may be restricted based on role or current state.'
         ),
@@ -941,7 +865,8 @@ class Request(Resource):
             return make_response(jsonify(message='Internal server error'), 500)
 
         if 'warnings' in locals() and warnings:  # noqa: F821
-            return make_response(jsonify(message='Request:{} - patched'.format(nr), warnings=warnings), 206)  # noqa: F821
+            return make_response(jsonify(message='Request:{} - patched'.format(nr), warnings=warnings),
+                                 206)  # noqa: F821
 
         if state in [State.APPROVED, State.CONDITIONAL, State.REJECTED]:
             queue_util.publish_email_notification(nrd.nrNum, state)
@@ -1476,33 +1401,17 @@ class Request(Resource):
 @cors_preflight('GET')
 @api.route('/<string:nr>/analysis/<int:choice>/<string:analysis_type>', methods=['GET', 'OPTIONS'])
 class RequestsAnalysis(Resource):
-    """Acting like a QUEUE this gets the next NR (just the NR number)
-    and assigns it to your auth id
-
-        :param nr (str): NameRequest Number in the format of 'NR 000000000'
-        :param choice (int): name choice number (1..3)
-        :param args: start: number of hits to start from, default is 0
-        :param args: names_per_page: number of names to return per page, default is 50
-        :param kwargs: __futures__
-        :return: 200 - success; 40X for errors
-    """
-
     START = 0
     ROWS = 50
 
-    # @auth_services.requires_auth
-    # noinspection PyUnusedLocal,PyUnusedLocal
     @staticmethod
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
     @api.doc(
-        description='Performs name analysis for the given NR and name choice using the specified analysis type',
+        description='Performs restricted word name analysis for the given NR and name choice',
         params={
             'nr': 'NR number',
             'choice': 'Name choice number (1, 2, or 3)',
-            'analysis_type': 'Type of analysis to perform (e.g., conflicts, histories, trademarks, restricted_words)',
-            'start': 'Offset for results pagination (default: 0)',
-            'rows': 'Number of results per page (default: 50)',
         },
         responses={
             200: 'Analysis results returned successfully',
@@ -1511,20 +1420,7 @@ class RequestsAnalysis(Resource):
             500: 'Internal server error',
         },
     )
-    def get(nr, choice, analysis_type, *args, **kwargs):
-        start = request.args.get('start', RequestsAnalysis.START)
-        rows = request.args.get('rows', RequestsAnalysis.ROWS)
-
-        if analysis_type not in ANALYTICS_VALID_ANALYSIS:
-            return make_response(
-                jsonify(
-                    message='{analysis_type} is not a valid analysis type for that name choice'.format(
-                        analysis_type=analysis_type
-                    )
-                ),
-                404,
-            )
-
+    def get(nr, choice, *args, **kwargs):
         nrd = RequestDAO.find_by_nr(nr)
 
         if not nrd:
@@ -1537,11 +1433,7 @@ class RequestsAnalysis(Resource):
                 jsonify(message='Name choice:{choice} not found for {nr}'.format(nr=nr, choice=choice)), 404
             )
 
-        if analysis_type in RestrictedWords.RESTRICTED_WORDS:
-            results, msg, code = RestrictedWords.get_restricted_words_conditions(nrd_name.name)
-
-        else:
-            results, msg, code = SolrQueries.get_results(analysis_type, nrd_name.name, start=start, rows=rows)
+        results, msg, code = RestrictedWords.get_restricted_words_conditions(nrd_name.name)
 
         if code:
             return make_response(jsonify(message=msg), code)
@@ -1549,8 +1441,8 @@ class RequestsAnalysis(Resource):
 
 
 @cors_preflight('GET')
-@api.route('/synonymbucket/<string:name>/<string:advanced_search>', methods=['GET', 'OPTIONS'])
-class SynonymBucket(Resource):
+@api.route('/possible-conflicts/<string:name>', methods=['GET', 'OPTIONS'])
+class PossibleConflicts(Resource):
     START = 0
     ROWS = 1000
 
@@ -1558,10 +1450,9 @@ class SynonymBucket(Resource):
     @cors.crossdomain(origin='*')
     @jwt.requires_auth
     @api.doc(
-        description='Fetches potential synonym conflicts for the given name using an optional advanced search filter',
+        description='Fetches potential name conflicts for the given name',
         params={
-            'name': 'The name to analyze for synonym conflicts',
-            'advanced_search': 'Optional phrase to refine the conflict search (use * for no filter)',
+            'name': 'The name to analyze for name conflicts',
             'start': 'Offset for pagination (default: 0)',
             'rows': 'Number of results to return (default: 1000)',
         },
@@ -1571,87 +1462,10 @@ class SynonymBucket(Resource):
             500: 'Internal server error',
         },
     )
-    def get(name, advanced_search, *args, **kwargs):
-        start = request.args.get('start', SynonymBucket.START)
-        rows = request.args.get('rows', SynonymBucket.ROWS)
-        exact_phrase = '' if advanced_search == '*' else advanced_search
-        results, msg, code = SolrQueries.get_conflict_results(
-            name.upper(), bucket='synonym', exact_phrase=exact_phrase, start=start, rows=rows
-        )
-        if code:
-            return make_response(jsonify(message=msg), code)
-        return make_response(jsonify(results), 200)
-
-
-@cors_preflight('GET')
-@api.route('/cobrsphonetics/<string:name>/<string:advanced_search>', methods=['GET', 'OPTIONS'])
-class CobrsPhoneticBucket(Resource):
-    START = 0
-    ROWS = 500
-
-    @staticmethod
-    @cors.crossdomain(origin='*')
-    @jwt.requires_auth
-    @api.doc(
-        description='Fetches potential COBRS phonetic conflicts for the given name using an optional advanced search filter',
-        params={
-            'name': 'The name to analyze for phonetic conflict',
-            'advanced_search': 'Optional phrase to refine the search (use * for no filter)',
-            'start': 'Offset for pagination (default: 0)',
-            'rows': 'Number of results to return (default: 500)',
-        },
-        responses={
-            200: 'Conflict results fetched successfully',
-            401: 'Unauthorized',
-            500: 'Internal server error',
-        },
-    )
-    def get(name, advanced_search, *args, **kwargs):
-        start = request.args.get('start', CobrsPhoneticBucket.START)
-        rows = request.args.get('rows', CobrsPhoneticBucket.ROWS)
-        name = '' if name == '*' else name
-        exact_phrase = '' if advanced_search == '*' else advanced_search
-        results, msg, code = SolrQueries.get_conflict_results(
-            name.upper(), bucket='cobrs_phonetic', exact_phrase=exact_phrase, start=start, rows=rows
-        )
-        if code:
-            return make_response(jsonify(message=msg), code)
-        return make_response(jsonify(results), 200)
-
-
-@cors_preflight('GET')
-@api.route('/phonetics/<string:name>/<string:advanced_search>', methods=['GET', 'OPTIONS'])
-class PhoneticBucket(Resource):
-    START = 0
-    ROWS = 100000
-
-    @staticmethod
-    @cors.crossdomain(origin='*')
-    @jwt.requires_auth
-    @api.doc(
-        description='Fetches potential phonetic conflicts for the given name using an optional advanced search filter',
-        params={
-            'name': 'The name to analyze for phonetic conflicts',
-            'advanced_search': 'Optional phrase to refine the search (use * for no filter)',
-            'start': 'Offset for pagination (default: 0)',
-            'rows': 'Number of results to return (default: 100000)',
-        },
-        responses={
-            200: 'Conflict results fetched successfully',
-            401: 'Unauthorized',
-            500: 'Internal server error',
-        },
-    )
-    def get(name, advanced_search, *args, **kwargs):
-        start = request.args.get('start', PhoneticBucket.START)
-        rows = request.args.get('rows', PhoneticBucket.ROWS)
-        name = '' if name == '*' else name
-        exact_phrase = '' if advanced_search == '*' else advanced_search
-        results, msg, code = SolrQueries.get_conflict_results(
-            name.upper(), bucket='phonetic', exact_phrase=exact_phrase, start=start, rows=rows
-        )
-        if code:
-            return make_response(jsonify(message=msg), code)
+    def get(name):
+        start = request.args.get('start', PossibleConflicts.START)
+        rows = request.args.get('rows', PossibleConflicts.ROWS)
+        results = SolrHlpers.get_possible_conflicts(name, start=start, rows=rows)
         return make_response(jsonify(results), 200)
 
 

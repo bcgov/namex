@@ -1,4 +1,5 @@
 from hamcrest import *
+from selenium.webdriver.common.by import By
 
 
 class RestrictedWordConditionAuditListPage:
@@ -10,7 +11,7 @@ class RestrictedWordConditionAuditListPage:
 
     def refresh(self):
         self.browser.get(self.base_url + '/admin/restrictedconditionaudit')
-        assert_that(self.browser.find_element_by_tag_name('body').text, contains_string('Namex Administration'))
+        assert_that(self.browser.find_element(By.TAG_NAME, 'body').text, contains_string('Namex Administration'))
         self.browser.find_element_by_link_text('Restricted Condition Audit').click()
 
     def list_size(self):
@@ -24,7 +25,7 @@ class RestrictedWordConditionAuditListPage:
 
     def element(self, what, index):
         selector = self.row(index) + what
-        cell = self.browser.find_element_by_css_selector(selector)
+        cell = self.browser.find_element(By.CSS_SELECTOR,selector)
 
         return cell
 

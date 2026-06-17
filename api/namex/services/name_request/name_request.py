@@ -354,3 +354,22 @@ class NameRequestService(AbstractNameRequestMixin):
 
         except Exception as err:
             raise SaveNameRequestError(err)
+
+
+def get_nrs_like_nr_num(nr_num) -> list:
+    db_data = (
+        Request.query
+        .filter(Request.nrNum.ilike(f'%{nr_num}%'))
+        .all()
+    )
+
+    return db_data
+
+
+def get_nrs_like_names(name_search) -> list:
+    db_data = (
+        Request.query
+        .filter(Request.names.any(Name.name.ilike(f'%{name_search}%')))
+    )
+
+    return db_data
