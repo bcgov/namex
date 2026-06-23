@@ -408,8 +408,8 @@ sqlalchemy = "^2.0.0"
 [package.source]
 type = "git"
 url = "https://github.com/bcgov/sbc-connect-common.git"
-reference = "main"
-resolved_reference = "42a520b3fc6f989d9401a34aa2267907ec1dc75f"
+reference = "b92e98f4ea1d59646f4b1465b73ccd688eddea48"
+resolved_reference = "b92e98f4ea1d59646f4b1465b73ccd688eddea48"
 subdirectory = "python/cloud-sql-connector"
 
 [[package]]
@@ -1913,7 +1913,7 @@ files = [
 
 [[package]]
 name = "namex"
-version = "1.50.0"
+version = "1.50.1"
 description = ""
 optional = false
 python-versions = ">=3.12,<3.13"
@@ -1930,7 +1930,7 @@ cachelib = "^0.13.0"
 certifi = "^2022.9.24"
 charset-normalizer = "^2.1.1"
 click = "^8.1.3"
-cloud-sql-connector = {git = "https://github.com/bcgov/sbc-connect-common.git", branch = "main", subdirectory = "python/cloud-sql-connector"}
+cloud-sql-connector = {git = "https://github.com/bcgov/sbc-connect-common.git", rev = "b92e98f4ea1d59646f4b1465b73ccd688eddea48", subdirectory = "python/cloud-sql-connector"}
 cmudict = "^1.0.2"
 dataclasses = "^0.6"
 defusedxml = "^0.7.1"
@@ -1983,7 +1983,7 @@ requests = "^2.28.1"
 rsa = "^4.9"
 sbc-common-components = {git = "https://github.com/bcgov/sbc-common-components.git", subdirectory = "python"}
 six = "^1.16.0"
-structured_logging = {git = "https://github.com/bcgov/sbc-connect-common.git", rev = "7f1cc0ea4a374310ac558ff435fa6b7ea7bb2f8b", subdirectory = "python/structured-logging"}
+structured_logging = {git = "https://github.com/bcgov/sbc-connect-common.git", rev = "b92e98f4ea1d59646f4b1465b73ccd688eddea48", subdirectory = "python/structured-logging"}
 swagger_client = {git = "https://github.com/bcgov/namex-synonyms-api-py-client.git"}
 toolz = "^0.12.0"
 tqdm = "^4.64.1"
@@ -1997,7 +1997,7 @@ zipp = "^3.8.1"
 type = "git"
 url = "https://github.com/bcgov/namex.git"
 reference = "HEAD"
-resolved_reference = "01ec488b346918c7d18243010b33b695abf07252"
+resolved_reference = "fe6407372a30f9c07078198ae1c82d450339ca66"
 subdirectory = "api"
 
 [[package]]
@@ -3355,8 +3355,8 @@ structlog = "^24.1.0"
 [package.source]
 type = "git"
 url = "https://github.com/bcgov/sbc-connect-common.git"
-reference = "7f1cc0ea4a374310ac558ff435fa6b7ea7bb2f8b"
-resolved_reference = "7f1cc0ea4a374310ac558ff435fa6b7ea7bb2f8b"
+reference = "b92e98f4ea1d59646f4b1465b73ccd688eddea48"
+resolved_reference = "b92e98f4ea1d59646f4b1465b73ccd688eddea48"
 subdirectory = "python/structured-logging"
 
 [[package]]
@@ -3669,4 +3669,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "4bb61a71ee292a4a64649dfabefe6f074c2970c56747c8fb19ebe3ee04fd5cf7"
+content-hash = "a0dcd6f8d5472568711ceacef80ac26a26f170800adfcb604655321ec7fcf251"
