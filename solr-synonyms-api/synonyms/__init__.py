@@ -7,7 +7,7 @@ import os
 import flask
 from flask import Flask
 from flask_jwt_oidc import JwtManager
-from namex import DBConfig, setup_pg8000_close_event_listener, setup_search_path_event_listener
+from cloud_sql_connector import DBConfig, setup_pg8000_close_event_listener, setup_search_path_event_listener
 from structured_logging import StructuredLogging
 
 from config import CONFIGURATION
