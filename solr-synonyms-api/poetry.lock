@@ -1997,7 +1997,7 @@ zipp = "^3.8.1"
 type = "git"
 url = "https://github.com/bcgov/namex.git"
 reference = "HEAD"
-resolved_reference = "d36d824768144e7f9922cc8f0165a507514781e4"
+resolved_reference = "01ec488b346918c7d18243010b33b695abf07252"
 subdirectory = "api"
 
 [[package]]
