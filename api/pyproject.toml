@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "namex"
-version = "1.50.0"
+version = "1.50.1"
 description = ""
 authors = ["Thor Wolpert <thor@wolpert.ca>"]
 license = "Apache Software License Version 2.0"
@@ -12,8 +12,8 @@ gcp_queue = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirect
 swagger_client = { git = "https://github.com/bcgov/namex-synonyms-api-py-client.git" }
 flask-jwt-oidc = { git = "https://github.com/seeker25/flask-jwt-oidc.git" }
 sbc-common-components = { git = "https://github.com/bcgov/sbc-common-components.git", subdirectory = "python" }
-structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", rev = "7f1cc0ea4a374310ac558ff435fa6b7ea7bb2f8b", subdirectory = "python/structured-logging" }
-cloud-sql-connector = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/cloud-sql-connector", branch = "main" }
+structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", rev = "b92e98f4ea1d59646f4b1465b73ccd688eddea48", subdirectory = "python/structured-logging" }
+cloud-sql-connector = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/cloud-sql-connector", rev = "b92e98f4ea1d59646f4b1465b73ccd688eddea48" }
 
 
 gunicorn = "^20.1.0"
