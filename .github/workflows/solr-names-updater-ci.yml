@@ -19,5 +19,5 @@ jobs:
       app_name: "namex-solr-names-updater"
       working_directory: "services/solr-names-updater"
       codecov_flag: "solrnamesupdater"
-      skip_isort: "true"
-      skip_black: "true"
+      skip_isort: true
+      skip_black: true
