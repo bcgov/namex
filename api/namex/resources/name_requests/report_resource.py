@@ -150,6 +150,8 @@ class ReportResource(Resource):
 
     @staticmethod
     def _get_template_data(nr_model):
+        current_app.logger.debug('_get_template_data - nrNum: %s, entity_type_cd: %s, request_action_cd: %s, corpNum: %s', \
+                nr_model['nrNum'], nr_model['entity_type_cd'], nr_model['request_action_cd'], nr_model['corpNum'])
         ReportResource._update_entity_and_action_code(nr_model)
         nr_report_json = nr_model
         nr_report_json['service_url'] = current_app.config.get('NAME_REQUEST_URL')

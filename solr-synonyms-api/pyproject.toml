@@ -1,6 +1,7 @@
 [tool.poetry]
 name = "solr-synonyms-api"
-version = "0.1.1"
+version = "0.1.4"
+
 description = ""
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
@@ -9,8 +10,8 @@ packages = [{include = "synonyms"}]
 
 [tool.poetry.dependencies]
 namex = { git = "https://github.com/bcgov/namex.git", subdirectory = "api" }
+cloud-sql-connector = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/cloud-sql-connector", rev = "b92e98f4ea1d59646f4b1465b73ccd688eddea48" }
 python = ">=3.12,<3.13"
-structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", rev = "7f1cc0ea4a374310ac558ff435fa6b7ea7bb2f8b", subdirectory = "python/structured-logging" }
 flask-sqlalchemy = "^3.0.0"
 flask = "^3.0.2"
 flask-jwt-oidc = "^0.8.0"
