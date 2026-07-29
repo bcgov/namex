@@ -706,11 +706,11 @@ def test_search_get(client, jwt, app, monkeypatch, search_name, expected_len):
 def test_search_get_dedupes_spaced_and_unspaced_nr(client, jwt, app, monkeypatch):
     """Solr unspaced + DB spaced NR should return a single canonical result."""
     nr = Request()
-    nr.nrNum = 'NR 0725959'
+    nr.nrNum = 'NR 1234567'
     nr.stateCd = State.DRAFT
     name1 = Name()
     name1.choice = 1
-    name1.name = 'PAULS NR TEST JULY 29TH CORPORATION'
+    name1.name = 'TEST NAME ONE'
     nr.names = [name1]
     nr.save_to_db()
 
@@ -719,8 +719,8 @@ def test_search_get_dedupes_spaced_and_unspaced_nr(client, jwt, app, monkeypatch
             'searchResults': {
                 'results': [
                     {
-                        'nr_num': 'NR0725959',
-                        'names': [{'name': 'PAULS NR TEST JULY 29TH CORPORATION'}],
+                        'nr_num': 'NR1234567',
+                        'names': [{'name': 'TEST NAME ONE'}],
                     }
                 ]
             }
@@ -729,9 +729,9 @@ def test_search_get_dedupes_spaced_and_unspaced_nr(client, jwt, app, monkeypatch
     monkeypatch.setattr(SolrClient, 'search_nrs', mock_search_nrs)
 
     headers = create_header(jwt, ['public_user'])
-    rv = client.get('/api/v1/requests/search?query=NR0725959', headers=headers)
+    rv = client.get('/api/v1/requests/search?query=NR1234567', headers=headers)
 
     assert rv.status_code == HTTPStatus.OK
     assert len(rv.json) == 1
-    assert rv.json[0]['nrNum'] == 'NR 0725959'
+    assert rv.json[0]['nrNum'] == 'NR 1234567'
     assert rv.json[0]['names'] == [name1.name]

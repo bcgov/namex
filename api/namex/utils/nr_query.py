@@ -21,5 +21,5 @@ def get_nr_num_from_query(value) -> str | None:
 
 
 def normalize_nr_key(nr_num: str) -> str:
-    """Return a comparable NR key ignoring spaces and case ('NR 0725959' == 'NR0725959')."""
+    """Return a comparable NR key ignoring spaces and case ('NR 1234567' == 'NR1234567')."""
     return (nr_num or '').replace(' ', '').upper()

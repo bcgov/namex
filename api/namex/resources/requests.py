@@ -506,7 +506,7 @@ class RequestSearch(Resource):
 
         try:
             # Merge Solr + DB hits; dedupe by normalized NR key so spaced/unspaced
-            # variants (NR 0725959 vs NR0725959) collapse to one affiliatable result.
+            # variants (NR 1234567 vs NR1234567) collapse to one affiliatable result.
             # Prefer DB nrNum (canonical "NR #######") when both sources match.
             by_nr: dict[str, dict] = {}
 

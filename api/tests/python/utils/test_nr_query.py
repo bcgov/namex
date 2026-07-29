@@ -122,10 +122,10 @@ def test_multiple_nr_numbers_returns_first_valid():
 
 
 @pytest.mark.parametrize('nr_num,expected', [
-    ('NR 0725959', 'NR0725959'),
-    ('NR0725959', 'NR0725959'),
-    ('nr 0725959', 'NR0725959'),
-    ('nr0725959', 'NR0725959'),
+    ('NR 1234567', 'NR1234567'),
+    ('NR1234567', 'NR1234567'),
+    ('nr 1234567', 'NR1234567'),
+    ('nr1234567', 'NR1234567'),
     ('', ''),
     (None, ''),
 ])
