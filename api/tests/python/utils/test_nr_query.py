@@ -16,7 +16,7 @@
 
 import pytest
 
-from namex.utils.nr_query import get_nr_num_from_query
+from namex.utils.nr_query import get_nr_num_from_query, normalize_nr_key
 
 
 @pytest.mark.parametrize('query,expected', [
@@ -119,3 +119,16 @@ def test_multiple_nr_numbers_returns_first_valid():
     result = get_nr_num_from_query('NR 1111111 NR 2222222')
 
     assert result == 'NR 1111111'
+
+
+@pytest.mark.parametrize('nr_num,expected', [
+    ('NR 0725959', 'NR0725959'),
+    ('NR0725959', 'NR0725959'),
+    ('nr 0725959', 'NR0725959'),
+    ('nr0725959', 'NR0725959'),
+    ('', ''),
+    (None, ''),
+])
+def test_normalize_nr_key(nr_num, expected):
+    """Spaced and unspaced NR numbers share the same comparison key."""
+    assert normalize_nr_key(nr_num) == expected
