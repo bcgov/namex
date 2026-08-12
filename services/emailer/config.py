@@ -86,8 +86,6 @@ class Config:
     NOTIFY_API_VERSION = os.getenv("NOTIFY_API_VERSION", "")
     NAMEX_API_URL = os.getenv("NAMEX_API_URL", "")
     NAMEX_API_VERSION = os.getenv("NAMEX_API_VERSION", "")
-    BUSINESS_API_URL = os.getenv("BUSINESS_API_URL", "https://business-api-dev-dy4loprnwa-nn.a.run.app")
-    BUSINESS_API_VERSION = os.getenv("BUSINESS_API_VERSION", "/api/v1")
 
     NOTIFY_API_URL = f"{NOTIFY_API_URL + NOTIFY_API_VERSION}/notify"
     NAMEX_SVC_URL = f"{NAMEX_API_URL + NAMEX_API_VERSION}"
