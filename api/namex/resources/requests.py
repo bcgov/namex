@@ -669,7 +669,10 @@ class Request(Resource):
     )
     def get(nr):
         # return make_response(jsonify(request_schema.dump(RequestDAO.query.filter_by(nr=nr.upper()).first_or_404()))
-        return jsonify(RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404().json())
+        # Normalize NR number: accept both "NR1234567" and "NR 1234567" formats
+        nr_normalized = nr.upper().strip().replace(' ', '')
+        nr_normalized = nr_normalized.replace('NR', 'NR ', 1)
+        return jsonify(RequestDAO.query.filter_by(nrNum=nr_normalized).first_or_404().json())
 
     @staticmethod
     # @cors.crossdomain(origin='*')
