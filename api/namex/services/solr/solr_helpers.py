@@ -76,9 +76,10 @@ class SolrHlpers:
                 exact = cls.normalize_words(highlighting.get('exact', []))
                 stems = cls.normalize_words(highlighting.get('stems', []))
                 synonyms = cls.normalize_words(highlighting.get('synonyms', []))
+                phonetic = cls.normalize_words(highlighting.get('phonetic', []))
 
                 rcd['type'] = 'similar'
-                rcd['highlighting'] = { 'exact': list(exact), 'stems': list(stems), 'synonyms': list(synonyms) }
+                rcd['highlighting'] = { 'exact': list(exact), 'stems': list(stems), 'synonyms': list(synonyms), 'phonetic': list(phonetic) }
                 similar_matches.append(rcd)
 
         return {

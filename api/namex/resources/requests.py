@@ -48,7 +48,7 @@ from namex.services.solr.solr_helpers import SolrHlpers
 from namex.utils import queue_util
 from namex.utils.auth import cors_preflight
 from namex.utils.common import convert_to_ascii, convert_to_utc_max_date_time, convert_to_utc_min_date_time
-from namex.utils.nr_query import get_nr_num_from_query
+from namex.utils.nr_query import get_nr_num_from_query, normalize_nr_key
 from namex.services.name_request.name_request import get_nrs_like_nr_num, get_nrs_like_names
 
 from .utils import DateUtils
@@ -505,44 +505,37 @@ class RequestSearch(Resource):
             return make_response(jsonify(data), 200)
 
         try:
+            # Merge Solr + DB hits; dedupe by normalized NR key so spaced/unspaced
+            # variants (NR 1234567 vs NR1234567) collapse to one affiliatable result.
+            # Prefer DB nrNum (canonical "NR #######") when both sources match.
+            by_nr: dict[str, dict] = {}
+
             results = SolrClient.search_nrs(query, start, rows)
-            existing_nrs = set(nr['nr_num'] for nr in results['searchResults']['results'])
-            data.extend(
-                [
-                    {
-                        'nrNum': nr['nr_num'],
-                        'names': [name['name'] for name in nr['names']]
-                    }
-                    for nr in results['searchResults']['results']
-                ]
-            )
+            solr_results = results.get('searchResults', {}).get('results', []) or []
+            for nr in solr_results:
+                raw = nr.get('nr_num') or ''
+                canonical = get_nr_num_from_query(raw.strip()) or raw
+                key = normalize_nr_key(canonical)
+                by_nr[key] = {
+                    'nrNum': canonical,
+                    'names': [name['name'] for name in nr.get('names', [])],
+                }
+
             nr_num = get_nr_num_from_query(query)
             if nr_num:
                 nrs = get_nrs_like_nr_num(nr_num)
-                data.extend(
-                    [
-                        {
-                            'nrNum': nr.nrNum,
-                            'names': [n.name for n in nr.names]
-                        }
-                        for nr in nrs
-                        if nr.nrNum not in existing_nrs
-                    ]
-                )
             else:
                 # above, we returned nothing if query was empty
                 nrs = get_nrs_like_names(query)
-                data.extend(
-                    [
-                        {
-                            'nrNum': nr.nrNum,
-                            'names': [n.name for n in nr.names]
-                        }
-                        for nr in nrs
-                        if nr.nrNum not in existing_nrs
-                    ]
-                )
 
+            for nr in nrs:
+                key = normalize_nr_key(nr.nrNum)
+                by_nr[key] = {
+                    'nrNum': nr.nrNum,
+                    'names': [n.name for n in nr.names],
+                }
+
+            data = list(by_nr.values())
             return make_response(jsonify(data), 200)
         except Exception:
             current_app.logger.error(f'Error when searching for {query}\n{traceback.format_exc()}')

@@ -18,3 +18,8 @@ def get_nr_num_from_query(value) -> str | None:
         return f'NR {nr_number}'
 
     return None
+
+
+def normalize_nr_key(nr_num: str) -> str:
+    """Return a comparable NR key ignoring spaces and case ('NR 1234567' == 'NR1234567')."""
+    return (nr_num or '').replace(' ', '').upper()
