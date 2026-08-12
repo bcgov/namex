@@ -86,12 +86,11 @@ class Config:
     NOTIFY_API_VERSION = os.getenv("NOTIFY_API_VERSION", "")
     NAMEX_API_URL = os.getenv("NAMEX_API_URL", "")
     NAMEX_API_VERSION = os.getenv("NAMEX_API_VERSION", "")
-    LEGAL_API_URL = os.getenv("LEGAL_API_URL", "https://legal-api-dev.apps.silver.devops.gov.bc.ca")
-    LEGAL_API_VERSION = os.getenv("LEGAL_API_VERSION", "/api/v1")
+    BUSINESS_API_URL = os.getenv("BUSINESS_API_URL", "https://business-api-dev-dy4loprnwa-nn.a.run.app")
+    BUSINESS_API_VERSION = os.getenv("BUSINESS_API_VERSION", "/api/v1")
 
     NOTIFY_API_URL = f"{NOTIFY_API_URL + NOTIFY_API_VERSION}/notify"
     NAMEX_SVC_URL = f"{NAMEX_API_URL + NAMEX_API_VERSION}"
-    ENTITY_SVC_URL = f"{LEGAL_API_URL + LEGAL_API_VERSION}"
 
     REPORT_SVC_URL = f"{os.getenv('REPORT_API_URL', None)}{os.getenv('REPORT_API_VERSION', None)}/reports"
 
