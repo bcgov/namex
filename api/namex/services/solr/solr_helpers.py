@@ -1,3 +1,4 @@
+import re
 import string
 
 from namex.constants import Designations
@@ -8,45 +9,29 @@ from namex.services.solr.solr_client import SolrClient
 class SolrHlpers:
     @classmethod
     def _name_pre_processing(cls, name):
+        if not name:
+            return ''
+
+        # Replace ampersands and pluses with space (e.g. H&H -> H H)
+        processed_name = re.sub(r'([&+])', ' ', name.lower())
+
+        # Currency symbol replacements
         processed_name = (
-            (' ' + name.lower() + ' ')
-            .replace('!', '')
-            .replace('@', '')
-            .replace('#', '')
-            .replace('%', '')
-            .replace('&', '')
-            .replace('\\', '')
-            .replace('/', '')
-            .replace('{', '')
-            .replace('}', '')
-            .replace('[', '')
-            .replace(']', '')
-            .replace(')', '')
-            .replace('(', '')
-            .replace('+', '')
-            .replace('-', '')
-            .replace('|', '')
-            .replace('?', '')
-            .replace('.', '')
-            .replace(',', '')
-            .replace('_', '')
-            .replace("'n", '')
-            .replace("'", '')
-            .replace('"', '')
-            .replace(' $ ', 'dollar')
+            processed_name
+            .replace(' $ ', ' dollar ')
             .replace('$', 's')
-            .replace(' ¢ ', 'cent')
+            .replace(' ¢ ', ' cent ')
             .replace('¢', 'c')
-            .replace('britishcolumbia', 'bc')
-            .replace('britishcolumbias', 'bc')
-            .replace('britishcolumbian', 'bc')
-            .replace('britishcolumbians', 'bc')
-            .replace('british columbia', 'bc')
-            .replace('british columbias', 'bc')
-            .replace('british columbian', 'bc')
-            .replace('british columbians', 'bc')
         )
-        return processed_name.strip()
+
+        # Region standardization (british columbia / britishcolumbian(s) -> bc)
+        processed_name = re.sub(r'\bbritish\s*columbia(ns|n|s)?\b|\bbritishcolumbia(ns|n|s)?\b', 'bc', processed_name)
+
+        # Regex removal of punctuation & Solr special characters
+        rmv_spec_chars_rgx = r"([\[\]!()\"~*?:/\\={}^%`#|<>,.@$;_\-])"
+        processed_name = re.sub(rmv_spec_chars_rgx, ' ', processed_name)
+
+        return ' '.join(processed_name.split())
 
     @classmethod
     def _conflicts_post_process(cls, q_data, query_name):
@@ -65,7 +50,8 @@ class SolrHlpers:
         histories = []
 
         for rcd in q_data.get('searchResults', {}).get('results', []):
-            nm = cls._get_name_without_designation(rcd.get('name'))
+            rcd_name = cls._name_pre_processing(rcd.get('name', ''))
+            nm = cls._get_name_without_designation(rcd_name)
             if nm == query_name:
                 rcd['type'] = 'exact'
                 exact_matches.append(rcd)
@@ -140,8 +126,7 @@ class SolrHlpers:
 
     @classmethod
     def get_possible_conflicts(cls, name, start=0, rows=100):
-        # q_name = cls._name_pre_processing(name)
-        q_name = name.lower().strip()
+        q_name = cls._name_pre_processing(name)
         q_name = cls._get_name_without_designation(q_name)
 
         candidates = SolrClient.get_possible_conflicts(q_name, start, rows)
