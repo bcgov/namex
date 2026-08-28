@@ -356,21 +356,20 @@ class NameRequestService(AbstractNameRequestMixin):
             raise SaveNameRequestError(err)
 
 
-def get_nrs_like_nr_num(nr_num, limit=20, offset=0) -> list:
-    return (
+def get_nrs_like_nr_num(nr_num) -> list:
+    db_data = (
         Request.query
         .filter(Request.nrNum.ilike(f'%{nr_num}%'))
-        .limit(limit)
-        .offset(offset)
         .all()
     )
 
+    return db_data
 
-def get_nrs_like_names(name_search, limit=20, offset=0) -> list:
-    return (
+
+def get_nrs_like_names(name_search) -> list:
+    db_data = (
         Request.query
         .filter(Request.names.any(Name.name.ilike(f'%{name_search}%')))
-        .limit(limit)
-        .offset(offset)
-        .all()
     )
+
+    return db_data

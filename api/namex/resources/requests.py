@@ -42,7 +42,6 @@ from namex.models.restricted_words import RestrictedWords
 from namex.services import EventRecorder, MessageServices, ServicesError
 from namex.services.lookup import nr_filing_actions
 from namex.services.name_request import NameRequestService
-from namex.services.name_request.name_request import get_nrs_like_names, get_nrs_like_nr_num
 from namex.services.name_request.utils import check_ownership, get_or_create_user_by_jwt, valid_state_transition
 from namex.services.solr.solr_client import SolrClient
 from namex.services.solr.solr_helpers import SolrHlpers
@@ -50,6 +49,7 @@ from namex.utils import queue_util
 from namex.utils.auth import cors_preflight
 from namex.utils.common import convert_to_ascii, convert_to_utc_max_date_time, convert_to_utc_min_date_time
 from namex.utils.nr_query import get_nr_num_from_query, normalize_nr_key
+from namex.services.name_request.name_request import get_nrs_like_nr_num, get_nrs_like_names
 
 from .utils import DateUtils
 
@@ -523,10 +523,10 @@ class RequestSearch(Resource):
 
             nr_num = get_nr_num_from_query(query)
             if nr_num:
-                nrs = get_nrs_like_nr_num(nr_num, limit=rows, offset=start)
+                nrs = get_nrs_like_nr_num(nr_num)
             else:
                 # above, we returned nothing if query was empty
-                nrs = get_nrs_like_names(query, limit=rows, offset=start)
+                nrs = get_nrs_like_names(query)
 
             for nr in nrs:
                 key = normalize_nr_key(nr.nrNum)
@@ -669,8 +669,7 @@ class Request(Resource):
     )
     def get(nr):
         # return make_response(jsonify(request_schema.dump(RequestDAO.query.filter_by(nr=nr.upper()).first_or_404()))
-        # Normalize NR number: accept both "NR1234567" and "NR 1234567" formats
-        return jsonify(RequestDAO.query.filter_by(nrNum=get_nr_num_from_query(nr) or nr.upper()).first_or_404().json())
+        return jsonify(RequestDAO.query.filter_by(nrNum=nr.upper()).first_or_404().json())
 
     @staticmethod
     # @cors.crossdomain(origin='*')
@@ -712,7 +711,7 @@ class Request(Resource):
     )
     @api.doc(
         description=(
-            "Updates a name request's state, records the previous state, optionally adds comments, assigns a corpNum if consumption state, "
+            'Updates a name request\'s state, records the previous state, optionally adds comments, assigns a corpNum if consumption state, '
             'and calculates expiration if approval state. Only users with APPROVER, EDITOR, or SYSTEM roles may update state, '
             'and certain transitions may be restricted based on role or current state.'
         ),
@@ -859,7 +858,7 @@ class Request(Resource):
             return make_response(jsonify(message='Internal server error'), 500)
 
         if 'warnings' in locals() and warnings:  # noqa: F821
-            return make_response(jsonify(message='Request:{} - patched'.format(nr), warnings=warnings),  # noqa: F821
+            return make_response(jsonify(message='Request:{} - patched'.format(nr), warnings=warnings),
                                  206)  # noqa: F821
 
         if state in [State.APPROVED, State.CONDITIONAL, State.REJECTED]:

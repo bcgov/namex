@@ -142,10 +142,8 @@ class SolrHlpers:
     def get_possible_conflicts(cls, name, start=0, rows=100):
         # q_name = cls._name_pre_processing(name)
         q_name = name.lower().strip()
-        # Keep the raw query for Solr ranking/boosts. Skip-word filtering for
-        # match prep happens in namex-solr-api via DESIGNATIONS.
-        stripped_name = cls._get_name_without_designation(q_name)
+        q_name = cls._get_name_without_designation(q_name)
 
         candidates = SolrClient.get_possible_conflicts(q_name, start, rows)
-        return cls._conflicts_post_process(candidates, stripped_name)
+        return cls._conflicts_post_process(candidates, q_name)
 
