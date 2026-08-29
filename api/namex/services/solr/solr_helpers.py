@@ -63,7 +63,7 @@ class SolrHlpers:
         exact_matches = []
         similar_matches = []
         histories = []
-
+        total_results = q_data.get('searchResults', {}).get('totalResults', 0)
         for rcd in q_data.get('searchResults', {}).get('results', []):
             nm = cls._get_name_without_designation(rcd.get('name'))
             if nm == query_name:
@@ -85,7 +85,8 @@ class SolrHlpers:
         return {
             'names': similar_matches,
             'exactNames': exact_matches,
-            'histories': histories}
+            'histories': histories,
+            'total': total_results}
 
     def normalize_words(word):
         """
@@ -139,13 +140,13 @@ class SolrHlpers:
         return ' '.join(filtered_words)
 
     @classmethod
-    def get_possible_conflicts(cls, name, start=0, rows=100):
+    def get_possible_conflicts(cls, name, start=0, rows=100, strict=True):
         # q_name = cls._name_pre_processing(name)
         q_name = name.lower().strip()
         # Keep the raw query for Solr ranking/boosts. Skip-word filtering for
         # match prep happens in namex-solr-api via DESIGNATIONS.
         stripped_name = cls._get_name_without_designation(q_name)
 
-        candidates = SolrClient.get_possible_conflicts(q_name, start, rows)
+        candidates = SolrClient.get_possible_conflicts(q_name, start, rows, strict)
         return cls._conflicts_post_process(candidates, stripped_name)
 

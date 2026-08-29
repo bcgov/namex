@@ -1438,7 +1438,8 @@ class RequestsAnalysis(Resource):
 @api.route('/possible-conflicts/<string:name>', methods=['GET', 'OPTIONS'])
 class PossibleConflicts(Resource):
     START = 0
-    ROWS = 1000
+    ROWS = 50
+    STRICT = False
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -1459,7 +1460,8 @@ class PossibleConflicts(Resource):
     def get(name):
         start = request.args.get('start', PossibleConflicts.START)
         rows = request.args.get('rows', PossibleConflicts.ROWS)
-        results = SolrHlpers.get_possible_conflicts(name, start=start, rows=rows)
+        strict = request.args.get('strict', PossibleConflicts.STRICT)
+        results = SolrHlpers.get_possible_conflicts(name, start=start, rows=rows, strict=strict)
         return make_response(jsonify(results), 200)
 
 
