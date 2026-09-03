@@ -62,12 +62,14 @@ class SolrClient:
 
 
     @classmethod
-    def get_possible_conflicts(cls, name, start=0, rows=100):
+    def get_possible_conflicts(cls, name, start=0, rows=100, exact_phrase=None):
         request_json = {
             'query': { 'value': name },
             'start': start,
             'rows': rows
         }
+        if exact_phrase and exact_phrase.strip():
+            request_json['exact_phrase'] = exact_phrase.strip().lower()
 
         token = cls._get_bearer_token()
 
