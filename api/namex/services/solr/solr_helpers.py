@@ -79,6 +79,7 @@ class SolrHlpers:
                 phonetic = cls.normalize_words(highlighting.get('phonetic', []))
 
                 rcd['type'] = 'similar'
+                rcd['bucket'] = rcd.get('bucket')
                 rcd['highlighting'] = { 'exact': list(exact), 'stems': list(stems), 'synonyms': list(synonyms), 'phonetic': list(phonetic) }
                 similar_matches.append(rcd)
 
