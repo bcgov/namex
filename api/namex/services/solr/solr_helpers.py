@@ -140,7 +140,7 @@ class SolrHlpers:
         return ' '.join(filtered_words)
 
     @classmethod
-    def get_possible_conflicts(cls, name, start=0, rows=100, exact_phrase_only=False):
+    def get_possible_conflicts(cls, name, start=0, rows=100, exact_phrase=''):
         # q_name = cls._name_pre_processing(name)
         q_name = name.lower().strip()
         # Keep the raw query for Solr ranking/boosts. Skip-word filtering for
@@ -148,7 +148,7 @@ class SolrHlpers:
         stripped_name = cls._get_name_without_designation(q_name)
 
         candidates = SolrClient.get_possible_conflicts(
-            q_name, start, rows, exact_phrase_only=exact_phrase_only
+            q_name, start, rows, exact_phrase=exact_phrase
         )
         return cls._conflicts_post_process(candidates, stripped_name)
 

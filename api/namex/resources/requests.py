@@ -1459,11 +1459,9 @@ class PossibleConflicts(Resource):
     def get(name):
         start = request.args.get('start', PossibleConflicts.START)
         rows = request.args.get('rows', PossibleConflicts.ROWS)
-        exact_phrase_only = str(request.args.get('exact_phrase_only', '')).strip().lower() in {
-            '1', 'true', 'yes'
-        }
+        exact_phrase = str(request.args.get('exact_phrase', '')).strip()
         results = SolrHlpers.get_possible_conflicts(
-            name, start=start, rows=rows, exact_phrase_only=exact_phrase_only
+            name, start=start, rows=rows, exact_phrase=exact_phrase
         )
         return make_response(jsonify(results), 200)
 
