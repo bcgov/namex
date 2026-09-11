@@ -86,9 +86,12 @@ class Config:
     NOTIFY_API_VERSION = os.getenv("NOTIFY_API_VERSION", "")
     NAMEX_API_URL = os.getenv("NAMEX_API_URL", "")
     NAMEX_API_VERSION = os.getenv("NAMEX_API_VERSION", "")
+    BUSINESS_API_URL = os.getenv("BUSINESS_API_URL", None)
+    BUSINESS_API_VERSION = os.getenv("BUSINESS_API_VERSION", "/api/v2")
 
     NOTIFY_API_URL = f"{NOTIFY_API_URL + NOTIFY_API_VERSION}/notify"
     NAMEX_SVC_URL = f"{NAMEX_API_URL + NAMEX_API_VERSION}"
+    ENTITY_SVC_URL = f"{BUSINESS_API_URL + BUSINESS_API_VERSION}"
 
     REPORT_SVC_URL = f"{os.getenv('REPORT_API_URL', None)}{os.getenv('REPORT_API_VERSION', None)}/reports"
 
