@@ -44,7 +44,7 @@ from namex.services.lookup import nr_filing_actions
 from namex.services.name_request import NameRequestService
 from namex.services.name_request.name_request import get_nrs_like_names, get_nrs_like_nr_num
 from namex.services.name_request.utils import check_ownership, get_or_create_user_by_jwt, valid_state_transition
-from namex.services.solr.solr_client import SolrClient
+from namex.services.solr.solr_client import QUERY_TOO_COMPLEX, SolrClient, SolrClientException
 from namex.services.solr.solr_helpers import SolrHlpers
 from namex.utils import queue_util
 from namex.utils.auth import cors_preflight
@@ -1453,6 +1453,7 @@ class PossibleConflicts(Resource):
         responses={
             200: 'Conflict results fetched successfully',
             401: 'Unauthorized',
+            422: 'Query too complex for conflict search',
             500: 'Internal server error',
         },
     )
@@ -1460,9 +1461,18 @@ class PossibleConflicts(Resource):
         start = request.args.get('start', PossibleConflicts.START)
         rows = request.args.get('rows', PossibleConflicts.ROWS)
         exact_phrase = str(request.args.get('exact_phrase', '')).strip()
-        results = SolrHlpers.get_possible_conflicts(
-            name, start=start, rows=rows, exact_phrase=exact_phrase
-        )
+        try:
+            results = SolrHlpers.get_possible_conflicts(
+                name, start=start, rows=rows, exact_phrase=exact_phrase
+            )
+        except SolrClientException as err:
+            body = err.body if isinstance(err.body, dict) else {}
+            if body.get('code') == QUERY_TOO_COMPLEX:
+                payload = {'code': QUERY_TOO_COMPLEX}
+                if body.get('message'):
+                    payload['message'] = body['message']
+                return make_response(jsonify(payload), err.status_code or 422)
+            raise
         return make_response(jsonify(results), 200)
 
 

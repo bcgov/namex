@@ -3,6 +3,8 @@ from flask import current_app
 
 from namex.utils.auth import get_client_credentials
 
+QUERY_TOO_COMPLEX = 'QUERY_TOO_COMPLEX'
+
 
 class SolrClientException(Exception):
     def __init__(self, wrapped_err=None, body=None, message='Solr client exception', status_code=500):
@@ -79,7 +81,16 @@ class SolrClient:
             headers={'Authorization': f'Bearer {token}'}
         )
         if resp.status_code != 200:
-            raise SolrClientException(message=f'Solr search failed: {resp.text}', status_code=resp.status_code)
+            body = None
+            try:
+                body = resp.json()
+            except ValueError:
+                body = None
+            raise SolrClientException(
+                body=body,
+                message=f'Solr search failed: {resp.text}',
+                status_code=resp.status_code,
+            )
 
         return resp.json()
 
