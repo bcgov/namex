@@ -2,7 +2,7 @@ import os
 
 import flask
 import flask_admin
-from cloud_sql_connector import DBConfig, setup_search_path_event_listener
+from cloud_sql_connector import DBConfig, setup_pg8000_close_event_listener, setup_search_path_event_listener
 from sqlalchemy.orm import scoped_session, sessionmaker
 from structured_logging import StructuredLogging
 
@@ -60,6 +60,7 @@ def create_application(run_mode=os.getenv('FLASK_ENV', 'production')):
     with application.app_context():
         engine = models.db.engine
         setup_search_path_event_listener(engine, schema)
+        setup_pg8000_close_event_listener(engine)
 
     # The root page - point the users to the admin interface.
     @application.route('/')
