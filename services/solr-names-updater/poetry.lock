@@ -436,7 +436,7 @@ sqlalchemy = "^2.0.0"
 type = "git"
 url = "https://github.com/bcgov/sbc-connect-common.git"
 reference = "b92e98f4ea1d59646f4b1465b73ccd688eddea48"
-resolved_reference = "9ba15bc19f01690185a46796c5d45c333e254bf8"
+resolved_reference = "b92e98f4ea1d59646f4b1465b73ccd688eddea48"
 subdirectory = "python/cloud-sql-connector"
 
 [[package]]
@@ -3711,7 +3711,7 @@ structlog = "^24.1.0"
 type = "git"
 url = "https://github.com/bcgov/sbc-connect-common.git"
 reference = "b92e98f4ea1d59646f4b1465b73ccd688eddea48"
-resolved_reference = "9ba15bc19f01690185a46796c5d45c333e254bf8"
+resolved_reference = "b92e98f4ea1d59646f4b1465b73ccd688eddea48"
 subdirectory = "python/structured-logging"
 
 [[package]]
@@ -4036,4 +4036,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "7ab5d5d95e4d3840991340271b8f113a28344e40e10876ccb85b46b7ae80f948"
+content-hash = "310991396cc722d9032e7b5fc87d23e12f4f09637d95e1cc7e4cec4b7cc4cb6b"
