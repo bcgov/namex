@@ -22,7 +22,7 @@ inflect==5.3.0
 itsdangerous==1.1.0
 joblib==1.0.1
 jsonpickle==2.0.0
-lxml==4.6.3
+lxml==4.9.1
 marshmallow-sqlalchemy==0.24.3
 marshmallow==3.11.1
 nltk==3.6.2
