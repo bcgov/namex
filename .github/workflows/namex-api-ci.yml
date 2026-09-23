@@ -13,7 +13,7 @@ defaults:
 
 jobs:
   namex-api-ci:
-    uses: bcgov/bcregistry-sre/.github/workflows/backend-ci.yaml@main
+    uses: bcgov/bcregistry-sre/.github/workflows/backend-ci.yaml@postgres-18-ci
     with:
       app_name: "namex-api"
       working_directory: "./api"
