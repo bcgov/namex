@@ -1,0 +1,16 @@
+{
+  "name": "namex-root",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare": "lefthook install || exit 0"
+  },
+  "devDependencies": {
+    "lefthook": "^1.11.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "lefthook"
+    ]
+  }
+}
