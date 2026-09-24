@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "prepare": "lefthook install || exit 0"
+    "prepare": "[ \"$CI\" = \"true\" ] || lefthook install"
   },
   "devDependencies": {
     "lefthook": "^1.11.3"
