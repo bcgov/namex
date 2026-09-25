@@ -187,6 +187,7 @@ def handle_payment_response(payment_action, payment_response, payment, nr_id, nr
                     if is_reapplication_eligible(nr_model.expirationDate):
                         expiry_days = nr_svc.get_expiry_days(nr_model.request_action_cd, nr_model.requestTypeCd)
                         nr_model.expirationDate = nr_svc.create_expiry_date(nr_model.expirationDate, expiry_days)
+                        nr_model.notifiedBeforeExpiry = False
                     payment.payment_completion_date = datetime.utcnow()
 
                 nr_model.save_to_db()
