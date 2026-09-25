@@ -21,7 +21,6 @@ import pytest
 import requests
 from namex.utils import queue_util
 
-from solr_names_updater.names_processors.names import get_nr_ids_to_delete_from_solr
 from solr_names_updater.resources import worker  # noqa: I001
 
 from . import MockResponse, create_nr, helper_create_cloud_event  # noqa: I003
@@ -157,7 +156,7 @@ def test_should_add_names_to_solr(
 
     ]
 )
-def test_should_delete_names_from_solr(
+def test_should_update_name_state_in_solr(
         client,
         app,
         db,
@@ -168,14 +167,13 @@ def test_should_delete_names_from_solr(
         previous_nr_state,
         names: list,
         name_states: list):
-    """Assert that names are deleted from Solr."""
+    """Assert that the NR state is updated in Solr instead of deleted."""
 
     queue_util.send_name_request_state_msg = mock.Mock(return_value='True')
     queue_util.send_name_state_msg = mock.Mock(return_value='True')
     data_json = json.loads(base64.b64decode(message_payload['message']['data']).decode('utf-8'))
     nr_num = data_json['data'][state_change_type]['nrNum']
-    mock_nr = create_nr(nr_num, new_nr_state, names, name_states)
-    nr_ids_to_delete_from_solr = get_nr_ids_to_delete_from_solr(mock_nr)
+    create_nr(nr_num, new_nr_state, names, name_states)
     mock_response = MockResponse({}, 200)
 
     # mock post method to solr feeder api
@@ -192,9 +190,7 @@ def test_should_delete_names_from_solr(
             assert post_json['solr_core'] == 'names'
 
             request_json = post_json['request']
-
-            assert 'delete' in request_json
-            assert len(nr_ids_to_delete_from_solr) > 0
-            request_json = post_json['request']
-            for nr_id in nr_ids_to_delete_from_solr:
-                assert nr_id in request_json
+            assert '"delete"' not in request_json
+            assert '"add"' in request_json
+            assert 'TEST NAME 1' in request_json
+            assert f'"state_type_cd": "{new_nr_state}"' in request_json

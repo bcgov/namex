@@ -55,9 +55,11 @@ def send_to_solr_add(nr: RequestDAO):
     """Send json payload to add possible conflict to solr for NR."""
     name_states = [NameState.APPROVED.value, NameState.CONDITION.value]  # pylint: disable=no-member
     names = find_name_by_name_states(nr.id, name_states)
-    name = names[0]
+    if not names:
+        logger.info(f'no approved/condition name found for {nr.nrNum}, skipping solr add')
+        return
     jur = nr.xproJurisdiction if nr.xproJurisdiction else 'BC'
-    payload_dict = construct_payload_dict(nr, name, jur)
+    payload_dict = construct_payload_dict(nr, names, jur)
 
     resp = post_to_solr_feeder(payload_dict)
     if resp.status_code != 200:
@@ -77,16 +79,21 @@ def send_to_solr_state_update(nr: RequestDAO):
         logger.info(f'no approved/condition name found for {nr.nrNum}, skipping solr state update')
         return
 
-    name = names[0]
     jur = nr.xproJurisdiction if nr.xproJurisdiction else 'BC'
-    payload_dict = construct_payload_dict(nr, name, jur, nr.stateCd)
+    payload_dict = construct_payload_dict(nr, names, jur, nr.stateCd)
 
     resp = post_to_solr_feeder(payload_dict)
     if resp.status_code != 200:
         logger.error(f'failed to update possible conflict state in solr for {nr.nrNum}, status code: {resp.status_code}, error reason: {resp.reason}, error details: {resp.text}')
 
 
-def construct_payload_dict(nr: RequestDAO, name, jur, state_type_cd=None):
+def _name_state_code(name_state: str) -> str:
+    if name_state == NameState.CONDITION.value:  # pylint: disable=no-member
+        return 'C'
+    return 'A'
+
+
+def construct_payload_dict(nr: RequestDAO, names, jur, state_type_cd=None):
     """Construct json payload used to invoke solr feeder endpoint for a given NR.
 
     When state_type_cd is provided it overrides the name state. This is used to update
@@ -100,11 +107,20 @@ def construct_payload_dict(nr: RequestDAO, name, jur, state_type_cd=None):
         'doc': {
             'id': nr.nrNum,
             'sub_type': nr.requestTypeCd,
-            'name': name.name,
-            'state_type_cd': state_type_cd if state_type_cd else name.state,
-            'source': nr.source,
+            'name': names[0].name,
+            'state_type_cd': state_type_cd if state_type_cd else names[0].state,
+            'source': nr.source or 'NAMEREQUEST',
             'start_date': start_date,
-            'jurisdiction': jur
+            'jurisdiction': jur,
+            'names': [
+                {
+                    'choice': name.choice,
+                    'name': name.name,
+                    'name_state': _name_state_code(name.state),
+                    'submit_count': nr.submitCount
+                }
+                for name in names
+            ]
         }
     }
 

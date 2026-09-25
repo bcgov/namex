@@ -16,6 +16,10 @@ import json
 from datetime import datetime
 
 
+# Name-request sources stored on requests.source. NRO is the legacy value.
+_NR_SOURCES = {'NAMEREQUEST', 'NRO', 'NAMEX', 'SO'}
+
+
 def convert_solr_doc(json_string: str) -> dict:
     """Convert a Solr add document to the target format.
 
@@ -26,15 +30,17 @@ def convert_solr_doc(json_string: str) -> dict:
         Converted dictionary in NR or CORP format.
     """
     data = json.loads(json_string)
-    doc = data.get('add', {}).get('doc', {})
-    source = doc.get('source', '').upper()
+    if 'delete' in data:
+        raise ValueError('Solr delete is not supported; update the document state instead')
 
-    if source == 'NAMEREQUEST':
-        return _convert_nr_doc(doc)
-    elif source == 'CORP':
+    doc = data.get('add', {}).get('doc', {})
+    source = (doc.get('source') or '').upper()
+
+    if source == 'CORP':
         return _convert_corp_doc(doc)
-    else:
-        raise ValueError(f"Unknown source type: {source}")
+    if source in _NR_SOURCES or source == '':
+        return _convert_nr_doc(doc)
+    raise ValueError(f"Unknown source type: {source}")
 
 
 def _convert_nr_doc(doc: dict) -> dict:
@@ -42,8 +48,18 @@ def _convert_nr_doc(doc: dict) -> dict:
     # Convert "NR 0664756" -> "NR0664756" (remove space)
     nr_num = doc.get('id', '').replace(' ', '')
 
-    # Convert ISO datetime to date only
-    start_date = _extract_date(doc.get('start_date', ''))
+    start_date = _solr_datetime(doc.get('start_date', ''))
+
+    names = doc.get('names')
+    if not names:
+        names = [
+            {
+                'choice': doc.get('choice', -1),
+                'name': doc.get('name', ''),
+                'name_state': 'A',  # Default to Approved
+                'submit_count': doc.get('submit_count', 1)
+            }
+        ]
 
     return {
         'nr_num': nr_num,
@@ -52,14 +68,7 @@ def _convert_nr_doc(doc: dict) -> dict:
         'state': doc.get('state_type_cd', ''),
         'type': 'NR',
         'sub_type': doc.get('sub_type', '-'),
-        'names': [
-            {
-                'choice': doc.get('choice', -1),
-                'name': doc.get('name', ''),
-                'name_state': 'A',  # Default to Approved
-                'submit_count': 1
-            }
-        ]
+        'names': names
     }
 
 
@@ -79,19 +88,23 @@ def _convert_corp_doc(doc: dict) -> dict:
     }
 
 
-def _extract_date(iso_datetime: str) -> str:
-    """Extract date portion from ISO datetime string.
+def _solr_datetime(iso_datetime: str) -> str:
+    """Return a UTC datetime Solr's start_date field accepts.
 
     Args:
         iso_datetime: ISO format datetime (e.g., "2026-01-27T14:52:31Z")
 
     Returns:
-        Date string in YYYY-MM-DD format.
+        Datetime string YYYY-MM-DDTHH:MM:SSZ, or '' when blank.
     """
     if not iso_datetime:
         return ''
+    text = iso_datetime[:-1] + '+00:00' if iso_datetime.endswith('Z') else iso_datetime
     try:
-        dt = datetime.fromisoformat(iso_datetime.replace('Z', '+00:00'))
-        return dt.strftime('%Y-%m-%d')
+        parsed = datetime.fromisoformat(text)
     except ValueError:
-        return iso_datetime[:10] if len(iso_datetime) >= 10 else iso_datetime
+        try:
+            parsed = datetime.strptime(iso_datetime[:10], '%Y-%m-%d')
+        except ValueError:
+            return ''
+    return parsed.strftime('%Y-%m-%dT%H:%M:%SZ')

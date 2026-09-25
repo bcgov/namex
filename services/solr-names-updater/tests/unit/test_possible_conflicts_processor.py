@@ -40,8 +40,8 @@ from . import MockResponse, create_nr, helper_create_cloud_event  # noqa: I003
             'APPROVED', 'DRAFT',
             ['TEST NAME 1', 'TEST NAME 2', 'TEST NAME 3'],
             ['APPROVED', 'CONDITION', 'APPROVED'],
-            ['TEST NAME 1'],
-            ['TEST NAME 2', 'TEST NAME 3']
+            ['TEST NAME 1', 'TEST NAME 2', 'TEST NAME 3'],
+            []
         ),
         (
             helper_create_cloud_event('APPROVED', 'DRAFT'),

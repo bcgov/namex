@@ -20,7 +20,6 @@ from structured_logging import StructuredLogging
 
 from solr_names_updater.names_processors import (
     convert_to_solr_conformant_datetime_str,  # noqa: I001
-    convert_to_solr_conformant_json,  # noqa: I001
     find_name_by_name_states,  # noqa: I001
     post_to_solr_feeder,  # noqa: I001; noqa: I001
 )
@@ -38,11 +37,20 @@ def process_add_to_solr(state_change_msg: dict):  # pylint: disable=too-many-loc
 
 
 def process_delete_from_solr(state_change_msg: dict):  # pylint: disable=too-many-locals, , too-many-branches
-    """Process names update via Solr feeder api."""
-    # structured_log(state_change_msg)
+    """Update the NR state in Solr.
+
+    The new Solr does not delete documents. Cancel, expire, consume, and reset
+    send the NR's current state so search filters the record out.
+    """
     nr_num = state_change_msg.get('nrNum', None)
     nr = RequestDAO.find_by_nr(nr_num)
-    send_to_solr_delete(nr)
+    send_to_solr_state_update(nr)
+
+
+def _name_state_code(name_state: str) -> str:
+    if name_state == NameState.CONDITION.value:  # pylint: disable=no-member
+        return 'C'
+    return 'A'
 
 
 def send_to_solr_add(nr: RequestDAO):
@@ -50,6 +58,9 @@ def send_to_solr_add(nr: RequestDAO):
     # pylint: disable=no-member
     name_states = [NameState.APPROVED.value, NameState.CONDITION.value]
     names = find_name_by_name_states(nr.id, name_states)
+    if not names:
+        logger.info(f'no approved/condition name found for {nr.nrNum}, skipping solr add')
+        return
     jur = nr.xproJurisdiction if nr.xproJurisdiction else 'BC'
     payload_dict = construct_payload_dict(nr, names, jur)
     resp = post_to_solr_feeder(payload_dict)
@@ -57,56 +68,49 @@ def send_to_solr_add(nr: RequestDAO):
         logger.error(f'failed to add names to solr for {nr.nrNum}, status code: {resp.status_code}, error reason: {resp.reason}, error details: {resp.text}')
 
 
-def send_to_solr_delete(nr: RequestDAO):
-    """Send json payload to delete names from solr for NR."""
-    delete_ids = get_nr_ids_to_delete_from_solr(nr)
-    payload_dict = {
-        'solr_core': 'names',
-        'request': {
-            'delete': delete_ids,
-            'commit': {}
-        }
-    }
-    request_str = json.dumps(payload_dict['request'])
-    payload_dict['request'] = request_str
+def send_to_solr_state_update(nr: RequestDAO):
+    """Send the NR's current state so the existing Solr document is updated, not deleted."""
+    name_states = [NameState.APPROVED.value, NameState.CONDITION.value]  # pylint: disable=no-member
+    names = find_name_by_name_states(nr.id, name_states)
+    if not names:
+        logger.info(f'no approved/condition name found for {nr.nrNum}, skipping solr state update')
+        return
+    jur = nr.xproJurisdiction if nr.xproJurisdiction else 'BC'
+    payload_dict = construct_payload_dict(nr, names, jur, nr.stateCd)
     resp = post_to_solr_feeder(payload_dict)
     if resp.status_code != 200:
-        logger.error(f'failed to delete names from solr for {nr.nrNum}, status code: {resp.status_code}, error reason: {resp.reason}, error details: {resp.text}')
+        logger.error(f'failed to update name state in solr for {nr.nrNum}, status code: {resp.status_code}, error reason: {resp.reason}, error details: {resp.text}')
 
 
-def get_nr_ids_to_delete_from_solr(nr: RequestDAO):
-    """Generate NR ids to be used to delete names from solr for a NR."""
-    nr_num_1 = f'{nr.nrNum}-1'
-    nr_num_2 = f'{nr.nrNum}-2'
-    nr_num_3 = f'{nr.nrNum}-3'
-    keys = [nr_num_1, nr_num_2, nr_num_3]
-    return keys
+def construct_payload_dict(nr: RequestDAO, names, jur, state_type_cd=None):
+    """Construct json payload used to invoke solr feeder endpoint for a given NR.
 
-
-def construct_payload_dict(nr: RequestDAO, names, jur):
-    """Construct json payload used to invoke solr feeder endpoint for adding names for a given NR."""
+    One add document carries every approved or conditional name. state_type_cd
+    overrides the name state when the NR itself is cancelled, expired, consumed, or reset.
+    """
     payload_dict = {'solr_core': 'names'}
-    payload_request = {}
-
-    for index, name in enumerate(names):
-        key = f'add{index + 1}'
-        doc_id = f'{nr.nrNum}-{name.choice}'
-        start_date = convert_to_solr_conformant_datetime_str(nr.submittedDate)
-        payload_request[key] = {
+    start_date = convert_to_solr_conformant_datetime_str(nr.submittedDate)
+    payload_request = {
+        'add': {
             'doc': {
-                'id': doc_id,
+                'id': nr.nrNum,
                 'sub_type': nr.requestTypeCd,
-                'name': name.name,
-                'nr_num': nr.nrNum,
-                'submit_count': nr.submitCount,
-                'name_state_type_cd': name.state,
+                'source': nr.source or 'NAMEREQUEST',
+                'state_type_cd': state_type_cd if state_type_cd else names[0].state,
                 'start_date': start_date,
-                'jurisdiction': jur
+                'jurisdiction': jur,
+                'names': [
+                    {
+                        'choice': name.choice,
+                        'name': name.name,
+                        'name_state': _name_state_code(name.state),
+                        'submit_count': nr.submitCount
+                    }
+                    for name in names
+                ]
             }
-        }
-
-    payload_request['commit'] = {}
-    request_str = json.dumps(payload_request)
-    request_str = convert_to_solr_conformant_json(request_str)
-    payload_dict['request'] = request_str
+        },
+        'commit': {}
+    }
+    payload_dict['request'] = json.dumps(payload_request)
     return payload_dict

@@ -26,11 +26,30 @@ _SOLR_INSTANCE = os.getenv('SOLR_FEEDER_SOLR_INSTANCE', 'http://localhost:8393/s
 _SOLR_URL = _SOLR_INSTANCE + '/{}/update/json'
 
 
+def _error_message(resp) -> str:
+    """Read an error body without assuming a Solr JSON shape."""
+    try:
+        body = resp.json()
+    except ValueError:
+        return resp.text
+    if isinstance(body, dict):
+        error = body.get('error')
+        if isinstance(error, dict) and error.get('msg'):
+            return error['msg']
+        if body.get('message'):
+            return body['message']
+    return resp.text
+
+
 def update_core(core_name: str, json_string: str):
     """Update the core with the given data."""
     current_app.logger.debug('json Solr command: %s', json_string)
 
-    converted_request = convert_solr_doc(json_string)
+    try:
+        converted_request = convert_solr_doc(json_string)
+    except ValueError as err:
+        current_app.logger.error('Solr update rejected: %s', err)
+        return {'message': f'{core_name} core: {err}', 'status_code': 400}
 
     bearer_token, token_err = get_search_bearer_token()
     headers = {
@@ -46,11 +65,10 @@ def update_core(core_name: str, json_string: str):
                         )
 
     if resp.status_code > 299:
-        current_app.logger.error('Solr update for ' + json_string + ' failed.')
-        current_app.logger.error('Failed to update solr', resp.json())
-
+        message = _error_message(resp)
+        current_app.logger.error('Solr update for %s failed: %s', json_string, message)
         return {
-            'message': f"{core_name} core: {resp.json()['error']['msg']}",
+            'message': f'{core_name} core: {message}',
             'status_code': resp.status_code
         }
 
