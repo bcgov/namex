@@ -164,6 +164,7 @@ def reapply_payment(nr, payment):
     if is_reapplication_eligible(nr.expirationDate):
         # to avoid duplicate expiration date calculated
         nr.expirationDate = nr.expirationDate + timedelta(days=NAME_REQUEST_LIFESPAN_DAYS)
+        nr.notifiedBeforeExpiry = False
     payment.payment_completion_date = datetime.utcnow()
     payment.payment_status_code = State.COMPLETED
 
