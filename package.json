@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "prepare": "command -v git >/dev/null 2>&1 && lefthook install || true"
+    "prepare": "git --version && lefthook install || exit 0"
   },
   "devDependencies": {
     "lefthook": "^1.11.3"
