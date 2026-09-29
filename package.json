@@ -1,0 +1,11 @@
+{
+  "name": "namex-root",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare": "git --version && lefthook install || exit 0"
+  },
+  "devDependencies": {
+    "lefthook": "^1.11.3"
+  }
+}
