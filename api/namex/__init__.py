@@ -18,7 +18,7 @@ from .VERSION import __version__
 
 jwt = JwtManager()
 
-from cloud_sql_connector import DBConfig, setup_search_path_event_listener
+from cloud_sql_connector import DBConfig, setup_pg8000_close_event_listener, setup_search_path_event_listener
 from flask_cors import CORS
 from flask_migrate import Migrate, upgrade
 
@@ -78,6 +78,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):  # noqa: B008
         with app.app_context():
             engine = db.engine
             setup_search_path_event_listener(engine, schema)
+            setup_pg8000_close_event_listener(engine)
 
     if run_mode == 'migration':
         Migrate(app, db)
