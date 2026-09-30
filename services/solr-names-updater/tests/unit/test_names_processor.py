@@ -83,7 +83,7 @@ def test_should_add_names_to_solr(
         names_state: list,
         expected_names_to_add_to_solr: list,
         not_expected_names_to_add_to_solr: list):
-    """Assert that names are added to solr."""
+    """Assert that approval does not write the old names core."""
 
     queue_util.send_name_request_state_msg = mock.Mock(return_value='True')
     data_json = json.loads(base64.b64decode(message_payload['message']['data']).decode('utf-8'))
@@ -99,25 +99,8 @@ def test_should_add_names_to_solr(
             with patch.object(worker, 'process_possible_conflicts_add', return_value=True):
                 # mock process_possible_conflicts_delete to do nothing in order to isolate testing relevant to this test
                 with patch.object(worker, 'process_possible_conflicts_delete', return_value=True):
-                    rv = client.post('/', json=message_payload)
-
-                    if len(expected_names_to_add_to_solr) > 0:
-                        assert mock_solr_feeder_api_post.called == True
-                        assert 'api/v1/feeds' in mock_solr_feeder_api_post.call_args[0][0]
-
-                        post_json = mock_solr_feeder_api_post.call_args[1]['json']
-                        assert post_json['solr_core']
-                        assert post_json['solr_core'] == 'names'
-
-                        request_json = post_json['request']
-
-                        for index, expect_name in enumerate(expected_names_to_add_to_solr):
-                            assert expect_name in request_json
-
-                        for index, not_expect_name in enumerate(not_expected_names_to_add_to_solr):
-                            assert not_expect_name not in request_json
-                    else:
-                        assert mock_solr_feeder_api_post.called == False
+                    client.post('/', json=message_payload)
+                    assert mock_solr_feeder_api_post.called is False
 
 
 @pytest.mark.parametrize(

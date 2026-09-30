@@ -16,23 +16,10 @@
 Processors hold the business logic for how solr feeder is updated.
 """
 
-import re
-
 import requests
 from flask import current_app
 from namex.models import db, Name  # noqa: 1001
 # noqa: 1005
-
-
-def convert_to_solr_conformant_json(request_str):
-    """Replace the 'add' keys append with a number with the key 'add'.
-
-    This is needed as dict do not allow duplicates keys.  The solr api expects a json
-    format that requires duplicate add keys so as a workaround this limitation, this is
-    done after the payload_dict is converted to a json string.
-    """
-    request_str = re.sub(r"\"add\d+\":", "\"add\":", request_str)  # noqa:Q000
-    return request_str
 
 
 def post_to_solr_feeder(payload: dict):
