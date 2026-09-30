@@ -123,8 +123,6 @@ def test_should_add_possible_conflicts_to_solr(
 
     # mock post method to solr feeder api
     with patch.object(requests, 'post', return_value=mock_response) as mock_solr_feeder_api_post:
-        # mock process_names_delete to do nothing in order to isolate testing relevant to this test
-        with patch.object(worker, 'process_names_delete', return_value=True):
             # mock process_names_add to do nothing in order to isolate testing relevant to this test
             with patch.object(worker, 'process_names_add', return_value=True):
                 # mock process_possible_conflicts_delete to do nothing in order to isolate testing relevant to this test
@@ -209,7 +207,6 @@ def test_should_update_possible_conflict_state_in_solr(
 
     # mock post method to solr feeder api
     with patch.object(requests, 'post', return_value=mock_response) as mock_solr_feeder_api_post:
-        with patch.object(worker, 'process_names_delete', return_value=True):
             rv = client.post('/', json=message_payload)
             assert mock_solr_feeder_api_post.called == True
             assert 'api/v1/feeds' in mock_solr_feeder_api_post.call_args[0][0]

@@ -21,7 +21,6 @@ import pytest
 import requests
 from namex.utils import queue_util
 
-from solr_names_updater.names_processors.names import get_nr_ids_to_delete_from_solr
 from solr_names_updater.resources import worker  # noqa: I001
 
 from . import MockResponse, create_nr, helper_create_cloud_event  # noqa: I003
@@ -96,8 +95,6 @@ def test_should_add_names_to_solr(
 
     # mock post method to solr feeder api
     with patch.object(requests, 'post', return_value=mock_response) as mock_solr_feeder_api_post:
-        # mock process_names_delete to do nothing in order to isolate testing relevant to this test
-        with patch.object(worker, 'process_names_delete', return_value=True):
             # mock process_possible_conflicts_add to do nothing in order to isolate testing relevant to this test
             with patch.object(worker, 'process_possible_conflicts_add', return_value=True):
                 # mock process_possible_conflicts_delete to do nothing in order to isolate testing relevant to this test
@@ -157,7 +154,7 @@ def test_should_add_names_to_solr(
 
     ]
 )
-def test_should_delete_names_from_solr(
+def test_should_not_delete_names_from_solr(
         client,
         app,
         db,
@@ -168,33 +165,17 @@ def test_should_delete_names_from_solr(
         previous_nr_state,
         names: list,
         name_states: list):
-    """Assert that names are deleted from Solr."""
+    """Assert that cancel, reset, consume, and expire do not delete the names core."""
 
     queue_util.send_name_request_state_msg = mock.Mock(return_value='True')
     queue_util.send_name_state_msg = mock.Mock(return_value='True')
     data_json = json.loads(base64.b64decode(message_payload['message']['data']).decode('utf-8'))
     nr_num = data_json['data'][state_change_type]['nrNum']
-    mock_nr = create_nr(nr_num, new_nr_state, names, name_states)
-    nr_ids_to_delete_from_solr = get_nr_ids_to_delete_from_solr(mock_nr)
+    create_nr(nr_num, new_nr_state, names, name_states)
     mock_response = MockResponse({}, 200)
 
-    # mock post method to solr feeder api
     with patch.object(requests, 'post', return_value=mock_response) as mock_solr_feeder_api_post:
-        # mock process_possible_conflicts_delete to do nothing in order to isolate testing relevant to this test
         with patch.object(worker, 'process_possible_conflicts_delete', return_value=True):
-            rv = client.post('/', json=message_payload)
+            client.post('/', json=message_payload)
 
-            assert mock_solr_feeder_api_post.called == True
-            assert 'api/v1/feeds' in mock_solr_feeder_api_post.call_args[0][0]
-
-            post_json = mock_solr_feeder_api_post.call_args[1]['json']
-            assert post_json['solr_core']
-            assert post_json['solr_core'] == 'names'
-
-            request_json = post_json['request']
-
-            assert 'delete' in request_json
-            assert len(nr_ids_to_delete_from_solr) > 0
-            request_json = post_json['request']
-            for nr_id in nr_ids_to_delete_from_solr:
-                assert nr_id in request_json
+            assert mock_solr_feeder_api_post.called is False

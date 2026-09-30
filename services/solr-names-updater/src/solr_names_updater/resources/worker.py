@@ -27,7 +27,6 @@ from structured_logging import StructuredLogging
 from urllib3.exceptions import NewConnectionError
 
 from solr_names_updater.names_processors.names import process_add_to_solr as process_names_add  # noqa: I001
-from solr_names_updater.names_processors.names import process_delete_from_solr as process_names_delete  # noqa: I001
 from solr_names_updater.names_processors.possible_conflicts import (
     process_add_to_solr as process_possible_conflicts_add,  # noqa: I001
 )
@@ -133,7 +132,6 @@ def process_names_event_message(msg: dict, flask_app: Flask):
             process_names_add(request_state_change)
             process_possible_conflicts_add(request_state_change)
         elif new_state in ('CANCELLED', 'RESET', 'CONSUMED', 'EXPIRED'):
-            process_names_delete(request_state_change)
             process_possible_conflicts_delete(request_state_change)
         else:
             logger.info(f'no names processing required for request state change message: {msg}')
@@ -155,8 +153,6 @@ def process_names_event_message_firm(msg: dict, flask_app: Flask):
         new_state = request_state_change.get('newState')
         if new_state in ('APPROVED', 'CONDITIONAL'):
             process_names_add(request_state_change)
-        elif new_state in ('CANCELLED', 'RESET', 'CONSUMED', 'EXPIRED'):
-            process_names_delete(request_state_change)
         else:
             logger.info(f'no names processing required for request state change message: {msg}')
 

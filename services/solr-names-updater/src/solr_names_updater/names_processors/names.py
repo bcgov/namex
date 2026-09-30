@@ -37,14 +37,6 @@ def process_add_to_solr(state_change_msg: dict):  # pylint: disable=too-many-loc
     send_to_solr_add(nr)
 
 
-def process_delete_from_solr(state_change_msg: dict):  # pylint: disable=too-many-locals, , too-many-branches
-    """Process names update via Solr feeder api."""
-    # structured_log(state_change_msg)
-    nr_num = state_change_msg.get('nrNum', None)
-    nr = RequestDAO.find_by_nr(nr_num)
-    send_to_solr_delete(nr)
-
-
 def send_to_solr_add(nr: RequestDAO):
     """Send json payload to add names to solr for NR."""
     # pylint: disable=no-member
@@ -55,32 +47,6 @@ def send_to_solr_add(nr: RequestDAO):
     resp = post_to_solr_feeder(payload_dict)
     if resp.status_code != 200:
         logger.error(f'failed to add names to solr for {nr.nrNum}, status code: {resp.status_code}, error reason: {resp.reason}, error details: {resp.text}')
-
-
-def send_to_solr_delete(nr: RequestDAO):
-    """Send json payload to delete names from solr for NR."""
-    delete_ids = get_nr_ids_to_delete_from_solr(nr)
-    payload_dict = {
-        'solr_core': 'names',
-        'request': {
-            'delete': delete_ids,
-            'commit': {}
-        }
-    }
-    request_str = json.dumps(payload_dict['request'])
-    payload_dict['request'] = request_str
-    resp = post_to_solr_feeder(payload_dict)
-    if resp.status_code != 200:
-        logger.error(f'failed to delete names from solr for {nr.nrNum}, status code: {resp.status_code}, error reason: {resp.reason}, error details: {resp.text}')
-
-
-def get_nr_ids_to_delete_from_solr(nr: RequestDAO):
-    """Generate NR ids to be used to delete names from solr for a NR."""
-    nr_num_1 = f'{nr.nrNum}-1'
-    nr_num_2 = f'{nr.nrNum}-2'
-    nr_num_3 = f'{nr.nrNum}-3'
-    keys = [nr_num_1, nr_num_2, nr_num_3]
-    return keys
 
 
 def construct_payload_dict(nr: RequestDAO, names, jur):
