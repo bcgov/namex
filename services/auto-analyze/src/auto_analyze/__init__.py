@@ -12,14 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The service that analyzes an array of names."""
-# This is important as this will add modules purporting to be Flask modules for later use by the extension.
-# Without this, Flask-SQLAlchemy may not work!
-# Thanks!
 import asyncio
 import os
 
 import config  # pylint: disable=wrong-import-order; # noqa: I001
-import quart.flask_patch
 from namex import models
 from namex.models import db, ma
 from namex.services.name_request.auto_analyse.protected_name_analysis import ProtectedNameAnalysisService
