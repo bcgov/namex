@@ -24,8 +24,7 @@ def lookup_forms(word: str) -> set[str]:
     return {form for form in forms if len(form) >= 4}
 
 
-def families_from_synonym_rows(words: list[str], rows: list[tuple[str, str]]) -> dict[str, list[str]]:
-    """Map each search word to the browsable synonym row that lists that word."""
+def _unique_terms(words: list[str]) -> list[str]:
     cleaned: list[str] = []
     seen: set[str] = set()
     for word in words:
@@ -33,18 +32,33 @@ def families_from_synonym_rows(words: list[str], rows: list[tuple[str, str]]) ->
         if token and token not in seen:
             seen.add(token)
             cleaned.append(token)
+    return cleaned
+
+
+def _merge_synonym_row(
+    families: dict[str, list[str]],
+    forms_by_word: dict[str, set[str]],
+    synonyms_text: str,
+    stems_text: str,
+) -> None:
+    entries = comma_entries(synonyms_text) + comma_entries(stems_text)
+    listed = set(entries)
+    for word, forms in forms_by_word.items():
+        if forms.isdisjoint(listed):
+            continue
+        merged = families[word]
+        for entry in entries:
+            if entry not in merged:
+                merged.append(entry)
+
+
+def families_from_synonym_rows(words: list[str], rows: list[tuple[str, str]]) -> dict[str, list[str]]:
+    """Map each search word to the browsable synonym row that lists that word."""
+    cleaned = _unique_terms(words)
     forms_by_word = {word: lookup_forms(word) for word in cleaned}
     families = {word: [] for word in cleaned}
     for synonyms_text, stems_text in rows:
-        entries = comma_entries(synonyms_text) + comma_entries(stems_text)
-        listed = set(entries)
-        for word in cleaned:
-            if forms_by_word[word].isdisjoint(listed):
-                continue
-            merged = families[word]
-            for entry in entries:
-                if entry not in merged:
-                    merged.append(entry)
+        _merge_synonym_row(families, forms_by_word, synonyms_text, stems_text)
     return families
 
 
