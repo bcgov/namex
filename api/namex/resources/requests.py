@@ -1461,9 +1461,16 @@ class PossibleConflicts(Resource):
         start = request.args.get('start', PossibleConflicts.START)
         rows = request.args.get('rows', PossibleConflicts.ROWS)
         exact_phrase = str(request.args.get('exact_phrase', '')).strip()
+        distinctive = str(request.args.get('distinctive', '')).strip()
+        descriptive = str(request.args.get('descriptive', '')).strip()
         try:
             results = SolrHlpers.get_possible_conflicts(
-                name, start=start, rows=rows, exact_phrase=exact_phrase
+                name,
+                start=start,
+                rows=rows,
+                exact_phrase=exact_phrase,
+                distinctive=distinctive,
+                descriptive=descriptive,
             )
         except SolrClientException as err:
             body = err.body if isinstance(err.body, dict) else {}
