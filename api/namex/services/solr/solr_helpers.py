@@ -1,8 +1,79 @@
 import string
 
+from flask import current_app, has_app_context
+from sqlalchemy import text
+
 from namex.constants import Designations
+from namex.models import db
 from namex.services.solr import words_to_filter_from_name
 from namex.services.solr.solr_client import SolrClient
+
+
+def comma_entries(value: str) -> list[str]:
+    return [part.strip().lower() for part in (value or "").split(",") if part.strip()]
+
+
+def lookup_forms(word: str) -> set[str]:
+    forms = {word}
+    if len(word) > 4 and word.endswith("ies"):
+        forms.add(word[:-3] + "y")
+    if len(word) > 4 and word.endswith("es"):
+        forms.add(word[:-2])
+    if len(word) > 4 and word.endswith("s"):
+        forms.add(word[:-1])
+    return {form for form in forms if len(form) >= 4}
+
+
+def families_from_synonym_rows(words: list[str], rows: list[tuple[str, str]]) -> dict[str, list[str]]:
+    """Map each search word to the browsable synonym row that lists that word."""
+    cleaned: list[str] = []
+    seen: set[str] = set()
+    for word in words:
+        token = (word or "").strip().lower()
+        if token and token not in seen:
+            seen.add(token)
+            cleaned.append(token)
+    forms_by_word = {word: lookup_forms(word) for word in cleaned}
+    families = {word: [] for word in cleaned}
+    for synonyms_text, stems_text in rows:
+        entries = comma_entries(synonyms_text) + comma_entries(stems_text)
+        listed = set(entries)
+        for word in cleaned:
+            if forms_by_word[word].isdisjoint(listed):
+                continue
+            merged = families[word]
+            for entry in entries:
+                if entry not in merged:
+                    merged.append(entry)
+    return families
+
+
+def load_browse_synonym_families(words: list[str]) -> dict[str, list[str]] | None:
+    """Read enabled rows from the NameX synonym table. None when that read is unavailable."""
+    if not has_app_context():
+        return None
+    cleaned = [(word or "").strip().lower() for word in words if (word or "").strip()]
+    if not cleaned:
+        return {}
+    clauses = []
+    params: dict[str, str] = {}
+    needles: list[str] = []
+    for word in dict.fromkeys(cleaned):
+        needles.extend(lookup_forms(word))
+    for index, needle in enumerate(dict.fromkeys(needles)):
+        params[f"w{index}"] = f"%{needle}%"
+        clauses.append(f"(synonyms_text ILIKE :w{index} OR stems_text ILIKE :w{index})")
+    statement = text(
+        "SELECT synonyms_text, stems_text FROM synonym WHERE enabled IS TRUE AND ("
+        + " OR ".join(clauses)
+        + ")"
+    )
+    try:
+        rows = db.session.execute(statement, params).fetchall()
+    except Exception:
+        current_app.logger.exception("synonym table lookup failed")
+        return None
+    return families_from_synonym_rows(cleaned, [(row[0], row[1]) for row in rows])
 
 
 class SolrHlpers:
@@ -140,15 +211,25 @@ class SolrHlpers:
         return ' '.join(filtered_words)
 
     @classmethod
-    def get_possible_conflicts(cls, name, start=0, rows=100, exact_phrase=''):
+    def get_possible_conflicts(cls, name, start=0, rows=100, exact_phrase='', distinctive='', descriptive=''):
         # q_name = cls._name_pre_processing(name)
         q_name = name.lower().strip()
-        # Keep the raw query for Solr ranking/boosts. Skip-word filtering for
-        # match prep happens in namex-solr-api via DESIGNATIONS.
         stripped_name = cls._get_name_without_designation(q_name)
+        lookup_words = [
+            *q_name.split(),
+            *(distinctive or "").split(),
+            *(descriptive or "").split(),
+        ]
+        synonym_families = load_browse_synonym_families(lookup_words)
 
         candidates = SolrClient.get_possible_conflicts(
-            q_name, start, rows, exact_phrase=exact_phrase
+            q_name,
+            start,
+            rows,
+            exact_phrase=exact_phrase,
+            distinctive=distinctive,
+            descriptive=descriptive,
+            synonym_families=synonym_families,
         )
         return cls._conflicts_post_process(candidates, stripped_name)
 
