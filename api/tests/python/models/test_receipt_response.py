@@ -113,3 +113,10 @@ def test_init_with_missing_filing_identifier():
     assert response.paymentMethod == 'CC'
     assert response.invoiceNumber == 'INV-200'
     assert response.filingIdentifier is None
+
+def test_init_treats_null_numbers_as_empty():
+    """Assert that a null invoice or receipt number is stored as an empty string."""
+    response = ReceiptResponse(invoiceNumber=None, receiptNumber=None)
+
+    assert response.invoiceNumber == ''
+    assert response.receiptNumber == ''

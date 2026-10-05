@@ -3,7 +3,7 @@ from typing import Optional, Union
 from decimal import Decimal
 
 from pydantic.dataclasses import dataclass as pydantic_dataclass
-from pydantic import Field
+from pydantic import Field, validator
 from datetime import date
 
 from .abstract import Serializable
@@ -202,3 +202,7 @@ class ReceiptResponse(Serializable):
     paymentMethod: str = ''
     receiptNumber: str = ''
     routingSlipNumber: str = ''
+
+    @validator('invoiceNumber', 'receiptNumber', pre=True)
+    def none_to_empty(cls, value):
+        return '' if value is None else value
