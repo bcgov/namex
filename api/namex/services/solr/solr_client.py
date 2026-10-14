@@ -64,9 +64,7 @@ class SolrClient:
 
 
     @classmethod
-    def get_possible_conflicts(
-        cls, name, start=0, rows=100, exact_phrase='', distinctive='', descriptive='', synonym_families=None
-    ):
+    def get_possible_conflicts(cls, name, start=0, rows=100, exact_phrase=''):
         request_json = {
             'query': { 'value': name },
             'start': start,
@@ -74,12 +72,6 @@ class SolrClient:
         }
         if exact_phrase:
             request_json['query']['name'] = exact_phrase
-        if distinctive:
-            request_json['query']['distinctive'] = distinctive
-        if descriptive:
-            request_json['query']['descriptive'] = descriptive
-        if synonym_families is not None:
-            request_json['query']['synonymFamilies'] = synonym_families
 
         token = cls._get_bearer_token()
 
