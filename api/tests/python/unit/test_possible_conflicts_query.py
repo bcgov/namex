@@ -10,7 +10,7 @@ def test_possible_conflicts_sends_raw_query_to_solr():
     """Skip words stay in the Solr payload so ranking/boosts can see BE KIND."""
     captured = {}
 
-    def fake_get_possible_conflicts(name, start=0, rows=100):
+    def fake_get_possible_conflicts(name, start=0, rows=100, exact_phrase=''):
         captured['name'] = name
         return {'searchResults': {'results': []}}
 

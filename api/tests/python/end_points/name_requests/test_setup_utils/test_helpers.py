@@ -187,8 +187,8 @@ def create_test_nr(nr_data=None, nr_state=State.DRAFT):
         add_states_to_db(state_data)
         user = add_test_user_to_db()
 
-        # Optionally supply the field data
-        custom_names = nr_data.get('names', None)
+        nr_data = nr_data or {}
+        custom_names = nr_data.get('names')
         if not custom_names:
             custom_names = [
                 {
@@ -239,8 +239,8 @@ def post_test_nr(client, nr_data=None, nr_state=State.DRAFT):
         add_states_to_db(state_data)
         add_test_user_to_db()
 
-        # Optionally supply the field data
-        custom_names = nr_data.get('names', None)
+        nr_data = nr_data or {}
+        custom_names = nr_data.get('names')
         if not custom_names:
             custom_names = [
                 {
