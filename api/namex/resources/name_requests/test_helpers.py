@@ -21,7 +21,6 @@ from namex.utils.auth import cors_preflight
 
 from .api_namespace import api
 
-# States this test helper is permitted to set (extend as needed).
 ALLOWED_TEST_STATES = [State.APPROVED, State.REJECTED]
 
 MSG_NOT_FOUND = 'Resource not found'
@@ -49,7 +48,6 @@ class TestNameRequestState(Resource):
         },
     )
     def patch(self, nr_id):
-        # Hard guard: only available when explicitly enabled. Prod never sets the flag.
         if not current_app.config.get('ALLOW_TEST_ENDPOINT'):
             return make_response(jsonify(message=MSG_NOT_FOUND), HTTPStatus.NOT_FOUND)
 
@@ -65,9 +63,6 @@ class TestNameRequestState(Resource):
         if not nr_model:
             return make_response(jsonify(message='Name Request not found'), HTTPStatus.NOT_FOUND)
 
-        # Update the NR and its names directly.
-        # Mirror a real decision: APPROVED approves the first choice and rejects the
-        # alternatives; REJECTED rejects every name. (nr_model.names is ordered by choice.)
         nr_model.stateCd = state
         if state == State.APPROVED:
             for index, name in enumerate(nr_model.names):
@@ -76,9 +71,7 @@ class TestNameRequestState(Resource):
             for name in nr_model.names:
                 name.state = Name.REJECTED
 
-        # IMPORTANT: deliberately DO NOT call send_name_request_state_msg() /
-        # send_name_state_msg() here. Skipping the queue publish is the entire point
-        # of this endpoint - the state change must never reach Solr.
+        nr_model.skip_state_publish = True
         nr_model.save_to_db()
 
         user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)

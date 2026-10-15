@@ -367,10 +367,10 @@ def get_nrs_like_nr_num(nr_num, limit=20, offset=0) -> list:
 
 
 def get_nrs_like_names(name_search, limit=20, offset=0) -> list:
-    return (
-        Request.query
-        .filter(Request.names.any(Name.name.ilike(f'%{name_search}%')))
-        .limit(limit)
-        .offset(offset)
-        .all()
-    )
+    words = name_search.split()
+    if not words:
+        return []
+    query = Request.query
+    for word in words:
+        query = query.filter(Request.names.any(Name.name.ilike(f'%{word}%')))
+    return query.limit(limit).offset(offset).all()
