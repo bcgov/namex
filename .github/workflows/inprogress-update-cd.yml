@@ -27,6 +27,10 @@ on:
 
 jobs:
   namex-inprogress-updater-cd:
+    permissions:
+      id-token: write
+      contents: write
+
     uses: bcgov/bcregistry-sre/.github/workflows/backend-job-cd.yaml@main
     with:
       target: ${{ inputs.target }}

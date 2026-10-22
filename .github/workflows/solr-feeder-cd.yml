@@ -20,6 +20,10 @@ on:
 
 jobs:
   solr-feeder-cd:
+    permissions:
+      id-token: write
+      contents: write
+
     uses: bcgov/bcregistry-sre/.github/workflows/backend-cd.yaml@main
     with:
       target: ${{ inputs.target }}
