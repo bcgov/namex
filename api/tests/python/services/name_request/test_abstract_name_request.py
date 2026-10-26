@@ -1,9 +1,9 @@
 """Tests for AbstractNameRequestMixin."""
 
 import datetime
+from zoneinfo import ZoneInfo
 
 import pytest
-from dateutil.tz import gettz
 
 from namex.constants import RequestAction
 from namex.models import Request as RequestDAO
@@ -11,8 +11,8 @@ from namex.models import State
 from namex.services.name_request import NameRequestService
 
 nr_svc = NameRequestService()
-pacific_tz = gettz('US/Pacific')
-utc_tz = gettz('UTC')
+pacific_tz = ZoneInfo('America/Vancouver')
+utc_tz = ZoneInfo('UTC')
 
 
 @pytest.mark.parametrize(
@@ -193,3 +193,18 @@ def test_get_expiry_days(client, test_name, days, action_cd, request_type):
     mock_expiry_days = int(nr_svc.get_expiry_days(mock_nr.request_action_cd, mock_nr.requestTypeCd))
 
     assert mock_expiry_days == days
+
+@pytest.mark.parametrize(
+    'input_datetime_utc',
+    [
+        datetime.datetime(2026, 11, 2, 8, 0, tzinfo=utc_tz),
+        datetime.datetime(2026, 12, 1, 8, 0, tzinfo=utc_tz),
+        datetime.datetime(2027, 1, 15, 8, 0, tzinfo=utc_tz),
+    ],
+)
+
+def test_vancouver_timezone_after_dst_change(input_datetime_utc):
+    """Verify Vancouver uses UTC-7 after the 2026 transition."""
+    local_datetime = input_datetime_utc.astimezone(pacific_tz)
+
+    assert local_datetime.strftime('%z') == '-0700'

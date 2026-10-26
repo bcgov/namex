@@ -1,5 +1,5 @@
 # from marshmallow import Schema, fields, post_load
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import current_app
 
@@ -17,7 +17,7 @@ class User(db.Model):
     iss = db.Column(db.String(1024))
     idp_userid = db.Column(db.String(256), index=True)
     login_source = db.Column(db.String(200), nullable=True)
-    creationDate = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
+    creationDate = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     # for name examination
     searchColumns = db.Column(
         db.String(1000),

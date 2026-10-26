@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timezone
 
 from . import db
 
@@ -43,7 +43,7 @@ class DecisionReasonAudit(db.Model):
 
     def __init__(self, username: str, action: str, id: str, name: str, reason: str) -> None:
         self.username = username
-        self.timestamp = datetime.datetime.now()
+        self.timestamp = datetime.now(timezone.utc).replace(tzinfo=None)
         self.action = action
         self.dr_id = id
         self.name = name
@@ -79,7 +79,7 @@ class RestrictedConditionAudit(db.Model):
         allow_use: bool,
     ) -> None:
         self.username = username
-        self.timestamp = datetime.datetime.now()
+        self.timestamp = datetime.now(timezone.utc)
         self.action = action
         self.cnd_id = cnd_id
         self.cnd_text = cnd_text
@@ -116,7 +116,7 @@ class SynonymAudit(db.Model):
         enabled: bool,
     ) -> None:
         self.username = username
-        self.timestamp = datetime.datetime.now()
+        self.timestamp = datetime.now(timezone.utc).replace(tzinfo=None)
         self.action = action
         self.synonym_id = synonym_id
         self.category = _to_string(category)

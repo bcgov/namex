@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy.orm import backref
 
@@ -11,7 +11,7 @@ class Comment(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     comment = db.Column(db.String(4096))
-    timestamp = db.Column('timestamp', db.DateTime(timezone=True), default=datetime.utcnow)
+    timestamp = db.Column('timestamp', db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # parent keys
     nrId = db.Column('nr_id', db.Integer, db.ForeignKey('requests.id'), index=True)

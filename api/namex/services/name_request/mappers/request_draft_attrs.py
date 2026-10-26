@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from namex.services.name_request.exceptions import MapRequestDataError
 
@@ -13,7 +13,7 @@ def map_draft_attrs(name_request, **kwargs):
         user_id = kwargs.get('user_id')
         # Set this to name_request_service_account
         name_request.userId = user_id
-        name_request.submittedDate = datetime.utcnow()
+        name_request.submittedDate = datetime.now(timezone.utc)
     except Exception as err:
         raise MapRequestDataError(err)
 
