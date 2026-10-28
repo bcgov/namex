@@ -26,18 +26,11 @@ column_headers = [col[1] for col in columns]
 
 
 def get_yesterday_str():
-    """Returns yesterday's date in 'yyyy-mm-dd' format based on Pacific Time."""
-    pacific = pytz.timezone("America/Los_Angeles")
-
-    # Get current UTC time and convert to Pacific Time
+    """Return yesterday in America/Vancouver as yyyy-mm-dd."""
+    zone = pytz.timezone("America/Vancouver")
     now_utc = datetime.now(tz=pytz.utc)
-    now_pacific = now_utc.astimezone(pacific)
-
-    # Calculate yesterday's date
-    start_of_yesterday = now_pacific - timedelta(days=1)
-
-    # Format the date as yyyy-mm-dd
-    return start_of_yesterday.strftime("%Y-%m-%d")
+    yesterday = now_utc.astimezone(zone) - timedelta(days=1)
+    return yesterday.strftime("%Y-%m-%d")
 
 
 @cached(cache=TTLCache(maxsize=1, ttl=180))
