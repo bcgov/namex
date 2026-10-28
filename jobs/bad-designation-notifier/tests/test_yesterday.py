@@ -4,8 +4,8 @@ from datetime import datetime
 from pathlib import Path
 from unittest.mock import patch
 
-import pytz
 import pytest
+import pytz
 
 _path = Path(__file__).parents[1] / "src" / "bad_designation_notifier" / "services" / "utils.py"
 _spec = importlib.util.spec_from_file_location("designation_utils", _path)
