@@ -48,12 +48,20 @@ RUN apt-get update && apt-get upgrade -y \
     gettext \
     git \
     libpq-dev \
+    tzdata \
     wait-for-it \
   && curl -sSL 'https://install.python-poetry.org' | python - \
   && poetry --version \
   # Clean up apt cache
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+
+RUN python -c "from datetime import datetime; from zoneinfo import ZoneInfo; \
+utc = ZoneInfo('UTC'); van = ZoneInfo('America/Vancouver'); la = ZoneInfo('America/Los_Angeles'); \
+nov = datetime(2026, 11, 1, 9, 1, tzinfo=utc); jan = datetime(2026, 1, 15, 20, 0, tzinfo=utc); \
+assert nov.astimezone(van).utcoffset().total_seconds() == -7 * 3600; \
+assert nov.astimezone(la).utcoffset().total_seconds() == -8 * 3600; \
+assert jan.astimezone(van).utcoffset().total_seconds() == -8 * 3600"
 
 WORKDIR /code
 

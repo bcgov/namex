@@ -1,8 +1,8 @@
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime, timezone
 from urllib.parse import urlencode
+from zoneinfo import ZoneInfo
 
-import pytz
 import requests
 from cachetools import TTLCache, cached
 from flask import current_app, request
@@ -38,7 +38,9 @@ def get_bearer_token():
 @staticmethod
 def as_legislation_timezone(date_time: datetime) -> datetime:
     """Return a datetime adjusted to the legislation timezone."""
-    return date_time.astimezone(pytz.timezone(current_app.config.get("LEGISLATIVE_TIMEZONE")))
+    if date_time.tzinfo is None:
+        date_time = date_time.replace(tzinfo=timezone.utc)
+    return date_time.astimezone(ZoneInfo(current_app.config.get("LEGISLATIVE_TIMEZONE")))
 
 
 @staticmethod
@@ -49,8 +51,9 @@ def format_as_report_string(date_time: datetime) -> str:
     hour = date_time.strftime("%I").lstrip("0")
     # %p provides locale value: AM, PM (en_US); am, pm (de_DE); So forcing it to be lower in any case
     am_pm = date_time.strftime("%p").lower()
-    date_time_str = date_time.strftime(f"%B %-d, %Y at {hour}:%M {am_pm} Pacific time")
-    return date_time_str
+    month = date_time.strftime("%B")
+    minute = date_time.strftime("%M")
+    return f"{month} {date_time.day}, {date_time.year} at {hour}:{minute} {am_pm} Pacific time"
 
 
 @staticmethod

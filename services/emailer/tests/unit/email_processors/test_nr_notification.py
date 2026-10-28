@@ -13,7 +13,8 @@
 # limitations under the License.
 """The Unit Tests for the name request expiry email processor."""
 
-from datetime import datetime
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 import pytest
 from sbc_common_components.utils.enums import QueueMessageTypes
@@ -116,3 +117,26 @@ def test_nr_notification(
         if option == Option.EXPIRED.value:
             assert nr_number in email["content"]["body"]
             assert expected_legal_name in email["content"]["body"]
+
+
+def test_legislation_timezone_offsets():
+    utc = ZoneInfo("UTC")
+    van = ZoneInfo("America/Vancouver")
+    la = ZoneInfo("America/Los_Angeles")
+    nov = datetime(2026, 11, 1, 9, 1, tzinfo=utc)
+    jan = datetime(2026, 1, 15, 20, 0, tzinfo=utc)
+    assert nov.astimezone(van).utcoffset().total_seconds() == -7 * 3600
+    assert nov.astimezone(la).utcoffset().total_seconds() == -8 * 3600
+    assert jan.astimezone(van).utcoffset().total_seconds() == -8 * 3600
+
+
+def test_as_legislation_timezone(app):
+    with app.app_context():
+        app.config["LEGISLATIVE_TIMEZONE"] = "America/Vancouver"
+        nov = datetime(2026, 11, 15, 6, 59, tzinfo=timezone.utc)
+        jan = datetime(2026, 1, 15, 7, 59, tzinfo=timezone.utc)
+        assert as_legislation_timezone(nov).strftime("%z") == "-0700"
+        assert as_legislation_timezone(jan).strftime("%z") == "-0800"
+        assert as_legislation_timezone(nov.replace(tzinfo=None)).strftime("%z") == "-0700"
+        assert format_as_report_string(nov) == "November 14, 2026 at 11:59 pm Pacific time"
+        assert format_as_report_string(jan) == "January 14, 2026 at 11:59 pm Pacific time"
