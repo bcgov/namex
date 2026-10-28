@@ -453,7 +453,7 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "cloud-sql-connector"
-version = "0.2.1"
+version = "0.2.3"
 description = "Cloud SQL connection utilities for database connectivity with authentication and schema management"
 optional = false
 python-versions = "^3.12"
@@ -469,8 +469,8 @@ sqlalchemy = "^2.0.0"
 [package.source]
 type = "git"
 url = "https://github.com/bcgov/sbc-connect-common.git"
-reference = "main"
-resolved_reference = "2a3d5a2d5b5ff3c905626f3193db5ed0af6d4952"
+reference = "9ba15bc19f01690185a46796c5d45c333e254bf8"
+resolved_reference = "9ba15bc19f01690185a46796c5d45c333e254bf8"
 subdirectory = "python/cloud-sql-connector"
 
 [[package]]
@@ -2315,7 +2315,7 @@ files = [
 
 [[package]]
 name = "namex"
-version = "1.50.0"
+version = "1.50.5"
 description = ""
 optional = false
 python-versions = ">=3.12,<3.13"
@@ -2332,7 +2332,7 @@ cachelib = "^0.13.0"
 certifi = "^2022.9.24"
 charset-normalizer = "^2.1.1"
 click = "^8.1.3"
-cloud-sql-connector = {git = "https://github.com/bcgov/sbc-connect-common.git", branch = "main", subdirectory = "python/cloud-sql-connector"}
+cloud-sql-connector = {git = "https://github.com/bcgov/sbc-connect-common.git", rev = "9ba15bc19f01690185a46796c5d45c333e254bf8", subdirectory = "python/cloud-sql-connector"}
 cmudict = "^1.0.2"
 dataclasses = "^0.6"
 defusedxml = "^0.7.1"
@@ -2379,13 +2379,13 @@ python-dateutil = "^2.8.2"
 python-dotenv = "^0.21.0"
 python-editor = "^1.0.4"
 python-jose = "^3.3.0"
-pytz = "^2022.4"
+pytz = "^2026.5"
 regex = "^2022.9.13"
 requests = "^2.28.1"
 rsa = "^4.9"
 sbc-common-components = {git = "https://github.com/bcgov/sbc-common-components.git", subdirectory = "python"}
 six = "^1.16.0"
-structured_logging = {git = "https://github.com/bcgov/sbc-connect-common.git", rev = "7f1cc0ea4a374310ac558ff435fa6b7ea7bb2f8b", subdirectory = "python/structured-logging"}
+structured_logging = {git = "https://github.com/bcgov/sbc-connect-common.git", rev = "9ba15bc19f01690185a46796c5d45c333e254bf8", subdirectory = "python/structured-logging"}
 swagger_client = {git = "https://github.com/bcgov/namex-synonyms-api-py-client.git"}
 toolz = "^0.12.0"
 tqdm = "^4.64.1"
@@ -2399,7 +2399,7 @@ zipp = "^3.8.1"
 type = "git"
 url = "https://github.com/bcgov/namex.git"
 reference = "main"
-resolved_reference = "ba6bc5c7a9d5527fa339c42b92bd9674de94b726"
+resolved_reference = "3d4027befeadec42cdf3899afbade271b3956efd"
 subdirectory = "api"
 
 [[package]]
@@ -3211,14 +3211,14 @@ test = ["pytest", "pytest-cov"]
 
 [[package]]
 name = "pytz"
-version = "2022.7.1"
+version = "2026.5"
 description = "World timezone definitions, modern and historical"
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "pytz-2022.7.1-py2.py3-none-any.whl", hash = "sha256:78f4f37d8198e0627c5f1143240bb0206b8691d8d7ac6d78fee88b78733f8c4a"},
-    {file = "pytz-2022.7.1.tar.gz", hash = "sha256:01a0681c4b9684a28304615eba55d1ab31ae00bf68ec157ec3708a8182dbbcd0"},
+    {file = "pytz-2026.5-py2.py3-none-any.whl", hash = "sha256:e658af3757f9e26a9d25dd2aff38335acd92bc9104f890a894b2c1ba28311b03"},
+    {file = "pytz-2026.5.tar.gz", hash = "sha256:fa23724b9c486543b9ff54a327ee7569ac83ade54bb9afd0fc18676620401c86"},
 ]
 
 [[package]]
@@ -3832,8 +3832,8 @@ structlog = "^24.1.0"
 [package.source]
 type = "git"
 url = "https://github.com/bcgov/sbc-connect-common.git"
-reference = "HEAD"
-resolved_reference = "7f1cc0ea4a374310ac558ff435fa6b7ea7bb2f8b"
+reference = "9ba15bc19f01690185a46796c5d45c333e254bf8"
+resolved_reference = "9ba15bc19f01690185a46796c5d45c333e254bf8"
 subdirectory = "python/structured-logging"
 
 [[package]]
