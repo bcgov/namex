@@ -77,18 +77,13 @@ RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
   && poetry install \
     $(if [ -z "${APP_ENV}" ] || [ "$APP_ENV" = 'production' ]; then echo '--only main'; fi) \
     --no-interaction --no-ansi \
-  && python - <<'PY'
-import pytz
-from datetime import datetime, timedelta, timezone
-
-van = pytz.timezone("America/Vancouver")
-la = pytz.timezone("America/Los_Angeles")
-nov = datetime(2026, 11, 1, 9, 1, tzinfo=timezone.utc)
-jan = datetime(2026, 1, 15, 20, 0, tzinfo=timezone.utc)
-assert nov.astimezone(van).utcoffset() == timedelta(hours=-7)
-assert nov.astimezone(la).utcoffset() == timedelta(hours=-8)
-assert jan.astimezone(van).utcoffset() == timedelta(hours=-8)
-PY
+  && python -c "import pytz; from datetime import datetime, timedelta, timezone; \
+van = pytz.timezone('America/Vancouver'); la = pytz.timezone('America/Los_Angeles'); \
+nov = datetime(2026, 11, 1, 9, 1, tzinfo=timezone.utc); \
+jan = datetime(2026, 1, 15, 20, 0, tzinfo=timezone.utc); \
+assert nov.astimezone(van).utcoffset() == timedelta(hours=-7); \
+assert nov.astimezone(la).utcoffset() == timedelta(hours=-8); \
+assert jan.astimezone(van).utcoffset() == timedelta(hours=-8)"
 
 # Run as non-root
 USER web
