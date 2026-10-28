@@ -13,9 +13,10 @@
 # limitations under the License.
 """The Unit Tests for the name request expiry email processor."""
 
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 import pytest
+import pytz
 from sbc_common_components.utils.enums import QueueMessageTypes
 
 from namex_emailer.constants.notification_options import Option
@@ -116,3 +117,36 @@ def test_nr_notification(
         if option == Option.EXPIRED.value:
             assert nr_number in email["content"]["body"]
             assert expected_legal_name in email["content"]["body"]
+
+
+def test_legislation_timezone_offsets():
+    van = pytz.timezone("America/Vancouver")
+    la = pytz.timezone("America/Los_Angeles")
+    nov = datetime(2026, 11, 1, 9, 1, tzinfo=timezone.utc)
+    jan = datetime(2026, 1, 15, 20, 0, tzinfo=timezone.utc)
+    assert nov.astimezone(van).utcoffset() == timedelta(hours=-7)
+    assert nov.astimezone(la).utcoffset() == timedelta(hours=-8)
+    assert jan.astimezone(van).utcoffset() == timedelta(hours=-8)
+
+
+@pytest.mark.parametrize(
+    ("instant", "offset", "sentence"),
+    [
+        (
+            datetime(2026, 11, 15, 6, 59, tzinfo=timezone.utc),
+            "-0700",
+            "November 14, 2026 at 11:59 pm Pacific time",
+        ),
+        (
+            datetime(2026, 1, 15, 7, 59, tzinfo=timezone.utc),
+            "-0800",
+            "January 14, 2026 at 11:59 pm Pacific time",
+        ),
+    ],
+)
+def test_as_legislation_timezone(app, instant, offset, sentence):
+    with app.app_context():
+        app.config["LEGISLATIVE_TIMEZONE"] = "America/Vancouver"
+        assert as_legislation_timezone(instant).strftime("%z") == offset
+        assert as_legislation_timezone(instant.replace(tzinfo=None)).strftime("%z") == offset
+        assert format_as_report_string(instant) == sentence
