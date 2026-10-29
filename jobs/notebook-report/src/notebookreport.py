@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 import papermill as pm
+import pytz
 import requests
 from flask import Flask, current_app
 from structured_logging import StructuredLogging
@@ -64,9 +65,17 @@ def send_email(email: dict, token):
         # current_app.logger.info(f'response:{response}')
         raise Exception('Unsuccessful response when sending email.')
 
+
+def vancouver_now():
+    """Return the current instant as America/Vancouver wall time."""
+    zone = pytz.timezone("America/Vancouver")
+    return datetime.now(tz=pytz.utc).astimezone(zone)
+
+
 def processnotebooks(notebookdirectory, token):
     """Process Notebook."""
-    date = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
+    local_now = vancouver_now()
+    date = (local_now - timedelta(days=1)).strftime("%Y-%m-%d")
     weekreportday = ast.literal_eval(Config.WEEK_REPORT_DATE)
     ext = ''
     if Config.ENVIRONMENT != 'prod':
@@ -74,7 +83,7 @@ def processnotebooks(notebookdirectory, token):
 
     # For weekly tasks, we only run on the specified days
     # Only run weekly report on Monday (index is 0) for previous 7 days data
-    if (notebookdirectory == 'daily' or (notebookdirectory == 'weekly' and datetime.now().weekday() in weekreportday)):
+    if (notebookdirectory == 'daily' or (notebookdirectory == 'weekly' and local_now.weekday() in weekreportday)):
         current_app.logger.info('Processing: %s', notebookdirectory)
         for file in findfiles(notebookdirectory, '*.ipynb'):
             nbfile = os.path.basename(file).split('.ipynb')[0]
