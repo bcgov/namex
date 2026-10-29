@@ -2,7 +2,6 @@ FROM python:3.12-slim
 
 # Always ensure the latest security patches are applied
 RUN apt-get update && apt-get upgrade -y && apt-get clean && rm -rf /var/lib/apt/lists/*
-RUN apt-get install -y --only-upgrade tzdata
 
 ARG VCS_REF="missing"
 ARG BUILD_DATE="missing"
@@ -78,6 +77,9 @@ RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
   && poetry install \
     $(if [ "$APP_ENV" = 'production' ] || [ -z "$APP_ENV" ]; then echo '--only main'; else echo '--with dev'; fi) \
     --no-interaction --no-ansi --verbose
+
+RUN pip install --no-cache-dir tzdata
+ENV PYTHONTZPATH=""
 
 # Switch to non-root user after installations
 USER web
