@@ -512,13 +512,13 @@ def test_consumed_event_history(client, jwt, app):
     assert b'"user_action": "Get NR Details from NRO"' in rv.data
 
 
-def test_bc_daylight_saving_transition_2026():
-    # Before the clocks go back: 1:30 a.m. PDT (UTC-7)
+def test_event_dst_2026():
+    # Before November 1: UTC-7
     before = datetime.fromisoformat(
         "2026-11-01T08:30:00+00:00"
     ).astimezone(VANCOUVER_TZ)
 
-    # After the clocks go back: 1:30 a.m. PST (UTC-8)
+    # After the traditional clock-change time: still UTC-7
     after = datetime.fromisoformat(
         "2026-11-01T09:30:00+00:00"
     ).astimezone(VANCOUVER_TZ)
@@ -526,13 +526,7 @@ def test_bc_daylight_saving_transition_2026():
     assert before.strftime("%Y-%m-%d %H:%M %z") == (
         "2026-11-01 01:30 -0700"
     )
-    assert after.strftime("%Y-%m-%d %H:%M %z") == (
-        "2026-11-01 01:30 -0800"
-    )
 
-    # The two identical local clock times represent different instants.
-    assert before.utcoffset().total_seconds() == -7 * 3600
-    assert after.utcoffset().total_seconds() == -8 * 3600
-    assert before.astimezone(ZoneInfo("UTC")) != after.astimezone(
-        ZoneInfo("UTC")
+    assert after.strftime("%Y-%m-%d %H:%M %z") == (
+        "2026-11-01 02:30 -0700"
     )
