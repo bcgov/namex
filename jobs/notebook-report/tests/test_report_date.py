@@ -1,12 +1,12 @@
 import importlib.util
 import sys
 import types
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
+from zoneinfo import TZPATH, ZoneInfo
 
 import pytest
-import pytz
 
 
 class _Logger:
@@ -81,7 +81,7 @@ def _execute(input_path, output_path, parameters=None, cwd=None):
 
 def _run(tmp, monkeypatch, instant, kind, environment, write_csv, execute):
     _configure(environment)
-    yesterday = (instant.astimezone(pytz.timezone("America/Vancouver"))
+    yesterday = (instant.astimezone(ZoneInfo("America/Vancouver"))
                  - report.timedelta(days=1)).strftime("%Y-%m-%d")
     _notebook(tmp, kind, yesterday, write_csv)
     monkeypatch.chdir(tmp)
@@ -99,11 +99,21 @@ def _run(tmp, monkeypatch, instant, kind, environment, write_csv, execute):
     return sent
 
 
+def test_vancouver_zone_file():
+    assert TZPATH == ()
+    zone = ZoneInfo("America/Vancouver")
+    nov = datetime(2026, 11, 1, 9, 1, tzinfo=timezone.utc).astimezone(zone)
+    jan = datetime(2026, 1, 15, 20, tzinfo=timezone.utc).astimezone(zone)
+    assert nov.strftime("%z") == "-0700"
+    assert jan.strftime("%z") == "-0800"
+
+
 def test_vancouver_yesterday():
     cases = [
-        (datetime(2026, 11, 2, 15, tzinfo=pytz.utc), "2026-11-01", 0),
-        (datetime(2026, 1, 16, 16, tzinfo=pytz.utc), "2026-01-15", 4),
-        (datetime(2026, 11, 2, 4, tzinfo=pytz.utc), "2026-10-31", 6),
+        (datetime(2026, 11, 2, 7, 30, tzinfo=timezone.utc), "2026-11-01", 0),
+        (datetime(2026, 11, 2, 15, tzinfo=timezone.utc), "2026-11-01", 0),
+        (datetime(2026, 1, 16, 16, tzinfo=timezone.utc), "2026-01-15", 4),
+        (datetime(2026, 11, 2, 4, tzinfo=timezone.utc), "2026-10-31", 6),
     ]
     for instant, yesterday, weekday in cases:
         with patch("notebookreport.datetime") as clock:
@@ -130,26 +140,26 @@ def test_send_email_raises_when_notify_fails():
 
 
 def test_daily_subject_uses_vancouver_yesterday(tmp_path, monkeypatch):
-    instant = datetime(2026, 11, 2, 15, tzinfo=pytz.utc)
+    instant = datetime(2026, 11, 2, 15, tzinfo=timezone.utc)
     sent = _run(tmp_path, monkeypatch, instant, "daily", "dev", True, _execute)
     assert sent[0]["content"]["subject"] == "Daily NameX Stats for 2026-11-01 on dev"
     assert sent[0]["content"]["attachments"][0]["fileBytes"]
 
 
 def test_weekly_subject_and_prod_have_no_environment_suffix(tmp_path, monkeypatch):
-    instant = datetime(2026, 1, 16, 16, tzinfo=pytz.utc)
+    instant = datetime(2026, 1, 16, 16, tzinfo=timezone.utc)
     sent = _run(tmp_path, monkeypatch, instant, "weekly", "prod", True, _execute)
     assert sent[0]["content"]["subject"] == "Weekly NameX Stats till 2026-01-15"
 
 
 def test_weekly_report_does_not_run_on_sunday(tmp_path, monkeypatch):
-    instant = datetime(2026, 11, 2, 4, tzinfo=pytz.utc)
+    instant = datetime(2026, 11, 2, 4, tzinfo=timezone.utc)
     sent = _run(tmp_path, monkeypatch, instant, "weekly", "dev", False, _execute)
     assert sent == []
 
 
 def test_failed_notebook_sends_the_error_mail(tmp_path, monkeypatch):
-    instant = datetime(2026, 11, 2, 15, tzinfo=pytz.utc)
+    instant = datetime(2026, 11, 2, 15, tzinfo=timezone.utc)
 
     def _boom(input_path, output_path, parameters=None, cwd=None):
         raise RuntimeError("notebook failed")

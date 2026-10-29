@@ -6,16 +6,18 @@ import logging
 import os
 import sys
 import traceback
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo, reset_tzpath
 
 import papermill as pm
-import pytz
 import requests
 from flask import Flask, current_app
 from structured_logging import StructuredLogging
 
 from config import Config
+
+reset_tzpath([])
 
 logging.getLogger("papermill").setLevel(logging.ERROR)
 
@@ -58,8 +60,7 @@ def send_email(email: dict, token):
 
 def vancouver_now():
     """Return the current instant as America/Vancouver wall time."""
-    zone = pytz.timezone("America/Vancouver")
-    return datetime.now(tz=pytz.utc).astimezone(zone)
+    return datetime.now(timezone.utc).astimezone(ZoneInfo("America/Vancouver"))
 
 
 def processnotebooks(notebookdirectory, token):
