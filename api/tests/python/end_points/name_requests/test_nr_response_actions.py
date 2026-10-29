@@ -3,7 +3,7 @@ Integration tests for Name Request state transitions.
 """
 
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 import responses
 
@@ -156,7 +156,7 @@ def test_approved_and_expired_response_actions(client, jwt, app, mock_auth_affil
     input_fields = build_test_input_fields()
 
     # Set the expirationDate to a previous day
-    input_fields['expirationDate'] = datetime.now(timezone.utc) - datetime.timedelta(days=2)
+    input_fields['expirationDate'] = datetime.now(timezone.utc) - timedelta(days=2)
 
     # Assign the payload to new nr var
     test_nr = create_test_nr(input_fields, State.APPROVED)
@@ -246,7 +246,7 @@ def test_conditional_and_expired_response_actions(client, jwt, app, mock_auth_af
     input_fields = build_test_input_fields()
 
     # Set the expirationDate to a previous day, set to less than 5 so we get the REAPPLY option
-    input_fields['expirationDate'] = datetime.now(timezone.utc) - datetime.timedelta(days=2)
+    input_fields['expirationDate'] = datetime.now(timezone.utc) - timedelta(days=2)
 
     # Assign the payload to new nr var
     test_nr = create_test_nr(input_fields, State.CONDITIONAL)

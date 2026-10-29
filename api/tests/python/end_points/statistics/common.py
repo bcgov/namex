@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from namex.constants import EventAction, EventUserId
 
@@ -80,13 +80,13 @@ def save_approved_names_by_examiner(approved_number_records):
         nr = RequestDAO()
         nr.nrNum = nr_num
         nr.stateCd = State.APPROVED
-        nr.submittedDate = datetime.now(timezone.utc) - datetime.timedelta(days=2)
+        nr.submittedDate = datetime.now(timezone.utc) - timedelta(days=2)
         nr._source = 'NAMEREQUEST'
 
         event = EventDAO()
         event.action = EventAction.PATCH.value
         event.stateCd = State.APPROVED
-        event.eventDate = datetime.now(timezone.utc) - datetime.timedelta(days=1)
+        event.eventDate = datetime.now(timezone.utc) - timedelta(days=1)
         nr.events = [event]
         nr.save_to_db()
 
