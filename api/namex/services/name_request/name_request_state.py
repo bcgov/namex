@@ -1,4 +1,5 @@
-from datetime import datetime, timezone
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from flask import current_app
 from flask_restx.fields import Boolean
@@ -31,6 +32,7 @@ invalid_state_transition_msg = (
     'Invalid state transition [{current_state}] -> [{next_state}], valid states are [{valid_states}]'
 )
 
+VANCOUVER_TZ = ZoneInfo('America/Vancouver')
 
 def display_edit_action(nr_model=None):
     try:
@@ -100,7 +102,7 @@ def display_reapply_action(nr_model=None) -> Boolean:
 
 def is_reapplication_eligible(expiration_date) -> Boolean:
     if expiration_date:
-        todays_date = datetime.now(timezone.utc).date()
+        todays_date = datetime.now(VANCOUVER_TZ).date()
         expiry_date = safe_date_extraction(expiration_date)
 
         delta = expiry_date - todays_date
@@ -127,7 +129,7 @@ def display_retry_payment(nr_model=None):
     try:
         current_app.logger.debug('retry payment method')
         if nr_model and nr_model.stateCd in (State.PENDING_PAYMENT):
-            payment = nr.payments.one_or_none()  # noqa: F821
+            payment = nr_model.payments.one_or_none()  # noqa: F821
             if payment:
                 if payment.payment_status_code not in [PaymentState.COMPLETED.value, PaymentState.APPROVED.value]:
                     return True

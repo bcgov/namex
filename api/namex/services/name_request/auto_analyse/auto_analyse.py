@@ -1,6 +1,6 @@
 # !!!!! DEPRECATED !!!! This is just in here so it's easier to merge, we'll delete when we are done
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from .name_analysis_director import NameAnalysisDirector
 
@@ -22,7 +22,7 @@ Notes:
   while exposing a consistent API for consumers of the service.
 """
 
-d = datetime.now()  # Was just used for perf analysis
+d = datetime.now(timezone.utc)  # Was just used for perf analysis
 
 
 class AutoAnalyseService(NameAnalysisDirector):

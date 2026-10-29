@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 import requests
 from dateutil import parser as dateutil_parser
@@ -169,7 +169,7 @@ def handle_payment_response(payment_action, payment_response, payment, nr_id, nr
                 if payment_action in [PaymentDAO.PaymentActions.CREATE.value, PaymentDAO.PaymentActions.RESUBMIT.value]:
                     if nr_model.stateCd == State.PENDING_PAYMENT:
                         nr_model.stateCd = State.DRAFT
-                    payment.payment_completion_date = datetime.utcnow()
+                    payment.payment_completion_date = datetime.now(timezone.utc)
 
                 elif payment_action == PaymentDAO.PaymentActions.UPGRADE.value:
                     # TODO: handle this (refund payment and prevent action?)
@@ -178,8 +178,8 @@ def handle_payment_response(payment_action, payment_response, payment, nr_id, nr
                         current_app.logger.debug(msg)
 
                     nr_model.priorityCd = 'Y'
-                    nr_model.priorityDate = datetime.utcnow()
-                    payment.payment_completion_date = datetime.utcnow()
+                    nr_model.priorityDate = datetime.now(timezone.utc)
+                    payment.payment_completion_date = datetime.now(timezone.utc)
 
                 elif payment_action == PaymentDAO.PaymentActions.REAPPLY.value:
                     # TODO: handle this (refund payment and prevent action?)
@@ -188,7 +188,7 @@ def handle_payment_response(payment_action, payment_response, payment, nr_id, nr
                         expiry_days = nr_svc.get_expiry_days(nr_model.request_action_cd, nr_model.requestTypeCd)
                         nr_model.expirationDate = nr_svc.create_expiry_date(nr_model.expirationDate, expiry_days)
                         nr_model.notifiedBeforeExpiry = False
-                    payment.payment_completion_date = datetime.utcnow()
+                    payment.payment_completion_date = datetime.now(timezone.utc)
 
                 nr_model.save_to_db()
                 payment.save_to_db()
@@ -852,7 +852,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             payment.save_to_db()
 
             nr_model.priorityCd = 'Y'
-            nr_model.priorityDate = datetime.utcnow()
+            nr_model.priorityDate = datetime.now(timezone.utc)
 
             # Save the name request
             nr_model.save_to_db()
@@ -889,7 +889,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
             payment.save_to_db()
 
             if nr_model.submitCount < 3:
-                nr_model = nr_svc.extend_expiry_date(nr_model, datetime.utcnow())
+                nr_model = nr_svc.extend_expiry_date(nr_model, datetime.now(timezone.utc))
                 nr_model = nr_svc.update_request_submit_count(nr_model)
                 nr_model.save_to_db()
             else:

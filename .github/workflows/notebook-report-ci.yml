@@ -17,5 +17,6 @@ jobs:
       app_name: "notebook-report"
       working_directory: "./jobs/notebook-report"
       codecov_flag: "notebookreport"
-      skip_isort: "true"
-      skip_black: "true"
+      coverage_threshold: "80"
+      skip_isort: true
+      skip_black: true

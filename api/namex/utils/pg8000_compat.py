@@ -94,6 +94,6 @@ def pg8000_utcnow():
     """
     Return timezone-aware UTC datetime for pg8000 compatibility.
 
-    Use this instead of datetime.utcnow() in areas that need timezone-aware datetimes.
+    Use this instead of datetime.now(timezone.utc) in areas that need timezone-aware datetimes.
     """
     return datetime.now(timezone.utc)

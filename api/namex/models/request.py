@@ -3,7 +3,7 @@
 import math
 import re
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional, Self
 
 import sqlalchemy
@@ -43,8 +43,8 @@ class Request(db.Model):
 
     # core fields
     id = db.Column(db.Integer, primary_key=True)
-    submittedDate = db.Column('submitted_date', db.DateTime(timezone=True), default=datetime.utcnow, index=True)
-    lastUpdate = db.Column('last_update', db.DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
+    submittedDate = db.Column('submitted_date', db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True)
+    lastUpdate = db.Column('last_update', db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     nrNum = db.Column('nr_num', db.String(10), unique=True)
     requestTypeCd = db.Column('request_type_cd', db.String(10))
@@ -328,7 +328,7 @@ class Request(db.Model):
         """
         Gets requests submited by user with given name choice in state draft
         """
-        current_time = datetime.utcnow()
+        current_time = datetime.now(timezone.utc)
         existing_nr = (
             db.session.query(Request)
             .join(Applicant, and_(Applicant.nrId == Request.id))

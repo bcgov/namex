@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 # TODO: We may need this import later
 # from http import HTTPStatus
@@ -79,7 +79,7 @@ class PaymentModelMixin:
     def set_processed(self):
         """Assign the completion date, unless it is already set."""
         if not self._completion_date:
-            self._completion_date = datetime.utcnow()
+            self._completion_date = datetime.now(timezone.utc)
 
     @staticmethod
     def _raise_default_lock_exception():

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import current_app
 
@@ -25,7 +25,7 @@ Notes:
   while exposing a consistent API for consumers of the service.
 """
 
-d = datetime.now()  # Was just used for perf analysis
+d = datetime.now(timezone.utc)  # Was just used for perf analysis
 
 
 class ProtectedNameAnalysisService(NameAnalysisDirector, SetDesignationsListsMixin):
