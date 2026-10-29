@@ -11,8 +11,9 @@ FROZEN_DATETIME = datetime(
 
 @pytest.fixture
 def freeze_datetime_utcnow():
-    with patch(
-        'tests.python.test_the_test_fixtures.datetime'
+    with patch.object(
+        __import__(__name__, fromlist=['datetime']),
+        'datetime',
     ) as mock_datetime:
         mock_datetime.now.return_value = FROZEN_DATETIME
         yield
