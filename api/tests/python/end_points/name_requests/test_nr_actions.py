@@ -2,8 +2,8 @@
 Test HTTP endpoints for Name Requests.
 """
 
-from datetime import datetime, timezone
 import json
+from datetime import datetime, timezone
 
 import pytest
 from sbc_common_components.utils.enums import QueueMessageTypes

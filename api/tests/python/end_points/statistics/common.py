@@ -1,4 +1,6 @@
-import datetime, timezone
+import datetime
+
+import timezone
 
 from namex.constants import EventAction, EventUserId
 
