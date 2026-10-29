@@ -1,4 +1,5 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from namex.services.name_request.exceptions import MapRequestHeaderAttributesError
 from namex.utils.common import convert_to_ascii
@@ -26,7 +27,7 @@ def map_request_header_attrs(name_request, **kwargs):
         if isinstance(request_data.get('priorityCd'), str):
             name_request.priorityCd = request_data.get('priorityCd')
         if request_data.get('priorityCd') == 'Y':
-            name_request.priorityDate = datetime.utcnow().date()
+            name_request.priorityDate = datetime.now(ZoneInfo("America/Vancouver")).date()
 
         name_request.submitter_userid = user_id
 

@@ -4,7 +4,7 @@ from datetime import datetime
 
 from flask import current_app, jsonify, make_response, request
 from flask_restx import Namespace, Resource, fields
-from pytz import timezone as pytz_timezone
+from zoneinfo import ZoneInfo
 
 from namex import jwt
 from namex.models import Event as EventDAO
@@ -424,10 +424,10 @@ class SingleEvent(Resource):
             if isinstance(event_json, str):
                 event_json = json.loads(event_json)
 
-            # 2. Update or add the resend_date in Pacific timezone, formatted as yyyy-mm-dd, hh:mm PM TZ
-            pacific = pytz_timezone('US/Pacific')
-            now_pacific = datetime.now(pacific)
-            resend_date = now_pacific.strftime('%Y-%m-%d, %I:%M %p %Z')
+            # 2. Update or add the resend_date in America/Vancouver timezone, formatted as yyyy-mm-dd, hh:mm PM TZ
+            vancouver = ZoneInfo('America/Vancouver')
+            now_vancouver = datetime.now(vancouver)
+            resend_date = now_vancouver.strftime('%Y-%m-%d, %I:%M %p %Z')
             event_json['resend_date'] = resend_date
 
             # 3. Save and commit the change

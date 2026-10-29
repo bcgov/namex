@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from namex.constants import ExpiryDays, NameState, RequestAction
 from namex.models import Applicant, Name, Request, State
@@ -162,7 +162,7 @@ class NameRequestService(AbstractNameRequestMixin):
 
         Default: extends the expiry date to 56 days date at 11:59pm.
         """
-        start_datetime = start_date if start_date else datetime.utcnow()
+        start_datetime = start_date if start_date else datetime.now(timezone.utc)
         try:
             expiry_days = cls.get_expiry_days(name_request.request_action_cd, name_request.requestTypeCd)
 

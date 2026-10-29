@@ -1,4 +1,5 @@
-from datetime import date
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from string import Template
 
 from namex.services.name_request.auto_analyse import AnalysisIssueCodes
@@ -8,6 +9,7 @@ from ..response_objects import Conflict, NameAction, NameActions, NameAnalysisIs
 # Import DTOs
 from .abstract import AnalysisResponseIssue
 
+VANCOUVER_TZ = ZoneInfo("America/Vancouver")
 
 class CorporateNameConflictIssue(AnalysisResponseIssue):
     issue_type = AnalysisIssueCodes.CORPORATE_CONFLICT
@@ -144,7 +146,7 @@ class CorporateNameConflictIssue(AnalysisResponseIssue):
         issue.conflicts = []
 
         conflict = Conflict(
-            name=current_conflict_name, date=date.today(), start_date=start_date, id=id_num, source=source
+            name=current_conflict_name, date=datetime.now(VANCOUVER_TZ).date(), start_date=start_date, id=id_num, source=source
         )
 
         issue.conflicts.append(conflict)

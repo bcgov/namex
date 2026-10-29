@@ -1,6 +1,7 @@
 import base64
 import json
-from datetime import datetime
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from http import HTTPStatus
 from pathlib import Path
 
@@ -8,7 +9,6 @@ import pycountry
 import requests
 from flask import current_app, jsonify, make_response, request
 from flask_restx import Resource
-from pytz import timezone
 
 from namex.constants import RequestAction
 from namex.models import Request, State
@@ -21,7 +21,34 @@ from ..utils import EntityUtils
 from .api_namespace import api
 
 DATE_FORMAT = '%B %-d, %Y at %-I:%M %p Pacific time'
+VANCOUVER_TZ = ZoneInfo('America/Vancouver')
 
+def to_vancouver_datetime(value):
+    """Convert an ISO timestamp or datetime to Vancouver local time.
+
+    Naive timestamps are assumed to represent UTC.
+    """
+    if isinstance(value, str):
+        # Support ISO timestamps ending in Z.
+        if value.endswith('Z'):
+            value = value[:-1] + '+00:00'
+
+        dt = datetime.fromisoformat(value)
+
+    elif isinstance(value, datetime):
+        dt = value
+
+    else:
+        raise TypeError(
+            f'Expected ISO datetime string or datetime, '
+            f'got {type(value).__name__}'
+        )
+
+    # Assumption: naive timestamps represent UTC.
+    if dt.tzinfo is None or dt.utcoffset() is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+
+    return dt.astimezone(VANCOUVER_TZ)
 
 @cors_preflight('GET')
 @api.route('/<int:nr_id>/result', strict_slashes=False, methods=['GET', 'OPTIONS'])
@@ -53,7 +80,7 @@ class ReportResource(Resource):
             nr_model = Request.query.get(nr_id)
             if not nr_model:
                 return make_response(
-                    jsonify(message='{nr_id} not found'.format(nr_id=nr_model.id)), HTTPStatus.NOT_FOUND
+                    jsonify(message=f'{nr_id} not found'), HTTPStatus.NOT_FOUND
                 )
             nr_json = nr_model.json()
             resp = ReportResource._get_report(nr_json)
@@ -117,7 +144,7 @@ class ReportResource(Resource):
         nr_service = NameRequestService()
         expiry_days = nr_service.get_expiry_days(nr_model['request_action_cd'], nr_model['requestTypeCd'])
         expiry_date = nr_service.create_expiry_date(
-            start=datetime.fromisoformat(nr_model['lastUpdate']).replace(tzinfo=timezone('UTC')),
+            start = to_vancouver_datetime(nr_model['lastUpdate']),
             expires_in_days=expiry_days,
         )
         nr_model['expirationDate'] = expiry_date
@@ -179,15 +206,14 @@ class ReportResource(Resource):
         if isXPRO and nr_report_json['nrStateDescription'] == 'Rejected':
             nr_report_json['nrStateDescription'] = 'Not Approved'
         if nr_report_json['expirationDate']:
-            tz_aware_date = datetime.fromisoformat(nr_model['expirationDate']).replace(tzinfo=timezone('UTC'))
-            localized_date = tz_aware_date.astimezone(timezone('US/Pacific'))
+            localized_date = to_vancouver_datetime(nr_model['expirationDate'])
             nr_report_json['expirationDate'] = localized_date.strftime(DATE_FORMAT)
         else:
             ReportResource._add_expiry_date(nr_model)
-            nr_report_json['expirationDate'] = nr_model['expirationDate'].strftime(DATE_FORMAT)
+            localized_date = to_vancouver_datetime(nr_model['expirationDate'])
+            nr_report_json['expirationDate'] = localized_date.strftime(DATE_FORMAT)
         if nr_report_json['submittedDate']:
-            tz_aware_date = datetime.fromisoformat(nr_model['submittedDate']).replace(tzinfo=timezone('UTC'))
-            localized_date = tz_aware_date.astimezone(timezone('US/Pacific'))
+            localized_date = to_vancouver_datetime(nr_model['submittedDate'])
             nr_report_json['submittedDate'] = localized_date.strftime(DATE_FORMAT)
         if nr_report_json['applicants']['countryTypeCd']:
             nr_report_json['applicants']['countryName'] = pycountry.countries.search_fuzzy(
@@ -201,7 +227,7 @@ class ReportResource(Resource):
                 action_text = actions_obj.get('DEFAULT')
             if action_text:
                 nr_report_json['nextAction'] = action_text
-        nr_report_json['retrievalDateTime'] = datetime.now().astimezone(timezone('US/Pacific')).strftime(DATE_FORMAT)
+        nr_report_json['retrievalDateTime'] = datetime.now(timezone.utc).astimezone(VANCOUVER_TZ).strftime(DATE_FORMAT)
 
         nr_report_json['hasUnreviewedNames'] = ReportResource._hasUnReviewedNames(nr_report_json['names'])
         return nr_report_json

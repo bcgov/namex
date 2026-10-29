@@ -2,13 +2,15 @@
 Virtual word classification classifies all words in a name approved by an examiner to be used for auto-approval
 """
 
-from datetime import date, datetime
+from datetime import timezone, datetime
 
 from sqlalchemy import func
 from sqlalchemy.orm import backref
 
 from . import db, ma
 
+def _datetime_to_iso(value):
+    return value.isoformat() if value is not None else None
 
 class WordClassification(db.Model):
     __tablename__ = 'word_classification'
@@ -25,7 +27,8 @@ class WordClassification(db.Model):
     end_dt = db.Column('end_dt', db.DateTime(timezone=True))
     last_updated_by = db.Column('last_updated_by', db.Integer, db.ForeignKey('users.id'))
     last_updated_dt = db.Column(
-        'last_update_dt', db.DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow
+        'last_update_dt', db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc)
     )
 
     # relationships
@@ -42,27 +45,28 @@ class WordClassification(db.Model):
             'lastNameUsed': self.last_name_used,
             'lastPrepName': self.last_prep_name,
             'frequency': self.frequency,
-            'approvedDate': self.approved_dt,
+            'approvedDate': _datetime_to_iso(self.approved_dt),
             'approvedBy': self.approved_by,
-            'startDate': self.start_dt,
+            'startDate': _datetime_to_iso(self.start_dt),
             'lastUpdatedBy': self.last_updated_by,
-            'lastUpdatedDate': self.last_updated_dt,
+            'lastUpdatedDate': _datetime_to_iso(self.last_updated_dt),
         }
 
     # TODO: Fix this it's not working...
     """
     Note: we convert to lower case as word text in the DB will be in all caps.
     """
-
+        
     @classmethod
     def find_word_classification(cls, word):
+        now_utc = datetime.now(timezone.utc)
         results = (
             db.session.query(cls.word, cls.classification)
             .distinct(cls.word, cls.classification)
             .filter(func.lower(cls.word).op('~')(r"(^{0}(''[a-zA-Z])?\y)".format(word.lower())))
             .filter(cls.end_dt.is_(None))
-            .filter(cls.start_dt <= date.today())
-            .filter(cls.approved_dt <= date.today())
+            .filter(cls.start_dt <= now_utc)
+            .filter(cls.approved_dt <= now_utc)
             .all()
         )
         cls.close_session()
@@ -70,13 +74,14 @@ class WordClassification(db.Model):
 
     @classmethod
     def find_word_by_classification(cls, word, classification):
+        now_utc = datetime.now(timezone.utc)
         results = (
             db.session.query(cls)
             .filter(func.lower(cls.word).op('~')(r"(\y{0}(''[a-zA-Z])?\y)".format(word.lower())))
             .filter(func.lower(cls.classification) == func.lower(classification))
             .filter(cls.end_dt.is_(None))
-            .filter(cls.start_dt <= date.today())
-            .filter(cls.approved_dt <= date.today())
+            .filter(cls.start_dt <= now_utc)
+            .filter(cls.approved_dt <= now_utc)
             .all()
         )
         cls.close_session()

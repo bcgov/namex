@@ -1,7 +1,7 @@
 from flask import jsonify, make_response, send_file
 from flask_jwt_oidc import AuthError
 from flask_restx import Resource
-from pytz import timezone
+from zoneinfo import ZoneInfo
 
 from namex.models import Payment as PaymentDAO
 from namex.models import Request as RequestDAO
@@ -60,8 +60,8 @@ class PaymentReceipt(Resource):
                     jsonify(message='Could not find name choice for {nr_id}'.format(nr_id=nr_model.id)), 400
                 )
 
-            tz_aware_submission_date = nr_model.submittedDate.replace(tzinfo=timezone('UTC'))
-            localized_submission_date = tz_aware_submission_date.astimezone(timezone('US/Pacific'))
+            tz_aware_submission_date = nr_model.submittedDate.replace(tzinfo=ZoneInfo('UTC'))
+            localized_submission_date = tz_aware_submission_date.astimezone(ZoneInfo('America/Vancouver'))
             receipt_req = ReceiptRequest(
                 corpName=name_choice.name,
                 filingDateTime=localized_submission_date.strftime('%B %-d, %Y at %-I:%M %P Pacific time'),

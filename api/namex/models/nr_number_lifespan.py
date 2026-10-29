@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from . import db, ma
 
@@ -6,7 +6,7 @@ from . import db, ma
 class NRNumberLifespan(db.Model):
     __tablename__ = 'nr_number_lifespan'
     nr_num = db.Column(db.String(10), primary_key=True)
-    nr_timestamp = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
+    nr_timestamp = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     @classmethod
     def check_nr_num_lifespan(cls, nr_num):
@@ -20,7 +20,7 @@ class NRNumberLifespan(db.Model):
 
     @classmethod
     def delete_old_entries(cls, lifespan_seconds):
-        expiration_time = datetime.utcnow() - timedelta(seconds=lifespan_seconds)
+        expiration_time = datetime.now(timezone.utc) - timedelta(seconds=lifespan_seconds)
         db.session.query(cls).filter(cls.nr_timestamp < expiration_time).delete()
         db.session.commit()
 

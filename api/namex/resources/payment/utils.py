@@ -1,5 +1,7 @@
-from datetime import date
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
+VANCOUVER_TZ = ZoneInfo("America/Vancouver")
 
 def build_payment_request(nr_model):
     """
@@ -19,7 +21,7 @@ def build_payment_request(nr_model):
         #     'methodOfPayment': 'CC',
         # },
         'filingInfo': {
-            'date': date.today(),
+            'date': datetime.now(VANCOUVER_TZ).date(),
             'filingTypes': [
                 {
                     'filingDescription': '',  # 'NM620: ' + nr_name.name,
@@ -65,7 +67,7 @@ def merge_payment_request(nr_model, config=None):
     # Comment out to use direct pay
     # method_of_payment = 'CC'
 
-    filing_date = date.today()
+    filing_date = datetime.now(VANCOUVER_TZ).date()
     filing_description = ''
     filing_type_code = ''  # TODO: Use an enum
     priority_request = nr_model.priorityCd == 'Y'  # TODO: Use an enum

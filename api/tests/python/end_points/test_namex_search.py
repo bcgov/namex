@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from contextlib import suppress
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from typing import List
 
@@ -65,7 +65,7 @@ def generate_nrs(num: int, nr_nums: List[str], names: list, submitted: List[date
     nrs = []
     for i in range(num):
         nr_num = nr_num = nr_nums[i] if i < len(nr_nums) else f'NR {i}'
-        submitted_date = submitted[i] if i < len(submitted) else datetime.utcnow() - timedelta(days=i)
+        submitted_date = submitted[i] if i < len(submitted) else datetime.now(timezone.utc) - timedelta(days=i)
         state_index = i % len(states)
         new_names = names[i] if i < len(names) else []
         nr = create_nr(nr_num, states[state_index], submitted_date, new_names)
@@ -156,36 +156,36 @@ def test_namex_search_nr_num(client, jwt, app, search_nr, nrs):
     [
         ('desc', 'All', None),
         ('asc', 'All', None),
-        ('desc', 'Today', datetime.utcnow() - timedelta(days=1)),
-        ('asc', 'Today', datetime.utcnow() - timedelta(days=1)),
-        ('desc', '7 days', datetime.utcnow() - timedelta(days=7)),
-        ('asc', '7 days', datetime.utcnow() - timedelta(days=7)),
-        ('desc', '30 days', datetime.utcnow() - timedelta(days=30)),
-        ('asc', '30 days', datetime.utcnow() - timedelta(days=30)),
-        ('desc', '90 days', datetime.utcnow() - timedelta(days=90)),
-        ('asc', '90 days', datetime.utcnow() - timedelta(days=90)),
-        ('desc', '1 year', datetime.utcnow() - timedelta(days=1 * (365))),
-        ('asc', '1 year', datetime.utcnow() - timedelta(days=1 * (365))),
-        ('desc', '3 years', datetime.utcnow() - timedelta(days=3 * (365))),
-        ('asc', '3 years', datetime.utcnow() - timedelta(days=3 * (365))),
-        ('desc', '5 years', datetime.utcnow() - timedelta(days=5 * (365))),
-        ('asc', '5 years', datetime.utcnow() - timedelta(days=5 * (365))),
+        ('desc', 'Today', datetime.now(timezone.utc) - timedelta(days=1)),
+        ('asc', 'Today', datetime.now(timezone.utc) - timedelta(days=1)),
+        ('desc', '7 days', datetime.now(timezone.utc) - timedelta(days=7)),
+        ('asc', '7 days', datetime.now(timezone.utc) - timedelta(days=7)),
+        ('desc', '30 days', datetime.now(timezone.utc) - timedelta(days=30)),
+        ('asc', '30 days', datetime.now(timezone.utc) - timedelta(days=30)),
+        ('desc', '90 days', datetime.now(timezone.utc) - timedelta(days=90)),
+        ('asc', '90 days', datetime.now(timezone.utc) - timedelta(days=90)),
+        ('desc', '1 year', datetime.now(timezone.utc) - timedelta(days=1 * (365))),
+        ('asc', '1 year', datetime.now(timezone.utc) - timedelta(days=1 * (365))),
+        ('desc', '3 years', datetime.now(timezone.utc) - timedelta(days=3 * (365))),
+        ('asc', '3 years', datetime.now(timezone.utc) - timedelta(days=3 * (365))),
+        ('desc', '5 years', datetime.now(timezone.utc) - timedelta(days=5 * (365))),
+        ('asc', '5 years', datetime.now(timezone.utc) - timedelta(days=5 * (365))),
     ],
 )
 def test_namex_search_submitted(client, jwt, app, order, submitted_interval, last_date):
     """Test searching by submitted date."""
     submitted = [
-        datetime.utcnow(),
-        datetime.utcnow() - timedelta(days=6),
-        datetime.utcnow() - timedelta(days=8),
-        datetime.utcnow() - timedelta(days=29),
-        datetime.utcnow() - timedelta(days=31),
-        datetime.utcnow() - timedelta(days=89),
-        datetime.utcnow() - timedelta(days=91),
-        datetime.utcnow() - timedelta(days=1 * (365)),
-        datetime.utcnow() - timedelta(days=2 * (365)),
-        datetime.utcnow() - timedelta(days=3 * (365)),
-        datetime.utcnow() - timedelta(days=5 * (365)),
+        datetime.now(timezone.utc),
+        datetime.now(timezone.utc) - timedelta(days=6),
+        datetime.now(timezone.utc) - timedelta(days=8),
+        datetime.now(timezone.utc) - timedelta(days=29),
+        datetime.now(timezone.utc) - timedelta(days=31),
+        datetime.now(timezone.utc) - timedelta(days=89),
+        datetime.now(timezone.utc) - timedelta(days=91),
+        datetime.now(timezone.utc) - timedelta(days=1 * (365)),
+        datetime.now(timezone.utc) - timedelta(days=2 * (365)),
+        datetime.now(timezone.utc) - timedelta(days=3 * (365)),
+        datetime.now(timezone.utc) - timedelta(days=5 * (365)),
     ]
     generate_nrs(len(submitted), [], [], submitted)
 
@@ -259,7 +259,7 @@ def test_namex_search_consent(client, jwt, app, consent_option):
     base_nrs[0].consentFlag = 'N'
     base_nrs[1].consentFlag = 'Y'
     base_nrs[2].consentFlag = 'R'
-    base_nrs[2].consent_dt = datetime.utcnow()
+    base_nrs[2].consent_dt = datetime.now(timezone.utc)
     for nr in base_nrs:
         nr.save_to_db()
 

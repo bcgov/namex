@@ -1,5 +1,6 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 from flask import json
 
@@ -11,6 +12,7 @@ from namex.services import EventRecorder
 
 from ..end_points.util import create_header
 
+VANCOUVER_TZ = ZoneInfo("America/Vancouver")
 
 def create_base_nr():
     nr = RequestDAO()
@@ -60,7 +62,7 @@ def test_event_create_nrl(client, jwt, app):
 
     nr = create_base_nr()
 
-    before_record_date = datetime.utcnow()
+    before_record_date = datetime.now(timezone.utc)
     EventRecorder.record(user, Event.POST, nr, nr.json())
 
     # get the resource (this is the test)
@@ -215,7 +217,7 @@ def test_expired_event_history(client, jwt, app):
 
     nr = create_base_nr()
     nr.stateCd = State.EXPIRED
-    nr.expirationDate = datetime.utcnow()
+    nr.expirationDate = datetime.now(timezone.utc)
     nr.save_to_db()
 
     EventRecorder.record(user, Event.POST, nr, nr.json())
@@ -508,3 +510,29 @@ def test_consumed_event_history(client, jwt, app):
     assert rv.status_code == 200
 
     assert b'"user_action": "Get NR Details from NRO"' in rv.data
+
+
+def test_bc_daylight_saving_transition_2026():
+    # Before the clocks go back: 1:30 a.m. PDT (UTC-7)
+    before = datetime.fromisoformat(
+        "2026-11-01T08:30:00+00:00"
+    ).astimezone(VANCOUVER_TZ)
+
+    # After the clocks go back: 1:30 a.m. PST (UTC-8)
+    after = datetime.fromisoformat(
+        "2026-11-01T09:30:00+00:00"
+    ).astimezone(VANCOUVER_TZ)
+
+    assert before.strftime("%Y-%m-%d %H:%M %z") == (
+        "2026-11-01 01:30 -0700"
+    )
+    assert after.strftime("%Y-%m-%d %H:%M %z") == (
+        "2026-11-01 01:30 -0800"
+    )
+
+    # The two identical local clock times represent different instants.
+    assert before.utcoffset().total_seconds() == -7 * 3600
+    assert after.utcoffset().total_seconds() == -8 * 3600
+    assert before.astimezone(ZoneInfo("UTC")) != after.astimezone(
+        ZoneInfo("UTC")
+    )
