@@ -1,10 +1,11 @@
 import importlib.util
 import sys
 import types
+import zoneinfo
 from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
-from zoneinfo import TZPATH, ZoneInfo
+from zoneinfo import ZoneInfo
 
 import pytest
 
@@ -100,7 +101,7 @@ def _run(tmp, monkeypatch, instant, kind, environment, write_csv, execute):
 
 
 def test_vancouver_zone_file():
-    assert TZPATH == ()
+    assert zoneinfo.TZPATH == ()
     zone = ZoneInfo("America/Vancouver")
     nov = datetime(2026, 11, 1, 9, 1, tzinfo=timezone.utc).astimezone(zone)
     jan = datetime(2026, 1, 15, 20, tzinfo=timezone.utc).astimezone(zone)
