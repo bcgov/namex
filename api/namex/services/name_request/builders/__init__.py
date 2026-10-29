@@ -5,7 +5,7 @@ EXACT_MATCH = 1.0
 HIGH_SIMILARITY = 0.85
 HIGH_CONFLICT_RECORDS = 20
 
-now = datetime.now(ZoneInfo("America/Vancouver"))
+now = datetime.now(ZoneInfo('America/Vancouver'))
 
 CURRENT_YEAR = now.year
 CURRENT_MONTH = now.month

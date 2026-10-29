@@ -4,31 +4,31 @@ from datetime import datetime, timedelta
 import pytest
 
 from namex.utils.common import (
-    convert_to_utc_min_date_time,
     convert_to_utc_max_date_time,
+    convert_to_utc_min_date_time,
 )
 
 
 @pytest.mark.parametrize(
-    ("date_str", "expected_min_utc", "expected_max_utc"),
+    ('date_str', 'expected_min_utc', 'expected_max_utc'),
     [
         # The day before the traditional DST transition: UTC-7
         (
-            "2026-10-31",
-            "2026-10-31T07:00:00+00:00",
-            "2026-11-01T06:59:59.999999+00:00",
+            '2026-10-31',
+            '2026-10-31T07:00:00+00:00',
+            '2026-11-01T06:59:59.999999+00:00',
         ),
         # The traditional DST transition date: UTC-7 throughout
         (
-            "2026-11-01",
-            "2026-11-01T07:00:00+00:00",
-            "2026-11-02T06:59:59.999999+00:00",
+            '2026-11-01',
+            '2026-11-01T07:00:00+00:00',
+            '2026-11-02T06:59:59.999999+00:00',
         ),
         # The day after the traditional DST transition: UTC-7
         (
-            "2026-11-02",
-            "2026-11-02T07:00:00+00:00",
-            "2026-11-03T06:59:59.999999+00:00",
+            '2026-11-02',
+            '2026-11-02T07:00:00+00:00',
+            '2026-11-03T06:59:59.999999+00:00',
         ),
     ],
 )

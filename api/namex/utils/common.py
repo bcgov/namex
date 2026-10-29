@@ -1,9 +1,9 @@
 import re
 from datetime import datetime, time
 from itertools import product
+from zoneinfo import ZoneInfo
 
 import inflect
-from zoneinfo import ZoneInfo
 
 from namex.constants import DATE_FORMAT_NAMEX_SEARCH
 

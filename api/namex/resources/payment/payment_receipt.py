@@ -1,7 +1,8 @@
+from zoneinfo import ZoneInfo
+
 from flask import jsonify, make_response, send_file
 from flask_jwt_oidc import AuthError
 from flask_restx import Resource
-from zoneinfo import ZoneInfo
 
 from namex.models import Payment as PaymentDAO
 from namex.models import Request as RequestDAO

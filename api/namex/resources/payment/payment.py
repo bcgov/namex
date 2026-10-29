@@ -881,7 +881,7 @@ class NameRequestPaymentAction(AbstractNameRequestResource):
         # Update the state of the payment
         payment = get_active_payment(nr_model, payment_id)
         sbc_payment_response = get_payment(payment.payment_token)
-        
+
         # TODO: Throw errors if this fails!
         if sbc_payment_response.statusCode in [PaymentStatusCode.COMPLETED.value, PaymentStatusCode.APPROVED.value]:
             payment.payment_status_code = sbc_payment_response.statusCode

@@ -2,12 +2,13 @@
 Virtual word classification classifies all words in a name approved by an examiner to be used for auto-approval
 """
 
-from datetime import timezone, datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import func
 from sqlalchemy.orm import backref
 
 from . import db, ma
+
 
 def _datetime_to_iso(value):
     return value.isoformat() if value is not None else None
@@ -56,7 +57,7 @@ class WordClassification(db.Model):
     """
     Note: we convert to lower case as word text in the DB will be in all caps.
     """
-        
+
     @classmethod
     def find_word_classification(cls, word):
         now_utc = datetime.now(timezone.utc)

@@ -1,7 +1,7 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-VANCOUVER_TZ = ZoneInfo("America/Vancouver")
+VANCOUVER_TZ = ZoneInfo('America/Vancouver')
 
 def build_payment_request(nr_model):
     """

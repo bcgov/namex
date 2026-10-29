@@ -5,12 +5,12 @@ TODO: Fill in a larger description once the API is defined for V1
 
 import traceback
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 from flask import current_app, g, jsonify, make_response, request
 from flask_jwt_oidc import AuthError
 from flask_restx import Namespace, Resource, cors, fields
 from marshmallow import ValidationError
-from zoneinfo import ZoneInfo
 from sqlalchemy import and_, exists, func, or_, text
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import joinedload, lazyload, load_only

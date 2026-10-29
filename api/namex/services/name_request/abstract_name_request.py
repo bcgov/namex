@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-
 from zoneinfo import ZoneInfo
 
 from namex.models import db

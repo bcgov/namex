@@ -32,7 +32,7 @@ invalid_state_transition_msg = (
     'Invalid state transition [{current_state}] -> [{next_state}], valid states are [{valid_states}]'
 )
 
-VANCOUVER_TZ = ZoneInfo("America/Vancouver")
+VANCOUVER_TZ = ZoneInfo('America/Vancouver')
 
 def display_edit_action(nr_model=None):
     try:

@@ -1,10 +1,10 @@
 import copy
 import json
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from flask import current_app, jsonify, make_response, request
 from flask_restx import Namespace, Resource, fields
-from zoneinfo import ZoneInfo
 
 from namex import jwt
 from namex.models import Event as EventDAO

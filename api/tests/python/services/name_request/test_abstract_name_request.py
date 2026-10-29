@@ -1,9 +1,9 @@
 """Tests for AbstractNameRequestMixin."""
 
 import datetime
+from zoneinfo import ZoneInfo
 
 import pytest
-from zoneinfo import ZoneInfo
 
 from namex.constants import RequestAction
 from namex.models import Request as RequestDAO

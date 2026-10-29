@@ -1,5 +1,4 @@
 from datetime import datetime, time
-
 from zoneinfo import ZoneInfo
 
 from namex.constants import DATE_FORMAT_NAMEX_SEARCH
