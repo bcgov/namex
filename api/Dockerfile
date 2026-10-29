@@ -2,6 +2,7 @@ FROM python:3.12-slim
 
 # Always ensure the latest security patches are applied
 RUN apt-get update && apt-get upgrade -y && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get install -y --only-upgrade tzdata
 
 ARG VCS_REF="missing"
 ARG BUILD_DATE="missing"
