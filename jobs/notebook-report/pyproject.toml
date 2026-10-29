@@ -27,3 +27,11 @@ jupyter_client = "^8.3.1"
 jupyterlab_server = "^2.25.0"
 numpy = "^1.26.0"
 matplotlib = "^3.8.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+pytest-cov = "^6.2.1"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=notebookreport --cov-report=term-missing --cov-report=xml:coverage.xml"

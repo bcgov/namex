@@ -17,13 +17,7 @@ from structured_logging import StructuredLogging
 
 from config import Config
 
-# Suppress verbose papermill logging
 logging.getLogger("papermill").setLevel(logging.ERROR)
-
-# Notebook Scheduler
-# ---------------------------------------
-# This script helps with the automated processing of Jupyter Notebooks via
-# papermill (https://github.com/nteract/papermill/)
 
 
 def create_app(config=Config):
@@ -31,7 +25,6 @@ def create_app(config=Config):
     app = Flask(__name__)
     app.config.from_object(config)
 
-    # Configure Structured Logging
     structured_logger = StructuredLogging()
     structured_logger.init_app(app)
     app.logger = structured_logger.get_logger()
@@ -41,7 +34,6 @@ def create_app(config=Config):
 
 def findfiles(directory, pattern):
     """findfiles."""
-    # Lists all files in the specified directory that match the specified pattern
     for filename in os.listdir(directory):
         if fnmatch.fnmatch(filename.lower(), pattern):
             yield os.path.join(directory, filename)
@@ -61,8 +53,6 @@ def send_email(email: dict, token):
     )
     if response.status_code != 200:
         current_app.logger.info(f'response:{response}')
-        # print(response)
-        # current_app.logger.info(f'response:{response}')
         raise Exception('Unsuccessful response when sending email.')
 
 
@@ -81,8 +71,6 @@ def processnotebooks(notebookdirectory, token):
     if Config.ENVIRONMENT != 'prod':
         ext = ' on ' + Config.ENVIRONMENT
 
-    # For weekly tasks, we only run on the specified days
-    # Only run weekly report on Monday (index is 0) for previous 7 days data
     if (notebookdirectory == 'daily' or (notebookdirectory == 'weekly' and local_now.weekday() in weekreportday)):
         current_app.logger.info('Processing: %s', notebookdirectory)
         for file in findfiles(notebookdirectory, '*.ipynb'):
@@ -90,12 +78,10 @@ def processnotebooks(notebookdirectory, token):
 
             if nbfile == 'daily':
                 subject = 'Daily NameX Stats for ' + date + ext
-                # filename = 'daily_totals_' + date + '.csv'
                 filename = os.path.join(notebookdirectory, f'daily_totals_{date}.csv')
-                recipients = Config.DAILY_REPORT_RECIPIENTS   
+                recipients = Config.DAILY_REPORT_RECIPIENTS
             elif nbfile == 'weeklynamex':
                 subject = 'Weekly NameX Stats till ' + date + ext
-                # filename = 'weekly_totals_till_' + datetime.strftime(datetime.now()-timedelta(1), '%Y-%m-%d') + '.csv'
                 filename = os.path.join(notebookdirectory, f'weekly_totals_till_{date}.csv')
                 recipients = Config.WEEKLY_REPORT_NAMEX_RECIPIENTS   
 
@@ -110,12 +96,11 @@ def processnotebooks(notebookdirectory, token):
             
             try:
                 temp_file = 'temp.ipynb'
-                # pm.execute_notebook(file, temp_file, parameters=None)
                 pm.execute_notebook(
                     input_path=file,
                     output_path=temp_file,
                     parameters=None,
-                    cwd=os.path.dirname(file),   # crucial!
+                    cwd=os.path.dirname(file),
                 )
 
                 with open(filename, "rb") as f:
@@ -160,8 +145,7 @@ if __name__ == '__main__':
         headers={'content-type': 'application/x-www-form-urlencoded'},
         auth=(client, secret))
     token = response.json()['access_token']
-    
-    # Check if the subfolders for notebooks exist, and create them if they don't
+
     for _directory in ['daily', 'weekly']:
         if not os.path.isdir(_directory):
             os.mkdir(_directory)
