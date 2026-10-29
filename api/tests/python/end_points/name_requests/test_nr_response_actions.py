@@ -3,7 +3,7 @@ Integration tests for Name Request state transitions.
 """
 
 import json
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
 import responses
 
