@@ -2,7 +2,7 @@
 Test HTTP endpoints for Name Requests.
 """
 
-import datetime
+from datetime import datetime, timezone
 import json
 
 import pytest
@@ -642,7 +642,7 @@ def test_draft_patch_cancel_with_expired_nr(client, jwt, app, mocker):
     input_fields = build_test_input_fields()
 
     # Set the expirationDate to a previous day
-    input_fields['expirationDate'] = datetime.date.today() - datetime.timedelta(days=2)
+    input_fields['expirationDate'] = datetime.now(timezone.utc) - datetime.timedelta(days=2)
 
     custom_names = [
         {
