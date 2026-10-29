@@ -1,9 +1,11 @@
 import datetime
+from zoneinfo import ZoneInfo
 
 import pytest
 
 from namex.constants import EntityTypes
 
+VANCOUVER_TZ = ZoneInfo('America/Vancouver')
 CORP_CONFLICT_MESSAGE = 'Too similar to an existing name.'
 QUEUE_CONFLICT_MESSAGE = 'Too similar to an existing name in the queue.'
 
@@ -128,12 +130,14 @@ def assert_is_number(issue_type, issues):
 def save_words_list_classification(words_list):
     from namex.models import WordClassification as WordClassificationDAO
 
+    today = datetime.datetime.now(VANCOUVER_TZ).date()
+
     for record in words_list:
         wc = WordClassificationDAO()
         wc.classification = record['classification']
         wc.word = record['word']
-        wc.start_dt = datetime.date.today()
-        wc.approved_dt = datetime.date.today()
+        wc.start_dt = today
+        wc.approved_dt = today
         wc.save_to_db()
 
 
@@ -153,6 +157,8 @@ def save_words_list_name(words_list, queue=False):
     from namex.models import Request as RequestDAO
     from namex.models import State
 
+    today = datetime.datetime.now(VANCOUVER_TZ).date()
+
     num = 0
     req = 1460775
     for record in words_list:
@@ -165,7 +171,7 @@ def save_words_list_name(words_list, queue=False):
         nr.nrNum = nr_num
         if queue:
             nr.stateCd = State.DRAFT
-            nr.expirationDate = datetime.date.today() + datetime.timedelta(days=1)
+            nr.expirationDate = today + datetime.timedelta(days=1)
         else:
             nr.stateCd = State.APPROVED
         nr.requestId = req

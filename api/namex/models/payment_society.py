@@ -1,6 +1,6 @@
 """Payment_societies keep data for society from home legancy app"""
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -13,7 +13,7 @@ class PaymentSociety(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nrNum = db.Column('nr_num', db.String(10), unique=True)
     corpNum = db.Column('corp_num', db.String(20), unique=True)
-    paymentCompletionDate = db.Column('payment_completion_date', db.DateTime(timezone=True), default=datetime.utcnow)
+    paymentCompletionDate = db.Column('payment_completion_date', db.DateTime(timezone=False), default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
     paymentStatusCode = db.Column('payment_status_code', db.String(30), unique=True)
     paymentFeeCode = db.Column('payment_fee_code', db.String(30), unique=True)
     paymentType = db.Column('payment_type', db.String(30), unique=True)

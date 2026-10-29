@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import current_app
 
@@ -51,7 +51,7 @@ class EventRecorder(object):
         from namex.models import Event
 
         event = Event(
-            eventDate=datetime.utcnow(),
+            eventDate=datetime.now(timezone.utc),
             action=action,
             eventJson=json.dumps(data_dict),
             nrId=nr.id,

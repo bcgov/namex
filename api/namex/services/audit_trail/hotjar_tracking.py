@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import current_app
 
@@ -34,4 +34,4 @@ class HotjarTracking(object):
     @staticmethod
     def create(nr_model, hotjar_user):
         """Create a hotjar tracking object."""
-        return HotjarTrackingModel(nrId=nr_model.id, hotjarUser=hotjar_user, lastUpdate=datetime.utcnow())
+        return HotjarTrackingModel(nrId=nr_model.id, hotjarUser=hotjar_user, lastUpdate=datetime.now(timezone.utc))

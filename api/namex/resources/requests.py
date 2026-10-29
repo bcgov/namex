@@ -4,13 +4,13 @@ TODO: Fill in a larger description once the API is defined for V1
 """
 
 import traceback
-from datetime import datetime
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 from flask import current_app, g, jsonify, make_response, request
 from flask_jwt_oidc import AuthError
 from flask_restx import Namespace, Resource, cors, fields
 from marshmallow import ValidationError
-from pytz import timezone
 from sqlalchemy import and_, exists, func, or_, text
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import joinedload, lazyload, load_only
@@ -824,7 +824,7 @@ class Request(Resource):
                 and nrd.expirationDate is None
             ):
                 expiry_days = NameRequestService.get_expiry_days(nrd.request_action_cd, nrd.requestTypeCd)
-                nrd.expirationDate = NameRequestService.create_expiry_date(datetime.utcnow(), expiry_days)
+                nrd.expirationDate = NameRequestService.create_expiry_date(datetime.now(timezone.utc), expiry_days)
                 json_input['expirationDate'] = nrd.expirationDate.isoformat()
 
                 nrd.furnished = 'Y'
@@ -836,7 +836,7 @@ class Request(Resource):
                 consumed = False
                 for nrd_name in nrd.names:
                     if nrd_name.state in (Name.APPROVED, Name.CONDITION):
-                        nrd_name.consumptionDate = datetime.utcnow()
+                        nrd_name.consumptionDate = datetime.now(timezone.utc)
                         nrd_name.corpNum = json_input.get('corpNum')
                         consumed = True
 
@@ -946,14 +946,14 @@ class Request(Resource):
                 try:
                     expirationDateStr = json_input['expirationDate']
                     expirationDate = DateUtils.parse_date(expirationDateStr)
-                    # Convert the UTC datetime object to the end of day in pacific time without milliseconds
-                    pacific_tz = timezone('US/Pacific')
-                    pacific_time = expirationDate.astimezone(pacific_tz)
+                    # Convert the UTC datetime object to the end of day in vancouver time without milliseconds
+                    vancouver_tz = ZoneInfo('America/Vancouver')
+                    vancouver_time = expirationDate.astimezone(vancouver_tz)
                     # Re-verify and normalize the offset after the hour replacement
-                    end_of_day_pacific = pacific_tz.normalize(
-                        pacific_time.replace(hour=23, minute=59, second=0, microsecond=0)
+                    end_of_day_vancouver = vancouver_tz.normalize(
+                        vancouver_time.replace(hour=23, minute=59, second=0, microsecond=0)
                     )
-                    json_input['expirationDate'] = end_of_day_pacific.strftime('%Y-%m-%d %H:%M:%S%z')
+                    json_input['expirationDate'] = end_of_day_vancouver.strftime('%Y-%m-%d %H:%M:%S%z')
                 except Exception as e:
                     current_app.logger.debug(f'Error parsing expirationDate: {str(e)}')
                     pass

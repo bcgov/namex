@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 import requests
@@ -213,7 +213,7 @@ class NameRequestFields(BaseNameRequestResource):
                     _self.request_data = {
                         # Doesn't have to be a UUID but this is easy and works for a pretty unique token
                         'checkedOutBy': str(uuid4()),
-                        'checkedOutDt': datetime.now(),
+                        'checkedOutDt': datetime.now(timezone.utc),
                     }
                     # Set the request data to the service
                     _self.nr_service.request_data = self.request_data

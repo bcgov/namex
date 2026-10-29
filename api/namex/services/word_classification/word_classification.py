@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from namex.models import User, WordClassification
 
@@ -25,8 +25,8 @@ class WordClassificationService:
         entity.last_prep_name = word_classification['name'].upper()
         entity.frequency = 1
         entity.approved_by = user_id
-        entity.approved_dt = datetime.utcnow()
-        entity.start_dt = datetime.utcnow()
+        entity.approved_dt = datetime.now(timezone.utc)
+        entity.start_dt = datetime.now(timezone.utc)
         entity.last_updated_by = user_id
 
         entity.save_to_db()

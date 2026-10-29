@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
-
-from pytz import timezone
+from zoneinfo import ZoneInfo
 
 from namex.models import db
 from namex.models.nr_number import NRNumber
@@ -159,22 +158,22 @@ class AbstractNameRequestMixin(object):
         In order to add days without having 1 hour difference between the two dates in summer time changes
         we need to calculate the new date using naive dates (not aware of timezone) and after that we can add the timezone.
         """
-        pacific_tz = timezone('US/Pacific')
+        vancouver_tz = ZoneInfo('America/Vancouver')
         expiry_hour = 23
         expiry_min = 59
 
-        # convert the input date to Pacific time and removes tzinfo:
-        naive_date_pst = start.astimezone(pacific_tz).replace(tzinfo=None)
-        # calculate the new day in Pacific time
-        expiry_date_pst = naive_date_pst + timedelta(days=expires_in_days)
-        # make it localized back to Pacific time
-        expiry_date_pst_localized = pacific_tz.localize(expiry_date_pst)
-        # set the time to 11:59pm in Pacific time
-        expiry_date_pst_with_adjusted_time = expiry_date_pst_localized.replace(
+        # convert the input date to Vancouver time and removes tzinfo:
+        naive_date_pst = start.astimezone(vancouver_tz).replace(tzinfo=None)
+        # calculate the new day in Vancouver time
+        expiry_date_vanst = naive_date_pst + timedelta(days=expires_in_days)
+        # make it localized back to Vancouver time
+        expiry_date_vanst_localized = expiry_date_vanst.replace(tzinfo=vancouver_tz)
+        # set the time to 11:59pm in Vancouver time
+        expiry_date_vanst_with_adjusted_time = expiry_date_vanst_localized.replace(
             hour=expiry_hour, minute=expiry_min, second=0, microsecond=0
         )
 
-        return expiry_date_pst_with_adjusted_time
+        return expiry_date_vanst_with_adjusted_time
 
     def generate_nr_keys(self):
         try:

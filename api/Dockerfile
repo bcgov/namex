@@ -78,6 +78,9 @@ RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
     $(if [ "$APP_ENV" = 'production' ] || [ -z "$APP_ENV" ]; then echo '--only main'; else echo '--with dev'; fi) \
     --no-interaction --no-ansi --verbose
 
+RUN pip install --no-cache-dir --only-binary :all: "tzdata==2026.6" 
+ENV PYTHONTZPATH=""
+
 # Switch to non-root user after installations
 USER web
 

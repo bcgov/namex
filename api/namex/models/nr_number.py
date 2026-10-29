@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from . import db, ma
 
@@ -8,7 +8,7 @@ class NRNumber(db.Model):
     # core fields
     id = db.Column(db.Integer, primary_key=True)
     nrNum = db.Column('nr_num', db.String(10), unique=True)
-    lastUpdate = db.Column('last_update', db.DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
+    lastUpdate = db.Column('last_update', db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     @classmethod
     def get_next_nr_num(cls, last_nr):
