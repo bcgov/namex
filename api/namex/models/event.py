@@ -1,6 +1,6 @@
 """Events keep an audit trail of all changes submitted to the datastore"""
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import JSONB
@@ -16,7 +16,7 @@ class Event(db.Model):
     __tablename__ = 'events'
 
     id = db.Column(db.Integer, primary_key=True)
-    eventDate = db.Column('event_dt', db.DateTime(timezone=True), default=datetime.utcnow)
+    eventDate = db.Column('event_dt', db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     action = db.Column(db.String(1000))
     jsonZip = db.Column('json_zip', db.Text)
     eventJson = db.Column('event_json', JSONB)

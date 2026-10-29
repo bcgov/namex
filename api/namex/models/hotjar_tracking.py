@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from . import db
 
@@ -9,7 +9,7 @@ class HotjarTracking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     hotjarUser = db.Column('hotjar_user', db.String(20))
     lastUpdate = db.Column(
-        'last_update_dt', db.DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow
+        'last_update_dt', db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc)
     )
 
     # parent keys

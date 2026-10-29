@@ -30,7 +30,7 @@ def to_vancouver_datetime(value):
     """
     if isinstance(value, str):
         # Support ISO timestamps ending in Z.
-        if value.endswith('Z'):
+        if value.endswith(("Z", "z")):
             value = value[:-1] + '+00:00'
 
         dt = datetime.fromisoformat(value)
