@@ -17,5 +17,5 @@ jobs:
       app_name: "namex-solr-syn-api"
       working_directory: "./solr-synonyms-api"
       codecov_flag: "namexsolrsynonymsapi"
-      skip_isort: "true"
-      skip_black: "true"
+      skip_isort: true
+      skip_black: true
