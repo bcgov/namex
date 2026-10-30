@@ -134,7 +134,7 @@ def _build_email_body(template: str, nr_model):
         exp_date = datetime.fromisoformat(nr_model["expirationDate"])
         exp_date_tz = as_legislation_timezone(exp_date)
         expiration_date = format_as_report_string(exp_date_tz)
-        
+
     var_map = {
         "{{NAMES_INFORMATION_URL}}": current_app.config.get("NAMES_INFORMATION_URL"),
         "{{NAME_REQUEST_URL}}": current_app.config.get("NAME_REQUEST_URL"),
