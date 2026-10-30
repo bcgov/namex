@@ -17,5 +17,5 @@ jobs:
       app_name: "nr-day-job"
       working_directory: "./jobs/nr-day-job"
       codecov_flag: "nr-day-job"
-      skip_isort: "true"
-      skip_black: "true"
+      skip_isort: true
+      skip_black: true

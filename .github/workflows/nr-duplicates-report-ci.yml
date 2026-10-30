@@ -17,5 +17,5 @@ jobs:
       app_name: "duplicates-report"
       working_directory: "./jobs/nr-duplicates-report"
       codecov_flag: "duplicatesreport"
-      skip_isort: "true"
-      skip_black: "true"
+      skip_isort: true
+      skip_black: true

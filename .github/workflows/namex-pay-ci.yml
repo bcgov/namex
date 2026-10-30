@@ -19,5 +19,5 @@ jobs:
       app_name: "namex-pay"
       working_directory: "services/namex-pay"
       codecov_flag: "namexpay"
-      skip_isort: "true"
-      skip_black: "true"
+      skip_isort: true
+      skip_black: true
