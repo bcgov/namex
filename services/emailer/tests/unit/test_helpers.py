@@ -9,6 +9,7 @@ import requests
 from namex_emailer.constants.notification_options import Option
 from namex_emailer.services import helpers
 
+
 @pytest.fixture(autouse=True)
 def clear_bearer_token_cache():
     """Prevent cached tokens from leaking between tests."""
