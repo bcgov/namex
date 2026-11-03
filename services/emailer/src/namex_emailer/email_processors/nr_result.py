@@ -54,6 +54,13 @@ def email_consent_letter(email_info: SimpleCloudEvent):
                 recipient_phones.append(applicant["phoneNumber"])
         if not nr_model["expirationDate"]:
             ReportResource._add_expiry_date(nr_model)
+
+        if nr_model["expirationDate"]:
+            exp_date = datetime.fromisoformat(nr_model["expirationDate"])
+            exp_date_tz = as_legislation_timezone(exp_date)
+            expiration_date = format_as_report_string(exp_date_tz)
+            nr_model["expirationDate"] = expiration_date
+
         recipients = ",".join(recipient_emails)
         file_name = "consent"
         legal_type = nr_model["entity_type_cd"]
@@ -129,12 +136,6 @@ def email_report(email_info: SimpleCloudEvent):
 
 
 def _build_email_body(template: str, nr_model):
-    expiration_date = ""
-    if nr_model["expirationDate"]:
-        exp_date = datetime.fromisoformat(nr_model["expirationDate"])
-        exp_date_tz = as_legislation_timezone(exp_date)
-        expiration_date = format_as_report_string(exp_date_tz)
-
     var_map = {
         "{{NAMES_INFORMATION_URL}}": current_app.config.get("NAMES_INFORMATION_URL"),
         "{{NAME_REQUEST_URL}}": current_app.config.get("NAME_REQUEST_URL"),
@@ -146,7 +147,7 @@ def _build_email_body(template: str, nr_model):
         "{{CORP_FORMS_URL}}": current_app.config.get("CORP_FORMS_URL"),
         "{{SOCIETIES_URL}}": current_app.config.get("SOCIETIES_URL"),
         "{{STEPS_TO_RESTORE_URL}}": current_app.config.get("STEPS_TO_RESTORE_URL"),
-        "{{EXPIRATION_DATE}}": expiration_date,
+        "{{EXPIRATION_DATE}}": nr_model["expirationDate"],
         "{{MAGIC_LINK}}": get_magic_link(nr_model),
     }
     for template_string, val in var_map.items():
