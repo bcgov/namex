@@ -17,5 +17,5 @@ jobs:
       app_name: "namex-inprogress-updater"
       working_directory: "./jobs/inprogress_update"
       codecov_flag: "namexinprogressupdater"
-      skip_isort: "true"
-      skip_black: "true"
+      skip_isort: true
+      skip_black: true

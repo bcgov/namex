@@ -11,6 +11,8 @@ from structured_logging import StructuredLogging
 from namex_emailer.constants.notification_options import Option
 from namex_emailer.email_processors import get_main_template
 from namex_emailer.services.helpers import (
+    as_legislation_timezone,
+    format_as_report_string,
     get_contact_info,  # noqa I001
     get_magic_link,  # noqa I001
     query_nr_number,  # noqa I001
@@ -127,6 +129,12 @@ def email_report(email_info: SimpleCloudEvent):
 
 
 def _build_email_body(template: str, nr_model):
+    expiration_date = ""
+    if nr_model["expirationDate"]:
+        exp_date = datetime.fromisoformat(nr_model["expirationDate"])
+        exp_date_tz = as_legislation_timezone(exp_date)
+        expiration_date = format_as_report_string(exp_date_tz)
+
     var_map = {
         "{{NAMES_INFORMATION_URL}}": current_app.config.get("NAMES_INFORMATION_URL"),
         "{{NAME_REQUEST_URL}}": current_app.config.get("NAME_REQUEST_URL"),
@@ -138,7 +146,7 @@ def _build_email_body(template: str, nr_model):
         "{{CORP_FORMS_URL}}": current_app.config.get("CORP_FORMS_URL"),
         "{{SOCIETIES_URL}}": current_app.config.get("SOCIETIES_URL"),
         "{{STEPS_TO_RESTORE_URL}}": current_app.config.get("STEPS_TO_RESTORE_URL"),
-        "{{EXPIRATION_DATE}}": nr_model["expirationDate"],
+        "{{EXPIRATION_DATE}}": expiration_date,
         "{{MAGIC_LINK}}": get_magic_link(nr_model),
     }
     for template_string, val in var_map.items():

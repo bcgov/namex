@@ -17,5 +17,5 @@ jobs:
       app_name: "namex-solr-admin-app"
       working_directory: "./solr-admin-app"
       codecov_flag: "namexsolradminapp"
-      skip_isort: "true"
-      skip_black: "true"
+      skip_isort: true
+      skip_black: true
