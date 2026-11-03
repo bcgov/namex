@@ -423,10 +423,10 @@ class TestBuildEmailBody:
         assert "{{STEPS_TO_RESTORE_URL}}" not in result
         assert "{{MAGIC_LINK}}" not in result
 
-    def test_no_expiration_date(
+    def test_empty_expiration_date(
         self, app, mocker, nr_model, setup_emailer
     ):
-        nr_model["expirationDate"] = None
+        nr_model["expirationDate"] = ""
 
         mocker.patch(
             "namex_emailer.email_processors.nr_result.get_magic_link",
@@ -441,19 +441,8 @@ class TestBuildEmailBody:
 
         assert result == "NR NR 1234567 "
 
-    def test_expiration_date(
-        self, app, mocker, nr_model, setup_emailer
-    ):
-        mocker.patch(
-            "namex_emailer.email_processors.nr_result.as_legislation_timezone",
-            return_value="Pacific date",
-        )
 
-        mocker.patch(
-            "namex_emailer.email_processors.nr_result.format_as_report_string",
-            return_value="January 1, 2027 at 12:00 PM Pacific time",
-        )
-
+    def test_expiration_date(self, app, mocker, nr_model, setup_emailer):
         mocker.patch(
             "namex_emailer.email_processors.nr_result.get_magic_link",
             return_value="magic-link",
@@ -465,22 +454,13 @@ class TestBuildEmailBody:
                 nr_model,
             )
 
-        assert result == "January 1, 2027 at 12:00 PM Pacific time"
+        assert result == "2027-01-01T12:00:00"
 
-    def test_datetime_template_variable(
-        self, app, mocker, nr_model, setup_emailer
-    ):
+    def test_datetime_template_variable(self, app, mocker, nr_model, setup_emailer):
         from datetime import datetime
 
-        mocker.patch(
-            "namex_emailer.email_processors.nr_result.as_legislation_timezone",
-            return_value=datetime(2027, 1, 1, 12, 0),
-        )
-
-        mocker.patch(
-            "namex_emailer.email_processors.nr_result.format_as_report_string",
-            return_value="formatted date",
-        )
+        expiration_date = datetime(2027, 1, 1, 12, 0)
+        nr_model["expirationDate"] = expiration_date
 
         mocker.patch(
             "namex_emailer.email_processors.nr_result.get_magic_link",
@@ -493,4 +473,4 @@ class TestBuildEmailBody:
                 nr_model,
             )
 
-        assert result == "formatted date"
+        assert result == expiration_date.strftime(nr_result.DATE_FORMAT)
