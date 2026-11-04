@@ -1,12 +1,16 @@
-import os
-from dotenv import load_dotenv, find_dotenv
+"""Application configuration."""
 import base64
+import os
+
+from dotenv import find_dotenv, load_dotenv
 
 # this will load all the envars from a .env file located in the project root (api)
 load_dotenv(find_dotenv())
 
 
 class Config(object):
+    """Config."""
+
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
     ENVIRONMENT = os.getenv('ENVIRONMENT', '')
 
@@ -26,9 +30,9 @@ class Config(object):
         )
 
     # Token Retrieval
-    ACCOUNT_SVC_AUTH_URL = os.getenv("KEYCLOAK_AUTH_TOKEN_URL", "")
-    ACCOUNT_SVC_CLIENT_ID = os.getenv("KEYCLOAK_CLIENT_ID", "")
-    ACCOUNT_SVC_CLIENT_SECRET = os.getenv("KEYCLOAK_CLIENT_SECRET", "")
+    ACCOUNT_SVC_AUTH_URL = os.getenv('KEYCLOAK_AUTH_TOKEN_URL', '')
+    ACCOUNT_SVC_CLIENT_ID = os.getenv('KEYCLOAK_CLIENT_ID', '')
+    ACCOUNT_SVC_CLIENT_SECRET = os.getenv('KEYCLOAK_CLIENT_SECRET', '')
 
     # Notebook Config
     NUMBER_OF_DAYS_NR = os.getenv('NUMBER_OF_DAYS_NR', '1')
@@ -56,5 +60,5 @@ class Config(object):
         pk_raw = os.getenv('PRIVATE_KEY', '').strip()
         pk_padded = pk_raw + '=' * (-len(pk_raw) % 4)
         PRIVATE_KEY = base64.b64decode(pk_padded).decode()
-    except Exception:
+    except Exception:  # noqa: B902
         PRIVATE_KEY = os.getenv('PRIVATE_KEY', '')

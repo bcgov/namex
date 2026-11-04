@@ -1,6 +1,5 @@
 """conftest for the notebook."""
 import pytest
-
 from config import Config
 from notebookreport import create_app
 
