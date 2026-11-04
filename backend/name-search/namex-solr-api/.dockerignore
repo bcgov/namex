@@ -1,0 +1,11 @@
+**/__pycache__
+.devcontainer
+.dockerignore
+.env*
+.gcloudignore
+.pytest_cache
+.venv
+.vscode
+Dockerfile
+cache
+tests

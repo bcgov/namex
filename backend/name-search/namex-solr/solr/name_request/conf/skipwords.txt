@@ -1,0 +1,33 @@
+# NameX words_to_filter_from_name() function words, plus "of"
+# (member of the "be" ALL group). Used only on the synonym query analyzer
+# so skip-word keys do not expand through the query-time ALL graph.
+an
+and
+are
+as
+at
+be
+but
+by
+for
+if
+in
+into
+is
+it
+no
+not
+o
+on
+or
+such
+that
+the
+their
+then
+there
+these
+they
+this
+to
+of

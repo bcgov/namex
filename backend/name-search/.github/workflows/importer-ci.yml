@@ -1,0 +1,24 @@
+name: NameX Solr Importer CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - feature*
+      - hotfix*
+    paths:
+      - "namex-solr-importer/**"
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./namex-solr-importer
+
+jobs:
+  namex-solr-importer-ci:
+    uses: bcgov/bcregistry-sre/.github/workflows/backend-ci.yaml@main
+    with:
+      app_name: "namex-solr-importer"
+      working_directory: "./namex-solr-importer"
+      codecov_flag: "namex-solr-importer"

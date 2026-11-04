@@ -1,0 +1,106 @@
+# Copyright © 2025 Province of British Columbia
+#
+# Licensed under the BSD 3 Clause License, (the "License");
+# you may not use this file except in compliance with the License.
+# The template for the license can be found here
+#    https://opensource.org/license/bsd-3-clause/
+#
+# Redistribution and use in source and binary forms,
+# with or without modification, are permitted provided that the
+# following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+#    this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+#
+# 3. Neither the name of the copyright holder nor the names of its contributors
+#    may be used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS”
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+apiVersion: deploy.cloud.google.com/v1
+kind: DeliveryPipeline
+metadata:
+ name: namex-solr-api-pipeline
+description: Deployment pipeline
+serialPipeline:
+ stages:
+ - targetId: a083gt-dev
+   profiles: [dev]
+   strategy:
+    standard:
+      verify: false
+   deployParameters:
+   - values:
+      deploy-env: "development"
+      deploy-project-id: "a083gt-dev"
+      service-name: "namex-solr-api-dev"
+      container-name: "namex-solr-api-dev"
+      cloudsql-instances: "a083gt-dev:northamerica-northeast1:namex-db-dev"
+      service-account: "sa-api@a083gt-dev.iam.gserviceaccount.com"
+      resources-cpu: "1000m"
+      resources-memory: "1Gi"
+      container-concurrency: "3"
+ - targetId: a083gt-test
+   profiles: [test]
+   strategy:
+    standard:
+      verify: false
+   deployParameters:
+   - values:
+      deploy-env: "development"
+      deploy-project-id: "a083gt-test"
+      service-name: "namex-solr-api-test"
+      container-name: "namex-solr-api-test"
+      cloudsql-instances: "a083gt-test:northamerica-northeast1:namex-db-test"
+      service-account: "sa-api@a083gt-test.iam.gserviceaccount.com"
+      resources-cpu: "1000m"
+      resources-memory: "1Gi"
+      container-concurrency: "3"
+ - targetId: a083gt-sandbox
+   profiles: [sandbox]
+   strategy:
+    standard:
+      verify: false
+   deployParameters:
+   - values:
+      deploy-env: "sandbox"
+      deploy-project-id: "a083gt-integration"
+      service-name: "namex-solr-api-sandbox"
+      container-name: "namex-solr-api-sandbox"
+      cloudsql-instances: "a083gt-integration:northamerica-northeast1:namex-db-sandbox"
+      service-account: "sa-api@a083gt-integration.iam.gserviceaccount.com"
+      resources-cpu: "1000m"
+      resources-memory: "1Gi"
+      container-concurrency: "3"
+ - targetId: a083gt-prod
+   profiles: [prod]
+   strategy:
+    standard:
+      verify: false
+   deployParameters:
+   - values:
+      deploy-env: "production"
+      deploy-project-id: "a083gt-prod"
+      service-name: "namex-solr-api-prod"
+      container-name: "namex-solr-api-prod"
+      container-concurrency: "10"
+      resources-cpu: "8000m"
+      resources-memory: "4Gi"
+      cloudsql-instances: "a083gt-prod:northamerica-northeast1:namex-db-prod"
+      service-account: "sa-api@a083gt-prod.iam.gserviceaccount.com"
+      max-scale: "20"

@@ -1,0 +1,161 @@
+#!/bin/bash
+set -euo pipefail
+
+### ============================================================
+### READ METADATA (injected from instance template)
+### ============================================================
+
+JVM_MEM="$(curl -fs http://metadata.google.internal/computeMetadata/v1/instance/attributes/jvm_mem -H 'Metadata-Flavor: Google')"
+ROLE="$(curl -fs http://metadata.google.internal/computeMetadata/v1/instance/attributes/role -H 'Metadata-Flavor: Google')"
+ENV="$(curl -fs http://metadata.google.internal/computeMetadata/v1/instance/attributes/env -H 'Metadata-Flavor: Google')"
+LABEL="$(curl -fs http://metadata.google.internal/computeMetadata/v1/instance/attributes/label -H 'Metadata-Flavor: Google')"
+FILTERCACHE_MAXRAM="$(curl -fs http://metadata.google.internal/computeMetadata/v1/instance/attributes/filtercache_maxram -H 'Metadata-Flavor: Google' || true)"
+QRCACHE_MAXRAM="$(curl -fs http://metadata.google.internal/computeMetadata/v1/instance/attributes/qrcache_maxram -H 'Metadata-Flavor: Google' || true)"
+DOCCACHE_MAXRAM="$(curl -fs http://metadata.google.internal/computeMetadata/v1/instance/attributes/doccache_maxram -H 'Metadata-Flavor: Google' || true)"
+PERSEGCACHE_MAXRAM="$(curl -fs http://metadata.google.internal/computeMetadata/v1/instance/attributes/persegcache_maxram -H 'Metadata-Flavor: Google' || true)"
+
+IMAGE_PROJECT="$(curl -fs http://metadata.google.internal/computeMetadata/v1/instance/attributes/image_project -H 'Metadata-Flavor: Google')"
+IMAGE_REPO="$(curl -fs http://metadata.google.internal/computeMetadata/v1/instance/attributes/image_repo -H 'Metadata-Flavor: Google')"
+IMAGE="$(curl -fs http://metadata.google.internal/computeMetadata/v1/instance/attributes/image -H 'Metadata-Flavor: Google')"
+
+REGION="northamerica-northeast1"
+CONTAINER_NAME="solr-container"
+
+IMAGE_PATH="${REGION}-docker.pkg.dev/${IMAGE_PROJECT}/${IMAGE_REPO}/${IMAGE}"
+SOLR_ENV_SETTINGS="${ENV},label=${LABEL}"
+
+SOLR_CACHE_OPTS=""
+[ -n "$FILTERCACHE_MAXRAM" ] && SOLR_CACHE_OPTS="$SOLR_CACHE_OPTS -Dsolr.filterCache.maxRamMB=$FILTERCACHE_MAXRAM"
+[ -n "$QRCACHE_MAXRAM" ]     && SOLR_CACHE_OPTS="$SOLR_CACHE_OPTS -Dsolr.queryResultCache.maxRamMB=$QRCACHE_MAXRAM"
+[ -n "$DOCCACHE_MAXRAM" ]    && SOLR_CACHE_OPTS="$SOLR_CACHE_OPTS -Dsolr.documentCache.maxRamMB=$DOCCACHE_MAXRAM"
+[ -n "$PERSEGCACHE_MAXRAM" ] && SOLR_CACHE_OPTS="$SOLR_CACHE_OPTS -Dsolr.perSegFilter.maxRamMB=$PERSEGCACHE_MAXRAM"
+
+echo "=== Solr startup script ==="
+echo "ROLE=${ROLE}"
+echo "ENV=${ENV}"
+echo "LABEL=${LABEL}"
+echo "IMAGE=${IMAGE}"
+echo "JVM_MEM=${JVM_MEM}"
+echo "IMAGE_PATH=${IMAGE_PATH}:${ENV}"
+echo "==========================="
+
+### ============================================================
+### CREATE SOLR USER
+### ============================================================
+
+sudo useradd -m solr || true
+export HOME="/home/solr"
+sudo chmod 777 "$HOME"
+
+### ============================================================
+### PREP DOCKER AUTH + VOLUME MOUNTS
+### ============================================================
+
+docker stop $CONTAINER_NAME || true
+docker rm $CONTAINER_NAME || true
+
+docker-credential-gcr configure-docker --registries="${REGION}-docker.pkg.dev"  # also fix here
+
+HOST_COPY_PATH=$HOME/volume
+HOST_MOUNT_PATH=$HOST_COPY_PATH/data
+HOST_MOUNT_PATH_ENV=$HOST_COPY_PATH/default
+
+CONTAINER_MOUNT_PATH=/var/solr/data
+CONTAINER_MOUNT_PATH_ENV=/etc/default
+
+### ============================================================
+### INIT SOLR DATA DIRECTORY (FIRST BOOT ONLY)
+### ============================================================
+
+if [ -d "$HOST_MOUNT_PATH" ]; then
+  echo "Solr data exists — skipping initialization."
+else
+  echo "Initializing Solr persistent storage..."
+
+  mkdir -p "$HOST_MOUNT_PATH"
+
+  docker run -d \
+    --name=$CONTAINER_NAME \
+    --log-driver=gcplogs \
+    -p 8983:8983 \
+    "$IMAGE_PATH:$ENV"
+
+  echo "Waiting 60 seconds for Solr initial boot..."
+  sleep 60
+
+  docker stop $CONTAINER_NAME
+
+  docker cp "$CONTAINER_NAME:$CONTAINER_MOUNT_PATH" "$HOST_COPY_PATH"
+  docker cp "$CONTAINER_NAME:$CONTAINER_MOUNT_PATH_ENV" "$HOST_COPY_PATH"
+
+  sudo chown -R solr: "$HOME"
+  sudo chmod -R 777 "$HOME"
+
+  docker rm $CONTAINER_NAME
+
+  SOLR_OPTS_VAR='$SOLR_OPTS'
+
+  echo "SOLR_OPTS=\"$SOLR_OPTS_VAR -Dsolr.environment=$SOLR_ENV_SETTINGS$SOLR_CACHE_OPTS\"" \
+    >> "$HOST_MOUNT_PATH_ENV/solr.in.sh"
+  echo "SOLR_JAVA_MEM=\"-Xms$JVM_MEM -Xmx$JVM_MEM\"" \
+    >> "$HOST_MOUNT_PATH_ENV/solr.in.sh"
+
+  echo "Initialization complete."
+fi
+
+### ============================================================
+### START SOLR WITH VOLUME
+### ============================================================
+
+SOLR_OPTS="-Djetty.host=0.0.0.0"
+
+docker run -d \
+  --name=$CONTAINER_NAME \
+  --log-driver=gcplogs \
+  -v "$HOST_MOUNT_PATH:$CONTAINER_MOUNT_PATH" \
+  -v "$HOST_MOUNT_PATH_ENV:$CONTAINER_MOUNT_PATH_ENV" \
+  -p 8983:8983 \
+  -e SOLR_OPTS="$SOLR_OPTS" \
+  "$IMAGE_PATH:$ENV"
+
+echo "Solr container running."
+
+### ============================================================
+### START HEALTH CHECK SIDECAR
+### ============================================================
+
+HEALTHCHECK_CONTAINER_NAME="solr-healthcheck"
+
+echo "Starting health check sidecar..."
+
+docker stop $HEALTHCHECK_CONTAINER_NAME || true
+docker rm $HEALTHCHECK_CONTAINER_NAME || true
+
+docker run -d \
+  --name=$HEALTHCHECK_CONTAINER_NAME \
+  --log-driver=gcplogs \
+  --network=host \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  --restart=unless-stopped \
+  "${REGION}-docker.pkg.dev/${IMAGE_PROJECT}/${IMAGE_REPO}/namex-solr-healthcheck:${ENV}"
+
+if [ $? -eq 0 ]; then
+  echo "✓ Health check sidecar started"
+else
+  echo "✗ Failed to start health check sidecar"
+  exit 1
+fi
+
+# Verify container is running
+echo "Verifying health check sidecar is running..."
+for i in {1..5}; do
+  if docker inspect -f '{{.State.Running}}' $HEALTHCHECK_CONTAINER_NAME | grep -q true; then
+    echo "✓ Health check sidecar is running"
+    break
+  fi
+  if [ $i -eq 5 ]; then
+    echo "✗ Health check sidecar failed to start"
+    exit 1
+  fi
+  sleep 1
+done
