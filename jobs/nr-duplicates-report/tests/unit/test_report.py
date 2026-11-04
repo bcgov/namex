@@ -36,7 +36,10 @@ def test_duplicate_query():
     assert "INTERVAL '7 days'" in source
     assert 'n.choice = 1' in source
     assert "NOT LIKE 'NR L%'" in source
-    assert 'ORDER BY n.name, r.nr_num' in source
+    assert 'name_without_designation' in source
+    assert 'n.designation' in source
+    assert 'name AS "NR NAME"' in source
+    assert 'ORDER BY name, nr_num' in source
 
 
 def test_report_run_date_november():
