@@ -67,6 +67,7 @@ coverage = "^7.6.12"
 [tool.pytest.ini_options]
 pythonpath = ["nr_duplicates_report"]
 testpaths = ["tests"]
+addopts = "--cov=nr_duplicates_report --cov-report=xml:coverage.xml"
 
 [build-system]
 requires = ["poetry-core"]

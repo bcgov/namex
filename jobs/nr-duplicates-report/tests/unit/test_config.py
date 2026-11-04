@@ -26,3 +26,11 @@ def test_sqlalchemy_uri_without_instance(monkeypatch):
     monkeypatch.setenv('DATABASE_PORT', '5432')
     config = _reload_config()
     assert config.Config.SQLALCHEMY_DATABASE_URI == 'postgresql+pg8000://local:local-secret@localhost:5432/namex'
+
+
+def test_private_key_falls_back(monkeypatch):
+    """Test a private key that cannot be decoded."""
+    monkeypatch.delenv('DATABASE_INSTANCE_CONNECTION_NAME', raising=False)
+    monkeypatch.setenv('PRIVATE_KEY', '/w==')
+    config = _reload_config()
+    assert config.Config.PRIVATE_KEY == '/w=='
