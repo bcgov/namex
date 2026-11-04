@@ -1,6 +1,0 @@
-.firebase
-.gcloudignore
-.git
-.gitignore
-.output
-/node_modules/
