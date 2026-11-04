@@ -1,0 +1,761 @@
+[
+    {
+        "request_type": "CCR",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "**Change of Name**||**<corp_num>**",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "CT",
+        "nwpta_required": true,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "**Continuation In** || <nwpta> ",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "CR",
+        "nwpta_required": true,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "RCR",
+        "nwpta_required": true,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "BC",
+        "nwpta_required": true,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "BEAM",
+        "nwpta_required": true,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "BEC",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "**Change of Name**||**<corp_num>**",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "BECT",
+        "nwpta_required": true,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "**Continuation In** || <nwpta> ",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "BERE",
+        "nwpta_required": true,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "BECV",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "**<corp_num>**",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "BECC",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "**<corp_num>**",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "BECR",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "**<corp_num>**",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "UC",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "**Change of Name**||**<corp_num>**",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "CCV",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "**Change of Name**||**<corp_num>**",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "ULCB",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "**Change of Name**||**<corp_num>**",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "ULBE",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "**Change of Name**||**<corp_num>**",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "CCC",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "**Change of Name**||**<corp_num>**",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "CCCT",
+        "nwpta_required": true,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "**Continuation In** || <nwpta>",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "CC",
+        "nwpta_required": true,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "RCC",
+        "nwpta_required": true,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "**Restoration** || <nwpta>",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "XCUL",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "CUL",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "**Change of Name**||**<corp_num>**",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "CCP",
+        "nwpta_required": true,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "**Change of Name**",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": true
+    },
+    {
+        "request_type": "CTC",
+        "nwpta_required": true,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "**Continuation In** ",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": true
+    },
+    {
+        "request_type": "XCCP",
+        "nwpta_required": true,
+        "jurisdiction_required": true,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": true
+    },
+    {
+        "request_type": "XCP",
+        "nwpta_required": true,
+        "jurisdiction_required": true,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": true
+    },
+    {
+        "request_type": "XRCP",
+        "nwpta_required": true,
+        "jurisdiction_required": true,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": true
+    },
+    {
+        "request_type": "CP",
+        "nwpta_required": true,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "RCP",
+        "nwpta_required": true,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": true
+    },
+    {
+        "request_type": "AS",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": true,
+        "corp_num_required": false,
+        "additional_info_template": "**Previous <prev_nr>** ",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "XCCR",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "**Change of Name** ",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "XCR",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "XACR",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "XRCR",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "**Reinstatement**",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "CFI",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "**Change of Name** ",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "FI",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "RFI",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "**Restoration**",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "AL",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": true,
+        "corp_num_required": false,
+        "additional_info_template": "**Previous <prev_nr>** ",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "CLC",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "LC",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "RLC",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "PA",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "ASO",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "**Amalgamation** ",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "CSO",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "**Change of Name**",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "CTSO",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "**Continuation In**",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "CSSO",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "XSO",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "XCSO",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "**Change of Name**",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "XASO",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": true,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "XCASO",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "XRSO",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "SO",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "RSO",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "ULCT",
+        "nwpta_required": true,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "**Continuation In**",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "UA",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": true,
+        "corp_num_required": false,
+        "additional_info_template": "**Previous <prev_nr>** ",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "XUL",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "XRUL",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "RUL",
+        "nwpta_required": true,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "**Restoration**",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "UL",
+        "nwpta_required": true,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "<nwpta>",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "XLP",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "CLL",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "**Change of Name**||**<corp_num>**",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "XCLL",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "XLL",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "LL",
+        "nwpta_required": true,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": true,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "CLP",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": true,
+        "additional_info_template": "**Change of Name**||**<corp_num>**",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "XCLP",
+        "nwpta_required": false,
+        "jurisdiction_required": true,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "LP",
+        "nwpta_required": true,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "**Limited Partnership**||<nwpta>",
+        "is_lp_nwpta_type": true,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "CFR",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "**Change of Name** ",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "FR",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "CEM",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "LIB",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "NON",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "PAR",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "RLY",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "TMY",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "additional_info_template": "",
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    },
+    {
+        "request_type": "",
+        "nwpta_required": false,
+        "jurisdiction_required": false,
+        "prev_nr_required": false,
+        "corp_num_required": false,
+        "is_lp_nwpta_type": false,
+        "is_cp_nwpta_type": false
+    }
+]

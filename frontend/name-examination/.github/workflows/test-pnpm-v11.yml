@@ -1,0 +1,41 @@
+name: Test pnpm v11 upgrade
+on:
+  push:
+    branches: [feat/upgrade-pnpm-v11]
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/test-pnpm-v11.yml'
+      - 'app/package.json'
+      - 'app/pnpm-lock.yaml'
+
+jobs:
+  test-pnpm-v11:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.9.0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --ignore-scripts
+
+      - name: Nuxt Prepare
+        run: pnpm exec nuxt prepare
+
+      - name: Build
+        run: pnpm run build-check
+
+      - name: Report pnpm version
+        run: pnpm --version

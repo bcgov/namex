@@ -1,0 +1,136 @@
+steps:
+  # Install / setup CI
+  - name: node:24
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        corepack enable
+        corepack prepare pnpm@11.9.0 --activate
+        pnpm --version
+        pnpm install --frozen-lockfile
+    dir: app  # <-- ADD THIS
+
+  # Setup .env
+  - name: bash
+    dir: app
+    script: |
+      #!/usr/bin/env bash
+      cp .env.example .env
+
+  # Generate the static site
+  - name: node:24
+    entrypoint: bash
+    env:
+      - 'NUXT_API_KEY=$_NUXT_API_KEY'
+      - 'NUXT_AUTH_DOMAIN=$_NUXT_AUTH_DOMAIN'
+      - 'NUXT_PROJECT_ID=$_NUXT_PROJECT_ID'
+      - 'NUXT_APP_ID=$_NUXT_APP_ID'
+    args:
+      - -c
+      - |
+        corepack enable
+        corepack prepare pnpm@11.9.0 --activate
+        pnpm run build
+    dir: app  # <-- ADD THIS
+
+  # Deploy to Firebase channel using the PR #
+  - name: gcr.io/yfthig-dev/firebase
+    entrypoint: bash
+    args: ['-c', 'firebase hosting:channel:deploy --project=yfthig-dev PR-$_PR_NUMBER > /workspace/firebase-deploy.txt']
+    dir: app  # <-- ADD THIS
+
+  # Generate GitHub App installation token
+  - id: "Generate GitHub App token"
+    name: python:3.11
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        pip install pyjwt cryptography requests
+        python <<EOF
+        import os, time, jwt, requests
+        from cryptography.hazmat.primitives import serialization
+
+        # Load GitHub App info from env
+        app_id = os.environ["GITHUB_APP_ID"]
+        installation_id = os.environ["GITHUB_INSTALLATION_ID"]
+        private_key = os.environ["GITHUB_APP_PRIVATE_KEY"]
+
+        # Build JWT
+        now = int(time.time())
+        payload = {
+            "iat": now,
+            "exp": now + 540,  # 9 minutes
+            "iss": app_id,
+        }
+        key = serialization.load_pem_private_key(private_key.encode(), password=None)
+        jwt_token = jwt.encode(payload, key, algorithm="RS256")
+
+        # Exchange for installation token
+        headers = {"Authorization": f"Bearer {jwt_token}", "Accept": "application/vnd.github.v3+json"}
+        url = f"https://api.github.com/app/installations/{installation_id}/access_tokens"
+        r = requests.post(url, headers=headers)
+        r.raise_for_status()
+        token = r.json()["token"]
+
+        # Write token for next steps
+        with open("/workspace/github_token.txt", "w") as f:
+            f.write(token)
+        EOF
+    secretEnv:
+      - GITHUB_APP_PRIVATE_KEY
+      - GITHUB_APP_ID
+      - GITHUB_INSTALLATION_ID
+
+  # Update the PR with the temporary URL
+  - id: "Update the PR"
+    name: gcr.io/cloud-builders/curl
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        # Read Firebase URL
+        url=$(grep 'Channel URL' /workspace/firebase-deploy.txt | grep -Eo "https://[a-zA-Z0-9./?=_%:-]*")
+        echo "Posting PR comment with URL: $url"
+
+        # Read GitHub App installation token
+        GITHUB_TOKEN=$(cat /workspace/github_token.txt)
+
+        curl -X POST \
+          https://api.github.com/repos/bcgov/name-examination/issues/$_PR_NUMBER/comments \
+          --header "Authorization: token $$GITHUB_TOKEN" \
+          --header "Accept: application/vnd.github.v3+json" \
+          --data-binary '{"body": "Temporary Url for review: '"$url"'"}'
+
+  # Run smoke test workflow
+  - id: "Run Smoke Test"
+    name: gcr.io/cloud-builders/curl
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        # Read Firebase URL
+        url=$(grep 'Channel URL' /workspace/firebase-deploy.txt | grep -Eo "https://[a-zA-Z0-9./?=_%:-]*")
+        echo "Triggering smoke test workflow with URL: $url"
+
+        # Read GitHub App installation token
+        GITHUB_TOKEN=$(cat /workspace/github_token.txt)
+
+        curl -X POST \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: token $$GITHUB_TOKEN" \
+          https://api.github.com/repos/bcgov/name-examination/actions/workflows/e2e.yml/dispatches \
+          -d '{"ref":"main","inputs":{"url_parameter":"'"$url"'"}}'
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/$PROJECT_ID/secrets/private-key-pr-review/versions/latest
+      env: 'GITHUB_APP_PRIVATE_KEY'
+    - versionName: projects/$PROJECT_ID/secrets/app-id-pr-review/versions/latest
+      env: 'GITHUB_APP_ID'
+    - versionName: projects/$PROJECT_ID/secrets/installation-id-pr-review/versions/latest
+      env: 'GITHUB_INSTALLATION_ID'
+
+options:
+  dynamicSubstitutions: false
