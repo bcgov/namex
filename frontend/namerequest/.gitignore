@@ -1,0 +1,28 @@
+coverage/
+dist/
+node_modules/
+.idea
+.history
+.vscode
+configuration.json.*
+keycloak.json.*
+public/config/configuration.json
+*.env
+.firebase
+*.firebaserc
+*.log
+!vaults.env
+
+# Cypress related files
+**/cypress.env.json
+**/node_modules
+**/videos/
+**/screenshots/
+**/results/**
+**/downloads/**
+**/mochawesome-report/**
+**/client.json
+**/token.json
+**/local-dev/**
+**/*copy.json
+testing/cypress.config copy.ts

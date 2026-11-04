@@ -1,0 +1,8 @@
+packages: []
+patchedDependencies:
+  sbc-common-components@3.0.15-c: patches/sbc-common-components@3.0.15-c.patch
+allowBuilds:
+  core-js: true
+  esbuild: true
+  vue-demi: true
+  vuex-module-decorators: true

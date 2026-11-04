@@ -1,0 +1,24 @@
+name: NAMEREQUEST UI CI
+
+on:
+  pull_request:
+    types: [assigned, synchronize]
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./
+
+jobs:
+  namerequest-ci:
+    permissions:
+      contents: read
+      pull-requests: write
+
+    uses: bcgov/bcregistry-sre/.github/workflows/frontend-ci.yaml@main
+    with:
+      app_name: "namerequest"
+      working_directory: "./app"
+      pnpm_version: "11.9.0"
+      codecov_flag: ""

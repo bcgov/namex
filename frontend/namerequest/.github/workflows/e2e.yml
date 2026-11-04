@@ -1,0 +1,72 @@
+name: main-e2e-tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      smoketest:
+        required: true
+        description: 'Is this a smoke test?'
+        default: 'true'
+      url_parameter:
+        required: false
+        description: 'Which URL to test?'
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+        type: choice
+        options:
+          - info
+          - warning
+          - debug
+env:
+  CYPRESS_users: ${{ secrets.CYPRESS_USERS }}
+  CYPRESS_BASE_URL: ${{ inputs.url_parameter || secrets.CYPRESS_BASEURL }}
+  CYPRESS_ENVIRONMENT: ${{ github.base_ref }}
+  CYPRESS_loginproxy: ${{ secrets.CYPRESS_LOGINPROXY }}
+  CYPRESS_siteminder: ${{ secrets.CYPRESS_SITEMINDER }}
+  CYPRESS_smoketest: ${{inputs.smoketest}}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # https://github.com/cypress-io/github-action/issues/48
+    steps:
+      # Checkout the PR branch
+      - name: Checkout Target Branch
+        uses: actions/checkout@v4
+      - name: E2E Smoke tests
+        uses: cypress-io/github-action@v6
+        id: smoke
+        continue-on-error: true
+        with:
+          summary-title: 'E2E Smoke tests'
+          wait-on: ${{ secrets.CYPRESS_HOST }}
+          wait-on-timeout: 120
+          record: false
+          install-command: npm ci
+          working-directory: testing
+          spec: |
+            cypress/e2e/smoke/smoke-*-*.cy.ts
+            cypress/e2e/name-*-*.cy.ts
+          browser: chrome
+          # project: ./e2e
+          ci-build-id: ${{ github.event.number }}
+
+      - name: Run the reports
+        run: |
+          cd testing
+          npm run report
+
+      - name: Upload Test Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-results
+          path: testing/mochawesome-report/report.html
+
+      - name: Upload Test Videos
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos
+          path: testing/cypress/videos

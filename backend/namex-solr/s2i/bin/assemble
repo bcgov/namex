@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# We aren't using a real S2I builder, so files will be in /tmp by default
+SOURCE_FILE_DIR=/tmp/src
+
+# Your configuration files need to be in a {corename}/conf directory.
+# The {corename}/conf structure ensures compatibility with the 
+# scripts from the official docker-solr image
+# https://github.com/docker-solr/docker-solr/tree/master/scripts
+#
+# This structure will then be copied into solr's configsets directory
+# (by default) where it can be referenced when creating cores.
+if [ -z "${SOLR_CONF_DIR}" ]; then
+  SOLR_CONF_DIR="${SOLR_HOME:-/opt/solr/server/solr}/configsets"
+fi
+
+echo "==========================================================="
+echo "Source Repo Files"
+echo "-----------------------------------------------------------"
+ls -al ${SOURCE_FILE_DIR}
+echo "==========================================================="
+echo
+
+echo "Copying SOLR conf files from ${SOURCE_FILE_DIR}/. to ${SOLR_CONF_DIR} ..."
+cp -Rf ${SOURCE_FILE_DIR}/. ${SOLR_CONF_DIR}
+echo "Copied SOLR conf files."
+echo

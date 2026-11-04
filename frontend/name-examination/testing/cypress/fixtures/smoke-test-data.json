@@ -1,0 +1,26 @@
+{
+  "testEditNRData": {
+    "companytype": "B.C. Company - Amalgamation",
+    "additionalInfo": "Just a test passing through, nothing to see here.",
+    "comment": "This comment was made by a test script.",
+    "clientFirstName": "Tim",
+    "clientLastName": "Tester",
+    "applicantFirstName": "Jesse",
+    "applicantMiddleName": "Adam",
+    "applicantLastName": "Jones",
+    "addressLine1": "940 Blanshard Street",
+    "addressLine2": "BC Registries",
+    "addressLine3": "Names testing automation",
+    "city": "Victoria",
+    "province": "BC",
+    "postalCode": "V8W2H3",
+    "country": "CA",
+    "phone": "1112223333",
+    "fax": "444555666",
+    "email": "namesteamtesting@gmail.com",
+    "contact": "Jesse",
+    "firstChoice": "Test City",
+    "secondChoice": "Tests Are Us",
+    "thirdChoice": "A test a day"
+  }
+}

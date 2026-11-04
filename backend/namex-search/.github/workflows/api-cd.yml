@@ -1,0 +1,45 @@
+name: NameX Solr Api CD
+
+on:
+  push:
+    branches:
+      - main
+      - feature*
+      - hotfix*
+    paths:
+      - "namex-solr-api/**"
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Deploy To"
+        required: true
+        type: choice
+        options:
+          - "dev"
+          - "test"
+          - "sandbox"
+          - "prod"
+      redeploy:
+        description: "Redeploy Application"
+        required: true
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+jobs:
+  namex-solr-api-cd:
+    permissions:
+      id-token: write
+      contents: write
+
+    uses: bcgov/bcregistry-sre/.github/workflows/backend-cd.yaml@main
+    with:
+      target: ${{ inputs.target }}
+      app_name: "namex-solr-api"
+      working_directory: "./namex-solr-api"
+      redeploy: ${{ inputs.redeploy }}
+      cd_runner_version: "1.2.1"
+    secrets:
+      WORKLOAD_IDENTIFY_POOLS_PROVIDER: ${{ secrets.WORKLOAD_IDENTIFY_POOLS_PROVIDER }}
+      GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}

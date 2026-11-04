@@ -1,0 +1,17 @@
+<dataConfig>
+    <dataSource type="FileDataSource"/>
+
+    <document>
+        <entity name="processor" processor="FileListEntityProcessor" fileName=".*xml" recursive="true"
+                rootEntity="false" dataSource="null" baseDir="/opt/solr/trademarks_data/latest">
+            <entity name="trademark" processor="XPathEntityProcessor" forEach="/trademark"
+                    url="${processor.fileAbsolutePath}">
+                <field column="application_number" xpath="/trademark/application_number"/>
+                <field column="category" xpath="/trademark/category"/>
+                <field column="status" xpath="/trademark/status"/>
+                <field column="name" xpath="/trademark/name"/>
+                <field column="description" xpath="/trademark/description"/>
+            </entity>
+        </entity>
+    </document>
+</dataConfig>

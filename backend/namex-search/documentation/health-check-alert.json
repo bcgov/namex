@@ -1,0 +1,26 @@
+{
+  "displayName": "namex-solr - Ping Failure (Either Leader or Follower)",
+  "combiner": "OR",
+  "conditions": [
+    {
+      "displayName": "Solr backend unhealthy (leader or follower)",
+      "conditionThreshold": {
+        "filter": "metric.type=\"logging.googleapis.com/user/solr_backend_unhealthy\"",
+        "aggregations": [
+          {
+            "perSeriesAligner": "ALIGN_RATE",
+            "crossSeriesReducer": "REDUCE_SUM",
+            "alignmentPeriod": "60s"
+          }
+        ],
+        "comparison": "COMPARISON_GT",
+        "thresholdValue": 0,
+        "duration": "0s"
+      }
+    }
+  ],
+  "enabled": true,
+  "notificationChannels": [
+    "projects/google-mpf-547144339658/notificationChannels/10750596525733956258"
+  ]
+}

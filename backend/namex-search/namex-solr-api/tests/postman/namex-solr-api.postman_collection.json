@@ -1,0 +1,1082 @@
+{
+  "info": {
+    "_postman_id": "9fbee3d4-a455-4870-95fd-cd3675d99143",
+    "name": "namex-solr-api",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "18245960",
+    "_collection_link": "https://go.postman.co/collection/18245960-9fbee3d4-a455-4870-95fd-cd3675d99143?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "ops",
+      "item": [
+        {
+          "name": "readyz",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{internal_url}}/ops/readyz",
+              "host": [
+                "{{internal_url}}"
+              ],
+              "path": [
+                "ops",
+                "readyz"
+              ]
+            },
+            "description": "Get drafts example."
+          },
+          "response": []
+        },
+        {
+          "name": "healthz",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{internal_url}}/ops/healthz",
+              "host": [
+                "{{internal_url}}"
+              ],
+              "path": [
+                "ops",
+                "healthz"
+              ]
+            },
+            "description": "Get drafts example."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authenticate",
+      "item": [
+        {
+          "name": "authenticate",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set(\"token\", jsonData.access_token);",
+                  "pm.environment.set(\"refresh_token\", jsonData.refresh_token);",
+                  "",
+                  "pm.environment.set(\"token_expires\", Date.now()+(jsonData.expires_in * 1000));",
+                  "pm.environment.set(\"refresh_token_expires\", Date.now()+(jsonData.refresh_expires_in * 1000));",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{client_id}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{client_secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "grant_type=client_credentials"
+            },
+            "url": {
+              "raw": "{{kc_url}}/auth/realms/{{realm}}/protocol/openid-connect/token",
+              "host": [
+                "{{kc_url}}"
+              ],
+              "path": [
+                "auth",
+                "realms",
+                "{{realm}}",
+                "protocol",
+                "openid-connect",
+                "token"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "internal",
+      "item": [
+        {
+          "name": "backup",
+          "item": [
+            {
+              "name": "backup",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json()\r",
+                      "\r",
+                      "pm.test(\"Status code is 200/OK\", function () {\r",
+                      "    pm.response.to.have.status(200);    \r",
+                      "});\r",
+                      "\r",
+                      "pm.test('should return JSON', function () {\r",
+                      "    pm.response.to.have.header('Content-Type', 'application/json');\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Account-Id",
+                    "value": "{{account_id}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n   \"command\": \"backup\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{internal_url}}/{{version}}/internal/solr/backup",
+                  "host": [
+                    "{{internal_url}}"
+                  ],
+                  "path": [
+                    "{{version}}",
+                    "internal",
+                    "solr",
+                    "backup"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "restore",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json()\r",
+                      "\r",
+                      "pm.test(\"Status code is 200/OK\", function () {\r",
+                      "    pm.response.to.have.status(200);    \r",
+                      "});\r",
+                      "\r",
+                      "pm.test('should return JSON', function () {\r",
+                      "    pm.response.to.have.header('Content-Type', 'application/json');\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Account-Id",
+                    "value": "{{account_id}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n   \"command\": \"restore\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{internal_url}}/{{version}}/internal/solr/backup",
+                  "host": [
+                    "{{internal_url}}"
+                  ],
+                  "path": [
+                    "{{version}}",
+                    "internal",
+                    "solr",
+                    "backup"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "restore status",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json()\r",
+                      "\r",
+                      "pm.test(\"Status code is 200/OK\", function () {\r",
+                      "    pm.response.to.have.status(200);    \r",
+                      "});\r",
+                      "\r",
+                      "pm.test('should return JSON', function () {\r",
+                      "    pm.response.to.have.header('Content-Type', 'application/json');\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Account-Id",
+                    "value": "{{account_id}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n   \"command\": \"restorestatus\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{internal_url}}/{{version}}/internal/solr/backup",
+                  "host": [
+                    "{{internal_url}}"
+                  ],
+                  "path": [
+                    "{{version}}",
+                    "internal",
+                    "solr",
+                    "backup"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "import",
+          "item": [
+            {
+              "name": "base",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json()\r",
+                      "\r",
+                      "pm.test(\"Status code is 201/CREATED\", function () {\r",
+                      "    pm.response.to.have.status(201);    \r",
+                      "});\r",
+                      "\r",
+                      "pm.test('should return JSON', function () {\r",
+                      "    pm.response.to.have.header('Content-Type', 'application/json');\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Account-Id",
+                    "value": "{{account_id}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"possibleConflicts\": [\r\n        {\r\n            \"id\": \"NR1234567\",\r\n            \"corp_num\": \"BC1234567\",\r\n            \"nr_num\": \"NR1234567\",\r\n            \"start_date\": \"2025-03-17\",\r\n            \"jurisdiction\": \"BC\",\r\n            \"state\": \"CONSUMED\",\r\n            \"type\": \"NR\",\r\n            \"sub_type\": \"BC\",\r\n            \"names\": [\r\n                {\r\n                    \"name\": \"Test CONSUMED Name Inc.\",\r\n                    \"name_state\": \"A\",\r\n                    \"submit_count\": 1\r\n                },\r\n                {\r\n                    \"name\": \"Test Rejected Name Inc.\",\r\n                    \"name_state\": \"R\",\r\n                    \"submit_count\": 2\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"id\": \"BC1234567\",\r\n            \"jurisdiction\": \"BC\",\r\n            \"state\": \"ACT\",\r\n            \"corp_num\": \"BC1234567\",\r\n            \"start_date\": \"2022-03-11\",\r\n            \"nr_num\": \"NR1234567\",\r\n            \"type\": \"CORP\",\r\n            \"sub_type\": \"BC\",\r\n            \"names\": [\r\n                {\r\n                    \"name\": \"Test CONSUMED Name Inc.\",\r\n                    \"name_state\": \"CORP\",\r\n                    \"submit_count\": 1\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"id\": \"NR1234568\",\r\n            \"jurisdiction\": \"BC\",\r\n            \"state\": \"APPROVED\",\r\n            \"type\": \"NR\",\r\n            \"sub_type\": \"FR\",\r\n            \"nr_num\": \"NR1234568\",\r\n            \"start_date\": \"2024-02-04\",\r\n            \"names\": [\r\n                {\r\n                    \"name\": \"Test APPROVED Name Inc.\",\r\n                    \"name_state\": \"A\",\r\n                    \"submit_count\": 1\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"id\": \"NR1234569\",\r\n            \"jurisdiction\": \"BC\",\r\n            \"state\": \"EXPIRED\",\r\n            \"type\": \"NR\",\r\n            \"sub_type\": \"BC\",\r\n            \"nr_num\": \"NR1234569\",\r\n            \"start_date\": \"2024-02-04\",\r\n            \"names\": [\r\n                {\r\n                    \"name\": \"Test EXPIRED Name Inc.\",\r\n                    \"name_state\": \"A\",\r\n                    \"submit_count\": 1\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"id\": \"NR1234566\",\r\n            \"jurisdiction\": \"BC\",\r\n            \"state\": \"DRAFT\",\r\n            \"type\": \"NR\",\r\n            \"sub_type\": \"FR\",\r\n            \"nr_num\": \"NR1234566\",\r\n            \"start_date\": \"2021-04-04\",\r\n            \"names\": [\r\n                {\r\n                    \"name\": \"Test DRAFT Name Inc.\",\r\n                    \"name_state\": \"D\",\r\n                    \"submit_count\": 1\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"id\": \"NR1234565\",\r\n            \"jurisdiction\": \"BC\",\r\n            \"state\": \"REJECTED\",\r\n            \"type\": \"NR\",\r\n            \"sub_type\": \"BC\",\r\n            \"nr_num\": \"NR1234565\",\r\n            \"start_date\": \"2020-11-01\",\r\n            \"names\": [\r\n                {\r\n                    \"name\": \"Test REJECTED Name Inc.\",\r\n                    \"name_state\": \"R\",\r\n                    \"submit_count\": 4\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"id\": \"NR1234565\",\r\n            \"jurisdiction\": \"BC\",\r\n            \"state\": \"CONDITIONAL\",\r\n            \"type\": \"NR\",\r\n            \"sub_type\": \"BC\",\r\n            \"nr_num\": \"NR1234565\",\r\n            \"start_date\": \"2025-02-25\",\r\n            \"names\": [\r\n                {\r\n                    \"name\": \"Test CONDITIONAL Name Inc.\",\r\n                    \"name_state\": \"C\",\r\n                    \"submit_count\": 1\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"id\": \"NR1234564\",\r\n            \"jurisdiction\": \"BC\",\r\n            \"state\": \"APPROVED\",\r\n            \"type\": \"NR\",\r\n            \"sub_type\": \"BC\",\r\n            \"nr_num\": \"NR1234564\",\r\n            \"start_date\": \"2025-04-22\",\r\n            \"names\": [\r\n                {\r\n                    \"name\": \"Test synonym british columbia Name Corp.\",\r\n                    \"name_state\": \"A\",\r\n                    \"submit_count\": 1\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"id\": \"NR1234563\",\r\n            \"jurisdiction\": \"BC\",\r\n            \"state\": \"APPROVED\",\r\n            \"type\": \"NR\",\r\n            \"sub_type\": \"BC\",\r\n            \"nr_num\": \"NR1234563\",\r\n            \"start_date\": \"2025-04-17\",\r\n            \"names\": [\r\n                {\r\n                    \"name\": \"Test NR with A,R,D names Rejected\",\r\n                    \"name_state\": \"R\",\r\n                    \"submit_count\": 1\r\n                },\r\n                {\r\n                    \"name\": \"Test NR with A,R,D names Approved\",\r\n                    \"name_state\": \"A\",\r\n                    \"submit_count\": 1\r\n                },\r\n                {\r\n                    \"name\": \"Test NR with A,R,D names Draft\",\r\n                    \"name_state\": \"D\",\r\n                    \"submit_count\": 1\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"id\": \"NR1234562\",\r\n            \"jurisdiction\": \"BC\",\r\n            \"state\": \"APPROVED\",\r\n            \"type\": \"NR\",\r\n            \"sub_type\": \"BC\",\r\n            \"nr_num\": \"NR1234563\",\r\n            \"start_date\": \"2025-05-17\",\r\n            \"names\": [\r\n                {\r\n                    \"name\": \"Test synonym cassandra bc\",\r\n                    \"name_state\": \"A\",\r\n                    \"submit_count\": 1\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"id\": \"NR1234561\",\r\n            \"jurisdiction\": \"BC\",\r\n            \"state\": \"APPROVED\",\r\n            \"type\": \"NR\",\r\n            \"sub_type\": \"BC\",\r\n            \"nr_num\": \"NR1234563\",\r\n            \"start_date\": \"2025-05-15\",\r\n            \"names\": [\r\n                {\r\n                    \"name\": \"Test synonym cassie british columbia\",\r\n                    \"name_state\": \"A\",\r\n                    \"submit_count\": 1\r\n                }\r\n            ]\r\n        }\r\n    ],\r\n    \"timeout\": \"45\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{internal_url}}/internal/solr/import",
+                  "host": [
+                    "{{internal_url}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "solr",
+                    "import"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "update",
+          "item": [
+            {
+              "name": "synonyms",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json()\r",
+                      "\r",
+                      "pm.test(\"Status code is 201/CREATED\", function () {\r",
+                      "    pm.response.to.have.status(201);    \r",
+                      "});\r",
+                      "\r",
+                      "pm.test('should return JSON', function () {\r",
+                      "    pm.response.to.have.header('Content-Type', 'application/json');\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Account-Id",
+                    "value": "{{account_id}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n   \"ALL\": {\r\n        \"farm\": [\r\n            \"farm\",\r\n            \"pharm\",\r\n            \"farmy\",\r\n            \"farming\",\r\n            \"farmed\"\r\n        ]\r\n   }\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{internal_url}}/internal/solr/update/synonyms",
+                  "host": [
+                    "{{internal_url}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "solr",
+                    "update",
+                    "synonyms"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "synonyms resync all",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Account-Id",
+                    "value": "{{account_id}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "x-apikey",
+                    "value": "{{api_key}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "",
+                    "value": "",
+                    "type": "text",
+                    "disabled": true
+                  }
+                ],
+                "url": {
+                  "raw": "{{internal_url}}/internal/solr/update/synonyms/resync-all",
+                  "host": [
+                    "{{internal_url}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "solr",
+                    "update",
+                    "synonyms",
+                    "resync-all"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "possible-conflict-nr",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json()\r",
+                      "\r",
+                      "pm.test(\"Status code is 202/ACCEPTED\", function () {\r",
+                      "    pm.response.to.have.status(202);    \r",
+                      "});\r",
+                      "\r",
+                      "pm.test('should return JSON', function () {\r",
+                      "    pm.response.to.have.header('Content-Type', 'application/json');\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Account-Id",
+                    "value": "{{account_id}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"nr_num\": \"NR9999991\",\r\n    \"start_date\": \"2024-02-04\",\r\n    \"jurisdiction\": \"BC\",\r\n    \"state\": \"CONSUMED\",\r\n    \"nr_request_type\":\"FR\",\r\n    \"type\": \"NR\",\r\n    \"names\": [\r\n        {\r\n            \"name\": \"Test APPROVED Name Inc. - Updated consumed\",\r\n            \"name_state\": \"A\",\r\n            \"submit_count\": 1,\r\n            \"choice\":1\r\n        }\r\n    ]\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{internal_url}}/internal/solr/update",
+                  "host": [
+                    "{{internal_url}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "solr",
+                    "update"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "possible-conflict-corp",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json()\r",
+                      "\r",
+                      "pm.test(\"Status code is 202/ACCEPTED\", function () {\r",
+                      "    pm.response.to.have.status(202);    \r",
+                      "});\r",
+                      "\r",
+                      "pm.test('should return JSON', function () {\r",
+                      "    pm.response.to.have.header('Content-Type', 'application/json');\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Account-Id",
+                    "value": "{{account_id}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"corp_num\": \"BC1234566\",\r\n    \"nr_num\": \"NR1234568\",\r\n    \"start_date\": \"2024-02-04\",\r\n    \"jurisdiction\": \"BC\",\r\n    \"state_type_cd\": \"ACT\",\r\n    \"type\": \"CORP\",\r\n    \"name\": \"Test APPROVED Name Inc. - Updated consumed\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{internal_url}}/internal/solr/update",
+                  "host": [
+                    "{{internal_url}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "solr",
+                    "update"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "sync update",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json()\r",
+                      "\r",
+                      "pm.test(\"Status code is 200/OK\", function () {\r",
+                      "    pm.response.to.have.status(200);    \r",
+                      "});\r",
+                      "\r",
+                      "pm.test('should return JSON', function () {\r",
+                      "    pm.response.to.have.header('Content-Type', 'application/json');\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{internal_url}}/internal/solr/update/sync",
+                  "host": [
+                    "{{internal_url}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "solr",
+                    "update",
+                    "sync"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "sync heartbeat",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json()\r",
+                      "\r",
+                      "pm.test(\"Status code is 200/OK\", function () {\r",
+                      "    pm.response.to.have.status(200);    \r",
+                      "});\r",
+                      "\r",
+                      "pm.test('should return JSON', function () {\r",
+                      "    pm.response.to.have.header('Content-Type', 'application/json');\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{internal_url}}/internal/solr/update/sync/heartbeat",
+                  "host": [
+                    "{{internal_url}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "solr",
+                    "update",
+                    "sync",
+                    "heartbeat"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "sync heartbeat",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json()\r",
+                      "\r",
+                      "pm.test(\"Status code is 200/OK\", function () {\r",
+                      "    pm.response.to.have.status(200);    \r",
+                      "});\r",
+                      "\r",
+                      "pm.test('should return JSON', function () {\r",
+                      "    pm.response.to.have.header('Content-Type', 'application/json');\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{internal_url}}/internal/solr/update/sync/heartbeat",
+                  "host": [
+                    "{{internal_url}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "solr",
+                    "update",
+                    "sync",
+                    "heartbeat"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "search",
+      "item": [
+        {
+          "name": "possible-conflicts",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Account-Id",
+                "value": "{{account_id}}",
+                "type": "text"
+              },
+              {
+                "key": "x-apikey",
+                "value": "{{api_key}}",
+                "type": "text"
+              },
+              {
+                "key": "",
+                "value": "",
+                "type": "text",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"query\": {\n        \"value\": \"pharm supplies\"\n    },\n    \"rows\": 100,\n    \"start\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{internal_url}}/api/v1/search/possible-conflict-names",
+              "host": [
+                "{{internal_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "search",
+                "possible-conflict-names"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "nrs",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Account-Id",
+                "value": "{{account_id}}",
+                "type": "text"
+              },
+              {
+                "key": "x-apikey",
+                "value": "{{api_key}}",
+                "type": "text"
+              },
+              {
+                "key": "",
+                "value": "",
+                "type": "text",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"query\": {\n        \"value\": \"Test APPROVED Name\"\n    },\n    \"rows\": 100,\n    \"start\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{internal_url}}/api/v1/search/nrs",
+              "host": [
+                "{{internal_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "search",
+                "nrs"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "synonyms",
+      "item": [
+        {
+          "name": "get-all-for-terms",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Account-Id",
+                "value": "{{account_id}}",
+                "type": "text"
+              },
+              {
+                "key": "x-apikey",
+                "value": "{{api_key}}",
+                "type": "text"
+              },
+              {
+                "key": "",
+                "value": "",
+                "type": "text",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"terms\": [\"pharm\", \"farm\"]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{internal_url}}/api/v1/synonyms",
+              "host": [
+                "{{internal_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "synonyms"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

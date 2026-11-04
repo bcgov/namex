@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://www.eclipse.org/jetty/configure.dtd"> 
+
+<Configure class="org.eclipse.jetty.webapp.WebAppContext">
+    <!-- =====================================================================
+
+    The connection to the database that contains the synonyms.
+
+    ====================================================================== -->
+    <New id="synonyms" class="org.eclipse.jetty.plus.jndi.Resource">
+        <Arg></Arg>
+        <Arg>jdbc/synonyms</Arg>
+        <Arg>
+            <New class="org.postgresql.ds.PGSimpleDataSource">
+                <Set name="User">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>SOLR_DB_USER</Arg>
+                    </Call>
+                </Set>
+                <Set name="Password">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>SOLR_DB_PASSWORD</Arg>
+                    </Call>
+                </Set>
+                <Set name="DatabaseName">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>SOLR_DB</Arg>
+                    </Call>
+                </Set>
+                <Set name="ServerName">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>SOLR_DB_HOST</Arg>
+                    </Call>
+                </Set>
+                <Set name="PortNumber">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>SOLR_DB_PORT</Arg>
+                    </Call>
+                </Set>
+            </New>
+        </Arg>
+
+        <!-- bind to java:comp/env for this webapp -->
+        <Call name="bindToENC">
+            <Arg>jdbc/synonyms</Arg>
+        </Call>
+    </New>
+
+    <!-- =====================================================================
+
+    The connection to the lear database used for loading cores.
+
+    ====================================================================== -->
+    <New id="lear" class="org.eclipse.jetty.plus.jndi.Resource">
+        <Arg></Arg>
+        <Arg>jdbc/lear</Arg>
+        <Arg>
+            <New class="org.postgresql.ds.PGSimpleDataSource">
+                <Set name="User">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>LEAR_DB_USER</Arg>
+                    </Call>
+                </Set>
+                <Set name="Password">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>LEAR_DB_PASSWORD</Arg>
+                    </Call>
+                </Set>
+                <Set name="DatabaseName">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>LEAR_DB</Arg>
+                    </Call>
+                </Set>
+                <Set name="ServerName">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>LEAR_DB_HOST</Arg>
+                    </Call>
+                </Set>
+                <Set name="PortNumber">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>LEAR_DB_PORT</Arg>
+                    </Call>
+                </Set>
+            </New>
+        </Arg>
+
+        <!-- bind to java:comp/env for this webapp -->
+        <Call name="bindToENC">
+            <Arg>jdbc/lear</Arg>
+        </Call>
+    </New>
+
+    <!-- =====================================================================
+
+    The connection to the corporations database used for loading cores.
+
+    ====================================================================== -->
+    <New id="bcrs_corps" class="org.eclipse.jetty.plus.jndi.Resource">
+        <Arg></Arg>
+        <Arg>jdbc/bcrs_corps</Arg>
+        <Arg>
+            <New class="org.postgresql.ds.PGSimpleDataSource">
+                <Set name="User">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>BCRS_CORPS_DB_USER</Arg>
+                    </Call>
+                </Set>
+                <Set name="Password">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>BCRS_CORPS_DB_PASSWORD</Arg>
+                    </Call>
+                </Set>
+                <Set name="DatabaseName">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>BCRS_CORPS_DB</Arg>
+                    </Call>
+                </Set>
+                <Set name="ServerName">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>BCRS_CORPS_DB_HOST</Arg>
+                    </Call>
+                </Set>
+                <Set name="PortNumber">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>BCRS_CORPS_DB_PORT</Arg>
+                    </Call>
+                </Set>
+            </New>
+        </Arg>
+
+        <!-- bind to java:comp/env for this webapp -->
+        <Call name="bindToENC">
+            <Arg>jdbc/bcrs_corps</Arg>
+        </Call>
+    </New>
+
+    <!-- =====================================================================
+
+    The connection to the names database used for loading cores.
+
+    ====================================================================== -->
+    <New id="bcrs_names" class="org.eclipse.jetty.plus.jndi.Resource">
+        <Arg></Arg>
+        <Arg>jdbc/bcrs_names</Arg>
+        <Arg>
+            <New class="org.postgresql.ds.PGSimpleDataSource">
+                <Set name="User">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>BCRS_NAMES_DB_USER</Arg>
+                    </Call>
+                </Set>
+                <Set name="Password">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>BCRS_NAMES_DB_PASSWORD</Arg>
+                    </Call>
+                </Set>
+                <Set name="DatabaseName">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>BCRS_NAMES_DB</Arg>
+                    </Call>
+                </Set>
+                <Set name="ServerName">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>BCRS_NAMES_DB_HOST</Arg>
+                    </Call>
+                </Set>
+                <Set name="PortNumber">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>BCRS_NAMES_DB_PORT</Arg>
+                    </Call>
+                </Set>
+            </New>
+        </Arg>
+
+        <!-- bind to java:comp/env for this webapp -->
+        <Call name="bindToENC">
+            <Arg>jdbc/bcrs_names</Arg>
+        </Call>
+    </New>
+    <!-- =====================================================================
+
+    The connection to the colin oracle database used for loading cores.
+
+    ====================================================================== -->
+    <New id="colin" class="org.eclipse.jetty.plus.jndi.Resource">
+        <Arg></Arg>
+        <Arg>jdbc/colin</Arg>
+        <Arg>
+            <New class="oracle.jdbc.pool.OracleDataSource">
+                <Set name="DriverType">thin</Set>
+                <Set name="URL">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>COLIN_URL</Arg>
+                    </Call>
+                </Set>
+                <Set name="User">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>COLIN_USER</Arg>
+                    </Call>
+                </Set>
+                <Set name="Password">
+                    <Call class="java.lang.System" name="getenv">
+                        <Arg>COLIN_PASSWORD</Arg>
+                    </Call>
+                </Set>
+            </New>
+        </Arg>
+
+        <!-- bind to java:comp/env for this webapp -->
+        <Call name="bindToENC">
+            <Arg>jdbc/colin</Arg>
+        </Call>
+    </New>
+</Configure>

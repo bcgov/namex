@@ -1,0 +1,26 @@
+{
+  "displayName": "namex-solr - Health Check Failure (Any: Solr, Docker, Disk)",
+  "combiner": "OR",
+  "conditions": [
+    {
+      "displayName": "Any health check failing (leader or follower)",
+      "conditionThreshold": {
+        "filter": "metric.type=\"logging.googleapis.com/user/solr_health_unhealthy\" AND resource.type=\"gce_instance\"",
+        "aggregations": [
+          {
+            "alignmentPeriod": "60s",
+            "perSeriesAligner": "ALIGN_MAX",
+            "crossSeriesReducer": "REDUCE_SUM"
+          }
+        ],
+        "comparison": "COMPARISON_GT",
+        "thresholdValue": 0,
+        "duration": "0s"
+      }
+    }
+  ],
+  "enabled": true,
+  "notificationChannels": [
+    "projects/google-mpf-547144339658/notificationChannels/10750596525733956258"
+  ]
+}

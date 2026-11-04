@@ -1,0 +1,20 @@
+name: NameX Solr API CI
+
+on:
+  pull_request:
+    paths:
+      - "namex-solr-api/**"
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./namex-solr-api
+
+jobs:
+  namex-solr-api-ci:
+    uses: bcgov/bcregistry-sre/.github/workflows/backend-ci.yaml@main
+    with:
+      app_name: "namex-solr-api"
+      working_directory: "./namex-solr-api"
+      codecov_flag: "namex-solr-api"

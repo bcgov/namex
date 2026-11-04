@@ -1,0 +1,36 @@
+name: NAME-EXAMINATION UI CD
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'app/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - test
+          - sandbox
+          - prod
+
+jobs:
+  name-examination-ui-cd:
+    permissions:
+      id-token: write
+      contents: write
+
+    uses: bcgov/bcregistry-sre/.github/workflows/frontend-cd.yaml@main
+    with:
+      target: ${{ inputs.environment }}
+      node_version: '24'
+      pnpm_version: '11.9.0'
+      app_name: 'name-examination-ui'
+      working_directory: 'app'
+    secrets:
+      WORKLOAD_IDENTIFY_POOLS_PROVIDER: ${{ secrets.WORKLOAD_IDENTIFY_POOLS_PROVIDER }}
+      GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}

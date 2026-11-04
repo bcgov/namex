@@ -1,0 +1,17 @@
+title = "name-examination gitleaks config"
+
+# Shared rules (gitleaks defaults + password rules) come from bcgov/bcregistry-sre,
+# downloaded by lefthook remotes - see lefthook.yml and
+# https://github.com/bcgov/bcregistry-sre/tree/main/git-hooks
+# Only this repo's own false positives go below.
+[extend]
+path = ".git/info/lefthook-remotes/bcregistry-sre-main/git-hooks/gitleaks-base.toml"
+
+[allowlist]
+description = "Files that routinely trip default rules with non-secret content"
+paths = [
+  '''pnpm-lock\.yaml''',
+  '''package-lock\.json''',
+  '''poetry\.lock''',
+  '''\.gitleaks\.toml''',
+]
