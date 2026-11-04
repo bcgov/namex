@@ -1,0 +1,15 @@
+<dataConfig>
+    <dataSource name="corp-conflicts-ds" type="com.s24.search.solr.analysis.jdbc.DataImportJdbcDataSource"
+                dataSource="jdbc/bcrs_corps" />
+
+    <dataSource name="name-conflicts-ds" type="com.s24.search.solr.analysis.jdbc.DataImportJdbcDataSource"
+                dataSource="jdbc/bcrs_names" />
+
+    <document>
+        <entity name="corp-conflicts" dataSource="corp-conflicts-ds" pk="id"
+                query="SELECT * FROM bc_registries.solr_dataimport_conflicts_vw" />
+
+        <entity name="name-conflicts" dataSource="name-conflicts-ds" pk="id"
+                query="SELECT * FROM bc_registries_names.solr_dataimport_conflicts_vw" />
+    </document>
+</dataConfig>

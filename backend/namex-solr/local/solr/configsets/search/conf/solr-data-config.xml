@@ -1,0 +1,16 @@
+<dataConfig>
+    <dataSource
+        name="lear-ds"
+        type="com.s24.search.solr.analysis.jdbc.DataImportJdbcDataSource"
+        dataSource="jdbc/lear"
+    />
+
+    <document>
+        <entity
+            name="lear"
+            dataSource="lear-ds"
+            pk="id"
+            query="SELECT identifier,legal_name,legal_type,state FROM businesses"
+        />
+    </document>
+</dataConfig>
