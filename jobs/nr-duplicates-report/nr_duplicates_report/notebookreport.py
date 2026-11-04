@@ -4,7 +4,8 @@ import os
 import sys
 import traceback
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo, reset_tzpath
 
 import papermill as pm
 from flask import Flask, current_app
@@ -12,6 +13,8 @@ from flask import Flask, current_app
 from config import Config
 from util.email import send_email_notification
 from structured_logging import StructuredLogging
+
+reset_tzpath([])
 
 # Suppress verbose papermill logging
 logging.getLogger("papermill").setLevel(logging.ERROR)
@@ -43,11 +46,16 @@ def findfiles(directory, pattern):
             yield os.path.join(directory, filename)
 
 
+def report_run_date(moment=None):
+    """report_run_date."""
+    if moment is None:
+        moment = datetime.now(timezone.utc)
+    return moment.astimezone(ZoneInfo('America/Vancouver')).strftime('%Y-%m-%d')
+
+
 def send_email(emailtype, errormessage):
     """Send email."""
-    number_of_days_nr = int(os.getenv('NUMBER_OF_DAYS_NR', '1'))
-    date = datetime.strftime(
-        datetime.now()-timedelta(number_of_days_nr), '%Y-%m-%d')
+    date = report_run_date()
     ext = ''
     if os.getenv('ENVIRONMENT', '') != 'prod':
         ext = ' on ' + os.getenv('ENVIRONMENT', '')
@@ -103,10 +111,10 @@ if __name__ == '__main__':
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
 
-    processnotebooks('nr_duplicates_report/daily', temp_dir)
+    status = processnotebooks('nr_duplicates_report/daily', temp_dir)
     # shutil.rmtree(temp_dir)
 
     end_time = datetime.now(timezone.utc)
     current_app.logger.info('job - jupyter notebook report completed in: %s',
                  end_time - start_time)
-    sys.exit()
+    sys.exit(0 if status else 1)
