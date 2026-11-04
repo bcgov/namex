@@ -1,0 +1,46 @@
+/*
+ * Layout styles (document sections, containers, lists, etc)
+ */
+
+.mt-30 {
+  margin-top: 30px !important;
+}
+
+.mb-30 {
+  margin-bottom: 30px !important;
+}
+
+.pr-75 {
+  padding-right: 75px !important;
+}
+
+.pl-75 {
+  padding-left: 75px !important;
+}
+
+.content-container {
+  min-width: 960px;
+  max-width: 1300px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+@media only screen and (max-width: 925px) {
+  html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .container {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .content-container {
+    min-width: 0;
+  }
+}
+
+
