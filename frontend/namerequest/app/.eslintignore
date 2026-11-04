@@ -1,0 +1,5 @@
+coverage/
+dist/
+node_modules/
+public/
+src/types/keycloak-js.d.ts
