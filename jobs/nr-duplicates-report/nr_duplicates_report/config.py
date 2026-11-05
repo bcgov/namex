@@ -1,30 +1,38 @@
-import os
-from dotenv import load_dotenv, find_dotenv
+"""Application configuration."""
 import base64
+import os
+
+from dotenv import find_dotenv, load_dotenv
 
 # this will load all the envars from a .env file located in the project root (api)
 load_dotenv(find_dotenv())
 
 
 class Config(object):
+    """Config."""
+
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
     ENVIRONMENT = os.getenv('ENVIRONMENT', '')
 
     # POSTGRESQL
-    PG_USER = os.getenv('PG_USER', '')
-    PG_PASSWORD = os.getenv('PG_PASSWORD', '')
-    PG_NAME = os.getenv('PG_NAME', '')
-    PG_HOST = os.getenv('PG_HOST', '')
-    PG_PORT = os.getenv('PG_PORT', '5432')
-    if DB_UNIX_SOCKET := os.getenv('PG_UNIX_SOCKET', None):
-        SQLALCHEMY_DATABASE_URI = f'postgresql+psycopg2://{PG_USER}:{PG_PASSWORD}@/{PG_NAME}?host={DB_UNIX_SOCKET}'
+    DATABASE_USERNAME = os.getenv('DATABASE_USERNAME', '')
+    DATABASE_PASSWORD = os.getenv('DATABASE_PASSWORD', '')
+    DATABASE_NAME = os.getenv('DATABASE_NAME', '')
+    DATABASE_HOST = os.getenv('DATABASE_HOST', '')
+    DATABASE_PORT = os.getenv('DATABASE_PORT', '5432')
+    DATABASE_SCHEMA = os.getenv('DATABASE_SCHEMA', 'public')
+    if DATABASE_INSTANCE_CONNECTION_NAME := os.getenv('DATABASE_INSTANCE_CONNECTION_NAME', None):
+        SQLALCHEMY_DATABASE_URI = 'postgresql+pg8000://'
     else:
-        SQLALCHEMY_DATABASE_URI = f'postgresql://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{int(PG_PORT)}/{PG_NAME}'
+        SQLALCHEMY_DATABASE_URI = (
+            f'postgresql+pg8000://{DATABASE_USERNAME}:{DATABASE_PASSWORD}'
+            f'@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}'
+        )
 
     # Token Retrieval
-    ACCOUNT_SVC_AUTH_URL = os.getenv("KEYCLOAK_AUTH_TOKEN_URL", "")
-    ACCOUNT_SVC_CLIENT_ID = os.getenv("KEYCLOAK_CLIENT_ID", "")
-    ACCOUNT_SVC_CLIENT_SECRET = os.getenv("KEYCLOAK_CLIENT_SECRET", "")
+    ACCOUNT_SVC_AUTH_URL = os.getenv('KEYCLOAK_AUTH_TOKEN_URL', '')
+    ACCOUNT_SVC_CLIENT_ID = os.getenv('KEYCLOAK_CLIENT_ID', '')
+    ACCOUNT_SVC_CLIENT_SECRET = os.getenv('KEYCLOAK_CLIENT_SECRET', '')
 
     # Notebook Config
     NUMBER_OF_DAYS_NR = os.getenv('NUMBER_OF_DAYS_NR', '1')
@@ -52,5 +60,5 @@ class Config(object):
         pk_raw = os.getenv('PRIVATE_KEY', '').strip()
         pk_padded = pk_raw + '=' * (-len(pk_raw) % 4)
         PRIVATE_KEY = base64.b64decode(pk_padded).decode()
-    except Exception:
+    except Exception:  # noqa: B902
         PRIVATE_KEY = os.getenv('PRIVATE_KEY', '')
