@@ -260,6 +260,7 @@ class NameRequestFilingActions:
             "{'filing': {'header': {'name': {entitiesFilingName} }, '{entitiesFilingName}': {'nameRequest': {'nrNumber': '{nrNumber}', 'legalName': '{legalName}', 'legalType': '{legalType}'}}}}",
         ),
         ('CTC', 'CP', 'Cooperative', 'Continuation In', 'lear', 'manual', None, None),
+        ('CTC_CP', 'CP', 'Cooperative', 'Continuation In', 'lear', 'manual', None, None),
         ('RCP', 'CP', 'Cooperative', 'Restoration', 'lear', 'manual', None, None),
         ('XCP', 'XCP', 'Extraprovincial Cooperative', 'Incorporation', 'lear', 'manual', None, None),
         ('XCP', 'XCP', 'Extraprovincial Cooperative', 'Amalgamation', 'lear', 'manual', None, None),
