@@ -1,4 +1,5 @@
 #import time
+from solr_admin.models import db
 from solr_admin.models.restricted_condition_tmp import RestrictedConditionTmp
 from solr_admin.models.restricted_word_tmp import RestrictedWordTmp
 from solr_admin.models.restricted_word_condition_tmp import RestrictedWordConditionTmp
@@ -17,13 +18,13 @@ def update_records(session):
 
     session.commit()
 
-    session.execute(db.text("DROP TABLE restricted_word_condition"))
-    session.execute(db.text("CREATE TABLE restricted_word_condition AS SELECT * from restricted_word_condition_tmp"))
+    session.execute(db.text("DELETE FROM restricted_word_condition"))
+    session.execute(db.text("INSERT INTO restricted_word_condition SELECT * FROM restricted_word_condition_tmp"))
 
-    session.execute(db.text("DROP TABLE restricted_condition"))
-    session.execute(db.text("CREATE TABLE restricted_condition AS SELECT * from restricted_condition_tmp"))
-    
-    session.execute(db.text("DROP TABLE restricted_word"))
-    session.execute(db.text("CREATE TABLE restricted_word AS SELECT * from restricted_word_tmp"))
+    session.execute(db.text("DELETE FROM restricted_condition"))
+    session.execute(db.text("INSERT INTO restricted_condition SELECT * FROM restricted_condition_tmp"))
+
+    session.execute(db.text("DELETE FROM restricted_word"))
+    session.execute(db.text("INSERT INTO restricted_word SELECT * FROM restricted_word_tmp"))
 
     session.commit()
