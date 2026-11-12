@@ -8,7 +8,6 @@ Create Date: 2026-11-09 22:51:00.105602
 from serial_id import upgrade_serial_id
 
 
-# revision identifiers, used by Alembic.
 revision = '472b3fcc1288'
 down_revision = '4c33aac6da67'
 branch_labels = None
