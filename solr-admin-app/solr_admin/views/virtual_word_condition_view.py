@@ -3,7 +3,6 @@
 from solr_admin import keycloak
 from solr_admin import models
 from solr_admin.models import restricted_condition_audit
-from solr_admin.services.create_records import create_records
 from solr_admin.services.update_records import update_records
 from solr_admin.views.secured_view import SecuredView
 
@@ -39,7 +38,7 @@ class VirtualWordConditionView(SecuredView):
 
     def after_model_change(self, form, model, is_created):
         if is_created:
-            create_records(model, self.session)
+            update_records(self.session)
             _create_audit_log(model, 'CREATE')
         else:
             update_records(self.session)

@@ -1,6 +1,8 @@
 from __future__ import with_statement
 
 import logging
+import os
+import sys
 from logging.config import fileConfig
 
 from alembic import context
@@ -8,6 +10,8 @@ from flask import current_app
 from sqlalchemy import text
 
 from config import MigrationConfig
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 config = context.config
 fileConfig(config.config_file_name)
