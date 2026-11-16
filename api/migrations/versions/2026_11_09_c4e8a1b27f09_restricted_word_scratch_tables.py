@@ -16,17 +16,6 @@ depends_on = None
 
 WORD_SEQUENCE = 'restricted_word_word_id_seq'
 CONDITION_SEQUENCE = 'restricted_condition_cnd_id_seq'
-GRANT_ROLES = (
-    'readwrite',
-    'sa-api@a083gt-dev.iam',
-    'sa-api@a083gt-test.iam',
-    'sa-api@a083gt-prod.iam',
-)
-SCRATCH_TABLES = (
-    'restricted_word_tmp',
-    'restricted_condition_tmp',
-    'restricted_word_condition_tmp',
-)
 
 
 def _has_primary_key(table_name):
@@ -130,28 +119,6 @@ def _recreate_scratch_tables():
     )
 
 
-def _grant_scratch_tables():
-    connection = op.get_bind()
-    for role_name in GRANT_ROLES:
-        exists = connection.execute(
-            sa.text('SELECT 1 FROM pg_roles WHERE rolname = :role_name'),
-            {'role_name': role_name},
-        ).scalar()
-        if exists is None:
-            continue
-        quoted_role = '"' + role_name.replace('"', '""') + '"'
-        for table_name in SCRATCH_TABLES:
-            op.execute(
-                f'GRANT SELECT, INSERT, DELETE, TRUNCATE ON {table_name} TO {quoted_role}'
-            )
-        op.execute(
-            f'GRANT USAGE, SELECT ON SEQUENCE {WORD_SEQUENCE} TO {quoted_role}'
-        )
-        op.execute(
-            f'GRANT USAGE, SELECT ON SEQUENCE {CONDITION_SEQUENCE} TO {quoted_role}'
-        )
-
-
 def upgrade():
     _repair_link('restricted_word_condition', 'rest_word_condition_pkey')
     _repair_id_column(
@@ -167,7 +134,6 @@ def upgrade():
         f'ALTER SEQUENCE {CONDITION_SEQUENCE} OWNED BY restricted_condition.cnd_id'
     )
     _recreate_scratch_tables()
-    _grant_scratch_tables()
 
 
 def downgrade():

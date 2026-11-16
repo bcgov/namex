@@ -17,16 +17,10 @@ TABLE_NAME = 'virtual_word_condition'
 COLUMN_NAME = 'id'
 SEQUENCE_NAME = 'virtual_word_condition_id_seq'
 PK_NAME = 'virtual_word_condition_pkey'
-GRANT_ROLES = (
-    'readwrite',
-    'sa-api@a083gt-dev.iam',
-    'sa-api@a083gt-test.iam',
-    'sa-api@a083gt-prod.iam',
-)
 
 
 def upgrade():
-    upgrade_serial_id(TABLE_NAME, COLUMN_NAME, SEQUENCE_NAME, PK_NAME, GRANT_ROLES)
+    upgrade_serial_id(TABLE_NAME, COLUMN_NAME, SEQUENCE_NAME, PK_NAME)
 
 
 def downgrade():

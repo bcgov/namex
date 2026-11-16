@@ -18,16 +18,10 @@ TABLE_NAME = 'restricted_condition_audit'
 COLUMN_NAME = 'id'
 SEQUENCE_NAME = 'restricted_condition_audit_id_seq'
 PK_NAME = 'restricted_condition_audit_pkey'
-GRANT_ROLES = (
-    'readwrite',
-    'sa-api@a083gt-dev.iam',
-    'sa-api@a083gt-test.iam',
-    'sa-api@a083gt-prod.iam',
-)
 
 
 def upgrade():
-    upgrade_serial_id(TABLE_NAME, COLUMN_NAME, SEQUENCE_NAME, PK_NAME, GRANT_ROLES)
+    upgrade_serial_id(TABLE_NAME, COLUMN_NAME, SEQUENCE_NAME, PK_NAME)
 
 
 def downgrade():

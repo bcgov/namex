@@ -99,7 +99,7 @@ def _require_unique_ids(table_name, column_name):
         )
 
 
-def _create_sequence(table_name, column_name, sequence_name, grant_roles):
+def _create_sequence(table_name, column_name, sequence_name):
     op.execute(
         f"""
         CREATE SEQUENCE {sequence_name}
@@ -124,23 +124,11 @@ def _create_sequence(table_name, column_name, sequence_name, grant_roles):
     op.execute(
         f'ALTER SEQUENCE {sequence_name} OWNED BY {table_name}.{column_name}'
     )
-    connection = op.get_bind()
-    for role_name in grant_roles:
-        exists = connection.execute(
-            sa.text('SELECT 1 FROM pg_roles WHERE rolname = :role_name'),
-            {'role_name': role_name},
-        ).scalar()
-        if exists is None:
-            continue
-        quoted_role = '"' + role_name.replace('"', '""') + '"'
-        op.execute(
-            f'GRANT USAGE, SELECT ON SEQUENCE {sequence_name} TO {quoted_role}'
-        )
 
 
-def upgrade_serial_id(table_name, column_name, sequence_name, pk_name, grant_roles):
+def upgrade_serial_id(table_name, column_name, sequence_name, pk_name):
     if not _sequence_exists(sequence_name):
-        _create_sequence(table_name, column_name, sequence_name, grant_roles)
+        _create_sequence(table_name, column_name, sequence_name)
     if _column_default(table_name, column_name) is None:
         op.execute(
             f"ALTER TABLE {table_name} ALTER COLUMN {column_name} "
