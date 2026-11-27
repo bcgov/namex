@@ -755,3 +755,24 @@ def test_log_api_auth_error(mock_flag):
     assert any('Status Code: 401' in log for log in logs)
     assert any('Token retrieval failed' in log for log in logs)
     assert not any('Payload:' in log for log in logs)
+
+
+@pytest.mark.parametrize('pay_api_status', [400, 402])
+def test_create_payment_maps_pay_api_rejection_to_402(pay_api_status):
+    """pay-api rejecting an API key payment (400 legacy / 402 new) surfaces as 402 with pay-api's detail."""
+    from namex.services.payment.exceptions import SBCPaymentException
+    from namex.services.payment.payments import create_payment
+
+    class FakeResponse:
+        status_code = pay_api_status
+        text = json.dumps({'type': 'INVALID_PAYMENT_METHOD', 'title': 'Invalid payment method', 'detail': 'Use PAD'})
+
+    with patch(
+        'namex.services.payment.payments.SBCPaymentClient.create_payment',
+        side_effect=ApiRequestError(FakeResponse(), body={}),
+    ):
+        with pytest.raises(SBCPaymentException) as exc_info:
+            create_payment({}, {})
+
+    assert exc_info.value.status_code == 402
+    assert exc_info.value.message == 'Use PAD'
