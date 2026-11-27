@@ -27,8 +27,10 @@ def create_payment(model, headers):
         return PaymentInvoice(**api_response)
 
     except Exception as err:
-        if err.status_code == HTTPStatus.BAD_REQUEST:
-            raise SBCPaymentException(err, err.detail, HTTPStatus.PAYMENT_REQUIRED)
+        # pay-api returns 402 (previously 400) when an API key request with fees uses a
+        # CC / Online Banking account; surface both to the caller as 402 with pay-api's detail.
+        if getattr(err, 'status_code', None) in (HTTPStatus.BAD_REQUEST, HTTPStatus.PAYMENT_REQUIRED):
+            raise SBCPaymentException(err, getattr(err, 'detail', None) or str(err), HTTPStatus.PAYMENT_REQUIRED)
 
         raise SBCPaymentException(err)
 
