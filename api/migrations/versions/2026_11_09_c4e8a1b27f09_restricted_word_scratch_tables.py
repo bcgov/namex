@@ -53,7 +53,48 @@ def _is_nullable(table_name, column_name):
     ).scalar()
 
 
+def _ensure_sequence(table_name, column_name, sequence_name):
+    """Create the sequence on a fresh database, where the migration history never made it."""
+    exists = op.get_bind().execute(
+        sa.text(
+            """
+            SELECT 1
+            FROM pg_class c
+            JOIN pg_namespace n ON n.oid = c.relnamespace
+            WHERE n.nspname = 'public'
+              AND c.relname = :sequence_name
+              AND c.relkind = 'S'
+            """
+        ),
+        {'sequence_name': sequence_name},
+    ).scalar() is not None
+    if exists:
+        return
+    op.execute(
+        f"""
+        CREATE SEQUENCE {sequence_name}
+            START WITH 1
+            INCREMENT BY 1
+            NO MINVALUE
+            NO MAXVALUE
+            CACHE 1
+        """
+    )
+    op.get_bind().execute(
+        sa.text(
+            f"""
+            SELECT setval(
+                '{sequence_name}',
+                COALESCE((SELECT MAX({column_name}) FROM {table_name}), 1),
+                (SELECT MAX({column_name}) FROM {table_name}) IS NOT NULL
+            )
+            """
+        )
+    )
+
+
 def _repair_id_column(table_name, column_name, sequence_name, pk_name):
+    _ensure_sequence(table_name, column_name, sequence_name)
     op.execute(
         f"ALTER TABLE {table_name} "
         f"ALTER COLUMN {column_name} SET DEFAULT nextval('{sequence_name}'::regclass)"
